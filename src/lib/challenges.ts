@@ -109,7 +109,6 @@ export async function addChallenge(challengeData: {
   category: string
   points: number
   flag: string
-  flag_hash: string
   hint?: string
   attachments?: Attachment[]
   difficulty: string
@@ -123,7 +122,7 @@ export async function addChallenge(challengeData: {
         category: challengeData.category,
         points: challengeData.points,
         flag: challengeData.flag,
-        flag_hash: challengeData.flag_hash,
+        // flag_hash akan auto-generate dari database trigger
         hint: challengeData.hint || null,
         attachments: challengeData.attachments || [],
         difficulty: challengeData.difficulty,
@@ -148,7 +147,6 @@ export async function updateChallenge(challengeId: string, challengeData: {
   category: string
   points: number
   flag?: string
-  flag_hash?: string
   hint?: string
   attachments?: Attachment[]
   difficulty: string
@@ -167,10 +165,10 @@ export async function updateChallenge(challengeId: string, challengeData: {
       updated_at: new Date().toISOString()
     }
 
-    // Only update flag and flag_hash if provided
-    if (challengeData.flag && challengeData.flag_hash) {
+    // Only update flag if provided (flag_hash akan auto-generate dari trigger)
+    if (challengeData.flag) {
       updateData.flag = challengeData.flag
-      updateData.flag_hash = challengeData.flag_hash
+      // flag_hash akan auto-generate dari database trigger
     }
 
     const { error } = await supabase

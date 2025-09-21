@@ -7,6 +7,7 @@ import { getChallenges, addChallenge, updateChallenge, deleteChallenge, getChall
 import { hashFlag } from '@/lib/crypto'
 import { Challenge, User, Attachment } from '@/types'
 import Navbar from '@/components/Navbar'
+import MarkdownRenderer from '@/components/MarkdownRenderer'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -27,6 +28,7 @@ export default function AdminPage() {
     attachments: [] as Attachment[]
   })
   const [submitting, setSubmitting] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,10 +72,10 @@ export default function AdminPage() {
         attachments: formData.attachments
       }
 
-      // Only update flag if provided
+      // Only update flag if provided (flag_hash akan auto-generate dari database trigger)
       if (formData.flag.trim()) {
         challengeData.flag = formData.flag
-        challengeData.flag_hash = hashFlag(formData.flag)
+        // flag_hash tidak perlu di-set manual, akan auto-generate dari trigger
       }
 
       if (editingChallenge) {
@@ -89,7 +91,7 @@ export default function AdminPage() {
           return
         }
         challengeData.flag = formData.flag
-        challengeData.flag_hash = hashFlag(formData.flag)
+        // flag_hash akan auto-generate dari database trigger
         await addChallenge(challengeData)
         alert('Challenge berhasil ditambahkan!')
       }
@@ -300,17 +302,39 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Deskripsi
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Deskripsi challenge..."
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Deskripsi
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-md hover:bg-blue-200"
+                    >
+                      {showPreview ? 'Edit' : 'Preview'}
+                    </button>
+                  </div>
+                  
+                  {showPreview ? (
+                    <div className="border border-gray-300 rounded-md p-3 bg-gray-50 min-h-[100px]">
+                      <div className="text-sm text-gray-600">
+                        <MarkdownRenderer content={formData.description || '*No description provided*'} />
+                      </div>
+                    </div>
+                  ) : (
+                    <textarea
+                      required
+                      rows={3}
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      placeholder="Deskripsi challenge... (supports markdown: **bold**, *italic*, `code`, [links](url), etc.)"
+                    />
+                  )}
+                  
+                  <p className="text-xs text-gray-500 mt-1">
+                    Supports markdown: **bold**, *italic*, `code`, [links](url), ```code blocks```, lists, etc.
+                  </p>
                 </div>
 
                 <div>

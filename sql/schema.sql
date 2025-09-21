@@ -37,14 +37,14 @@ DROP TABLE IF EXISTS public.challenges CASCADE;
 -- ==============================================
 
 -- Create users table (extends auth.users)
-CREATE TABLE public.users (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL,
-  score INTEGER DEFAULT 0,
-  is_admin BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- CREATE TABLE public.users (
+--   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+--   username TEXT UNIQUE NOT NULL,
+--   score INTEGER DEFAULT 0,
+--   is_admin BOOLEAN DEFAULT false,
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+--   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- );
 
 -- Create challenges table
 CREATE TABLE public.challenges (
@@ -184,6 +184,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- Function untuk generate SHA256 hash dari flag
+CREATE OR REPLACE FUNCTION generate_flag_hash(flag_text TEXT)
+RETURNS TEXT AS $$
+BEGIN
+  RETURN encode(digest(flag_text, 'sha256'), 'hex');
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Function untuk auto-update flag_hash saat flag diubah
+CREATE OR REPLACE FUNCTION auto_update_flag_hash()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Generate hash dari flag yang baru
+  NEW.flag_hash = generate_flag_hash(NEW.flag);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- ==============================================
 -- 6. CREATE TRIGGERS
 -- ==============================================
@@ -194,15 +212,65 @@ CREATE TRIGGER trigger_update_user_score
   FOR EACH ROW
   EXECUTE FUNCTION update_user_score();
 
+-- Trigger to auto-generate flag_hash when flag is inserted/updated
+CREATE TRIGGER trigger_auto_flag_hash
+  BEFORE INSERT OR UPDATE ON public.challenges
+  FOR EACH ROW
+  EXECUTE FUNCTION auto_update_flag_hash();
+
 -- ==============================================
 -- 7. INSERT SAMPLE DATA
 -- ==============================================
 
--- Insert sample challenges
-INSERT INTO public.challenges (title, description, category, points, flag, flag_hash, hint, difficulty, attachments) VALUES
-('Welcome Challenge', 'Challenge pertama untuk memulai perjalanan CTF Anda. Submit flag yang benar untuk mendapatkan poin!', 'Web', 100, 'hello', '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824', 'Flag adalah kata "hello" dalam bahasa Inggris', 'Easy', '[]'::jsonb),
-('SQL Injection Basics', 'Pelajari dasar-dasar SQL Injection dengan challenge ini. Temukan cara untuk bypass authentication dan dapatkan flag.', 'Web', 200, 'sqli123', 'ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d', 'Coba inject SQL di form login', 'Medium', '[{"name": "login.php", "url": "https://example.com/files/login.php", "type": "file"}, {"name": "Database Schema", "url": "https://example.com/files/schema.sql", "type": "file"}]'::jsonb),
-('Reverse Engineering 101', 'Challenge reverse engineering untuk pemula. Analisis binary dan temukan flag yang tersembunyi.', 'Reverse', 300, 'reverseme', '5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5', 'Gunakan tools seperti strings atau hex editor', 'Hard', '[{"name": "binary.exe", "url": "https://example.com/files/binary.exe", "type": "file"}, {"name": "Documentation", "url": "https://example.com/docs/reverse-engineering", "type": "link"}]'::jsonb);
+-- Insert sample challenges (flag_hash akan auto-generate dari trigger)
+INSERT INTO public.challenges (title, description, category, points, flag, hint, difficulty, attachments) VALUES
+(
+  'Base64',
+  'Flag disembunyikan sebagai Base64. Cari string yang sudah di-encode dan decode untuk mendapatkan flag.\ YXJpYQo=',
+  'Cryptography',
+  150,
+  'aria',
+  'Flag adalah Base64 dari nama domain target.',
+  'Easy',
+  '[]'::jsonb
+),
+(
+  'Robots.txt',
+  'Flag disembunyikan di file `robots.txt` pada domain target. Buka `https://smk.amablex90.my.id/robots.txt` dan cari baris yang menyimpan flag.',
+  'Web',
+  180,
+  'flag{robots_txt_leaked_the_secret}',
+  'Cek https://smk.amablex90.my.id/robots.txt — flag ada di sana.',
+  'Medium',
+  '[
+    {
+      "url": "https://smk.amablex90.my.id/robots.txt",
+      "name": "robots.txt",
+      "type": "link"
+    }
+  ]'::jsonb
+),
+(
+  'Attachment & Link — Test Challenge',
+  'Challenge ini untuk mengetes fitur attachment (file) dan link di platform. Cek apakah file dapat di-download dan link dapat dibuka dari halaman challenge.',
+  'Misc',
+  10,
+  'test',
+  'Flag sederhana: "test". Cek attachment atau link untuk verifikasi.',
+  'Very Easy',
+  '[
+    {
+      "url": "https://smk.amablex90.my.id/asset/test-file.txt",
+      "name": "test-file.txt",
+      "type": "file"
+    },
+    {
+      "url": "https://smk.amablex90.my.id/test-feature",
+      "name": "Test Feature Page",
+      "type": "link"
+    }
+  ]'::jsonb
+);
 
 -- ==============================================
 -- 8. GRANT PERMISSIONS
