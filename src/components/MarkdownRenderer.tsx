@@ -86,7 +86,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           inList = false
           listType = ''
         }
-        
+
         if (line.trim() === '') {
           processedLines.push('<br>')
         } else {
@@ -109,7 +109,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
   const htmlContent = parseMarkdown(content)
 
   return (
-    <div 
+    <div
       className={`markdown-content ${className}`}
       dangerouslySetInnerHTML={{ __html: htmlContent }}
     />

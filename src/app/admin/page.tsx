@@ -39,16 +39,16 @@ export default function AdminPage() {
       }
 
       setUser(currentUser)
-      
+
       // Check admin status
       const adminCheck = await isAdmin()
       setAdminStatus(adminCheck)
-      
+
       if (!adminCheck) {
         router.push('/dashboard')
         return
       }
-      
+
       const challengesData = await getChallenges()
       setChallenges(challengesData)
       setLoading(false)
@@ -95,11 +95,11 @@ export default function AdminPage() {
         await addChallenge(challengeData)
         alert('Challenge berhasil ditambahkan!')
       }
-      
+
       // Refresh challenges list
       const challengesData = await getChallenges()
       setChallenges(challengesData)
-      
+
       // Reset form
       setFormData({
         title: '',
@@ -112,7 +112,7 @@ export default function AdminPage() {
         attachments: []
       })
       setShowAddForm(false)
-      
+
     } catch (error) {
       console.error('Error saving challenge:', error)
       alert('Gagal menyimpan challenge')
@@ -141,11 +141,11 @@ export default function AdminPage() {
 
     try {
       await deleteChallenge(challengeId)
-      
+
       // Refresh challenges list
       const challengesData = await getChallenges()
       setChallenges(challengesData)
-      
+
       alert('Challenge berhasil dihapus!')
     } catch (error) {
       console.error('Error deleting challenge:', error)
@@ -186,7 +186,7 @@ export default function AdminPage() {
   const updateAttachment = (index: number, field: keyof Attachment, value: string) => {
     setFormData(prev => ({
       ...prev,
-      attachments: prev.attachments.map((attachment, i) => 
+      attachments: prev.attachments.map((attachment, i) =>
         i === index ? { ...attachment, [field]: value } : attachment
       )
     }))
@@ -212,7 +212,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
@@ -236,7 +236,7 @@ export default function AdminPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 {editingChallenge ? 'Edit Challenge' : 'Tambah Challenge Baru'}
               </h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -314,7 +314,7 @@ export default function AdminPage() {
                       {showPreview ? 'Edit' : 'Preview'}
                     </button>
                   </div>
-                  
+
                   {showPreview ? (
                     <div className="border border-gray-300 rounded-md p-3 bg-gray-50 min-h-[100px]">
                       <div className="text-sm text-gray-600">
@@ -331,7 +331,7 @@ export default function AdminPage() {
                       placeholder="Deskripsi challenge... (supports markdown: **bold**, *italic*, `code`, [links](url), etc.)"
                     />
                   )}
-                  
+
                   <p className="text-xs text-gray-500 mt-1">
                     Supports markdown: **bold**, *italic*, `code`, [links](url), ```code blocks```, lists, etc.
                   </p>
@@ -350,9 +350,9 @@ export default function AdminPage() {
                     placeholder={editingChallenge ? "Kosongkan jika tidak ingin mengubah flag" : "ctf{flag_here}"}
                   />
                   <p className="text-sm text-gray-500 mt-1">
-                    {editingChallenge 
-                      ? "Kosongkan jika tidak ingin mengubah flag. Flag akan di-hash secara otomatis."
-                      : "Flag akan disimpan sebagai plain text dan di-hash untuk validasi"
+                    {editingChallenge
+                      ? 'Kosongkan jika tidak ingin mengubah flag. Flag akan di-hash secara otomatis.'
+                      : 'Flag akan disimpan sebagai plain text dan di-hash untuk validasi'
                     }
                   </p>
                 </div>
@@ -384,7 +384,7 @@ export default function AdminPage() {
                       + Add File
                     </button>
                   </div>
-                  
+
                   {formData.attachments.map((attachment, index) => (
                     <div key={index} className="flex items-center space-x-2 mb-2 p-3 border border-gray-200 rounded-md">
                       <div className="flex-1 grid grid-cols-3 gap-2">
@@ -420,10 +420,10 @@ export default function AdminPage() {
                       </button>
                     </div>
                   ))}
-                  
+
                   {formData.attachments.length === 0 && (
                     <p className="text-sm text-gray-500 italic">
-                      No attachments added. Click "Add File" to add download links or files.
+                      No attachments added. Click Add File to add download links or files.
                     </p>
                   )}
                 </div>
@@ -441,8 +441,8 @@ export default function AdminPage() {
                     disabled={submitting}
                     className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
                   >
-                    {submitting 
-                      ? (editingChallenge ? 'Mengupdate...' : 'Menambahkan...') 
+                    {submitting
+                      ? (editingChallenge ? 'Mengupdate...' : 'Menambahkan...')
                       : (editingChallenge ? 'Update Challenge' : 'Tambah Challenge')
                     }
                   </button>
@@ -454,7 +454,7 @@ export default function AdminPage() {
           {/* Challenges List */}
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Daftar Challenges</h2>
-            
+
             {challenges.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-500 text-lg">Belum ada challenges</div>
@@ -504,7 +504,7 @@ export default function AdminPage() {
                               </div>
                             </div>
                           </div>
-                          
+
                           {/* Action Buttons */}
                           <div className="flex items-center space-x-2">
                             <button
