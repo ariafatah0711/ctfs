@@ -56,7 +56,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Profile Header */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -136,7 +136,7 @@ export default function ProfilePage() {
               const categoryChallenges = challenges.filter(c => c.category === category)
               const solvedInCategory = categoryChallenges.filter(c => c.is_solved)
               const progress = categoryChallenges.length > 0 ? (solvedInCategory.length / categoryChallenges.length) * 100 : 0
-              
+
               return (
                 <div key={category} className="flex items-center justify-between">
                   <div className="flex-1">
@@ -145,7 +145,7 @@ export default function ProfilePage() {
                       <span className="text-sm text-gray-500">{solvedInCategory.length}/{categoryChallenges.length}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       ></div>

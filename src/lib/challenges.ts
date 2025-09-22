@@ -56,12 +56,12 @@ export async function submitFlag(challengeId: string, flag: string, userId: stri
 
     // Validasi flag dengan hash
     const { validateFlag, hashFlag } = await import('./crypto')
-    
+
     // Debug info
     console.log('Flag submitted:', flag)
     console.log('Expected hash:', challenge.flag_hash)
     console.log('Actual hash:', hashFlag(flag))
-    
+
     if (!validateFlag(flag, challenge.flag_hash)) {
       return { success: false, message: 'Flag salah! Cek hint untuk petunjuk.' }
     }
@@ -90,9 +90,9 @@ export async function submitFlag(challengeId: string, flag: string, userId: stri
       return { success: false, message: 'Gagal menyimpan solve' }
     }
 
-    return { 
-      success: true, 
-      message: `Flag benar! Kamu mendapat ${challenge.points} poin!` 
+    return {
+      success: true,
+      message: `Flag benar! Kamu mendapat ${challenge.points} poin!`
     }
   } catch (error) {
     console.error('Error submitting flag:', error)
@@ -229,17 +229,58 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
 /**
  * Ambil leaderboard
  */
-export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-  try {
-    const { data, error } = await supabase.rpc('get_leaderboard')
+// export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
+//   try {
+//     const { data, error } = await supabase.rpc('get_leaderboard')
 
-    if (error) {
-      throw new Error(error.message)
+//     if (error) {
+//       throw new Error(error.message)
+//     }
+
+//     return data || []
+//   } catch (error) {
+//     console.error('Error fetching leaderboard:', error)
+//     return []
+//   }
+// }
+
+/**
+ * Ambil leaderboard dengan progress
+ */
+export async function getLeaderboard() {
+  const { data, error } = await supabase
+    .from('solves')
+    .select(`
+      created_at,
+      challenges(points),
+      users(id, username)
+    `)
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+
+  // transform ke leaderboard progress
+  const userProgress: Record<string, { username: string, progress: { date: string, score: number }[] }> = {}
+
+  data.forEach((row) => {
+    const uid = row.users.id
+    if (!userProgress[uid]) {
+      userProgress[uid] = { username: row.users.username, progress: [] }
     }
+    const prevScore = userProgress[uid].progress.at(-1)?.score || 0
+    userProgress[uid].progress.push({
+      date: row.created_at,
+      score: prevScore + row.challenges.points
+    })
+  })
 
-    return data || []
-  } catch (error) {
-    console.error('Error fetching leaderboard:', error)
-    return []
-  }
+  const startDate = data[0]?.created_at || new Date().toISOString()
+
+  return Object.values(userProgress).map(user => ({
+    username: user.username,
+    progress: [
+      { date: startDate, score: 0 }, // mulai dari 0
+      ...user.progress
+    ]
+  }))
 }

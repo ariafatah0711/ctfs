@@ -40,9 +40,20 @@ export interface ChallengeWithSolve extends Challenge {
   is_solved?: boolean
 }
 
-export interface LeaderboardEntry {
+// export interface LeaderboardEntry {
+//   id: string
+//   username: string
+//   score: number
+//   rank: number
+// }
+
+export type LeaderboardEntry = {
   id: string
   username: string
   score: number
   rank: number
+  progress: {
+    date: string
+    score: number
+  }[]
 }

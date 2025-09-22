@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth'
+import dynamic from 'next/dynamic'
+import { useEffect, useState } from 'react'
 import { getLeaderboard } from '@/lib/challenges'
-import { LeaderboardEntry, User } from '@/types'
+import { getCurrentUser } from '@/lib/auth'
+import { User, LeaderboardEntry } from '@/types'
 import Navbar from '@/components/Navbar'
 
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false })
+
 export default function ScoreboardPage() {
-  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -17,148 +18,113 @@ export default function ScoreboardPage() {
     const fetchData = async () => {
       const currentUser = await getCurrentUser()
       if (!currentUser) {
-        router.push('/login')
+        window.location.href = '/login'
         return
       }
-
       setUser(currentUser)
-      
-      const leaderboardData = await getLeaderboard()
-      setLeaderboard(leaderboardData)
+
+      const data = await getLeaderboard()
+      console.log(data)
+      setLeaderboard(data)
       setLoading(false)
     }
-
     fetchData()
-  }, [router])
+  }, [])
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-gray-600">Loading scoreboard...</p>
+            </div>
           </div>
         </div>
-      </div>
-    )
-  }
+      )
+    }
+  if (!user) return null
 
-  if (!user) {
-    return null
-  }
-
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return '🥇'
-    if (rank === 2) return '🥈'
-    if (rank === 3) return '🥉'
-    return `#${rank}`
-  }
-
-  const getRankColor = (rank: number) => {
-    if (rank === 1) return 'bg-yellow-50 border-yellow-200'
-    if (rank === 2) return 'bg-gray-50 border-gray-200'
-    if (rank === 3) return 'bg-orange-50 border-orange-200'
-    return 'bg-white border-gray-200'
-  }
+  // transform leaderboard jadi chartData
+  const chartData = leaderboard.slice(0, 10).map((entry) => ({
+    x: entry.progress.map(p => p.date),
+    y: entry.progress.map(p => p.score),
+    text: entry.progress.map(p => `${entry.username} - ${p.score}`), // buat isi hover
+    hovertemplate: '%{x}<br>%{text}<extra></extra>',
+    mode: 'lines+markers',
+    name: entry.username,
+    line: { shape: 'hv' }
+  }))
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Scoreboard</h1>
-            <p className="mt-2 text-gray-600">Ranking peserta berdasarkan total score</p>
-          </div>
+      <div className="max-w-6xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Scoreboard</h1>
 
-          {/* Current User Stats */}
-          <div className="bg-white shadow rounded-lg p-6 mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Statistik Anda</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-600">{user.score}</div>
-                <div className="text-sm text-gray-500">Total Score</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-600">
-                  {leaderboard.find(entry => entry.id === user.id)?.rank || 'N/A'}
-                </div>
-                <div className="text-sm text-gray-500">Ranking</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary-600">{leaderboard.length}</div>
-                <div className="text-sm text-gray-500">Total Peserta</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Leaderboard */}
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Leaderboard</h2>
-            </div>
-            
-            {leaderboard.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500 text-lg">Belum ada data leaderboard</div>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {leaderboard.map((entry, index) => (
-                  <div
-                    key={entry.id}
-                    className={`px-6 py-4 flex items-center justify-between ${
-                      entry.id === user.id ? 'bg-primary-50' : getRankColor(entry.rank)
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${
-                          entry.rank <= 3 ? 'text-white' : 'text-gray-600'
-                        } ${
-                          entry.rank === 1 ? 'bg-yellow-500' :
-                          entry.rank === 2 ? 'bg-gray-400' :
-                          entry.rank === 3 ? 'bg-orange-500' :
-                          'bg-gray-200'
-                        }`}>
-                          {getRankIcon(entry.rank)}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <a 
-                            href={`/user/${entry.username}`}
-                            className={`text-lg font-medium hover:underline ${
-                              entry.id === user.id ? 'text-primary-700' : 'text-gray-900'
-                            }`}
-                          >
-                            {entry.username}
-                          </a>
-                          {entry.id === user.id && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                              Anda
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          Rank #{entry.rank}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-gray-900">{entry.score}</div>
-                      <div className="text-sm text-gray-500">points</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="bg-white shadow rounded-lg p-4 mb-8">
+        <Plot
+          data={chartData}
+          layout={{
+            dragmode: false,
+            title: { text: 'Top 10 Users' }, // ✅ string dibungkus object
+            autosize: true,
+            xaxis: {
+              type: 'date',
+              autorange: true,
+              title: { text: 'Tanggal' }     // ✅ juga harus object
+            },
+            yaxis: {
+              autorange: true,
+              rangemode: 'tozero',
+              automargin: true,
+              title: { text: 'Score' }       // ✅ juga harus object
+            },
+            legend: { orientation: 'h' }
+          }}
+          style={{ width: '100%', height: '500px' }}
+          useResizeHandler
+          config={{
+            scrollZoom: false,
+            staticPlot: false,
+            displayModeBar: true
+          }}
+          revision={leaderboard.length}
+        />
         </div>
+
+        {/* Ranking Table */}
+       <div className="bg-white shadow rounded-lg p-4">
+        <h2 className="text-xl font-semibold mb-4">Top 25 Ranking</h2>
+        <table className="min-w-full border border-gray-200 rounded-lg text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-3 py-2 text-left">Rank</th>
+              <th className="px-3 py-2 text-left">User</th>
+              <th className="px-3 py-2 text-left">Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.slice(0, 25).map((entry, i) => (
+              <tr
+                key={entry.username}
+                className={`border-t ${
+                  i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                } ${i < 3 ? 'font-bold' : ''}`}
+              >
+                <td className="px-3 py-1.5">{i + 1}</td>
+                <td className="px-3 py-1.5">{entry.username}</td>
+                <td className="px-3 py-1.5">
+                  {entry.progress.length > 0
+                    ? entry.progress[entry.progress.length - 1].score
+                    : 0}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       </div>
     </div>
   )

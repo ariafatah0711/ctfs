@@ -18,7 +18,7 @@ export default function DashboardPage() {
   const [expandedChallenges, setExpandedChallenges] = useState<{[key: string]: boolean}>({})
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     status: 'all', // 'all', 'solved', 'unsolved'
@@ -53,19 +53,19 @@ export default function DashboardPage() {
 
     try {
       const result = await submitFlag(challengeId, flagInputs[challengeId].trim(), user.id)
-      
+
       if (result.success) {
         // Clear input
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
-        
+
         // Refresh challenges and user data
       const challengesData = await getChallenges(user.id)
       setChallenges(challengesData)
-      
+
       const updatedUser = await getCurrentUser()
       setUser(updatedUser)
     }
-      
+
       alert(result.message)
     } catch (error) {
       console.error('Error submitting flag:', error)
@@ -82,7 +82,7 @@ export default function DashboardPage() {
   const toggleChallengeExpansion = (challengeId: string) => {
     setExpandedChallenges(prev => {
       const isCurrentlyOpen = prev[challengeId]
-      
+
       if (isCurrentlyOpen) {
         // If clicking on currently open challenge, close it
         return { [challengeId]: false }
@@ -102,13 +102,13 @@ export default function DashboardPage() {
     // Status filter
     if (filters.status === 'solved' && !challenge.is_solved) return false
     if (filters.status === 'unsolved' && challenge.is_solved) return false
-    
+
     // Category filter
     if (filters.category !== 'all' && challenge.category !== filters.category) return false
-    
+
     // Difficulty filter
     if (filters.difficulty !== 'all' && challenge.difficulty !== filters.difficulty) return false
-    
+
     // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
@@ -116,7 +116,7 @@ export default function DashboardPage() {
       const descMatch = challenge.description.toLowerCase().includes(searchLower)
       if (!titleMatch && !descMatch) return false
     }
-    
+
     return true
   })
 
@@ -126,7 +126,7 @@ export default function DashboardPage() {
 
   const downloadFile = async (attachment: Attachment, attachmentKey: string) => {
     setDownloading(prev => ({ ...prev, [attachmentKey]: true }))
-    
+
     try {
     if (attachment.type === 'file') {
         // For files, try to download directly
@@ -134,17 +134,17 @@ export default function DashboardPage() {
         if (!response.ok) {
           throw new Error('Failed to fetch file')
         }
-        
+
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
-        
+
         // Create temporary download link
         const link = document.createElement('a')
         link.href = url
         link.download = attachment.name
         document.body.appendChild(link)
         link.click()
-        
+
         // Cleanup
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
@@ -185,7 +185,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Combined Stats and Filter Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-4 animate-fade-in">
@@ -311,14 +311,14 @@ export default function DashboardPage() {
                 <span className="text-2xl text-gray-400">🔍</span>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {challenges.length === 0 
-                  ? "No challenges available" 
+                {challenges.length === 0
+                  ? "No challenges available"
                   : "No challenges match your filters"
                 }
               </h3>
               <p className="text-gray-500">
-                {challenges.length === 0 
-                  ? "Check back later for new challenges" 
+                {challenges.length === 0
+                  ? "Check back later for new challenges"
                   : "Try adjusting your filter criteria"
                 }
               </p>
@@ -346,27 +346,27 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="w-full bg-blue-800 rounded-full h-0.5 mt-1">
-                      <div 
+                      <div
                         className="bg-blue-200 h-0.5 rounded-full transition-all duration-300"
-                        style={{ 
-                          width: `${categoryChallenges.length > 0 
-                            ? (categoryChallenges.filter(c => c.is_solved).length / categoryChallenges.length) * 100 
-                            : 0}%` 
+                        style={{
+                          width: `${categoryChallenges.length > 0
+                            ? (categoryChallenges.filter(c => c.is_solved).length / categoryChallenges.length) * 100
+                            : 0}%`
                         }}
                       ></div>
                     </div>
                     </div>
-                    
+
                     {/* Challenges List */}
                     <div className="divide-y divide-gray-200">
                       {categoryChallenges.map((challenge) => (
                       <div key={challenge.id} className={`transition-all duration-200 ${
-                              challenge.is_solved 
-                          ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100' 
+                              challenge.is_solved
+                          ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100'
                                 : 'hover:bg-gray-50'
                       }`}>
                         {/* Challenge Header */}
-                        <div 
+                        <div
                           className="p-1.5 cursor-pointer"
                           onClick={() => toggleChallengeExpansion(challenge.id)}
                         >
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                                 <div className={`w-2 h-2 rounded-full ${
                                   challenge.is_solved ? 'bg-green-500' : 'bg-blue-500'
                                 }`}></div>
-                                
+
                               {/* Challenge Details */}
                                 <div className="flex-1">
                                 <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
@@ -387,13 +387,13 @@ export default function DashboardPage() {
                                       <span className="ml-2 text-green-600 text-xs">✓</span>
                                       )}
                                     </h4>
-                                    
+
                                   <div className="flex items-center space-x-1.5">
                                     <span className="flex items-center text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
                                       <span className="mr-1">🪙</span>
                                       {challenge.points}
                                     </span>
-                                    
+
                                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                                       challenge.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
                                       challenge.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
@@ -404,22 +404,22 @@ export default function DashboardPage() {
                                   </div>
                                   </div>
                                 </div>
-                                
+
                                 {/* Expand/Collapse Icon */}
                                 <div className="flex-shrink-0">
-                                  <svg 
+                                  <svg
                                     className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
                                       expandedChallenges[challenge.id] ? 'rotate-180' : ''
                                     }`}
-                                    fill="none" 
-                                    stroke="currentColor" 
+                                    fill="none"
+                                    stroke="currentColor"
                                     viewBox="0 0 24 24"
                                   >
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                   </svg>
                                 </div>
                               </div>
-                              
+
                               {/* Flag Input */}
                               {!challenge.is_solved && (
                               <div className="lg:ml-4 flex items-center space-x-2 hidden lg:flex" onClick={(e) => e.stopPropagation()}>
@@ -442,12 +442,12 @@ export default function DashboardPage() {
                               )}
                             </div>
                           </div>
-                          
+
                           {/* Expanded Details */}
                           {expandedChallenges[challenge.id] && (
                             <div className={`px-3 pb-3 border-t ${
-                              challenge.is_solved 
-                                ? 'bg-green-50 border-green-200' 
+                              challenge.is_solved
+                                ? 'bg-green-50 border-green-200'
                                 : 'bg-gray-50 border-gray-200'
                             }`}>
                               <div className="pt-2">
@@ -480,7 +480,7 @@ export default function DashboardPage() {
                                   <MarkdownRenderer content={challenge.description} />
                                   </div>
                                 </div>
-                                
+
                                 {/* Attachments */}
                                 {challenge.attachments && challenge.attachments.length > 0 && (
                                 <div className="mb-2">
@@ -489,7 +489,7 @@ export default function DashboardPage() {
                                       {challenge.attachments.map((attachment, index) => {
                                         const attachmentKey = `${challenge.id}-${index}`
                                         const isDownloading = downloading[attachmentKey]
-                                        
+
                                         return (
                                         <div key={index} className="flex items-center justify-between p-2 bg-white border border-gray-200 rounded-lg">
                                           <div className="flex items-center space-x-2">
@@ -523,7 +523,7 @@ export default function DashboardPage() {
                                     </div>
                                   </div>
                                 )}
-                                
+
                                 {/* Hint Button */}
                                 {challenge.hint && (
                                 <div className="flex items-center mt-1">
@@ -562,7 +562,7 @@ export default function DashboardPage() {
                   Hint for: {showHintModal.challenge.title}
               </h3>
               </div>
-              
+
               <div className="mb-6">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <p className="text-gray-700 leading-relaxed">
@@ -570,7 +570,7 @@ export default function DashboardPage() {
                 </p>
                 </div>
               </div>
-              
+
               <div className="flex justify-end">
                 <button
                   onClick={() => setShowHintModal({ challenge: null })}

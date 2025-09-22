@@ -12,9 +12,11 @@
     "@supabase/supabase-js": "^2.38.4",
     "crypto-js": "^4.2.0",
     "next": "14.0.4",
+    "plotly.js": "^3.1.0",
     "react": "^18",
     "react-dom": "^18",
     "react-markdown": "^10.1.0",
+    "react-plotly.js": "^2.6.0",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
@@ -22,6 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-plotly.js": "^2.6.3",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",

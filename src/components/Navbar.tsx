@@ -81,12 +81,6 @@ export default function Navbar() {
               >
                 Scoreboard
               </Link>
-              <Link
-                href="/profile"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Profile
-              </Link>
               {adminStatus && (
                 <Link
                   href="/admin"
