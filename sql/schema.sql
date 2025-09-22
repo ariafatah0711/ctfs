@@ -257,7 +257,7 @@ INSERT INTO public.challenges (title, description, category, points, flag, hint,
   10,
   'test',
   'Flag sederhana: "test". Cek attachment atau link untuk verifikasi.',
-  'Very Easy',
+  'Easy',
   '[
     {
       "url": "https://smk.amablex90.my.id/asset/test-file.txt",

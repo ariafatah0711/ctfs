@@ -129,11 +129,14 @@ export default function ScoreboardPage() {
                       
                       <div>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-lg font-medium ${
-                            entry.id === user.id ? 'text-primary-700' : 'text-gray-900'
-                          }`}>
+                          <a 
+                            href={`/user/${entry.username}`}
+                            className={`text-lg font-medium hover:underline ${
+                              entry.id === user.id ? 'text-primary-700' : 'text-gray-900'
+                            }`}
+                          >
                             {entry.username}
-                          </span>
+                          </a>
                           {entry.id === user.id && (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                               Anda
