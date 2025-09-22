@@ -24,8 +24,20 @@ export default function ScoreboardPage() {
       setUser(currentUser)
 
       const data = await getLeaderboard()
-      console.log(data)
-      setLeaderboard(data)
+
+      // Transform supaya cocok sama LeaderboardEntry
+      const transformed: LeaderboardEntry[] = data.map((d: any, i: number) => ({
+        id: String(i + 1), // kalau backend ada id, pakai itu
+        username: d.username,
+        score: d.progress.length > 0 ? d.progress[d.progress.length - 1].score : 0,
+        rank: i + 1,
+        progress: d.progress.map((p: any) => ({
+          date: String(p.date), // pastikan string
+          score: p.score,
+        })),
+      }))
+
+      setLeaderboard(transformed)
       setLoading(false)
     }
     fetchData()

@@ -227,24 +227,6 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
 }
 
 /**
- * Ambil leaderboard
- */
-// export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-//   try {
-//     const { data, error } = await supabase.rpc('get_leaderboard')
-
-//     if (error) {
-//       throw new Error(error.message)
-//     }
-
-//     return data || []
-//   } catch (error) {
-//     console.error('Error fetching leaderboard:', error)
-//     return []
-//   }
-// }
-
-/**
  * Ambil leaderboard dengan progress
  */
 export async function getLeaderboard() {
@@ -262,10 +244,13 @@ export async function getLeaderboard() {
   // transform ke leaderboard progress
   const userProgress: Record<string, { username: string, progress: { date: string, score: number }[] }> = {}
 
-  data.forEach((row) => {
-    const uid = row.users.id
+  data.forEach((row: any) => {
+    const uid = (row.users as { id: string, username: string }).id
     if (!userProgress[uid]) {
-      userProgress[uid] = { username: row.users.username, progress: [] }
+      userProgress[uid] = {
+        username: (row.users as { id: string, username: string }).username,
+        progress: []
+      }
     }
     const prevScore = userProgress[uid].progress.at(-1)?.score || 0
     userProgress[uid].progress.push({

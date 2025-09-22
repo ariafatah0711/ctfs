@@ -53,7 +53,7 @@ export default function UserProfilePage() {
     }
 
     fetchData()
-  }, [router, params.username])
+  }, [router, params])
 
   if (loading) {
     return (
