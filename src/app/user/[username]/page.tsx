@@ -80,7 +80,7 @@ export default function UserProfilePage() {
               {error || 'User not found'}
             </h3>
             <p className="text-gray-500 mb-6">
-              The user you're looking for doesn't exist or has been removed.
+              The user you re looking for doesn t exist or has been removed.
             </p>
             <button
               onClick={() => router.back()}
@@ -225,7 +225,7 @@ export default function UserProfilePage() {
                 <span className="text-2xl text-gray-400">🎯</span>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No solved challenges yet</h3>
-              <p className="text-gray-500">This user hasn't solved any challenges yet.</p>
+              <p className="text-gray-500">This user hasn t solved any challenges yet.</p>
             </div>
           ) : (
             <div className="space-y-3">
