@@ -63,10 +63,21 @@ export async function submitFlag(challengeId: string, flag: string, userId: stri
     console.log('Actual hash:', hashFlag(flag))
 
     if (!validateFlag(flag, challenge.flag_hash)) {
-      return { success: false, message: 'Flag salah! Cek hint untuk petunjuk.' }
+      // Flag salah
+      // Tapi cek apakah sudah solved
+      const { data: existingSolve } = await supabase
+        .from('solves')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('challenge_id', challengeId)
+        .single()
+      if (existingSolve) {
+        return { success: false, message: 'Incorrect, but you already solved this challenge!' }
+      }
+      return { success: false, message: 'Incorrect!' }
     }
 
-    // Cek apakah user sudah menyelesaikan challenge ini
+    // Flag benar
     const { data: existingSolve } = await supabase
       .from('solves')
       .select('id')
@@ -75,7 +86,7 @@ export async function submitFlag(challengeId: string, flag: string, userId: stri
       .single()
 
     if (existingSolve) {
-      return { success: false, message: 'Challenge ini sudah diselesaikan!' }
+      return { success: true, message: 'Correct, but you already solved this challenge!' }
     }
 
     // Insert solve
@@ -268,4 +279,27 @@ export async function getLeaderboard() {
       ...user.progress
     ]
   }))
+}
+
+/**
+ * Ambil daftar solver untuk sebuah challenge
+ */
+export async function getSolversByChallenge(challengeId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('solves')
+      .select('created_at, users(username)')
+      .eq('challenge_id', challengeId)
+      .order('created_at', { ascending: true })
+
+    if (error) throw error
+
+    return (data || []).map(row => ({
+      username: row.users[0]?.username ?? 'Unknown',
+      solvedAt: row.created_at
+    }))
+  } catch (error) {
+    console.error('Error fetching solvers:', error)
+    return []
+  }
 }

@@ -232,77 +232,74 @@ export default function AdminPage() {
 
           {/* Add Challenge Form */}
           {showAddForm && (
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
                 {editingChallenge ? 'Edit Challenge' : 'Tambah Challenge Baru'}
               </h2>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Judul Challenge
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Contoh: SQL Injection Basics"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kategori
-                    </label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      <option value="Web">Web</option>
-                      <option value="Reverse">Reverse Engineering</option>
-                      <option value="Crypto">Cryptography</option>
-                      <option value="Forensics">Forensics</option>
-                      <option value="Pwn">Pwn</option>
-                      <option value="Misc">Miscellaneous</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Poin
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      value={formData.points}
-                      onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tingkat Kesulitan
-                    </label>
-                    <select
-                      value={formData.difficulty}
-                      onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      <option value="Easy">Easy</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Hard">Hard</option>
-                    </select>
-                  </div>
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Judul Challenge
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="Contoh: SQL Injection Basics"
+                  />
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-2">
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Kategori
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="Web">Web</option>
+                    <option value="Reverse">Reverse Engineering</option>
+                    <option value="Crypto">Cryptography</option>
+                    <option value="Forensics">Forensics</option>
+                    <option value="Pwn">Pwn</option>
+                    <option value="Misc">Miscellaneous</option>
+                  </select>
+                </div>
+
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Poin
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.points}
+                    onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div className="mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tingkat Kesulitan
+                  </label>
+                  <select
+                    value={formData.difficulty}
+                    onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                  </select>
+                </div>
+
+                <div className="mb-2">
+                  <div className="flex items-center justify-between">
                     <label className="block text-sm font-medium text-gray-700">
                       Deskripsi
                     </label>
@@ -337,7 +334,7 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                <div>
+                <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Flag
                   </label>
@@ -357,7 +354,7 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                <div>
+                <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hint (Opsional)
                   </label>
@@ -371,7 +368,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Attachments */}
-                <div>
+                <div className="mb-2">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-700">
                       Attachments (Opsional)
@@ -428,22 +425,22 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                <div className="flex justify-end space-x-3">
+                <div className="md:col-span-2 flex justify-end gap-2 mt-2">
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 text-sm"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md disabled:opacity-50"
+                    className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
                   >
                     {submitting
                       ? (editingChallenge ? 'Mengupdate...' : 'Menambahkan...')
-                      : (editingChallenge ? 'Update Challenge' : 'Tambah Challenge')
+                      : (editingChallenge ? 'Update' : 'Tambah')
                     }
                   </button>
                 </div>
@@ -453,75 +450,37 @@ export default function AdminPage() {
 
           {/* Challenges List */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Daftar Challenges</h2>
-
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Daftar Challenges</h2>
             {challenges.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500 text-lg">Belum ada challenges</div>
-              </div>
+              <div className="text-center py-8 text-gray-500">Belum ada challenges</div>
             ) : (
-              <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <ul className="divide-y divide-gray-200">
+              <div className="bg-white shadow-sm rounded-lg">
+                <ul>
                   {challenges.map((challenge) => (
-                    <li key={challenge.id}>
-                      <div className="px-4 py-4 sm:px-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                              <div className={`w-3 h-3 rounded-full ${
-                                challenge.difficulty === 'Easy' ? 'bg-green-400' :
-                                challenge.difficulty === 'Medium' ? 'bg-yellow-400' : 'bg-red-400'
-                              }`}></div>
-                            </div>
-                            <div className="ml-4 flex-1">
-                              <div className="flex items-center">
-                                <p className="text-sm font-medium text-primary-600 truncate">
-                                  {challenge.title}
-                                </p>
-                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  {challenge.category}
-                                </span>
-                                <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  challenge.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                }`}>
-                                  {challenge.is_active ? 'Active' : 'Inactive'}
-                                </span>
-                              </div>
-                              <div className="mt-2 sm:flex sm:justify-between">
-                                <div className="sm:flex">
-                                  <p className="flex items-center text-sm text-gray-500">
-                                    {challenge.points} poin
-                                  </p>
-                                  <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                                    {challenge.difficulty}
-                                  </p>
-                                </div>
-                                <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                  <p>
-                                    Dibuat: {new Date(challenge.created_at).toLocaleDateString('id-ID')}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => handleEdit(challenge)}
-                              className="text-yellow-600 hover:text-yellow-800 text-sm font-medium"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(challenge.id)}
-                              className="text-red-600 hover:text-red-800 text-sm font-medium"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                    <li key={challenge.id} className="flex items-center px-3 py-2 border-b last:border-b-0">
+                      <span className={`w-2 h-2 rounded-full mr-3 ${
+                        challenge.difficulty === 'Easy' ? 'bg-green-400' :
+                        challenge.difficulty === 'Medium' ? 'bg-yellow-400' : 'bg-red-400'
+                      }`} />
+                      <span className="flex-1 truncate text-sm font-medium text-gray-800">{challenge.title}</span>
+                      <span className="ml-2 text-xs text-gray-500">{challenge.category}</span>
+                      <span className={`ml-2 text-xs ${
+                        challenge.is_active ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {challenge.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                      <span className="ml-2 text-xs text-gray-400">{challenge.points} pts</span>
+                      <span className="ml-2 text-xs text-gray-400">{challenge.difficulty}</span>
+                      <button
+                        onClick={() => handleEdit(challenge)}
+                        className="ml-3 text-gray-500 hover:text-yellow-600"
+                        title="Edit"
+                      >✏️</button>
+                      <button
+                        onClick={() => handleDelete(challenge.id)}
+                        className="ml-1 text-gray-500 hover:text-red-600"
+                        title="Delete"
+                      >🗑️</button>
                     </li>
                   ))}
                 </ul>

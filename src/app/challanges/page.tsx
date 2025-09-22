@@ -3,12 +3,33 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
-import { getChallenges, submitFlag } from '@/lib/challenges'
+import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { ChallengeWithSolve, User, Attachment } from '@/types'
+
+type Solver = {
+  username: string;
+  solvedAt: string;
+};
 import Navbar from '@/components/Navbar'
+import ChallengeStatsFilterBar from '@/components/ChallengeStatsFilterBar'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 
 export default function ChallengesPage() {
+  // State untuk tab modal challenge
+  const [challengeTab, setChallengeTab] = useState<'challenge' | 'solves'>('challenge');
+  const [solvers, setSolvers] = useState<Solver[]>([]);
+  // Saat tab solves dibuka, fetch solvers
+  const handleTabChange = async (tab: 'challenge' | 'solves', challengeId: string) => {
+    setChallengeTab(tab);
+    if (tab === 'solves') {
+      try {
+        const data = await getSolversByChallenge(challengeId);
+        setSolvers(data);
+      } catch (err) {
+        setSolvers([]);
+      }
+    }
+  };
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
@@ -18,6 +39,7 @@ export default function ChallengesPage() {
   const [expandedChallenges, setExpandedChallenges] = useState<{[key: string]: boolean}>({})
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
+  const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -52,21 +74,33 @@ export default function ChallengesPage() {
     setSubmitting(prev => ({ ...prev, [challengeId]: true }))
 
     try {
+      // Submit flag
       const result = await submitFlag(challengeId, flagInputs[challengeId].trim(), user.id)
 
-      if (result.success) {
-        // Clear input
-        setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
-
-        // Refresh challenges and user data
+      // Refresh challenges and user data (selalu, agar status is_solved up-to-date)
       const challengesData = await getChallenges(user.id)
       setChallenges(challengesData)
-
       const updatedUser = await getCurrentUser()
       setUser(updatedUser)
-    }
 
-      alert(result.message)
+      // Cari challenge terbaru
+      const updatedChallenge = challengesData.find(c => c.id === challengeId)
+
+      if (updatedChallenge?.is_solved) {
+        if (result.success) {
+          alert('Correct, but you already solved this challenge!')
+          setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
+        } else {
+          alert('Incorrect, but you already solved this challenge!')
+        }
+      } else {
+        if (result.success) {
+          alert('Correct!')
+          setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
+        } else {
+          alert('Incorrect!')
+        }
+      }
     } catch (error) {
       console.error('Error submitting flag:', error)
       alert('Terjadi kesalahan saat submit flag')
@@ -180,139 +214,31 @@ export default function ChallengesPage() {
   }
 
   const solvedCount = challenges.filter(c => c.is_solved).length
-  const totalPoints = challenges.filter(c => c.is_solved).reduce((sum, c) => sum + c.points, 0)
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <h1 className="text-3xl font-bold text-center">
+          🚩 challanges
+        </h1>
 
-      {/* Title */}
-      <h1 className="text-3xl font-bold text-center">
-        🚩 challanges
-      </h1>
+        <ChallengeStatsFilterBar
+          userScore={user.score}
+          solvedCount={solvedCount}
+          totalChallenges={challenges.length}
+          filteredCount={filteredChallenges.length}
+          filters={filters}
+          categories={categories}
+          difficulties={difficulties}
+          onFilterChange={setFilters}
+          onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
+        />
 
-      {/* <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"> */}
-        {/* Combined Stats and Filter Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-4 animate-fade-in">
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-            <div className="flex items-center space-x-1.5">
-              <div className="w-5 h-5 bg-blue-100 rounded flex items-center justify-center">
-                <span className="text-blue-600 text-xs">🏆</span>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Points</p>
-                <p className="text-sm font-bold text-gray-900">{user.score}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-1.5">
-              <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
-                <span className="text-green-600 text-xs">✓</span>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Solved</p>
-                <p className="text-sm font-bold text-gray-900">{solvedCount}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-1.5">
-              <div className="w-5 h-5 bg-purple-100 rounded flex items-center justify-center">
-                <span className="text-purple-600 text-xs">📊</span>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Total</p>
-                <p className="text-sm font-bold text-gray-900">{challenges.length}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-1.5">
-              <div className="w-5 h-5 bg-yellow-100 rounded flex items-center justify-center">
-                <span className="text-yellow-600 text-xs">📈</span>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Progress</p>
-                <p className="text-sm font-bold text-gray-900">
-                  {challenges.length > 0 ? Math.round((solvedCount / challenges.length) * 100) : 0}%
-                </p>
-              </div>
-            </div>
-          </div>
-
-
-          {/* Filter Row */}
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500">
-              {filteredChallenges.length} of {challenges.length} challenges
-            </span>
-            <button
-              onClick={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Clear
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-            {/* Search */}
-            <div>
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                placeholder="Search..."
-                className="w-full px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Status */}
-            <div>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All</option>
-                <option value="unsolved">Unsolved</option>
-                <option value="solved">Solved</option>
-              </select>
-            </div>
-
-            {/* Category */}
-            <div>
-              <select
-                value={filters.category}
-                onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Difficulty */}
-            <div>
-              <select
-                value={filters.difficulty}
-                onChange={(e) => setFilters(prev => ({ ...prev, difficulty: e.target.value }))}
-                className="w-full px-1.5 py-0.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">All Difficulties</option>
-                {difficulties.map(difficulty => (
-                  <option key={difficulty} value={difficulty}>{difficulty}</option>
-                ))}
-              </select>
-            </div>
-            </div>
-          </div>
-
-        {/* Challenges Section */}
-          <div>
-            {filteredChallenges.length === 0 ? (
+        {/* Challenges Grid Grouped by Category */}
+        <div>
+          {filteredChallenges.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl text-gray-400">🔍</span>
@@ -329,230 +255,185 @@ export default function ChallengesPage() {
                   : "Try adjusting your filter criteria"
                 }
               </p>
-              </div>
-            ) : (
-            <div className="space-y-2">
-                {Object.entries(
-                  filteredChallenges.reduce((acc, challenge) => {
-                    if (!acc[challenge.category]) {
-                      acc[challenge.category] = []
-                    }
-                    acc[challenge.category].push(challenge)
-                    return acc
-                  }, {} as {[key: string]: ChallengeWithSolve[]})
-                ).map(([category, categoryChallenges]) => (
-                <div key={category} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                    {/* Category Header */}
-                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-2 py-1.5">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs font-semibold text-white">
-                        {category}
-                      </h3>
-                      <div className="text-xs text-blue-100">
-                        {categoryChallenges.filter(c => c.is_solved).length} / {categoryChallenges.length} solved
+            </div>
+          ) : (
+            // Group by category
+            Object.entries(
+              filteredChallenges.reduce((acc, challenge) => {
+                if (!acc[challenge.category]) acc[challenge.category] = []
+                acc[challenge.category].push(challenge)
+                return acc
+              }, {} as {[key: string]: ChallengeWithSolve[]})
+            ).map(([category, categoryChallenges]) => (
+              <div key={category} className="mb-12">
+                {/* Category Header */}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-orange-400 text-2xl">{'»'}</span>
+                  <h2 className="text-xl sm:text-2xl tracking-widest text-gray-800 font-bold uppercase">{category}</h2>
+                </div>
+                {/* Grid Card */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {categoryChallenges.map((challenge) => (
+                    <div
+                      key={challenge.id}
+                      className={`
+                        relative rounded-md border-2
+                        ${challenge.is_solved
+                          ? 'bg-green-600 border-green-400 hover:border-green-200'
+                          : 'bg-blue-700 border-blue-400 hover:border-blue-200'}
+                        transition-all duration-150 cursor-pointer shadow-lg group
+                      `}
+                      onClick={() => setSelectedChallenge(challenge)}
+                      style={{
+                        minHeight: 110,
+                        boxShadow: '0 2px 0 #222, 0 4px 24px #0004'
+                      }}
+                    >
+                      {/* Centang kanan atas */}
+                      {challenge.is_solved && (
+                        <span className="absolute top-2 right-3 text-white text-lg font-bold select-none">
+                          ✓
+                        </span>
+                      )}
+                      <div className="flex flex-col items-center justify-center h-full py-6">
+                        <span className="text-lg font-bold text-white mb-2 truncate">{challenge.title}</span>
+                        <span className="flex items-center gap-1 text-yellow-300 text-base font-semibold">
+                          <span className="text-lg">🪙</span> {challenge.points}
+                        </span>
                       </div>
                     </div>
-                    <div className="w-full bg-blue-800 rounded-full h-0.5 mt-1">
-                      <div
-                        className="bg-blue-200 h-0.5 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${categoryChallenges.length > 0
-                            ? (categoryChallenges.filter(c => c.is_solved).length / categoryChallenges.length) * 100
-                            : 0}%`
-                        }}
-                      ></div>
-                    </div>
-                    </div>
-
-                    {/* Challenges List */}
-                    <div className="divide-y divide-gray-200">
-                      {categoryChallenges.map((challenge) => (
-                        <div key={challenge.id}
-                          className={`transition-all duration-200 ${
-                            challenge.is_solved
-                              ? 'bg-green-100 border-l-4 hover:bg-green-200'
-                              : 'bg-white hover:bg-gray-50 border-l-4'
-                          }`}
-                        >
-                        {/* Challenge Header */}
-                        <div
-                          className="p-1.5 cursor-pointer"
-                          onClick={() => toggleChallengeExpansion(challenge.id)}
-                        >
-                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-2 lg:space-y-0">
-                              {/* Challenge Info */}
-                              <div className="flex items-center space-x-3 flex-1">
-                                {/* Status Indicator */}
-                                <div className={`w-2 h-2 rounded-full ${
-                                  challenge.is_solved ? 'bg-green-500' : 'bg-blue-500'
-                                }`}></div>
-
-                              {/* Challenge Details */}
-                                <div className="flex-1">
-                                <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
-                                  <h4 className="text-base font-semibold text-gray-900">
-                                      {challenge.title}
-                                      {challenge.is_solved && (
-                                      <span className="ml-2 text-green-600 text-xs">✓</span>
-                                      )}
-                                    </h4>
-
-                                  <div className="flex items-center space-x-1.5">
-                                    <span className="flex items-center text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                                      <span className="mr-1">🪙</span>
-                                      {challenge.points}
-                                    </span>
-
-                                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                      challenge.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                                      challenge.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-red-100 text-red-800'
-                                    }`}>
-                                      {challenge.difficulty}
-                                    </span>
-                                  </div>
-                                  </div>
-                                </div>
-
-                                {/* Expand/Collapse Icon */}
-                                <div className="flex-shrink-0">
-                                  <svg
-                                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                                      expandedChallenges[challenge.id] ? 'rotate-180' : ''
-                                    }`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                  </svg>
-                                </div>
-                              </div>
-
-                              {/* Flag Input */}
-                              {!challenge.is_solved && (
-                              <div className="lg:ml-4 flex items-center space-x-2 hidden lg:flex" onClick={(e) => e.stopPropagation()}>
-                                  <input
-                                    type="text"
-                                    value={flagInputs[challenge.id] || ''}
-                                    onChange={(e) => handleFlagInputChange(challenge.id, e.target.value)}
-                                  placeholder="Enter flag..."
-                                  className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-60"
-                                    onKeyPress={(e) => e.key === 'Enter' && handleFlagSubmit(challenge.id)}
-                                  />
-                                  <button
-                                    onClick={() => handleFlagSubmit(challenge.id)}
-                                    disabled={submitting[challenge.id] || !flagInputs[challenge.id]?.trim()}
-                                  className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                  >
-                                  {submitting[challenge.id] ? 'Submitting...' : 'Submit'}
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                        {/* Expanded Details */}
-                        {expandedChallenges[challenge.id] && (
-                          <div className="px-3 pb-3 border-t bg-gray-50 border-gray-200">
-                            <div className="pt-2">
-                              {/* Mobile Flag Input */}
-                              {!challenge.is_solved && (
-                                <div className="mb-1 lg:hidden">
-                                  <div className="flex items-center space-x-2">
-                                    <input
-                                      type="text"
-                                      value={flagInputs[challenge.id] || ''}
-                                      onChange={(e) => handleFlagInputChange(challenge.id, e.target.value)}
-                                      placeholder="Enter flag..."
-                                      className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      onKeyPress={(e) => e.key === 'Enter' && handleFlagSubmit(challenge.id)}
-                                    />
-                                    <button
-                                      onClick={() => handleFlagSubmit(challenge.id)}
-                                      disabled={submitting[challenge.id] || !flagInputs[challenge.id]?.trim()}
-                                      className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                      {submitting[challenge.id] ? '...' : 'Submit'}
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-                              {/* Description */}
-                              <div className="mb-2">
-                                <h5 className="text-sm font-semibold text-gray-900 mb-1">Description</h5>
-                                <div className="prose prose-sm max-w-none text-gray-700">
-                                  <MarkdownRenderer content={challenge.description} />
-                                  </div>
-                                </div>
-
-                                {/* Attachments */}
-                                {challenge.attachments && challenge.attachments.length > 0 && (
-                                <div className="mb-2">
-                                  <h5 className="text-sm font-semibold text-gray-900 mb-1">Files & Links</h5>
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                      {challenge.attachments.map((attachment, index) => {
-                                        const attachmentKey = `${challenge.id}-${index}`
-                                        const isDownloading = downloading[attachmentKey]
-
-                                        return (
-                                        <div key={index} className="flex items-center justify-between p-2 bg-white border border-gray-200 rounded-lg">
-                                          <div className="flex items-center space-x-2">
-                                            <span className="text-lg">
-                                              {attachment.type === 'file' ? '📁' : '🔗'}
-                                            </span>
-                                            <span className="text-sm font-medium text-gray-900">
-                                              {attachment.name}
-                                          </span>
-                                          </div>
-                                          <button
-                                              onClick={() => downloadFile(attachment, attachmentKey)}
-                                              disabled={isDownloading}
-                                            className="px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-md hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                                            >
-                                              {isDownloading ? (
-                                                <>
-                                                <div className="animate-spin rounded-full h-3 w-3 border-b border-blue-700"></div>
-                                                <span>Downloading...</span>
-                                                </>
-                                              ) : (
-                                              <>
-                                                <span>{attachment.type === 'file' ? '↓' : '→'}</span>
-                                                <span>{attachment.type === 'file' ? 'Download' : 'Open'}</span>
-                                              </>
-                                              )}
-                                          </button>
-                                        </div>
-                                        )
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Hint Button */}
-                                {challenge.hint && (
-                                <div className="flex items-center mt-1">
-                                    <button
-                                      onClick={() => showHint(challenge)}
-                                    className="px-2 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-md hover:bg-yellow-200 transition-colors flex items-center space-x-1"
-                                    >
-                                    <span>💡</span>
-                                    <span>Show Hint</span>
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            )}
+            ))
+          )}
         </div>
       </div>
+
+      {/* Challenge Detail Modal */}
+      {selectedChallenge && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+          onClick={() => {
+            setSelectedChallenge(null);
+            setChallengeTab('challenge');
+          }}
+        >
+          <div
+            className="relative w-full max-w-lg mx-auto rounded-md shadow-2xl bg-[#232344] border border-[#35355e] p-8 font-mono"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
+              onClick={() => {
+                setSelectedChallenge(null);
+                setChallengeTab('challenge');
+              }}
+              aria-label="Close"
+            >✕</button>
+
+            {/* Tabs */}
+            <div className="flex gap-2 mb-6">
+              <button
+                className={`px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+                onClick={() => setChallengeTab('challenge')}
+              >Challenge</button>
+              <button
+                className={`px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solves' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+                onClick={() => handleTabChange('solves', selectedChallenge.id)}
+              >Solves</button>
+            </div>
+
+            {/* Tab Content */}
+            {challengeTab === 'challenge' && (
+              <>
+                {/* Title */}
+                <h2
+                  className={`
+                    text-2xl font-bold mb-2 tracking-wide
+                    ${selectedChallenge.is_solved ? 'text-green-400' : 'text-pink-400'}
+                  `}
+                >
+                  {selectedChallenge.title}
+                </h2>
+                {/* Coin */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className={`
+                      flex items-center gap-1 text-lg font-semibold
+                      ${selectedChallenge.is_solved ? 'text-green-300' : 'text-yellow-300'}
+                    `}
+                  >
+                    🪙 {selectedChallenge.points}
+                  </span>
+                </div>
+                {/* Description */}
+                <div className="mb-3 text-gray-200 text-sm whitespace-pre-line">
+                  <MarkdownRenderer content={selectedChallenge.description} />
+                </div>
+                {/* Attachments */}
+                {selectedChallenge.attachments && selectedChallenge.attachments.length > 0 && (
+                  <div className="mb-3">
+                    {selectedChallenge.attachments.map((attachment, idx) => (
+                      <a
+                        key={idx}
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-pink-400 underline text-xs mb-1 hover:text-pink-300"
+                      >
+                        {attachment.name}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                {/* Flag input */}
+                <form
+                  className="flex gap-2 mt-4"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    handleFlagSubmit(selectedChallenge.id);
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={flagInputs[selectedChallenge.id] || ''}
+                    onChange={e => handleFlagInputChange(selectedChallenge.id, e.target.value)}
+                    placeholder="Flag"
+                    className="flex-1 px-3 py-2 rounded border border-[#35355e] bg-[#181829] text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    disabled={submitting[selectedChallenge.id] || !flagInputs[selectedChallenge.id]?.trim()}
+                    className="px-5 py-2 rounded bg-gradient-to-br from-pink-500 to-pink-400 text-white font-bold shadow hover:from-pink-400 hover:to-pink-500 transition disabled:opacity-50"
+                  >
+                    {submitting[selectedChallenge.id] ? '...' : 'Submit'}
+                  </button>
+                </form>
+              </>
+            )}
+            {challengeTab === 'solves' && (
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-pink-300">Solvers</h3>
+                <ul className="space-y-2 max-h-60 overflow-y-auto">
+                  {solvers.length === 0 ? (
+                    <li className="text-gray-400">Belum ada yang solve.</li>
+                  ) : (
+                    solvers.map((solver, idx) => (
+                      <li key={idx} className="flex justify-between text-gray-200">
+                        <span>{solver.username}</span>
+                        <span className="text-xs text-gray-400">{new Date(solver.solvedAt).toLocaleString()}</span>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Hint Modal */}
       {showHintModal.challenge && (
@@ -565,17 +446,15 @@ export default function ChallengesPage() {
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   Hint for: {showHintModal.challenge.title}
-              </h3>
+                </h3>
               </div>
-
               <div className="mb-6">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <p className="text-gray-700 leading-relaxed">
-                  {showHintModal.challenge.hint}
-                </p>
+                    {showHintModal.challenge.hint}
+                  </p>
                 </div>
               </div>
-
               <div className="flex justify-end">
                 <button
                   onClick={() => setShowHintModal({ challenge: null })}

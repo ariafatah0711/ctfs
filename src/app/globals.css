@@ -17,10 +17,33 @@
 }
 
 body {
+  font-family: 'Fira Mono', 'JetBrains Mono', 'Menlo', 'monospace';
+}
+
+body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom,
       transparent,
       rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+}
+
+.bg-ctfd {
+  background: repeating-linear-gradient(0deg,
+      #181829,
+      #181829 2px,
+      #1a1a2e 2px,
+      #1a1a2e 4px);
+}
+
+code {
+  background: #2d2a3a !important;
+  /* warna gelap */
+  color: #ffb8d1 !important;
+  /* warna pink/ungu, sesuaikan tema */
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: 0.95em;
 }
 
 @layer utilities {
