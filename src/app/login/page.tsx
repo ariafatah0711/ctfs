@@ -21,11 +21,11 @@ export default function LoginPage() {
 
     try {
       const { user, error } = await signIn(formData.email, formData.password)
-      
+
       if (error) {
         setError(error)
       } else if (user) {
-        router.push('/dashboard')
+        router.push('/challanges')
       }
     } catch (err) {
       setError('Terjadi kesalahan saat login')
@@ -55,7 +55,7 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>

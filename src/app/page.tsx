@@ -12,7 +12,7 @@ export default function Home() {
     const checkAuth = async () => {
       const user = await getCurrentUser()
       if (user) {
-        router.push('/dashboard')
+        router.push('/challanges')
       } else {
         router.push('/login')
       }

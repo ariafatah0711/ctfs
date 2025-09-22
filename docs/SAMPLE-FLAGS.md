@@ -25,7 +25,7 @@ Berikut adalah sample flags yang bisa digunakan untuk testing aplikasi CTFS:
 ## 🧪 Cara Testing
 
 1. **Login ke aplikasi**
-2. **Buka dashboard**
+2. **Buka challanges**
 3. **Lihat daftar challenges**
 4. **Submit flag sesuai dengan challenge**
 

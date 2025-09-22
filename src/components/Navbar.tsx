@@ -40,7 +40,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/dashboard" className="flex items-center space-x-2">
+              <Link href="/challanges" className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">C</span>
                 </div>
@@ -62,7 +62,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-8">
-            <Link href="/dashboard" className="flex items-center space-x-2">
+            <Link href="/challanges" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">C</span>
               </div>
@@ -70,10 +70,10 @@ export default function Navbar() {
             </Link>
             <div className="hidden md:flex space-x-1">
               <Link
-                href="/dashboard"
+                href="/challanges"
                 className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                Dashboard
+                challanges
               </Link>
               <Link
                 href="/scoreboard"
@@ -159,11 +159,11 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/dashboard"
+                href="/challanges"
                 className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-base font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Dashboard
+                challanges
               </Link>
               <Link
                 href="/scoreboard"

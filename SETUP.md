@@ -13,7 +13,7 @@ Panduan lengkap untuk setup aplikasi CTFS dari awal.
    - Tunggu hingga project selesai dibuat
 
 2. **Setup Database**
-   - Buka SQL Editor di dashboard Supabase
+   - Buka SQL Editor di challanges Supabase
    - Copy semua isi file `supabase-schema-fixed.sql` (gunakan file yang fixed)
    - Paste dan jalankan script tersebut
    - Pastikan tidak ada error
@@ -93,7 +93,7 @@ git push origin main
 
 ### 3. Update Supabase Settings
 
-Di Supabase dashboard:
+Di Supabase challanges:
 1. Settings > Authentication
 2. Site URL: `https://your-app.vercel.app`
 3. Redirect URLs: `https://your-app.vercel.app/**`
@@ -117,7 +117,7 @@ testFlagValidation()
 
 ## 🔧 Menambah Challenge Baru
 
-### Via Supabase Dashboard
+### Via Supabase challanges
 
 1. Buka Table Editor > challenges
 2. Klik "Insert" > "Insert row"
@@ -173,10 +173,10 @@ console.log(hash) // Copy hash ini ke database
 
 ## 📱 Pages Overview
 
-- **/** - Redirect ke login/dashboard
+- **/** - Redirect ke login/challanges
 - **/login** - Login page
 - **/register** - Register page
-- **/dashboard** - Main dashboard dengan challenges
+- **/challanges** - Main challanges dengan challenges
 - **/scoreboard** - Leaderboard ranking
 
 ## 🔒 Security Notes

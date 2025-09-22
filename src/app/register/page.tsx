@@ -36,11 +36,11 @@ export default function RegisterPage() {
 
     try {
       const { user, error } = await signUp(formData.email, formData.password, formData.username)
-      
+
       if (error) {
         setError(error)
       } else if (user) {
-        router.push('/dashboard')
+        router.push('/challanges')
       }
     } catch (err) {
       setError('Terjadi kesalahan saat mendaftar')
@@ -70,7 +70,7 @@ export default function RegisterPage() {
             </Link>
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -88,7 +88,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
               />
             </div>
-            
+
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Konfirmasi Password

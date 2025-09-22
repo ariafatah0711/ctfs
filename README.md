@@ -5,10 +5,10 @@ Aplikasi CTF minimalis yang dibangun dengan Next.js dan Supabase. Aplikasi ini m
 ## 🚀 Fitur
 
 - **Authentication**: Sistem login/register menggunakan Supabase Auth
-- **Dashboard**: Tampilan challenges dengan status solved/belum
+- **challanges**: Tampilan challenges dengan status solved/belum
 - **Flag Submission**: Validasi flag menggunakan hash SHA256
 - **Scoreboard**: Ranking user berdasarkan total score
-- **Admin Dashboard**: Panel admin untuk menambah challenge baru
+- **Admin challanges**: Panel admin untuk menambah challenge baru
 - **Responsive Design**: UI yang clean dan minimalis dengan Tailwind CSS
 
 ## 🛠️ Tech Stack
@@ -42,7 +42,7 @@ npm install
 ### 3. Setup Supabase
 
 1. Buat project baru di [Supabase](https://supabase.com)
-2. Buka SQL Editor di dashboard Supabase
+2. Buka SQL Editor di challanges Supabase
 3. Jalankan script SQL dari file `sql/schema.sql`
 4. Jalankan script SQL dari file `sql/admin-policies.sql` (untuk admin functionality)
 5. Ambil URL dan Anon Key dari Settings > API
@@ -116,7 +116,7 @@ git push origin main
 
 ### 3. Update Supabase Settings
 
-Di Supabase dashboard, tambahkan domain Vercel ke:
+Di Supabase challanges, tambahkan domain Vercel ke:
 - Settings > Authentication > Site URL
 - Settings > Authentication > Redirect URLs
 
@@ -126,8 +126,8 @@ Di Supabase dashboard, tambahkan domain Vercel ke:
 ctfs/
 ├── src/
 │   ├── app/                 # Next.js App Router
-│   │   ├── dashboard/       # Halaman dashboard
-│   │   ├── admin/          # Halaman admin dashboard
+│   │   ├── challanges/       # Halaman challanges
+│   │   ├── admin/          # Halaman admin challanges
 │   │   ├── login/          # Halaman login
 │   │   ├── register/       # Halaman register
 │   │   ├── scoreboard/     # Halaman scoreboard
@@ -175,10 +175,10 @@ const isValid = validateFlag(submittedFlag, storedHash)
 
 ## 🎯 Cara Menambah Challenge Baru
 
-### Via Admin Dashboard
+### Via Admin challanges
 
 1. Login sebagai admin
-2. Buka halaman Admin Dashboard
+2. Buka halaman Admin challanges
 3. Klik "Tambah Challenge"
 4. Isi form dengan data challenge
 5. Submit challenge
@@ -209,12 +209,12 @@ VALUES (
 
 ## 📱 Pages
 
-- **/** - Redirect ke login/dashboard
+- **/** - Redirect ke login/challanges
 - **/login** - Halaman login
 - **/register** - Halaman register
-- **/dashboard** - Dashboard dengan daftar challenges
+- **/challanges** - challanges dengan daftar challenges
 - **/scoreboard** - Leaderboard ranking
-- **/admin** - Admin dashboard (admin only)
+- **/admin** - Admin challanges (admin only)
 
 ## 🤝 Contributing
 

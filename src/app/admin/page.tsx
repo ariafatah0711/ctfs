@@ -45,7 +45,7 @@ export default function AdminPage() {
       setAdminStatus(adminCheck)
 
       if (!adminCheck) {
-        router.push('/dashboard')
+        router.push('/challanges')
         return
       }
 
@@ -216,7 +216,7 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Admin challanges</h1>
             <p className="mt-2 text-gray-600">Kelola challenges CTF</p>
           </div>
 

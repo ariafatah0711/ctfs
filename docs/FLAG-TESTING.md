@@ -24,7 +24,7 @@ Berdasarkan data di database, berikut adalah flag yang benar:
 ## 🔍 Cara Testing
 
 ### 1. Gunakan Flag Tester
-- Buka dashboard
+- Buka challanges
 - Scroll ke bawah, ada komponen "Flag Tester"
 - Masukkan flag untuk test hash-nya
 - Cek apakah hash cocok dengan yang di database
@@ -70,7 +70,7 @@ Jika flag masih salah, cek browser console untuk debug info:
 
 ### 1. Flag Tester tidak muncul
 - Pastikan sudah login
-- Refresh halaman dashboard
+- Refresh halaman challanges
 - Cek console untuk error
 
 ### 2. Hash tidak cocok

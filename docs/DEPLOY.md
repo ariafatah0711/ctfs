@@ -47,7 +47,7 @@ Pastikan sudah:
 Setelah deploy, update settings di Supabase:
 
 1. **Authentication Settings**
-   - Buka Supabase Dashboard
+   - Buka Supabase challanges
    - Settings > Authentication
    - Site URL: `https://your-app.vercel.app`
    - Redirect URLs: `https://your-app.vercel.app/**`
@@ -60,7 +60,7 @@ Setelah deploy, update settings di Supabase:
 
 ### 1. Add Domain di Vercel
 
-1. Buka project di Vercel dashboard
+1. Buka project di Vercel challanges
 2. Settings > Domains
 3. Add domain: `your-domain.com`
 4. Follow instructions untuk setup DNS
@@ -79,8 +79,8 @@ Update Site URL dan Redirect URLs dengan domain baru.
 
 ### Supabase Monitoring
 
-- Dashboard > Logs untuk melihat database activity
-- Dashboard > API untuk melihat API usage
+- challanges > Logs untuk melihat database activity
+- challanges > API untuk melihat API usage
 
 ## 🔄 Auto Deploy
 
@@ -153,7 +153,7 @@ Pastikan semua env vars sudah di-set di Vercel:
 
 Jika ada masalah deploy:
 1. Check Vercel documentation
-2. Check Supabase documentation  
+2. Check Supabase documentation
 3. Check GitHub issues
 4. Create issue di repository
 

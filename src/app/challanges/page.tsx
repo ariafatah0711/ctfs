@@ -8,7 +8,7 @@ import { ChallengeWithSolve, User, Attachment } from '@/types'
 import Navbar from '@/components/Navbar'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 
-export default function DashboardPage() {
+export default function ChallengesPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
@@ -186,7 +186,14 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+
+      {/* Title */}
+      <h1 className="text-3xl font-bold text-center">
+        🚩 challanges
+      </h1>
+
+      {/* <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"> */}
         {/* Combined Stats and Filter Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-4 animate-fade-in">
           {/* Stats Row */}
@@ -232,7 +239,7 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-                    </div>
+          </div>
 
 
           {/* Filter Row */}

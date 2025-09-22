@@ -72,7 +72,7 @@ DROP FUNCTION IF EXISTS get_leaderboard();
    ```sql
    -- Jalankan di Supabase SQL Editor
    INSERT INTO public.users (id, username, score)
-   SELECT 
+   SELECT
      au.id,
      COALESCE(
        au.raw_user_meta_data->>'username',
@@ -107,10 +107,10 @@ DROP FUNCTION IF EXISTS get_leaderboard();
    ```sql
    -- Jalankan di Supabase SQL Editor
    DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
-   
+
    CREATE POLICY "Allow user registration" ON public.users
      FOR INSERT WITH CHECK (
-       auth.uid() = id AND 
+       auth.uid() = id AND
        auth.role() = 'authenticated'
      );
    ```
@@ -145,7 +145,7 @@ DROP FUNCTION IF EXISTS get_leaderboard();
 **Penyebab:** Error saat build di Vercel.
 
 **Solusi:**
-1. Cek logs di Vercel dashboard
+1. Cek logs di Vercel challanges
 2. Pastikan semua dependencies terinstall
 3. Cek TypeScript errors:
    ```bash
@@ -157,7 +157,7 @@ DROP FUNCTION IF EXISTS get_leaderboard();
 **Penyebab:** Env vars tidak di-set di Vercel.
 
 **Solusi:**
-1. Buka Vercel dashboard > Project > Settings > Environment Variables
+1. Buka Vercel challanges > Project > Settings > Environment Variables
 2. Tambahkan:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -168,7 +168,7 @@ DROP FUNCTION IF EXISTS get_leaderboard();
 **Penyebab:** Domain tidak diizinkan di Supabase.
 
 **Solusi:**
-1. Buka Supabase dashboard > Settings > API
+1. Buka Supabase challanges > Settings > API
 2. Tambahkan domain Vercel ke allowed origins
 3. Atau tambahkan di Authentication > Site URL
 
