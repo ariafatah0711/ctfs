@@ -360,11 +360,13 @@ export default function DashboardPage() {
                     {/* Challenges List */}
                     <div className="divide-y divide-gray-200">
                       {categoryChallenges.map((challenge) => (
-                      <div key={challenge.id} className={`transition-all duration-200 ${
-                              challenge.is_solved
-                          ? 'bg-green-50 border-l-4 border-green-500 hover:bg-green-100'
-                                : 'hover:bg-gray-50'
-                      }`}>
+                        <div key={challenge.id}
+                          className={`transition-all duration-200 ${
+                            challenge.is_solved
+                              ? 'bg-green-100 border-l-4 hover:bg-green-200'
+                              : 'bg-white hover:bg-gray-50 border-l-4'
+                          }`}
+                        >
                         {/* Challenge Header */}
                         <div
                           className="p-1.5 cursor-pointer"
@@ -443,14 +445,10 @@ export default function DashboardPage() {
                             </div>
                           </div>
 
-                          {/* Expanded Details */}
-                          {expandedChallenges[challenge.id] && (
-                            <div className={`px-3 pb-3 border-t ${
-                              challenge.is_solved
-                                ? 'bg-green-50 border-green-200'
-                                : 'bg-gray-50 border-gray-200'
-                            }`}>
-                              <div className="pt-2">
+                        {/* Expanded Details */}
+                        {expandedChallenges[challenge.id] && (
+                          <div className="px-3 pb-3 border-t bg-gray-50 border-gray-200">
+                            <div className="pt-2">
                               {/* Mobile Flag Input */}
                               {!challenge.is_solved && (
                                 <div className="mb-1 lg:hidden">

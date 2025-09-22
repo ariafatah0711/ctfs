@@ -135,14 +135,6 @@ export default function UserProfilePage() {
                   <span className="text-sm text-gray-500">🏆</span>
                   <span className="text-sm font-medium text-gray-900">{user.score} points</span>
                 </div>
-                <div className="flex items-center space-x-1">
-                  <span className="text-sm text-gray-500">✓</span>
-                  <span className="text-sm font-medium text-gray-900">{solvedChallenges.length} solved</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <span className="text-sm text-gray-500">📊</span>
-                  <span className="text-sm font-medium text-gray-900">{challenges.length} total</span>
-                </div>
               </div>
             </div>
           </div>

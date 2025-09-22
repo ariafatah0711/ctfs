@@ -135,7 +135,7 @@ CREATE POLICY "Users can insert own solves" ON public.solves
 -- 5. CREATE FUNCTIONS
 -- ==============================================
 
--- Function to update user score when solve is added
+-- Function untuk update ulang score user
 CREATE OR REPLACE FUNCTION update_user_score()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -144,10 +144,29 @@ BEGIN
     SELECT COALESCE(SUM(c.points), 0)
     FROM public.solves s
     JOIN public.challenges c ON s.challenge_id = c.id
-    WHERE s.user_id = NEW.user_id
+    WHERE s.user_id = COALESCE(NEW.user_id, OLD.user_id) -- support insert & delete
   ),
   updated_at = NOW()
-  WHERE id = NEW.user_id;
+  WHERE id = COALESCE(NEW.user_id, OLD.user_id);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION recalc_scores_for_challenge()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE public.users u
+  SET score = (
+    SELECT COALESCE(SUM(c.points), 0)
+    FROM public.solves s
+    JOIN public.challenges c ON s.challenge_id = c.id
+    WHERE s.user_id = u.id
+  ),
+  updated_at = NOW()
+  WHERE EXISTS (
+    SELECT 1 FROM public.solves s WHERE s.challenge_id = COALESCE(NEW.id, OLD.id) AND s.user_id = u.id
+  );
 
   RETURN NEW;
 END;
@@ -206,13 +225,29 @@ $$ LANGUAGE plpgsql;
 -- 6. CREATE TRIGGERS
 -- ==============================================
 
--- Trigger to update score when solve is added
-CREATE TRIGGER trigger_update_user_score
+-- Saat solve baru ditambah → update score
+DROP TRIGGER IF EXISTS trigger_update_user_score_insert ON public.solves;
+CREATE TRIGGER trigger_update_user_score_insert
   AFTER INSERT ON public.solves
   FOR EACH ROW
   EXECUTE FUNCTION update_user_score();
 
--- Trigger to auto-generate flag_hash when flag is inserted/updated
+-- Saat solve dihapus → update score
+DROP TRIGGER IF EXISTS trigger_update_user_score_delete ON public.solves;
+CREATE TRIGGER trigger_update_user_score_delete
+  AFTER DELETE ON public.solves
+  FOR EACH ROW
+  EXECUTE FUNCTION update_user_score();
+
+-- Recalculate score semua user yang solved challenge tsb kalau challenge diubah
+DROP TRIGGER IF EXISTS trigger_update_score_challenge_update ON public.challenges;
+CREATE TRIGGER trigger_update_score_challenge_update
+  AFTER UPDATE OR DELETE ON public.challenges
+  FOR EACH ROW
+  EXECUTE FUNCTION recalc_scores_for_challenge();
+
+-- Trigger untuk auto-generate flag_hash saat flag diinsert/update
+DROP TRIGGER IF EXISTS trigger_auto_flag_hash ON public.challenges;
 CREATE TRIGGER trigger_auto_flag_hash
   BEFORE INSERT OR UPDATE ON public.challenges
   FOR EACH ROW
@@ -223,7 +258,8 @@ CREATE TRIGGER trigger_auto_flag_hash
 -- ==============================================
 
 -- Insert sample challenges (flag_hash akan auto-generate dari trigger)
-INSERT INTO public.challenges (title, description, category, points, flag, hint, difficulty, attachments) VALUES
+INSERT INTO public.challenges (title, description, category, points, flag, hint, difficulty, attachments)
+VALUES
 (
   'Base64',
   'Flag disembunyikan sebagai Base64. Cari string yang sudah di-encode dan decode untuk mendapatkan flag.\ YXJpYQo=',
@@ -235,39 +271,50 @@ INSERT INTO public.challenges (title, description, category, points, flag, hint,
   '[]'::jsonb
 ),
 (
-  'Robots.txt',
+  'Robots',
   'Flag disembunyikan di file `robots.txt` pada domain target. Buka `https://smk.amablex90.my.id/robots.txt` dan cari baris yang menyimpan flag.',
   'Web',
-  180,
+  100,
   'flag{robots_txt_leaked_the_secret}',
   'Cek https://smk.amablex90.my.id/robots.txt — flag ada di sana.',
-  'Medium',
+  'Easy',
   '[
     {
-      "url": "https://smk.amablex90.my.id/robots.txt",
-      "name": "robots.txt",
+      "url": "https://smk.amablex90.my.id",
+      "name": "https://smk.amablex90.my.id",
       "type": "link"
     }
   ]'::jsonb
 ),
 (
-  'Attachment & Link — Test Challenge',
-  'Challenge ini untuk mengetes fitur attachment (file) dan link di platform. Cek apakah file dapat di-download dan link dapat dibuka dari halaman challenge.',
-  'Misc',
-  10,
-  'test',
-  'Flag sederhana: "test". Cek attachment atau link untuk verifikasi.',
+  'Hidden Flag in HTML',
+  'Hidden Flag in HTML',
+  'Web',
+  100,
+  'CWA{hidden_in_plain_sight}',
+  NULL,
   'Easy',
   '[
     {
-      "url": "https://smk.amablex90.my.id/asset/test-file.txt",
-      "name": "test-file.txt",
-      "type": "file"
-    },
-    {
-      "url": "https://smk.amablex90.my.id/test-feature",
-      "name": "Test Feature Page",
+      "url": "https://ariaf.my.id/ctf_quest/web/easy/hidden_flag/index.html",
+      "name": "https://ariaf.my.id/ctf_quest/web/easy/hidden_flag/index.html",
       "type": "link"
+    }
+  ]'::jsonb
+),
+(
+  'ada udang dibalik batu',
+  'ini test doang: flag{test}',
+  'Web',
+  200,
+  'flag{test}',
+  'test',
+  'Medium',
+  '[
+    {
+      "url": "https://raw.githubusercontent.com/ariafatah0711/ctf_quest/refs/heads/main/Forensics/medium/ada_udang_dibalik_pixe/chall.png",
+      "name": "chall.png",
+      "type": "file"
     }
   ]'::jsonb
 );
