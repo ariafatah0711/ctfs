@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
-import { getUserByUsername, getUserChallenges } from '@/lib/users'
+import { getUserByUsername } from '@/lib/users'
+import { getChallenges } from '@/lib/challenges'
 import { User, ChallengeWithSolve } from '@/types'
 import Navbar from '@/components/Navbar'
 
@@ -40,7 +41,8 @@ export default function UserProfilePage() {
         }
 
         setUser(userData)
-        const challengesData = await getUserChallenges(userData.id)
+        const challengesData = await getChallenges(userData.id)
+        console.log(challengesData)
         setChallenges(challengesData)
         setLoading(false)
       } catch (err) {
