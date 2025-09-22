@@ -25,6 +25,12 @@ export default function ScoreboardPage() {
       setUser(currentUser)
 
       const data = await getLeaderboard()
+      // Sort berdasarkan skor akhir (tertinggi ke terendah)
+      data.sort((a: any, b: any) => {
+        const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0
+        const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0
+        return scoreB - scoreA
+      })
       const transformed: LeaderboardEntry[] = data.map((d: any, i: number) => ({
         id: String(i + 1),
         username: d.username,
@@ -68,56 +74,56 @@ export default function ScoreboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        {/* Title */}
-        <h1 className="text-3xl font-bold text-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">
           🏆 Scoreboard
         </h1>
-
-        {/* Chart Card */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <Plot
-            data={chartData}
-            layout={{
-              dragmode: false,
-              title: { text: 'Top 10 Users', x: 0.5 }, // center
-              autosize: true,
-              xaxis: {
-                type: 'date',
-                autorange: true,
-                // title: { text: 'Tanggal' },
-              },
-              yaxis: {
-                autorange: true,
-                rangemode: 'tozero',
-                automargin: true,
-                title: { text: 'Score' },
-              },
-              legend: { orientation: 'h', x: 0.5, xanchor: 'center' },
-              margin: { t: 50, r: 20, l: 50, b: 50 },
-            }}
-            style={{ width: '100%', height: '500px' }}
-            useResizeHandler
-            config={{
-              scrollZoom: false,
-              staticPlot: false,
-              displayModeBar: true,
-            }}
-            revision={leaderboard.length}
-          />
+        <div className="mb-6 sm:mb-8">
+          {loading ? (
+            <div className="w-full h-40 sm:h-64 bg-gray-200 animate-pulse rounded-lg mb-4 sm:mb-6"></div>
+          ) : (
+            <Plot
+              data={chartData}
+              layout={{
+                dragmode: false,
+                title: { text: 'Top 10 Users', x: 0.5, font: { size: 16 } },
+                autosize: true,
+                xaxis: {
+                  type: 'date',
+                  autorange: true,
+                  tickfont: { size: 10 },
+                },
+                yaxis: {
+                  autorange: true,
+                  rangemode: 'tozero',
+                  automargin: true,
+                  title: { text: 'Score', font: { size: 12 } },
+                  tickfont: { size: 10 },
+                },
+                legend: { orientation: 'h', x: 0.5, xanchor: 'center', font: { size: 10 } },
+                margin: { t: 40, r: 10, l: 30, b: 30 },
+              }}
+              style={{ width: '100%', height: '220px' }} // Lebih pendek di HP
+              useResizeHandler
+              config={{
+                scrollZoom: false,
+                staticPlot: false,
+                displayModeBar: true,
+              }}
+              revision={leaderboard.length}
+            />
+          )}
         </div>
 
         {/* Ranking Table Card */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Top 25 Ranking</h2>
+        <div className="bg-white rounded-xl shadow-md p-2 sm:p-6">
           <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 rounded-lg text-sm">
+            <table className="min-w-[340px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
               <thead className="bg-gray-100 text-gray-700">
                 <tr>
-                  <th className="w-16 px-2 py-2 text-center text-xs font-medium uppercase">Rank</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">User</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase">Score</th>
+                  <th className="w-12 sm:w-16 px-1 sm:px-2 py-1 sm:py-2 text-center text-[10px] sm:text-xs font-medium uppercase">Rank</th>
+                  <th className="px-2 sm:px-4 py-1 sm:py-2 text-left text-[10px] sm:text-xs font-medium uppercase">User</th>
+                  <th className="px-2 sm:px-4 py-1 sm:py-2 text-left text-[10px] sm:text-xs font-medium uppercase">Score</th>
                 </tr>
               </thead>
               <tbody>
@@ -128,23 +134,18 @@ export default function ScoreboardPage() {
                       i % 2 === 0 ? 'bg-gray-50' : 'bg-white'
                     }`}
                   >
-                    {/* Rank kecil, center */}
-                    <td className="px-2 py-2 text-center font-mono text-xs text-gray-600">
+                    <td className="px-1 sm:px-2 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs text-gray-600">
                       {i + 1}
                     </td>
-
-                    {/* Username */}
-                    <td className="px-4 py-2">
+                    <td className="px-2 sm:px-4 py-1 sm:py-2">
                       <Link
                         href={`/user/${entry.username}`}
-                        className="hover:underline hover:text-blue-600"
+                        className="hover:underline hover:text-blue-600 break-all"
                       >
                         {entry.username}
                       </Link>
                     </td>
-
-                    {/* Score */}
-                    <td className="px-4 py-2 font-medium">
+                    <td className="px-2 sm:px-4 py-1 sm:py-2 font-medium">
                       {entry.progress.length > 0
                         ? entry.progress[entry.progress.length - 1].score
                         : 0}
@@ -155,7 +156,7 @@ export default function ScoreboardPage() {
             </table>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

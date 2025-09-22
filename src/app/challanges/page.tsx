@@ -83,23 +83,10 @@ export default function ChallengesPage() {
       const updatedUser = await getCurrentUser()
       setUser(updatedUser)
 
-      // Cari challenge terbaru
-      const updatedChallenge = challengesData.find(c => c.id === challengeId)
-
-      if (updatedChallenge?.is_solved) {
-        if (result.success) {
-          alert('Correct, but you already solved this challenge!')
-          setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
-        } else {
-          alert('Incorrect, but you already solved this challenge!')
-        }
-      } else {
-        if (result.success) {
-          alert('Correct!')
-          setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
-        } else {
-          alert('Incorrect!')
-        }
+      // Tampilkan pesan dari backend langsung
+      alert(result.message)
+      if (result.success) {
+        setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
       }
     } catch (error) {
       console.error('Error submitting flag:', error)
@@ -162,33 +149,25 @@ export default function ChallengesPage() {
     setDownloading(prev => ({ ...prev, [attachmentKey]: true }))
 
     try {
-    if (attachment.type === 'file') {
-        // For files, try to download directly
+      if (attachment.type === 'file') {
         const response = await fetch(attachment.url)
-        if (!response.ok) {
-          throw new Error('Failed to fetch file')
-        }
+        if (!response.ok) throw new Error('Failed to fetch file')
 
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
 
-        // Create temporary download link
         const link = document.createElement('a')
         link.href = url
-        link.download = attachment.name
+        link.download = attachment.name || 'download'
         document.body.appendChild(link)
         link.click()
-
-        // Cleanup
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
-    } else {
-      // For links, open in new tab
+      } else {
         window.open(attachment.url, '_blank')
       }
     } catch (error) {
       console.error('Download failed:', error)
-      // Fallback to opening in new tab if download fails
       window.open(attachment.url, '_blank')
     } finally {
       setDownloading(prev => ({ ...prev, [attachmentKey]: false }))
@@ -313,14 +292,14 @@ export default function ChallengesPage() {
       {/* Challenge Detail Modal */}
       {selectedChallenge && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
           onClick={() => {
             setSelectedChallenge(null);
             setChallengeTab('challenge');
           }}
         >
           <div
-            className="relative w-full max-w-lg mx-auto rounded-md shadow-2xl bg-[#232344] border border-[#35355e] p-8 font-mono"
+            className="relative w-full max-w-lg mx-auto rounded-md shadow-2xl bg-[#232344] border border-[#35355e] p-8 font-mono max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             {/* Close button */}
@@ -330,7 +309,6 @@ export default function ChallengesPage() {
                 setSelectedChallenge(null);
                 setChallengeTab('challenge');
               }}
-              aria-label="Close"
             >✕</button>
 
             {/* Tabs */}
@@ -374,18 +352,39 @@ export default function ChallengesPage() {
                 </div>
                 {/* Attachments */}
                 {selectedChallenge.attachments && selectedChallenge.attachments.length > 0 && (
-                  <div className="mb-3">
-                    {selectedChallenge.attachments.map((attachment, idx) => (
-                      <a
-                        key={idx}
-                        href={attachment.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-pink-400 underline text-xs mb-1 hover:text-pink-300"
-                      >
-                        {attachment.name}
-                      </a>
-                    ))}
+                  <div className="mb-3 space-y-1">
+                    {selectedChallenge.attachments.map((attachment, idx) => {
+                      const displayName = attachment.name?.length > 40
+                        ? attachment.name.slice(0, 37) + "..."
+                        : attachment.name;
+
+                      return attachment.type === 'file' ? (
+                        <button
+                          key={idx}
+                          type="button"
+                          title={attachment.name}
+                          className="block text-pink-400 underline text-xs hover:text-pink-300 break-all"
+                          onClick={e => {
+                            e.stopPropagation()
+                            downloadFile(attachment, `${selectedChallenge.id}-${idx}`)
+                          }}
+                          disabled={downloading[`${selectedChallenge.id}-${idx}`]}
+                        >
+                          {downloading[`${selectedChallenge.id}-${idx}`] ? 'Mengunduh...' : displayName}
+                        </button>
+                      ) : (
+                        <a
+                          key={idx}
+                          href={attachment.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title={attachment.url}
+                          className="block text-pink-400 underline text-xs hover:text-pink-300 break-all"
+                        >
+                          {displayName || attachment.url.slice(0, 40) + "..."}
+                        </a>
+                      )
+                    })}
                   </div>
                 )}
                 {/* Flag input */}

@@ -41,7 +41,11 @@ export async function getChallenges(userId?: string): Promise<ChallengeWithSolve
 /**
  * Submit flag untuk challenge
  */
-export async function submitFlag(challengeId: string, flag: string, userId: string): Promise<{ success: boolean; message: string }> {
+export async function submitFlag(
+  challengeId: string,
+  flag: string,
+  userId: string
+): Promise<{ success: boolean; message: string }> {
   try {
     // Ambil challenge untuk mendapatkan flag_hash
     const { data: challenge, error: challengeError } = await supabase
@@ -51,63 +55,50 @@ export async function submitFlag(challengeId: string, flag: string, userId: stri
       .single()
 
     if (challengeError || !challenge) {
-      return { success: false, message: 'Challenge tidak ditemukan' }
+      return { success: false, message: 'Challenge tidak ditemukan.' }
     }
 
     // Validasi flag dengan hash
-    const { validateFlag, hashFlag } = await import('./crypto')
+    const { validateFlag } = await import('./crypto')
+    const isCorrect = validateFlag(flag, challenge.flag_hash)
 
-    // Debug info
-    console.log('Flag submitted:', flag)
-    console.log('Expected hash:', challenge.flag_hash)
-    console.log('Actual hash:', hashFlag(flag))
-
-    if (!validateFlag(flag, challenge.flag_hash)) {
-      // Flag salah
-      // Tapi cek apakah sudah solved
-      const { data: existingSolve } = await supabase
-        .from('solves')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('challenge_id', challengeId)
-        .single()
-      if (existingSolve) {
-        return { success: false, message: 'Incorrect, but you already solved this challenge!' }
-      }
-      return { success: false, message: 'Incorrect!' }
-    }
-
-    // Flag benar
+    // Cek apakah sudah solve
     const { data: existingSolve } = await supabase
       .from('solves')
       .select('id')
       .eq('user_id', userId)
       .eq('challenge_id', challengeId)
-      .single()
+      .maybeSingle()
 
-    if (existingSolve) {
-      return { success: true, message: 'Correct, but you already solved this challenge!' }
-    }
+    if (isCorrect) {
+      if (existingSolve) {
+        return { success: true, message: 'Benar, tapi kamu sudah pernah menyelesaikan challenge ini.' }
+      }
+      // Insert solve
+      const { error: solveError } = await supabase
+        .from('solves')
+        .insert({
+          user_id: userId,
+          challenge_id: challengeId
+        })
 
-    // Insert solve
-    const { error: solveError } = await supabase
-      .from('solves')
-      .insert({
-        user_id: userId,
-        challenge_id: challengeId
-      })
+      if (solveError) {
+        return { success: false, message: 'Gagal menyimpan penyelesaian challenge.' }
+      }
 
-    if (solveError) {
-      return { success: false, message: 'Gagal menyimpan solve' }
-    }
-
-    return {
-      success: true,
-      message: `Flag benar! Kamu mendapat ${challenge.points} poin!`
+      return {
+        success: true,
+        message: `Flag benar! Kamu mendapatkan ${challenge.points} poin.`
+      }
+    } else {
+      if (existingSolve) {
+        return { success: false, message: 'Flag salah, tapi kamu sudah pernah menyelesaikan challenge ini.' }
+      }
+      return { success: false, message: 'Flag salah. Silakan coba lagi.' }
     }
   } catch (error) {
     console.error('Error submitting flag:', error)
-    return { success: false, message: 'Terjadi kesalahan saat submit flag' }
+    return { success: false, message: 'Terjadi kesalahan saat submit flag.' }
   }
 }
 
@@ -294,8 +285,9 @@ export async function getSolversByChallenge(challengeId: string) {
 
     if (error) throw error
 
-    return (data || []).map(row => ({
-      username: row.users[0]?.username ?? 'Unknown',
+    // Pakai any agar TypeScript tidak protes
+    return ((data as any[]) || []).map(row => ({
+      username: row.users.username,
       solvedAt: row.created_at
     }))
   } catch (error) {
