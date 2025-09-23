@@ -59,9 +59,6 @@ export async function signUp(email: string, password: string, username: string):
   }
 }
 
-/**
- * Sign in user
- */
 export async function signIn(identifier: string, password: string): Promise<AuthResponse> {
   try {
     let email = identifier;
@@ -92,15 +89,41 @@ export async function signIn(identifier: string, password: string): Promise<Auth
       return { user: null, error: 'Login failed' };
     }
 
-    // Fetch user data dari public.users
-    const { data: userData, error: userError } = await supabase
+    // Coba ambil dari public.users
+    let { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('id', data.user.id)
       .single();
 
-    if (userError) {
-      return { user: null, error: userError.message };
+    if (userError || !userData) {
+      // Auto create profile kalau belum ada
+      const username =
+        data.user.user_metadata?.username ??
+        (data.user.email ? data.user.email.split("@")[0] : "user_" + data.user.id.substring(0, 8));
+
+      const { error: rpcError } = await supabase.rpc('create_profile', {
+        p_id: data.user.id,
+        p_username: username
+      });
+
+      if (rpcError) {
+        console.error("Auto create_profile error:", rpcError);
+        return { user: null, error: 'Failed to create user profile' };
+      }
+
+      // Ambil ulang
+      const { data: newUserData, error: newUserError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (newUserError) {
+        return { user: null, error: newUserError.message };
+      }
+
+      userData = newUserData;
     }
 
     return { user: userData, error: null };

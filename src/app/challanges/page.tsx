@@ -403,39 +403,67 @@ export default function ChallengesPage() {
                 </div>
                 {/* Attachments */}
                 {selectedChallenge.attachments && selectedChallenge.attachments.length > 0 && (
-                  <div className="mb-3 space-y-1">
-                    {selectedChallenge.attachments.map((attachment, idx) => {
-                      const displayName = attachment.name?.length > 40
-                        ? attachment.name.slice(0, 37) + "..."
-                        : attachment.name;
+                  <div className="mb-3 space-y-3">
+                    {/* File Attachments */}
+                    {selectedChallenge.attachments.some(att => att.type === 'file') && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">📂 Files</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedChallenge.attachments
+                            .filter(att => att.type === 'file')
+                            .map((attachment, idx) => {
+                              const displayName = attachment.name?.length > 40
+                                ? attachment.name.slice(0, 37) + "..."
+                                : attachment.name;
 
-                      return attachment.type === 'file' ? (
-                        <button
-                          key={idx}
-                          type="button"
-                          title={attachment.name}
-                          className="block text-pink-400 underline text-xs hover:text-pink-300 break-all"
-                          onClick={e => {
-                            e.stopPropagation()
-                            downloadFile(attachment, `${selectedChallenge.id}-${idx}`)
-                          }}
-                          disabled={downloading[`${selectedChallenge.id}-${idx}`]}
-                        >
-                          {downloading[`${selectedChallenge.id}-${idx}`] ? 'Mengunduh...' : displayName}
-                        </button>
-                      ) : (
-                        <a
-                          key={idx}
-                          href={attachment.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={attachment.url}
-                          className="block text-pink-400 underline text-xs hover:text-pink-300 break-all"
-                        >
-                          {displayName || attachment.url.slice(0, 40) + "..."}
-                        </a>
-                      )
-                    })}
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  title={attachment.name}
+                                  className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    downloadFile(attachment, `${selectedChallenge.id}-${idx}`);
+                                  }}
+                                  disabled={downloading[`${selectedChallenge.id}-${idx}`]}
+                                >
+                                  {downloading[`${selectedChallenge.id}-${idx}`] ? "Mengunduh..." : displayName}
+                                </button>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* URL Attachments */}
+                    {selectedChallenge.attachments.some(att => att.type !== 'file') && (
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">🔗 Links</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedChallenge.attachments
+                            .filter(att => att.type !== 'file')
+                            .map((attachment, idx) => {
+                              const displayName = attachment.name?.length > 40
+                                ? attachment.name.slice(0, 37) + "..."
+                                : attachment.name;
+
+                              return (
+                                <a
+                                  key={idx}
+                                  href={attachment.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={attachment.url}
+                                  className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
+                                >
+                                  {displayName || attachment.url.slice(0, 40) + "..."}
+                                </a>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {/* Show Hint Buttons (one per hint) */}

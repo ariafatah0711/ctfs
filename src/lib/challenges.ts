@@ -294,3 +294,24 @@ export async function getFirstBloodChallengeIds(userId: string): Promise<string[
     return []
   }
 }
+
+/**
+ * Ambil flag challenge (Admin only)
+ */
+export async function getFlag(challengeId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.rpc('get_flag', {
+      p_challenge_id: challengeId
+    });
+
+    if (error) {
+      console.error('Error fetching flag:', error);
+      return null;
+    }
+
+    return data; // data sudah berupa text (flag)
+  } catch (err) {
+    console.error('Unexpected error fetching flag:', err);
+    return null;
+  }
+}

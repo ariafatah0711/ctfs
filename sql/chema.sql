@@ -304,6 +304,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+CREATE OR REPLACE FUNCTION get_flag(p_challenge_id uuid)
+RETURNS text AS $$
+DECLARE
+  v_flag text;
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can see flag';
+  END IF;
+
+  SELECT flag INTO v_flag
+  FROM public.challenge_flags
+  WHERE challenge_id = p_challenge_id;
+
+  RETURN v_flag;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_flag(p_challenge_id uuid) TO authenticated;
+
 CREATE OR REPLACE FUNCTION add_challenge(
   p_title TEXT,
   p_description TEXT,
