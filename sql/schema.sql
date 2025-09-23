@@ -28,7 +28,7 @@ DROP FUNCTION IF EXISTS get_leaderboard() CASCADE;
 DROP FUNCTION IF EXISTS is_admin(UUID) CASCADE;
 
 -- Drop existing tables
-DROP TABLE IF EXISTS public.solves CASCADE;
+-- DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
 -- DROP TABLE IF EXISTS public.users CASCADE;
 

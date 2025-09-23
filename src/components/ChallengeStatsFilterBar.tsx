@@ -1,10 +1,6 @@
 import React from 'react'
 
 type Props = {
-  userScore: number
-  solvedCount: number
-  totalChallenges: number
-  filteredCount: number
   filters: {
     status: string
     category: string
@@ -18,10 +14,6 @@ type Props = {
 }
 
 export default function ChallengeStatsFilterBar({
-  userScore,
-  solvedCount,
-  totalChallenges,
-  filteredCount,
   filters,
   categories,
   difficulties,
@@ -29,50 +21,29 @@ export default function ChallengeStatsFilterBar({
   onClear,
 }: Props) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 mb-4 animate-fade-in">
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div className="flex items-center gap-4 text-xs">
-          <span className="flex items-center gap-1 text-blue-600">
-            🏆 <b>{userScore}</b>
-          </span>
-          <span className="flex items-center gap-1 text-green-600">
-            ✓ <b>{solvedCount}</b>
-          </span>
-          <span className="flex items-center gap-1 text-purple-600">
-            📊 <b>{totalChallenges}</b>
-          </span>
-          <span className="flex items-center gap-1 text-yellow-600">
-            📈 <b>
-              {totalChallenges > 0 ? Math.round((solvedCount / totalChallenges) * 100) : 0}%
-            </b>
-          </span>
-        </div>
-        <span className="text-xs text-gray-500">
-          {filteredCount} of {totalChallenges} challenges
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-1 items-center mb-2">
+    <div className="bg-white rounded-lg shadow border border-gray-200 p-4 mb-4 animate-fade-in">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <input
           type="text"
           value={filters.search}
           onChange={e => onFilterChange({ ...filters, search: e.target.value })}
-          placeholder="🔍 Search..."
-          className="px-2 py-1 text-xs border border-gray-300 rounded"
-          style={{ minWidth: 100 }}
+          placeholder="🔍 Search challenge..."
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          style={{ minWidth: 160 }}
         />
         <select
           value={filters.status}
           onChange={e => onFilterChange({ ...filters, status: e.target.value })}
-          className="px-2 py-1 text-xs border border-gray-300 rounded"
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
         >
-          <option value="all">All</option>
+          <option value="all">All Status</option>
           <option value="unsolved">Unsolved</option>
           <option value="solved">Solved</option>
         </select>
         <select
           value={filters.category}
           onChange={e => onFilterChange({ ...filters, category: e.target.value })}
-          className="px-2 py-1 text-xs border border-gray-300 rounded"
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
         >
           <option value="all">All Categories</option>
           {categories.map(category => (
@@ -82,7 +53,7 @@ export default function ChallengeStatsFilterBar({
         <select
           value={filters.difficulty}
           onChange={e => onFilterChange({ ...filters, difficulty: e.target.value })}
-          className="px-2 py-1 text-xs border border-gray-300 rounded"
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
         >
           <option value="all">All Difficulties</option>
           {difficulties.map(difficulty => (
@@ -91,7 +62,7 @@ export default function ChallengeStatsFilterBar({
         </select>
         <button
           onClick={onClear}
-          className="text-xs text-blue-600 hover:underline ml-2"
+          className="w-full sm:w-auto px-4 py-2 text-base text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition"
         >
           Clear
         </button>

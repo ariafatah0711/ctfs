@@ -16,12 +16,12 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 
 export default function ChallengesPage() {
   // State untuk tab modal challenge
-  const [challengeTab, setChallengeTab] = useState<'challenge' | 'solves'>('challenge');
+  const [challengeTab, setChallengeTab] = useState<'challenge' | 'solvers'>('challenge');
   const [solvers, setSolvers] = useState<Solver[]>([]);
-  // Saat tab solves dibuka, fetch solvers
-  const handleTabChange = async (tab: 'challenge' | 'solves', challengeId: string) => {
+  // Saat tab solvers dibuka, fetch solvers
+  const handleTabChange = async (tab: 'challenge' | 'solvers', challengeId: string) => {
     setChallengeTab(tab);
-    if (tab === 'solves') {
+    if (tab === 'solvers') {
       try {
         const data = await getSolversByChallenge(challengeId);
         setSolvers(data);
@@ -67,6 +67,16 @@ export default function ChallengesPage() {
 
     fetchData()
   }, [router])
+
+  // Tambahkan useEffect ini setelah deklarasi state
+  useEffect(() => {
+    if (selectedChallenge) {
+      // Fetch solvers setiap kali challenge detail dibuka
+      getSolversByChallenge(selectedChallenge.id)
+        .then(setSolvers)
+        .catch(() => setSolvers([]));
+    }
+  }, [selectedChallenge]);
 
   const handleFlagSubmit = async (challengeId: string) => {
     if (!user || !flagInputs[challengeId]?.trim()) return
@@ -204,10 +214,6 @@ export default function ChallengesPage() {
         </h1>
 
         <ChallengeStatsFilterBar
-          userScore={user.score}
-          solvedCount={solvedCount}
-          totalChallenges={challenges.length}
-          filteredCount={filteredChallenges.length}
           filters={filters}
           categories={categories}
           difficulties={difficulties}
@@ -301,45 +307,63 @@ export default function ChallengesPage() {
           <div
             className="relative w-full max-w-lg mx-auto rounded-md shadow-2xl bg-[#232344] border border-[#35355e] p-8 font-mono max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
+            style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
           >
-            {/* Close button */}
-            <button
-              className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
-              onClick={() => {
-                setSelectedChallenge(null);
-                setChallengeTab('challenge');
-              }}
-            >✕</button>
+            {/* Title & Close button in one row */}
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                className={`
+                  text-xl font-bold tracking-wide
+                  ${selectedChallenge.is_solved ? 'text-green-400' : 'text-pink-400'}
+                `}
+                style={{ fontSize: '1.25rem' }}
+              >
+                {selectedChallenge.title}
+              </h2>
+              <button
+                className="ml-4 text-gray-400 hover:text-white text-xl"
+                onClick={() => {
+                  setSelectedChallenge(null);
+                  setChallengeTab('challenge');
+                }}
+                aria-label="Close"
+                type="button"
+              >✕</button>
+            </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex justify-between gap-2 mb-6">
               <button
-                className={`px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+                className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
                 onClick={() => setChallengeTab('challenge')}
               >Challenge</button>
               <button
-                className={`px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solves' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
-                onClick={() => handleTabChange('solves', selectedChallenge.id)}
-              >Solves</button>
+                className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+                onClick={() => handleTabChange('solvers', selectedChallenge.id)}
+              >{solvers.length || ""} solve</button>
             </div>
 
             {/* Tab Content */}
             {challengeTab === 'challenge' && (
               <>
-                {/* Title */}
-                <h2
-                  className={`
-                    text-2xl font-bold mb-2 tracking-wide
-                    ${selectedChallenge.is_solved ? 'text-green-400' : 'text-pink-400'}
-                  `}
-                >
-                  {selectedChallenge.title}
-                </h2>
-                {/* Coin */}
-                <div className="flex items-center gap-2 mb-3">
+                {/* Badge bar: difficulty, category, coin */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className={`
+                      px-3 py-1 rounded text-sm font-semibold
+                      ${selectedChallenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''}
+                      ${selectedChallenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800' : ''}
+                      ${selectedChallenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}
+                    `}>
+                      {selectedChallenge.difficulty}
+                    </span>
+                    <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-200 text-blue-800">
+                      {selectedChallenge.category}
+                    </span>
+                  </div>
                   <span
                     className={`
-                      flex items-center gap-1 text-lg font-semibold
+                      flex items-center gap-1 text-base font-bold
                       ${selectedChallenge.is_solved ? 'text-green-300' : 'text-yellow-300'}
                     `}
                   >
@@ -413,16 +437,25 @@ export default function ChallengesPage() {
                 </form>
               </>
             )}
-            {challengeTab === 'solves' && (
+            {challengeTab === 'solvers' && (
               <div>
-                <h3 className="text-lg font-bold mb-4 text-pink-300">Solvers</h3>
                 <ul className="space-y-2 max-h-60 overflow-y-auto">
                   {solvers.length === 0 ? (
                     <li className="text-gray-400">Belum ada yang solve.</li>
                   ) : (
                     solvers.map((solver, idx) => (
-                      <li key={idx} className="flex justify-between text-gray-200">
-                        <span>{solver.username}</span>
+                      <li key={idx} className="flex justify-between text-gray-200 items-center">
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`/user/${solver.username}`}
+                            className={`hover:underline ${idx === 0 ? 'font-bold text-red-400' : 'text-pink-300'}`}
+                          >
+                            {solver.username}
+                          </a>
+                          {idx === 0 && (
+                            <span title="First Blood" className="text-red-400 text-lg font-bold">🩸</span>
+                          )}
+                        </div>
                         <span className="text-xs text-gray-400">{new Date(solver.solvedAt).toLocaleString()}</span>
                       </li>
                     ))

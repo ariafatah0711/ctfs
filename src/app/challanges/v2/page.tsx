@@ -193,17 +193,13 @@ export default function ChallengesPage() {
         🚩 challanges
       </h1>
 
-      <ChallengeStatsFilterBar
-        userScore={user.score}
-        solvedCount={solvedCount}
-        totalChallenges={challenges.length}
-        filteredCount={filteredChallenges.length}
-        filters={filters}
-        categories={categories}
-        difficulties={difficulties}
-        onFilterChange={setFilters}
-        onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
-      />
+        <ChallengeStatsFilterBar
+          filters={filters}
+          categories={categories}
+          difficulties={difficulties}
+          onFilterChange={setFilters}
+          onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
+        />
 
         {/* Challenges Section */}
           <div>

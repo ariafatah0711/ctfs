@@ -61,15 +61,26 @@ export default function ScoreboardPage() {
   }
   if (!user) return null
 
-  const chartData = leaderboard.slice(0, 10).map((entry) => ({
-    x: entry.progress.map((p) => p.date),
-    y: entry.progress.map((p) => p.score),
-    text: entry.progress.map((p) => `${entry.username} - ${p.score}`),
-    hovertemplate: '%{x}<br>%{text}<extra></extra>',
-    mode: 'lines+markers',
-    name: entry.username,
-    line: { shape: 'hv' },
-  }))
+  const chartData = leaderboard.slice(0, 10).map((entry) => {
+    // Konversi ke waktu lokal (misal WIB, GMT+7)
+    const x = entry.progress.map((p) => {
+      const date = new Date(p.date)
+      // Format ke ISO string waktu lokal
+      const offset = date.getTimezoneOffset() * 60000
+      const localISOTime = new Date(date.getTime() - offset).toISOString().slice(0, 16)
+      return localISOTime
+    })
+    return {
+      x,
+      y: entry.progress.map((p) => p.score),
+      text: entry.progress.map((p) => `${entry.username} - ${p.score}`),
+      hovertemplate: '%{x}<br>%{text}<extra></extra>',
+      mode: 'lines+markers',
+      name: entry.username,
+      line: { shape: 'hv', width: 3 },
+      marker: { size: 6 },
+    }
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -92,6 +103,7 @@ export default function ScoreboardPage() {
                   type: 'date',
                   autorange: true,
                   tickfont: { size: 10 },
+                  tickformat: '%Y-%m-%d %H:%M', // tampilkan jam dan menit
                 },
                 yaxis: {
                   autorange: true,
@@ -100,10 +112,10 @@ export default function ScoreboardPage() {
                   title: { text: 'Score', font: { size: 12 } },
                   tickfont: { size: 10 },
                 },
-                legend: { orientation: 'h', x: 0.5, xanchor: 'center', font: { size: 10 } },
-                margin: { t: 40, r: 10, l: 30, b: 30 },
+                legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2, font: { size: 10 } },
+                margin: { t: 40, r: 10, l: 30, b: 50 },
               }}
-              style={{ width: '100%', height: '220px' }} // Lebih pendek di HP
+              style={{ width: '100%', height: '320px' }}
               useResizeHandler
               config={{
                 scrollZoom: false,

@@ -1,3 +1,14 @@
+// Ambil rank user saja (berdasarkan username)
+export async function getUserRank(username: string): Promise<number | null> {
+  const leaderboard = await getLeaderboard();
+  leaderboard.sort((a, b) => {
+    const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0;
+    const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0;
+    return scoreB - scoreA;
+  });
+  const idx = leaderboard.findIndex(entry => entry.username === username);
+  return idx !== -1 ? idx + 1 : null;
+}
 import { supabase } from './supabase'
 import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/types'
 
@@ -292,6 +303,46 @@ export async function getSolversByChallenge(challengeId: string) {
     }))
   } catch (error) {
     console.error('Error fetching solvers:', error)
+    return []
+  }
+}
+
+/**
+ * Get first blood challenge IDs for a user
+ */
+export async function getFirstBloodChallengeIds(userId: string): Promise<string[]> {
+  try {
+    // Ambil semua challenge yang pernah di-solve user
+    const { data: solves, error } = await supabase
+      .from('solves')
+      .select('challenge_id, created_at')
+      .eq('user_id', userId)
+
+    if (error) throw error
+    if (!solves || solves.length === 0) return []
+
+    const challengeIds = solves.map(s => s.challenge_id)
+
+    // Ambil solve pertama untuk setiap challenge yang sudah di-solve user
+    const { data: firstSolves, error: firstError } = await supabase
+      .from('solves')
+      .select('challenge_id, user_id, created_at')
+      .in('challenge_id', challengeIds)
+      .order('created_at', { ascending: true })
+
+    if (firstError) throw firstError
+
+    // Map: challenge_id => user_id first solver
+    const firstBloodIds: string[] = []
+    for (const cid of challengeIds) {
+      const first = firstSolves.find(s => s.challenge_id === cid)
+      if (first && first.user_id === userId) {
+        firstBloodIds.push(cid)
+      }
+    }
+    return firstBloodIds
+  } catch (err) {
+    console.error('Error fetching first bloods:', err)
     return []
   }
 }
