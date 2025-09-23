@@ -38,7 +38,7 @@ export default function ChallengesPage() {
 
     setSubmitting(prev => ({ ...prev, [challengeId]: true }))
     try {
-      const result = await submitFlag(challengeId, flagInputs[challengeId].trim(), user.id)
+      const result = await submitFlag(challengeId, flagInputs[challengeId].trim())
       if (result.success) {
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
         const challengesData = await getChallenges(user.id)

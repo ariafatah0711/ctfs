@@ -85,7 +85,7 @@ export default function ChallengesPage() {
 
     try {
       // Submit flag
-      const result = await submitFlag(challengeId, flagInputs[challengeId].trim(), user.id)
+      const result = await submitFlag(challengeId, flagInputs[challengeId].trim())
 
       // Refresh challenges and user data (selalu, agar status is_solved up-to-date)
       const challengesData = await getChallenges(user.id)
@@ -349,6 +349,9 @@ export default function ChallengesPage() {
                 {/* Badge bar: difficulty, category, coin */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-200 text-blue-800">
+                      {selectedChallenge.category}
+                    </span>
                     <span className={`
                       px-3 py-1 rounded text-sm font-semibold
                       ${selectedChallenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''}
@@ -356,9 +359,6 @@ export default function ChallengesPage() {
                       ${selectedChallenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}
                     `}>
                       {selectedChallenge.difficulty}
-                    </span>
-                    <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-200 text-blue-800">
-                      {selectedChallenge.category}
                     </span>
                   </div>
                   <span

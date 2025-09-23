@@ -63,18 +63,18 @@ export default function AdminPage() {
 
     try {
       const challengeData: any = {
-        title: formData.title,
-        description: formData.description,
-        category: formData.category,
-        points: formData.points,
-        hint: formData.hint,
-        difficulty: formData.difficulty,
-        attachments: formData.attachments
+        title: (formData.title || "").trim(),
+        description: (formData.description || "").trim(),
+        category: (formData.category || "").trim(),
+        points: Number(formData.points) || 0,
+        hint: (formData.hint || "").trim(),
+        difficulty: (formData.difficulty || "").trim(),
+        attachments: formData.attachments || []
       }
 
       // Only update flag if provided (flag_hash akan auto-generate dari database trigger)
-      if (formData.flag.trim()) {
-        challengeData.flag = formData.flag
+      if ((formData.flag || "").trim()) {
+        challengeData.flag = (formData.flag || "").trim()
         // flag_hash tidak perlu di-set manual, akan auto-generate dari trigger
       }
 

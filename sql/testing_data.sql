@@ -46,31 +46,53 @@ ON CONFLICT (id) DO NOTHING;
 -- =========================
 -- 2. Tambah banyak dummy challenges (20 total)
 -- =========================
-INSERT INTO public.challenges (id, title, description, category, points, flag, flag_hash, hint, difficulty, is_active)
+INSERT INTO public.challenges (id, title, description, category, points, hint, difficulty, is_active)
 VALUES
-  -- existing 10 (biarin kalau udah ada)
-  ('10000000-0000-0000-0000-000000000001', 'Dummy Challenge 1', 'Deskripsi dummy 1', 'Web', 100, 'flag{dummy1}', generate_flag_hash('flag{dummy1}'), 'Hint dummy 1', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000002', 'Dummy Challenge 2', 'Deskripsi dummy 2', 'Crypto', 200, 'flag{dummy2}', generate_flag_hash('flag{dummy2}'), 'Hint dummy 2', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000003', 'Dummy Challenge 3', 'Deskripsi dummy 3', 'Forensics', 300, 'flag{dummy3}', generate_flag_hash('flag{dummy3}'), 'Hint dummy 3', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000004', 'Dummy Challenge 4', 'Deskripsi dummy 4', 'PWN', 400, 'flag{dummy4}', generate_flag_hash('flag{dummy4}'), 'Hint dummy 4', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000005', 'Dummy Challenge 5', 'Deskripsi dummy 5', 'Reverse', 500, 'flag{dummy5}', generate_flag_hash('flag{dummy5}'), 'Hint dummy 5', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000006', 'Dummy Challenge 6', 'Deskripsi dummy 6', 'Web', 150, 'flag{dummy6}', generate_flag_hash('flag{dummy6}'), 'Hint dummy 6', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000007', 'Dummy Challenge 7', 'Deskripsi dummy 7', 'Crypto', 250, 'flag{dummy7}', generate_flag_hash('flag{dummy7}'), 'Hint dummy 7', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000008', 'Dummy Challenge 8', 'Deskripsi dummy 8', 'Forensics', 350, 'flag{dummy8}', generate_flag_hash('flag{dummy8}'), 'Hint dummy 8', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000009', 'Dummy Challenge 9', 'Deskripsi dummy 9', 'PWN', 450, 'flag{dummy9}', generate_flag_hash('flag{dummy9}'), 'Hint dummy 9', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000010', 'Dummy Challenge 10', 'Deskripsi dummy 10', 'Reverse', 550, 'flag{dummy10}', generate_flag_hash('flag{dummy10}'), 'Hint dummy 10', 'Hard', true),
-  -- tambahan 10 baru
-  ('10000000-0000-0000-0000-000000000011', 'Dummy Challenge 11', 'Deskripsi dummy 11', 'Web', 120, 'flag{dummy11}', generate_flag_hash('flag{dummy11}'), 'Hint dummy 11', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000012', 'Dummy Challenge 12', 'Deskripsi dummy 12', 'Crypto', 220, 'flag{dummy12}', generate_flag_hash('flag{dummy12}'), 'Hint dummy 12', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000013', 'Dummy Challenge 13', 'Deskripsi dummy 13', 'Forensics', 320, 'flag{dummy13}', generate_flag_hash('flag{dummy13}'), 'Hint dummy 13', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000014', 'Dummy Challenge 14', 'Deskripsi dummy 14', 'PWN', 420, 'flag{dummy14}', generate_flag_hash('flag{dummy14}'), 'Hint dummy 14', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000015', 'Dummy Challenge 15', 'Deskripsi dummy 15', 'Reverse', 520, 'flag{dummy15}', generate_flag_hash('flag{dummy15}'), 'Hint dummy 15', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000016', 'Dummy Challenge 16', 'Deskripsi dummy 16', 'Web', 180, 'flag{dummy16}', generate_flag_hash('flag{dummy16}'), 'Hint dummy 16', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000017', 'Dummy Challenge 17', 'Deskripsi dummy 17', 'Crypto', 280, 'flag{dummy17}', generate_flag_hash('flag{dummy17}'), 'Hint dummy 17', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000018', 'Dummy Challenge 18', 'Deskripsi dummy 18', 'Forensics', 380, 'flag{dummy18}', generate_flag_hash('flag{dummy18}'), 'Hint dummy 18', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000019', 'Dummy Challenge 19', 'Deskripsi dummy 19', 'PWN', 480, 'flag{dummy19}', generate_flag_hash('flag{dummy19}'), 'Hint dummy 19', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000020', 'Dummy Challenge 20', 'Deskripsi dummy 20', 'Reverse', 580, 'flag{dummy20}', generate_flag_hash('flag{dummy20}'), 'Hint dummy 20', 'Hard', true)
+  ('10000000-0000-0000-0000-000000000001', 'Dummy Challenge 1', 'Deskripsi dummy 1', 'Web', 100, 'Hint dummy 1', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000002', 'Dummy Challenge 2', 'Deskripsi dummy 2', 'Cryptography', 200, 'Hint dummy 2', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000003', 'Dummy Challenge 3', 'Deskripsi dummy 3', 'Forensics', 300, 'Hint dummy 3', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000004', 'Dummy Challenge 4', 'Deskripsi dummy 4', 'PWN', 400, 'Hint dummy 4', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000005', 'Dummy Challenge 5', 'Deskripsi dummy 5', 'Reverse', 500, 'Hint dummy 5', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000006', 'Dummy Challenge 6', 'Deskripsi dummy 6', 'Web', 150, 'Hint dummy 6', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000007', 'Dummy Challenge 7', 'Deskripsi dummy 7', 'Cryptography', 250, 'Hint dummy 7', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000008', 'Dummy Challenge 8', 'Deskripsi dummy 8', 'Forensics', 350, 'Hint dummy 8', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000009', 'Dummy Challenge 9', 'Deskripsi dummy 9', 'PWN', 450, 'Hint dummy 9', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000010', 'Dummy Challenge 10', 'Deskripsi dummy 10', 'Reverse', 550, 'Hint dummy 10', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000011', 'Dummy Challenge 11', 'Deskripsi dummy 11', 'Web', 120, 'Hint dummy 11', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000012', 'Dummy Challenge 12', 'Deskripsi dummy 12', 'Cryptography', 220, 'Hint dummy 12', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000013', 'Dummy Challenge 13', 'Deskripsi dummy 13', 'Forensics', 320, 'Hint dummy 13', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000014', 'Dummy Challenge 14', 'Deskripsi dummy 14', 'PWN', 420, 'Hint dummy 14', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000015', 'Dummy Challenge 15', 'Deskripsi dummy 15', 'Reverse', 520, 'Hint dummy 15', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000016', 'Dummy Challenge 16', 'Deskripsi dummy 16', 'Web', 180, 'Hint dummy 16', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000017', 'Dummy Challenge 17', 'Deskripsi dummy 17', 'Cryptography', 280, 'Hint dummy 17', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000018', 'Dummy Challenge 18', 'Deskripsi dummy 18', 'Forensics', 380, 'Hint dummy 18', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000019', 'Dummy Challenge 19', 'Deskripsi dummy 19', 'PWN', 480, 'Hint dummy 19', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000020', 'Dummy Challenge 20', 'Deskripsi dummy 20', 'Reverse', 580, 'Hint dummy 20', 'Hard', true)
 ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.challenge_flags (challenge_id, flag)
+VALUES
+  ('10000000-0000-0000-0000-000000000001', 'flag{dummy1}'),
+  ('10000000-0000-0000-0000-000000000002', 'flag{dummy2}'),
+  ('10000000-0000-0000-0000-000000000003', 'flag{dummy3}'),
+  ('10000000-0000-0000-0000-000000000004', 'flag{dummy4}'),
+  ('10000000-0000-0000-0000-000000000005', 'flag{dummy5}'),
+  ('10000000-0000-0000-0000-000000000006', 'flag{dummy6}'),
+  ('10000000-0000-0000-0000-000000000007', 'flag{dummy7}'),
+  ('10000000-0000-0000-0000-000000000008', 'flag{dummy8}'),
+  ('10000000-0000-0000-0000-000000000009', 'flag{dummy9}'),
+  ('10000000-0000-0000-0000-000000000010', 'flag{dummy10}'),
+  ('10000000-0000-0000-0000-000000000011', 'flag{dummy11}'),
+  ('10000000-0000-0000-0000-000000000012', 'flag{dummy12}'),
+  ('10000000-0000-0000-0000-000000000013', 'flag{dummy13}'),
+  ('10000000-0000-0000-0000-000000000014', 'flag{dummy14}'),
+  ('10000000-0000-0000-0000-000000000015', 'flag{dummy15}'),
+  ('10000000-0000-0000-0000-000000000016', 'flag{dummy16}'),
+  ('10000000-0000-0000-0000-000000000017', 'flag{dummy17}'),
+  ('10000000-0000-0000-0000-000000000018', 'flag{dummy18}'),
+  ('10000000-0000-0000-0000-000000000019', 'flag{dummy19}'),
+  ('10000000-0000-0000-0000-000000000020', 'flag{dummy20}')
+ON CONFLICT (challenge_id) DO NOTHING;
 
 -- =========================
 -- 3. Tambah banyak dummy solves (random 1-3 solve per user)

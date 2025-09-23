@@ -4,6 +4,70 @@ Aplikasi CTF minimalis yang dibangun dengan Next.js dan Supabase. Aplikasi ini m
 
 ## 🚀 Fitur
 
+```bash
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/solves"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Content-Type: application/json" \
+  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{tes}\"}"
+
+JWT="eyJhbGciOiJIUzI1NiIsImtpZCI6Imp6c0lrN0MzdFk0SWpUZGUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2piZGN4ZHZwYmZtcWNoZnBhd3FwLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3OGRmMzU4Yi02NjVkLTRhYTQtYTQ2OS1lZTY1NjhmYTJiMTgiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU4NjI2ODY5LCJpYXQiOjE3NTg2MjMyNjksImVtYWlsIjoidGVzNUBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImRpc3BsYXlfbmFtZSI6InRlczUiLCJlbWFpbCI6InRlczVAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiNzhkZjM1OGItNjY1ZC00YWE0LWE0NjktZWU2NTY4ZmEyYjE4IiwidXNlcm5hbWUiOiJ0ZXM1In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTg2MjMyNjl9XSwic2Vzc2lvbl9pZCI6ImM1NTdkZjEwLWI2MGQtNDI4NS1hNTU1LTA5YmVmOTQ0NGFkMyIsImlzX2Fub255bW91cyI6ZmFsc2V9.a5u_dYZAK7S1vfJRnNQi90j7i_l6sLoQUj9P-MxbPFU"
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}"
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/solves" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}"
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}"
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenge_flags" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}"
+
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Insert/Delete Only",
+    "description": "Challenge ini cuma buat test security insert & delete.",
+    "category": "Testing",
+    "points": 50,
+    "hint": "No hint, this is just a test",
+    "difficulty": "Easy",
+    "attachments": "[]"
+  }'
+
+chall_id="2341c787-b77d-4ed9-ab31-38e523ff405f"
+USER_ID="07fd81cb-ddae-4dfe-af89-f88220577828"
+
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenge_flags" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"challenge_id\": \"${chall_id}\",
+    \"flag\": \"flag{test_insert_delete}\"
+  }"
+
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?id=eq.${USER_ID}" \
+  -X PATCH \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{"is_admin": true}'
+
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{tes}\"}"
+```
+
 - **Authentication**: Sistem login/register menggunakan Supabase Auth
 - **challanges**: Tampilan challenges dengan status solved/belum
 - **Flag Submission**: Validasi flag menggunakan hash SHA256

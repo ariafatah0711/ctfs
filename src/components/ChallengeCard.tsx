@@ -31,8 +31,8 @@ export default function ChallengeCard({ challenge, onSolve }: ChallengeCardProps
         return
       }
 
-      const result = await submitFlag(challenge.id, flag.trim(), user.id)
-      
+      const result = await submitFlag(challenge.id, flag.trim())
+
       if (result.success) {
         setMessage(result.message)
         setMessageType('success')
@@ -76,10 +76,10 @@ export default function ChallengeCard({ challenge, onSolve }: ChallengeCardProps
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{challenge.title}</h3>
-          
+
           {/* Description */}
           <p className="text-sm text-gray-600 mb-3">{challenge.description}</p>
-          
+
           {/* Tags */}
           <div className="flex items-center space-x-2 mb-2">
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(challenge.category)}`}>
@@ -90,7 +90,7 @@ export default function ChallengeCard({ challenge, onSolve }: ChallengeCardProps
             </span>
             <span className="text-sm text-gray-600 font-medium">{challenge.points} pts</span>
           </div>
-          
+
           {/* Hint */}
           {challenge.hint && !challenge.is_solved && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-3">
@@ -104,7 +104,7 @@ export default function ChallengeCard({ challenge, onSolve }: ChallengeCardProps
             </div>
           )}
         </div>
-        
+
         {challenge.is_solved && (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-4">
             ✓ Solved
@@ -124,17 +124,17 @@ export default function ChallengeCard({ challenge, onSolve }: ChallengeCardProps
               disabled={loading}
             />
           </div>
-          
+
           {message && (
             <div className={`p-3 rounded-md text-sm ${
-              messageType === 'success' 
-                ? 'bg-green-50 text-green-700 border border-green-200' 
+              messageType === 'success'
+                ? 'bg-green-50 text-green-700 border border-green-200'
                 : 'bg-red-50 text-red-700 border border-red-200'
             }`}>
               {message}
             </div>
           )}
-          
+
           <button
             type="submit"
             disabled={loading || !flag.trim()}

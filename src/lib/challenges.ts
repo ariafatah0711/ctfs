@@ -1,3 +1,14 @@
+// Ambil rank user saja (berdasarkan username)
+export async function getUserRank(username: string): Promise<number | null> {
+  const leaderboard = await getLeaderboard();
+  leaderboard.sort((a, b) => {
+    const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0;
+    const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0;
+    return scoreB - scoreA;
+  });
+  const idx = leaderboard.findIndex(entry => entry.username === username);
+  return idx !== -1 ? idx + 1 : null;
+}
 import { supabase } from './supabase'
 import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/types'
 
@@ -41,65 +52,19 @@ export async function getChallenges(userId?: string): Promise<ChallengeWithSolve
 /**
  * Submit flag untuk challenge
  */
-export async function submitFlag(
-  challengeId: string,
-  flag: string,
-  userId: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    // Ambil challenge untuk mendapatkan flag_hash
-    const { data: challenge, error: challengeError } = await supabase
-      .from('challenges')
-      .select('flag_hash, points')
-      .eq('id', challengeId)
-      .single()
+export async function submitFlag(challengeId: string, flag: string) {
+  const { data, error } = await supabase.rpc('submit_flag', {
+    // p_user_id: userId,
+    p_challenge_id: challengeId,
+    p_flag: flag,
+  });
 
-    if (challengeError || !challenge) {
-      return { success: false, message: 'Challenge tidak ditemukan.' }
-    }
-
-    // Validasi flag dengan hash
-    const { validateFlag } = await import('./crypto')
-    const isCorrect = validateFlag(flag, challenge.flag_hash)
-
-    // Cek apakah sudah solve
-    const { data: existingSolve } = await supabase
-      .from('solves')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('challenge_id', challengeId)
-      .maybeSingle()
-
-    if (isCorrect) {
-      if (existingSolve) {
-        return { success: true, message: 'Benar, tapi kamu sudah pernah menyelesaikan challenge ini.' }
-      }
-      // Insert solve
-      const { error: solveError } = await supabase
-        .from('solves')
-        .insert({
-          user_id: userId,
-          challenge_id: challengeId
-        })
-
-      if (solveError) {
-        return { success: false, message: 'Gagal menyimpan penyelesaian challenge.' }
-      }
-
-      return {
-        success: true,
-        message: `Flag benar! Kamu mendapatkan ${challenge.points} poin.`
-      }
-    } else {
-      if (existingSolve) {
-        return { success: false, message: 'Flag salah, tapi kamu sudah pernah menyelesaikan challenge ini.' }
-      }
-      return { success: false, message: 'Flag salah. Silakan coba lagi.' }
-    }
-  } catch (error) {
-    console.error('Error submitting flag:', error)
-    return { success: false, message: 'Terjadi kesalahan saat submit flag.' }
+  if (error) {
+    console.error('RPC error:', error);
+    return { success: false, message: 'Gagal submit flag' };
   }
+
+  return data;
 }
 
 /**
@@ -116,21 +81,16 @@ export async function addChallenge(challengeData: {
   difficulty: string
 }): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('challenges')
-      .insert([{
-        title: challengeData.title,
-        description: challengeData.description,
-        category: challengeData.category,
-        points: challengeData.points,
-        flag: challengeData.flag,
-        // flag_hash akan auto-generate dari database trigger
-        hint: challengeData.hint || null,
-        attachments: challengeData.attachments || [],
-        difficulty: challengeData.difficulty,
-        is_active: true
-      }])
-
+    const { error } = await supabase.rpc('add_challenge', {
+      p_title: challengeData.title,
+      p_description: challengeData.description,
+      p_category: challengeData.category,
+      p_points: challengeData.points,
+      p_flag: challengeData.flag,
+      p_difficulty: challengeData.difficulty,   // <- dipindah ke sini
+      p_hint: challengeData.hint || null,
+      p_attachments: challengeData.attachments || []
+    });
     if (error) {
       throw new Error(error.message)
     }
@@ -155,29 +115,18 @@ export async function updateChallenge(challengeId: string, challengeData: {
   is_active?: boolean
 }): Promise<void> {
   try {
-    const updateData: any = {
-      title: challengeData.title,
-      description: challengeData.description,
-      category: challengeData.category,
-      points: challengeData.points,
-      hint: challengeData.hint || null,
-      attachments: challengeData.attachments || [],
-      difficulty: challengeData.difficulty,
-      is_active: challengeData.is_active !== undefined ? challengeData.is_active : true,
-      updated_at: new Date().toISOString()
-    }
-
-    // Only update flag if provided (flag_hash akan auto-generate dari trigger)
-    if (challengeData.flag) {
-      updateData.flag = challengeData.flag
-      // flag_hash akan auto-generate dari database trigger
-    }
-
-    const { error } = await supabase
-      .from('challenges')
-      .update(updateData)
-      .eq('id', challengeId)
-
+    const { error } = await supabase.rpc('update_challenge', {
+      p_challenge_id: challengeId,
+      p_title: challengeData.title,
+      p_description: challengeData.description,
+      p_category: challengeData.category,
+      p_points: challengeData.points,
+      p_difficulty: challengeData.difficulty,
+      p_hint: challengeData.hint || null,
+      p_attachments: challengeData.attachments || [],
+      p_is_active: challengeData.is_active !== undefined ? challengeData.is_active : true,
+      p_flag: challengeData.flag || null
+    });
     if (error) {
       throw new Error(error.message)
     }
@@ -192,11 +141,9 @@ export async function updateChallenge(challengeId: string, challengeData: {
  */
 export async function deleteChallenge(challengeId: string): Promise<void> {
   try {
-    const { error } = await supabase
-      .from('challenges')
-      .delete()
-      .eq('id', challengeId)
-
+    const { error } = await supabase.rpc('delete_challenge', {
+      p_challenge_id: challengeId
+    });
     if (error) {
       throw new Error(error.message)
     }
