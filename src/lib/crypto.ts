@@ -19,4 +19,3 @@ export function validateFlag(flag: string, expectedHash: string): boolean {
   const flagHash = hashFlag(flag)
   return flagHash === expectedHash
 }
-

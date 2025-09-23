@@ -5,6 +5,9 @@ Aplikasi CTF minimalis yang dibangun dengan Next.js dan Supabase. Aplikasi ini m
 ## 🚀 Fitur
 
 ```bash
+chall_id="10000000-0000-0000-0000-000000000001"
+USER_ID="00000000-0000-0000-0000-000000000001"
+
 curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
 curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
 curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/solves"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
@@ -12,9 +15,14 @@ curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/solves"   -H "apikey: ${NEXT_PUBLIC_SU
 curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
   -H "Content-Type: application/json" \
-  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{tes}\"}"
+  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{dummy1}\"}"
 
-JWT="eyJhbGciOiJIUzI1NiIsImtpZCI6Imp6c0lrN0MzdFk0SWpUZGUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2piZGN4ZHZwYmZtcWNoZnBhd3FwLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3OGRmMzU4Yi02NjVkLTRhYTQtYTQ2OS1lZTY1NjhmYTJiMTgiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU4NjI2ODY5LCJpYXQiOjE3NTg2MjMyNjksImVtYWlsIjoidGVzNUBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImRpc3BsYXlfbmFtZSI6InRlczUiLCJlbWFpbCI6InRlczVAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiNzhkZjM1OGItNjY1ZC00YWE0LWE0NjktZWU2NTY4ZmEyYjE4IiwidXNlcm5hbWUiOiJ0ZXM1In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTg2MjMyNjl9XSwic2Vzc2lvbl9pZCI6ImM1NTdkZjEwLWI2MGQtNDI4NS1hNTU1LTA5YmVmOTQ0NGFkMyIsImlzX2Fub255bW91cyI6ZmFsc2V9.a5u_dYZAK7S1vfJRnNQi90j7i_l6sLoQUj9P-MxbPFU"
+JWT="eyJhbGciOiJIUzI1NiIsImtpZCI6Imp6c0lrN0MzdFk0SWpUZGUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2piZGN4ZHZwYmZtcWNoZnBhd3FwLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI1YzMzMzFmMy05NzI3LTRlYzQtODk0ZS02MzhmYmMyNTNiYTQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU4NjM2MjcwLCJpYXQiOjE3NTg2MzI2NzAsImVtYWlsIjoiY2FsaG91bnNndDA3QGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZGlzcGxheV9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImNhbGhvdW5zZ3QwN0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiI1YzMzMzFmMy05NzI3LTRlYzQtODk0ZS02MzhmYmMyNTNiYTQiLCJ1c2VybmFtZSI6ImFkbWluIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTg2MjkwNzZ9XSwic2Vzc2lvbl9pZCI6ImUxZTA3YjUzLTVhYjctNGRmYS05YTA2LTYwMTAxM2Q5NDJmYyIsImlzX2Fub255bW91cyI6ZmFsc2V9.ct0HmJ6RXccRTpG0iA8XicytvfJ6PmGBtH0LOB1uaq0"
+
+curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/is_admin" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}"
+
 curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users" \
   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
   -H "Authorization: Bearer ${JWT}"
@@ -42,9 +50,6 @@ curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges" \
     "attachments": "[]"
   }'
 
-chall_id="2341c787-b77d-4ed9-ab31-38e523ff405f"
-USER_ID="07fd81cb-ddae-4dfe-af89-f88220577828"
-
 curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenge_flags" \
   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
   -H "Authorization: Bearer ${JWT}" \
@@ -66,6 +71,53 @@ curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
   -H "Authorization: Bearer ${JWT}" \
   -H "Content-Type: application/json" \
   -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{tes}\"}"
+
+curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{dummy1}\"}"
+
+CHALL_TEST_RAW=$(curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/add_challenge" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "p_title":"Test Add Challenge (auto)",
+    "p_description":"Dipakai untuk testing hak akses",
+    "p_category":"Testing",
+    "p_points":10,
+    "p_flag":"flag{autotest_add}",
+    "p_difficulty":"Easy",
+    "p_hint": null,
+    "p_attachments": "[]"
+  }')
+
+CHALL_TEST=$(echo "${CHALL_TEST_RAW}" | tr -d '"')
+echo $CHALL_TEST
+
+curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/update_challenge" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "p_challenge_id":"'"${CHALL_TEST}"'",
+    "p_title":"Updated Title (test)",
+    "p_description":"Updated desc",
+    "p_category":"Web",
+    "p_points":99,
+    "p_difficulty":"Hard",
+    "p_hint": null,
+    "p_attachments": "[]",
+    "p_is_active": true,
+    "p_flag": "flag{updated_flag_optional}"
+  }'
+
+curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/delete_challenge" \
+  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "Content-Type: application/json" \
+  -d '{"p_challenge_id":"'"${CHALL_TEST}"'"}'
 ```
 
 - **Authentication**: Sistem login/register menggunakan Supabase Auth
