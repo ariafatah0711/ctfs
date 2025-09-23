@@ -32,17 +32,33 @@ export default function ScoreboardPage() {
       const data = await getLeaderboard()
 
       // langsung sort pake total_points dari SQL
-      data.sort((a: any, b: any) => b.total_points - a.total_points)
-      const transformed: LeaderboardEntry[] = data.map((d: any, i: number) => ({
-        id: String(i + 1),
-        username: d.username,
-        score: d.progress.length > 0 ? d.progress[d.progress.length - 1].score : 0,
-        rank: i + 1,
-        progress: d.progress.map((p: any) => ({
-          date: String(p.date),
-          score: p.score,
-        })),
-      }))
+      data.sort((a: any, b: any) => {
+        const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0
+        const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0
+
+        // Urutkan berdasarkan score desc
+        if (scoreB !== scoreA) return scoreB - scoreA
+
+        // Tie-breaker: siapa yang terakhir solve lebih cepat
+        const lastSolveA = a.progress.length > 0 ? new Date(a.progress[a.progress.length - 1].date).getTime() : Infinity
+        const lastSolveB = b.progress.length > 0 ? new Date(b.progress[b.progress.length - 1].date).getTime() : Infinity
+
+        return lastSolveA - lastSolveB
+      })
+
+      const transformed: LeaderboardEntry[] = data.map((d: any, i: number) => {
+        const finalScore = d.progress.length > 0 ? d.progress[d.progress.length - 1].score : 0
+        return {
+          id: String(i + 1),
+          username: d.username,
+          score: finalScore,
+          rank: i + 1,
+          progress: d.progress.map((p: any) => ({
+            date: String(p.date),
+            score: p.score,
+          })),
+        }
+      })
 
       setLeaderboard(transformed)
       setLoading(false)
