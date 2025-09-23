@@ -48,6 +48,7 @@ export default function ScoreboardPage() {
     fetchData()
   }, [])
 
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -60,6 +61,9 @@ export default function ScoreboardPage() {
     )
   }
   if (!user) return null
+
+  // Jika leaderboard kosong (belum ada yang solve challenge sama sekali)
+  const isEmpty = leaderboard.length === 0 || leaderboard.every(e => (e.progress?.length ?? 0) === 0 || (e.score ?? 0) === 0)
 
   const chartData = leaderboard.slice(0, 10).map((entry) => {
     // Konversi ke waktu lokal (misal WIB, GMT+7)
@@ -82,6 +86,23 @@ export default function ScoreboardPage() {
     }
   })
 
+  if (isEmpty) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center h-[70vh]">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <span className="text-4xl text-gray-400">🎯</span>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No challenges solved yet.</h3>
+          <p className="text-gray-500">
+            Leaderboard is empty! Be the first to solve a challenge and get on the board!
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -90,41 +111,37 @@ export default function ScoreboardPage() {
           🏆 Scoreboard
         </h1>
         <div className="mb-6 sm:mb-8">
-          {loading ? (
-            <div className="w-full h-40 sm:h-64 bg-gray-200 animate-pulse rounded-lg mb-4 sm:mb-6"></div>
-          ) : (
-            <Plot
-              data={chartData}
-              layout={{
-                dragmode: false,
-                title: { text: 'Top 10 Users', x: 0.5, font: { size: 16 } },
-                autosize: true,
-                xaxis: {
-                  type: 'date',
-                  autorange: true,
-                  tickfont: { size: 10 },
-                  tickformat: '%Y-%m-%d %H:%M', // tampilkan jam dan menit
-                },
-                yaxis: {
-                  autorange: true,
-                  rangemode: 'tozero',
-                  automargin: true,
-                  title: { text: 'Score', font: { size: 12 } },
-                  tickfont: { size: 10 },
-                },
-                legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2, font: { size: 10 } },
-                margin: { t: 40, r: 10, l: 30, b: 50 },
-              }}
-              style={{ width: '100%', height: '320px' }}
-              useResizeHandler
-              config={{
-                scrollZoom: false,
-                staticPlot: false,
-                displayModeBar: true,
-              }}
-              revision={leaderboard.length}
-            />
-          )}
+          <Plot
+            data={chartData}
+            layout={{
+              dragmode: false,
+              title: { text: 'Top 10 Users', x: 0.5, font: { size: 16 } },
+              autosize: true,
+              xaxis: {
+                type: 'date',
+                autorange: true,
+                tickfont: { size: 10 },
+                tickformat: '%Y-%m-%d %H:%M', // tampilkan jam dan menit
+              },
+              yaxis: {
+                autorange: true,
+                rangemode: 'tozero',
+                automargin: true,
+                title: { text: 'Score', font: { size: 12 } },
+                tickfont: { size: 10 },
+              },
+              legend: { orientation: 'h', x: 0.5, xanchor: 'center', y: -0.2, font: { size: 10 } },
+              margin: { t: 40, r: 10, l: 30, b: 50 },
+            }}
+            style={{ width: '100%', height: '320px' }}
+            useResizeHandler
+            config={{
+              scrollZoom: false,
+              staticPlot: false,
+              displayModeBar: true,
+            }}
+            revision={leaderboard.length}
+          />
         </div>
 
         {/* Ranking Table Card */}

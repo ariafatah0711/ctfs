@@ -83,19 +83,19 @@ export default function AdminPage() {
       if (editingChallenge) {
         // Update existing challenge
         await updateChallenge(editingChallenge.id, challengeData)
-        alert('Challenge berhasil diupdate!')
+  alert('Challenge updated!')
         setEditingChallenge(null)
       } else {
         // Add new challenge - flag is required for new challenges
         if (!formData.flag.trim()) {
-          alert('Flag harus diisi untuk challenge baru!')
+    alert('Flag is required for new challenges!')
           setSubmitting(false)
           return
         }
         challengeData.flag = formData.flag
         // flag_hash akan auto-generate dari database trigger
         await addChallenge(challengeData)
-        alert('Challenge berhasil ditambahkan!')
+  alert('Challenge added!')
       }
 
       // Refresh challenges list
@@ -117,7 +117,7 @@ export default function AdminPage() {
 
     } catch (error) {
       console.error('Error saving challenge:', error)
-      alert('Gagal menyimpan challenge')
+  alert('Failed to save challenge')
     } finally {
       setSubmitting(false)
     }
@@ -156,7 +156,7 @@ export default function AdminPage() {
   }
 
   const handleDelete = async (challengeId: string) => {
-    if (!confirm('Yakin ingin menghapus challenge ini?')) return
+  if (!confirm('Are you sure you want to delete this challenge?')) return
 
     try {
       await deleteChallenge(challengeId)
@@ -165,10 +165,10 @@ export default function AdminPage() {
       const challengesData = await getChallenges()
       setChallenges(challengesData)
 
-      alert('Challenge berhasil dihapus!')
+  alert('Challenge deleted!')
     } catch (error) {
       console.error('Error deleting challenge:', error)
-      alert('Gagal menghapus challenge')
+  alert('Failed to delete challenge')
     }
   }
 
@@ -255,8 +255,8 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Admin challanges</h1>
-            <p className="mt-2 text-gray-600">Kelola challenges CTF</p>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Challenges</h1>
+            <p className="mt-2 text-gray-600">Manage CTF challenges</p>
           </div>
 
           {/* Add Challenge Button */}
@@ -265,7 +265,7 @@ export default function AdminPage() {
               onClick={() => setShowAddForm(!showAddForm)}
               className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md"
             >
-              {showAddForm ? 'Batal' : 'Tambah Challenge'}
+              {showAddForm ? 'Cancel' : 'Add Challenge'}
             </button>
           </div>
 
@@ -273,12 +273,12 @@ export default function AdminPage() {
           {showAddForm && (
             <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">
-                {editingChallenge ? 'Edit Challenge' : 'Tambah Challenge Baru'}
+                {editingChallenge ? 'Edit Challenge' : 'Add New Challenge'}
               </h2>
               <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Judul Challenge
+                    Challenge Title
                   </label>
                   <input
                     type="text"
@@ -286,13 +286,13 @@ export default function AdminPage() {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Contoh: SQL Injection Basics"
+                    placeholder="e.g., SQL Injection Basics"
                   />
                 </div>
 
                 <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Kategori
+                    Category
                   </label>
                   <select
                     value={formData.category}
@@ -310,7 +310,7 @@ export default function AdminPage() {
 
                 <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Poin
+                    Points
                   </label>
                   <input
                     type="number"
@@ -324,7 +324,7 @@ export default function AdminPage() {
 
                 <div className="mb-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tingkat Kesulitan
+                    Difficulty
                   </label>
                   <select
                     value={formData.difficulty}
@@ -364,7 +364,7 @@ export default function AdminPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      placeholder="Deskripsi challenge... (supports markdown: **bold**, *italic*, `code`, [links](url), etc.)"
+                      placeholder="Challenge description... (supports markdown: **bold**, *italic*, `code`, [links](url), etc.)"
                     />
                   )}
 
@@ -383,12 +383,12 @@ export default function AdminPage() {
                     value={formData.flag}
                     onChange={(e) => setFormData({ ...formData, flag: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder={editingChallenge ? "Kosongkan jika tidak ingin mengubah flag" : "ctf{flag_here}"}
+                    placeholder={editingChallenge ? "Leave blank to keep current flag" : "ctf{flag_here}"}
                   />
                   <p className="text-sm text-gray-500 mt-1">
                     {editingChallenge
-                      ? 'Kosongkan jika tidak ingin mengubah flag. Flag akan di-hash secara otomatis.'
-                      : 'Flag akan disimpan sebagai plain text dan di-hash untuk validasi'
+                      ? 'Leave blank to keep current flag. Flag will be hashed automatically.'
+                      : 'Flag will be stored as plain text and hashed for validation.'
                     }
                   </p>
                 </div>
@@ -396,7 +396,7 @@ export default function AdminPage() {
                 <div className="mb-2">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Hint (Opsional)
+                      Hint (Optional)
                     </label>
                     <button
                       type="button"
@@ -431,7 +431,7 @@ export default function AdminPage() {
                 <div className="mb-2">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Attachments (Opsional)
+                      Attachments (Optional)
                     </label>
                     <button
                       type="button"
@@ -491,7 +491,7 @@ export default function AdminPage() {
                     onClick={handleCancelEdit}
                     className="px-3 py-1 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 text-sm"
                   >
-                    Batal
+                    Cancel
                   </button>
                   <button
                     type="submit"
@@ -499,8 +499,8 @@ export default function AdminPage() {
                     className="bg-primary-600 hover:bg-primary-700 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
                   >
                     {submitting
-                      ? (editingChallenge ? 'Mengupdate...' : 'Menambahkan...')
-                      : (editingChallenge ? 'Update' : 'Tambah')
+                      ? (editingChallenge ? 'Updating...' : 'Adding...')
+                      : (editingChallenge ? 'Update' : 'Add')
                     }
                   </button>
                 </div>
@@ -510,9 +510,9 @@ export default function AdminPage() {
 
           {/* Challenges List */}
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Daftar Challenges</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Challenge List</h2>
             {challenges.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">Belum ada challenges</div>
+              <div className="text-center py-8 text-gray-500">No challenges yet</div>
             ) : (
               <div className="bg-white shadow-sm rounded-lg">
                 <ul>

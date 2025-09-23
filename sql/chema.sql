@@ -66,22 +66,17 @@ DROP VIEW IF EXISTS public.challenges_with_masked_flag CASCADE;
 DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
--- DROP TABLE IF EXISTS public.users CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
 
 -- 2. CREATE TABLES
-
--- Users table
--- CREATE TABLE public.users (
---   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
---   username TEXT UNIQUE NOT NULL,
--- --   email TEXT UNIQUE NOT NULL,
---   score INTEGER DEFAULT 0,
---   rank INTEGER,
---   is_admin BOOLEAN DEFAULT false,
---   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
---   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
--- );
--- ALTER TABLE public.users ALTER COLUMN email DROP NOT NULL;
+-- Users table (tanpa email, score, rank)
+CREATE TABLE public.users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  is_admin BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
 
 -- Challenges table (metadata only)
 CREATE TABLE public.challenges (
@@ -139,14 +134,26 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Create profile function (RPC)
-CREATE OR REPLACE FUNCTION create_profile(p_id UUID, p_username TEXT)
-RETURNS json AS $$
+CREATE OR REPLACE FUNCTION create_profile(p_id uuid, p_username text)
+RETURNS void AS $$
 BEGIN
-  INSERT INTO users(id, username, score)
-  VALUES (p_id, p_username, 0);
-  RETURN json_build_object('success', true, 'message', 'Profile created');
-EXCEPTION WHEN unique_violation THEN
-    RETURN json_build_object('success', false, 'message', 'User already exists');
+  -- 1. insert untuk user yang baru dipassing
+  INSERT INTO public.users (id, username)
+  VALUES (p_id, p_username)
+  ON CONFLICT (id) DO NOTHING;
+
+  -- 2. insert untuk semua user lain di auth.users yang belum ada di public.users
+  INSERT INTO public.users (id, username)
+  SELECT
+    au.id,
+    COALESCE(
+      au.raw_user_meta_data->>'username',
+      au.raw_user_meta_data->>'display_name',
+      split_part(au.email, '@', 1) -- fallback
+    )
+  FROM auth.users au
+  LEFT JOIN public.users pu ON pu.id = au.id
+  WHERE pu.id IS NULL; -- cuma yang belum ada
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -164,12 +171,75 @@ CREATE TRIGGER trigger_auto_flag_hash
   FOR EACH ROW
   EXECUTE FUNCTION auto_update_flag_hash();
 
--- Leaderboard
+CREATE OR REPLACE FUNCTION get_email_by_username(p_username TEXT)
+RETURNS TEXT AS $$
+DECLARE v_email TEXT;
+BEGIN
+  SELECT au.email
+  INTO v_email
+  FROM auth.users au
+  JOIN public.users u ON u.id = au.id
+  WHERE u.username = p_username;
+
+  RETURN v_email;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function: detail_user(p_id UUID)
+-- Mengembalikan: id, username, rank, solved challenges (id, title, category, points, difficulty, solved_at)
+CREATE OR REPLACE FUNCTION detail_user(p_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  v_user RECORD;
+  v_rank BIGINT;
+  v_solves JSON;
+BEGIN
+  -- Ambil user
+  SELECT id, username INTO v_user FROM public.users WHERE id = p_id;
+  IF NOT FOUND THEN
+  RETURN json_build_object('success', false, 'message', 'User not found');
+  END IF;
+
+  -- Hitung rank (berdasarkan jumlah solve, urutan waktu solve tercepat)
+  SELECT COALESCE(rank, 0) FROM (
+    SELECT u.id, CASE WHEN COUNT(s.id) = 0 THEN 0 ELSE ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, MIN(s.created_at) ASC) END AS rank
+    FROM public.users u
+    LEFT JOIN public.solves s ON u.id = s.user_id
+    GROUP BY u.id
+  ) ranked WHERE ranked.id = p_id INTO v_rank;
+
+  -- Daftar solved challenges
+  SELECT json_agg(json_build_object(
+    'challenge_id', c.id,
+    'title', c.title,
+    'category', c.category,
+    'points', c.points,
+    'difficulty', c.difficulty,
+    'solved_at', s.created_at
+  ) ORDER BY s.created_at DESC)
+  FROM public.solves s
+  JOIN public.challenges c ON s.challenge_id = c.id
+  WHERE s.user_id = p_id
+  INTO v_solves;
+
+  RETURN json_build_object(
+    'success', true,
+    'user', json_build_object(
+      'id', v_user.id,
+      'username', v_user.username,
+      'rank', v_rank
+    ),
+    'solved_challenges', COALESCE(v_solves, '[]'::json)
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Leaderboard: urutkan berdasarkan jumlah solve
 CREATE OR REPLACE FUNCTION get_leaderboard()
 RETURNS TABLE (
   id UUID,
   username TEXT,
-  score INTEGER,
+  solves INTEGER,
   rank BIGINT
 ) AS $$
 BEGIN
@@ -177,10 +247,12 @@ BEGIN
   SELECT
     u.id,
     u.username,
-    u.score,
-    ROW_NUMBER() OVER (ORDER BY u.score DESC, u.created_at ASC) as rank
+    COUNT(s.id) as solves,
+    ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, MIN(s.created_at) ASC) as rank
   FROM public.users u
-  ORDER BY u.score DESC, u.created_at ASC;
+  LEFT JOIN public.solves s ON u.id = s.user_id
+  GROUP BY u.id, u.username
+  ORDER BY solves DESC, MIN(s.created_at) ASC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -198,7 +270,7 @@ DECLARE
   v_is_correct boolean;
 BEGIN
   IF v_user_id IS NULL THEN
-    RETURN json_build_object('success', false, 'message', 'Not authenticated');
+  RETURN json_build_object('success', false, 'message', 'Not authenticated');
   END IF;
 
   SELECT cf.flag_hash, c.points
@@ -208,13 +280,13 @@ BEGIN
   WHERE cf.challenge_id = p_challenge_id;
 
   IF v_flag_hash IS NULL THEN
-    RETURN json_build_object('success', false, 'message', 'Challenge tidak ditemukan');
+    RETURN json_build_object('success', false, 'message', 'Challenge not found');
   END IF;
 
   v_is_correct := encode(digest(p_flag, 'sha256'), 'hex') = v_flag_hash;
 
   IF NOT v_is_correct THEN
-    RETURN json_build_object('success', false, 'message', 'Flag salah');
+    RETURN json_build_object('success', false, 'message', 'Incorrect flag');
   END IF;
 
   SELECT count(*) INTO v_existing
@@ -222,16 +294,15 @@ BEGIN
   WHERE user_id = v_user_id AND challenge_id = p_challenge_id;
 
   IF v_existing > 0 THEN
-    RETURN json_build_object('success', true, 'message', 'Benar, tapi kamu sudah pernah menyelesaikan challenge ini.');
+    RETURN json_build_object('success', true, 'message', 'Correct, but already solved.');
   END IF;
 
-  INSERT INTO solves(user_id, challenge_id) VALUES (v_user_id, p_challenge_id);
-  UPDATE users SET score = score + v_points WHERE id = v_user_id;
 
-  RETURN json_build_object('success', true, 'message', format('Flag benar! Kamu dapat %s poin.', v_points));
+  INSERT INTO solves(user_id, challenge_id) VALUES (v_user_id, p_challenge_id);
+
+  RETURN json_build_object('success', true, 'message', format('Correct! +%s points.', v_points));
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 
 CREATE OR REPLACE FUNCTION add_challenge(
   p_title TEXT,
@@ -397,6 +468,8 @@ GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
 
 GRANT EXECUTE ON FUNCTION is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_email_by_username(text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION detail_user(p_id UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION create_profile(UUID, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION get_leaderboard() TO authenticated;
 GRANT EXECUTE ON FUNCTION submit_flag(uuid, text) TO authenticated;
@@ -446,7 +519,6 @@ WITH ins AS (
 INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
 SELECT id, 'flag{robots_txt_leaked_the_secret}', encode(digest('flag{robots_txt_leaked_the_secret}', 'sha256'), 'hex')
 FROM ins;
-
 
 -- Insert Hidden Flag challenge
 WITH ins AS (

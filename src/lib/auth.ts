@@ -28,7 +28,7 @@ export async function signUp(email: string, password: string, username: string):
     }
 
     if (!authData.user) {
-      return { user: null, error: 'Gagal membuat akun' }
+      return { user: null, error: 'Failed to create account' }
     }
 
     // Buat profil user via RPC
@@ -39,7 +39,7 @@ export async function signUp(email: string, password: string, username: string):
 
     if (rpcError) {
       console.error('User creation error:', rpcError)
-      return { user: null, error: `Gagal membuat profil user: ${rpcError.message}` }
+      return { user: null, error: `Failed to create user profile: ${rpcError.message}` }
     }
 
     // Ambil data user dari tabel users
@@ -55,29 +55,44 @@ export async function signUp(email: string, password: string, username: string):
 
     return { user: userData, error: null };
   } catch (error) {
-    return { user: null, error: 'Terjadi kesalahan saat mendaftar' }
+  return { user: null, error: 'Registration failed' }
   }
 }
 
 /**
  * Sign in user
  */
-export async function signIn(email: string, password: string): Promise<AuthResponse> {
+export async function signIn(identifier: string, password: string): Promise<AuthResponse> {
   try {
+    let email = identifier;
+
+    // Kalau bukan email, berarti username → ambil email via RPC
+    if (!identifier.includes('@')) {
+      const { data: rpcEmail, error: rpcError } = await supabase.rpc('get_email_by_username', {
+        p_username: identifier
+      });
+
+      if (rpcError || !rpcEmail) {
+        return { user: null, error: 'User not found' };
+      }
+
+      email = rpcEmail;
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    })
+    });
 
     if (error) {
-      return { user: null, error: error.message }
+      return { user: null, error: error.message };
     }
 
     if (!data.user) {
-      return { user: null, error: 'Gagal login' }
+      return { user: null, error: 'Login failed' };
     }
 
-    // Ambil data user dari tabel public.users
+    // Fetch user data dari public.users
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -85,46 +100,12 @@ export async function signIn(email: string, password: string): Promise<AuthRespo
       .single();
 
     if (userError) {
-      // Jika user tidak ada di tabel public.users, buat profil baru via RPC
-      if (userError.code === 'PGRST116') {
-        console.log('User not found in public.users, creating profile...');
-
-        // Ambil username dari user metadata atau email
-        const username = data.user.user_metadata?.username ||
-                        data.user.user_metadata?.display_name ||
-                        data.user.email?.split('@')[0] ||
-                        'user_' + data.user.id.slice(0, 8);
-
-        const { data: rpcData, error: rpcError } = await supabase.rpc('create_profile', {
-          p_id: data.user.id,
-          p_username: username
-        });
-
-        if (rpcError) {
-          console.error('Failed to create user profile:', rpcError);
-          return { user: null, error: 'Gagal membuat profil user' };
-        }
-
-        // Ambil lagi data user
-        const { data: newUserData, error: newUserError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-
-        if (newUserError) {
-          return { user: null, error: newUserError.message };
-        }
-
-        return { user: newUserData, error: null };
-      }
-
       return { user: null, error: userError.message };
     }
 
     return { user: userData, error: null };
   } catch (error) {
-    return { user: null, error: 'Terjadi kesalahan saat login' }
+    return { user: null, error: 'Login failed' };
   }
 }
 

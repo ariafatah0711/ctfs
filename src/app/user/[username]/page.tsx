@@ -4,16 +4,13 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 import { getUserByUsername } from '@/lib/users'
-import { getChallenges } from '@/lib/challenges'
-import { User, ChallengeWithSolve } from '@/types'
 import UserProfile from '@/components/UserProfile'
 
 export default function UserProfilePage() {
   const router = useRouter()
   const params = useParams()
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [user, setUser] = useState<User | null>(null)
-  const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,10 +32,8 @@ export default function UserProfilePage() {
           return
         }
 
-        setUser(userData)
-        const challengesData = await getChallenges(userData.id)
-        setChallenges(challengesData)
-        setLoading(false)
+  setUserId(userData.id)
+  setLoading(false)
       } catch (err) {
         setError('Failed to load user profile')
         setLoading(false)
@@ -50,8 +45,7 @@ export default function UserProfilePage() {
 
   return (
     <UserProfile
-      user={user}
-      challenges={challenges}
+      userId={userId}
       loading={loading}
       error={error}
       onBack={() => router.back()}

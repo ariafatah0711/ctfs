@@ -1,11 +1,18 @@
 import Navbar from '@/components/Navbar'
-import { User, ChallengeWithSolve } from '@/types'
+import { ChallengeWithSolve } from '@/types'
 import { getFirstBloodChallengeIds } from '@/lib/challenges'
 import { useEffect, useState } from 'react'
+import { getUserDetail } from '@/lib/users'
+
+type UserDetail = {
+  id: string
+  username: string
+  rank: number | null
+  solved_challenges: ChallengeWithSolve[]
+}
 
 type Props = {
-  user: User | null
-  challenges: ChallengeWithSolve[]
+  userId: string | null
   loading: boolean
   error?: string | null
   onBack?: () => void
@@ -13,37 +20,33 @@ type Props = {
 }
 
 export default function UserProfile({
-  user,
-  challenges,
+  userId,
   loading,
   error,
   onBack,
   isCurrentUser = false,
 }: Props) {
+  const [userDetail, setUserDetail] = useState<UserDetail | null>(null)
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
-  const [allUsers, setAllUsers] = useState<User[]>([])
-  const [userRank, setUserRank] = useState<number | null>(null)
+  const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (user) {
-        const firstBlood = await getFirstBloodChallengeIds(user.id)
-        setFirstBloodIds(firstBlood)
+    const fetchDetail = async () => {
+      if (userId) {
+        setLoadingDetail(true)
+        const detail = await getUserDetail(userId)
+        setUserDetail(detail)
+        if (detail) {
+          const firstBlood = await getFirstBloodChallengeIds(detail.id)
+          setFirstBloodIds(firstBlood)
+        }
+        setLoadingDetail(false)
       }
     }
+    fetchDetail()
+  }, [userId])
 
-    fetchData()
-  }, [user])
-
-  useEffect(() => {
-    if (user && typeof user.rank === 'number') {
-      setUserRank(user.rank);
-    } else {
-      setUserRank(null);
-    }
-  }, [user]);
-
-  if (loading) {
+  if (loading || loadingDetail) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -57,7 +60,7 @@ export default function UserProfile({
     )
   }
 
-  if (error || !user) {
+  if (error || !userDetail) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
@@ -88,8 +91,9 @@ export default function UserProfile({
     )
   }
 
-  const solvedChallenges = challenges.filter(c => c.is_solved)
-  const categories = Array.from(new Set(challenges.map(c => c.category)))
+  const solvedChallenges = userDetail.solved_challenges || []
+  // Only include categories with at least 1 solved challenge
+  const categories = Array.from(new Set(solvedChallenges.filter(c => c.is_solved).map(c => c.category)))
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -116,17 +120,12 @@ export default function UserProfile({
           <div className="flex items-center space-x-6">
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 text-2xl font-bold">
-                {user.username.charAt(0).toUpperCase()}
+                {userDetail.username.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
-              <div className="flex items-center space-x-4 mt-2">
-                <div className="flex items-center space-x-1">
-                  <span className="text-sm text-gray-500">🪙</span>
-                  <span className="text-sm font-medium text-gray-900">{user.score} points</span>
-                </div>
-              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{userDetail.username}</h1>
+              {/* You can add more user info here if needed */}
             </div>
           </div>
         </div>
@@ -142,7 +141,7 @@ export default function UserProfile({
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-500">Rank</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {userRank ? `#${userRank}` : 'Unranked'}
+                  {userDetail.rank === 0 ? '0' : `#${userDetail.rank}`}
                 </p>
               </div>
             </div>
@@ -173,34 +172,37 @@ export default function UserProfile({
           </div>
         </div>
 
-        {/* Category Progress */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Category Progress</h2>
-          <div className="space-y-4">
-            {categories.map(category => {
-              const categoryChallenges = challenges.filter(c => c.category === category)
-              const solvedInCategory = categoryChallenges.filter(c => c.is_solved)
-              const progress = categoryChallenges.length > 0 ? (solvedInCategory.length / categoryChallenges.length) * 100 : 0
-
-              return (
-                <div key={category} className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-gray-900">{category}</span>
-                      <span className="text-sm text-gray-500">{solvedInCategory.length}/{categoryChallenges.length}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                      ></div>
+        {/* Category Progress (only show if at least 1 solved challenge and at least 1 category) */}
+        {solvedChallenges.length > 0 && categories.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Category Progress</h2>
+            <div className="space-y-4">
+              {categories.map((category: string) => {
+                const categoryChallenges = solvedChallenges.filter((c: ChallengeWithSolve) => c.category === category)
+                const solvedInCategory = categoryChallenges.filter((c: ChallengeWithSolve) => c.is_solved)
+                const progress = categoryChallenges.length > 0 ? (solvedInCategory.length / categoryChallenges.length) * 100 : 0
+                // Only show if at least 1 solved in this category
+                if (solvedInCategory.length === 0) return null
+                return (
+                  <div key={category} className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-900">{category}</span>
+                        <span className="text-sm text-gray-500">{solvedInCategory.length}/{categoryChallenges.length}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Recent Solved Challenges */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

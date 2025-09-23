@@ -8,7 +8,7 @@ import { signIn } from '@/lib/auth'
 export default function LoginPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '', // username or email
     password: ''
   })
   const [loading, setLoading] = useState(false)
@@ -20,7 +20,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const { user, error } = await signIn(formData.email, formData.password)
+  const { user, error } = await signIn(formData.identifier, formData.password)
 
       if (error) {
         setError(error)
@@ -28,7 +28,7 @@ export default function LoginPage() {
         router.push('/challanges')
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat login')
+  setError('Login failed')
     } finally {
       setLoading(false)
     }
@@ -46,12 +46,12 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Masuk ke CTFS
+            Sign in to CTFS
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Atau{' '}
+            Or{' '}
             <Link href="/register" className="font-medium text-primary-600 hover:text-primary-500">
-              daftar akun baru
+              create a new account
             </Link>
           </p>
         </div>
@@ -59,18 +59,18 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email
+              <label htmlFor="identifier" className="sr-only">
+                Username or Email
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="identifier"
+                name="identifier"
+                type="text"
+                autoComplete="username"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
+                placeholder="Username or Email"
+                value={formData.identifier}
                 onChange={handleChange}
               />
             </div>

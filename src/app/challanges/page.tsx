@@ -122,10 +122,12 @@ export default function ChallengesPage() {
       alert(result.message)
       if (result.success) {
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
+        setSelectedChallenge(null)
+        setChallengeTab('challenge')
       }
     } catch (error) {
       console.error('Error submitting flag:', error)
-      alert('Terjadi kesalahan saat submit flag')
+  alert('Failed to submit flag')
     } finally {
       setSubmitting(prev => ({ ...prev, [challengeId]: false }))
     }
@@ -485,7 +487,7 @@ export default function ChallengesPage() {
               <div>
                 <ul className="space-y-2 max-h-60 overflow-y-auto">
                   {solvers.length === 0 ? (
-                    <li className="text-gray-400">Belum ada yang solve.</li>
+                    <li className="text-gray-400">No solves yet.</li>
                   ) : (
                     solvers.map((solver, idx) => (
                       <li key={idx} className="flex justify-between text-gray-200 items-center">

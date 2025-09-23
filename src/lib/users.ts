@@ -1,5 +1,41 @@
+// Get user detail (rank, solved challenges) via RPC
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
 import { supabase } from './supabase'
 import { User, ChallengeWithSolve } from '@/types'
+
+export type UserDetail = {
+  id: string
+  username: string
+  rank: number | null
+  solved_challenges: ChallengeWithSolve[]
+}
+
+export async function getUserDetail(userId: string): Promise<UserDetail | null> {
+  try {
+    const { data, error }: PostgrestSingleResponse<any> = await supabase.rpc('detail_user', { p_id: userId })
+    if (error || !data || !data.success) {
+      console.error('Error fetching user detail:', error || data?.message)
+      return null
+    }
+    return {
+      id: data.user.id,
+      username: data.user.username,
+      rank: data.user.rank ?? null,
+      solved_challenges: (data.solved_challenges || []).map((c: any) => ({
+        id: c.challenge_id,
+        title: c.title,
+        category: c.category,
+        points: c.points,
+        difficulty: c.difficulty,
+        is_solved: true,
+        solved_at: c.solved_at,
+      })),
+    }
+  } catch (error) {
+    console.error('Error fetching user detail:', error)
+    return null
+  }
+}
 
 export async function getUserByUsername(username: string): Promise<User | null> {
   try {

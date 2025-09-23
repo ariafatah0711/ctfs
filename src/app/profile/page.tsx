@@ -3,14 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
-import { getChallenges } from '@/lib/challenges'
-import { User, ChallengeWithSolve } from '@/types'
 import UserProfile from '@/components/UserProfile'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
+  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -20,9 +17,7 @@ export default function ProfilePage() {
         router.push('/login')
         return
       }
-      setUser(currentUser)
-      const challengesData = await getChallenges(currentUser.id)
-      setChallenges(challengesData)
+      setUserId(currentUser.id)
       setLoading(false)
     }
     fetchData()
@@ -30,9 +25,9 @@ export default function ProfilePage() {
 
   return (
     <UserProfile
-      user={user}
-      challenges={challenges}
+      userId={userId}
       loading={loading}
+      onBack={() => router.back()}
       isCurrentUser={true}
     />
   )

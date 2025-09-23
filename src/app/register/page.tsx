@@ -23,13 +23,13 @@ export default function RegisterPage() {
 
     // Validasi password
     if (formData.password !== formData.confirmPassword) {
-      setError('Password dan konfirmasi password tidak sama')
+      setError('Passwords do not match')
       setLoading(false)
       return
     }
 
     if (formData.password.length < 6) {
-      setError('Password minimal 6 karakter')
+      setError('Password must be at least 6 characters')
       setLoading(false)
       return
     }
@@ -43,7 +43,7 @@ export default function RegisterPage() {
         router.push('/challanges')
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat mendaftar')
+      setError('Registration failed')
     } finally {
       setLoading(false)
     }
@@ -61,12 +61,12 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Daftar ke CTFS
+            Register for CTFS
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Atau{' '}
+            Or{' '}
             <Link href="/login" className="font-medium text-primary-600 hover:text-primary-500">
-              masuk dengan akun yang sudah ada
+              sign in with an existing account
             </Link>
           </p>
         </div>
