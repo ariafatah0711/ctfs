@@ -216,7 +216,11 @@ export default function AdminPage() {
   const removeHint = (i: number) => setFormData(prev => ({ ...prev, hint: prev.hint.filter((_, idx) => idx !== i) }))
 
   // attachments
-  const addAttachment = () => setFormData(prev => ({ ...prev, attachments: [...prev.attachments, { name: '', url: '', type: 'file' }] }))
+  const addAttachment = () =>
+    setFormData(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, { name: '', url: '', type: 'file' }]
+    }))
   const updateAttachment = (i: number, field: keyof Attachment, v: string) => setFormData(prev => ({ ...prev, attachments: prev.attachments.map((a, idx) => idx === i ? { ...a, [field]: v } : a) }))
   const removeAttachment = (i: number) => setFormData(prev => ({ ...prev, attachments: prev.attachments.filter((_, idx) => idx !== i) }))
 
@@ -461,20 +465,60 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  <div className="md:col-span-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Attachments</Label>
-                      <Button type="button" variant="ghost" size="sm" onClick={addAttachment}>+ Add</Button>
-                    </div>
+                <div className="md:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Attachments</Label>
+                    <Button type="button" variant="ghost" size="sm" onClick={addAttachment}>+ Add</Button>
+                  </div>
+
                     <div className="space-y-2 mt-2">
                       {formData.attachments.map((a, idx) => (
                         <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                          <Input className="col-span-5" value={a.name} onChange={(e) => updateAttachment(idx, 'name', e.target.value)} placeholder="File name" />
-                          <Input className="col-span-5" value={a.url} onChange={(e) => updateAttachment(idx, 'url', e.target.value)} placeholder="URL" />
-                          <Button type="button" variant="ghost" onClick={() => removeAttachment(idx)}>✕</Button>
+                          {/* Attachment name */}
+                          <Input
+                            className="col-span-3"
+                            value={a.name}
+                            onChange={(e) => updateAttachment(idx, 'name', e.target.value)}
+                            placeholder="File name / Label"
+                          />
+
+                          {/* Attachment url */}
+                          <Input
+                            className="col-span-6"
+                            value={a.url}
+                            onChange={(e) => updateAttachment(idx, 'url', e.target.value)}
+                            placeholder="URL"
+                          />
+
+                          {/* Attachment type */}
+                          <Select
+                            value={a.type}
+                            onValueChange={(v) => updateAttachment(idx, 'type', v)}
+                          >
+                            <SelectTrigger className="col-span-2">
+                              <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="file">File</SelectItem>
+                              <SelectItem value="link">Link</SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          {/* Remove button */}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => removeAttachment(idx)}
+                            className="col-span-1"
+                          >
+                            ✕
+                          </Button>
                         </div>
                       ))}
-                      {formData.attachments.length === 0 && <p className="text-xs text-muted-foreground">No attachments added</p>}
+
+                      {formData.attachments.length === 0 && (
+                        <p className="text-xs text-muted-foreground">No attachments added</p>
+                      )}
                     </div>
                   </div>
                 </div>

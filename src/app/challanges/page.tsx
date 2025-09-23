@@ -6,6 +6,10 @@ import { getCurrentUser } from '@/lib/auth'
 import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { ChallengeWithSolve, User, Attachment } from '@/types'
 
+import { motion } from "framer-motion"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
 type Solver = {
   username: string;
   solvedAt: string;
@@ -35,6 +39,7 @@ export default function ChallengesPage() {
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
   const [loading, setLoading] = useState(true)
   const [flagInputs, setFlagInputs] = useState<{[key: string]: string}>({})
+  const [flagFeedback, setFlagFeedback] = useState<{[key: string]: { success: boolean, message: string } | null}>({})
   const [submitting, setSubmitting] = useState<{[key: string]: boolean}>({})
   const [expandedChallenges, setExpandedChallenges] = useState<{[key: string]: boolean}>({})
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
@@ -107,27 +112,34 @@ export default function ChallengesPage() {
     if (!user || !flagInputs[challengeId]?.trim()) return
 
     setSubmitting(prev => ({ ...prev, [challengeId]: true }))
+    setFlagFeedback(prev => ({ ...prev, [challengeId]: null })) // reset dulu
 
     try {
-      // Submit flag
       const result = await submitFlag(challengeId, flagInputs[challengeId].trim())
 
-      // Refresh challenges and user data (selalu, agar status is_solved up-to-date)
+      // Refresh challenge list & user
       const challengesData = await getChallenges(user.id)
       setChallenges(challengesData)
       const updatedUser = await getCurrentUser()
       setUser(updatedUser)
 
-      // Tampilkan pesan dari backend langsung
-      alert(result.message)
+      // set feedback box
+      setFlagFeedback(prev => ({
+        ...prev,
+        [challengeId]: { success: result.success, message: result.message }
+      }))
+
       if (result.success) {
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
-        setSelectedChallenge(null)
-        setChallengeTab('challenge')
+        // setSelectedChallenge(null)
+        // setChallengeTab('challenge')
       }
     } catch (error) {
       console.error('Error submitting flag:', error)
-  alert('Failed to submit flag')
+      setFlagFeedback(prev => ({
+        ...prev,
+        [challengeId]: { success: false, message: "Failed to submit flag" }
+      }))
     } finally {
       setSubmitting(prev => ({ ...prev, [challengeId]: false }))
     }
@@ -286,34 +298,27 @@ export default function ChallengesPage() {
                 {/* Grid Card */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {categoryChallenges.map((challenge) => (
-                    <div
+                    <motion.div
                       key={challenge.id}
-                      className={`
-                        relative rounded-md border-2
-                        ${challenge.is_solved
-                          ? 'bg-green-600 border-green-400 hover:border-green-200'
-                          : 'bg-blue-700 border-blue-400 hover:border-blue-200'}
-                        transition-all duration-150 cursor-pointer shadow-lg group
-                      `}
-                      onClick={() => setSelectedChallenge(challenge)}
-                      style={{
-                        minHeight: 110,
-                        boxShadow: '0 2px 0 #222, 0 4px 24px #0004'
-                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.97 }}
                     >
-                      {/* Centang kanan atas */}
-                      {challenge.is_solved && (
-                        <span className="absolute top-2 right-3 text-white text-lg font-bold select-none">
-                          ✓
-                        </span>
-                      )}
-                      <div className="flex flex-col items-center justify-center h-full py-6">
-                        <span className="text-lg font-bold text-white mb-2 truncate">{challenge.title}</span>
-                        <span className="flex items-center gap-1 text-yellow-300 text-base font-semibold">
-                          <span className="text-lg">🪙</span> {challenge.points}
-                        </span>
-                      </div>
-                    </div>
+                      <Card
+                        onClick={() => setSelectedChallenge(challenge)}
+                        className={`cursor-pointer shadow-md rounded-md ${
+                          challenge.is_solved ? "bg-green-600" : "bg-blue-600"
+                        }`}
+                      >
+                        <CardHeader className="flex items-center justify-center">
+                          <h3 className="text-white font-semibold text-center truncate">
+                            {challenge.title}
+                          </h3>
+                        </CardHeader>
+                        <CardContent className="flex items-center justify-center gap-2 text-yellow-300 font-bold">
+                          🪙 {challenge.points}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -322,275 +327,288 @@ export default function ChallengesPage() {
         </div>
       </div>
 
-      {/* Challenge Detail Modal */}
-      {selectedChallenge && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4"
-          onClick={() => {
-            setSelectedChallenge(null);
-            setChallengeTab('challenge');
-          }}
+      {/* === Challenge Detail Dialog (menggantikan modal manual) === */}
+      <Dialog
+        open={!!selectedChallenge}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedChallenge(null)
+            setChallengeTab('challenge')
+          }
+        }}
+      >
+        <DialogContent
+          className="w-full max-w-lg rounded-md bg-[#232344] border border-[#35355e] p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          onClick={e => e.stopPropagation()}
+          style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
         >
-          <div
-            className="relative w-full max-w-lg mx-auto rounded-md shadow-2xl bg-[#232344] border border-[#35355e] p-8 font-mono max-h-[90vh] overflow-y-auto"
-            onClick={e => e.stopPropagation()}
-            style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
-          >
-            {/* Title & Close button in one row */}
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                className={`
-                  text-xl font-bold tracking-wide
-                  ${selectedChallenge.is_solved ? 'text-green-400' : 'text-pink-400'}
-                `}
-                style={{ fontSize: '1.25rem' }}
-              >
-                {selectedChallenge.title}
-              </h2>
-              <button
-                className="ml-4 text-gray-400 hover:text-white text-xl"
-                onClick={() => {
-                  setSelectedChallenge(null);
-                  setChallengeTab('challenge');
-                }}
-                aria-label="Close"
-                type="button"
-              >✕</button>
-            </div>
+          {selectedChallenge && (
+            <>
+              {/* Header: title + close */}
+              <div className="flex items-center justify-between mb-4">
+                <h2
+                  className={`
+                    text-xl font-bold tracking-wide
+                    ${selectedChallenge.is_solved ? 'text-green-400' : 'text-pink-400'}
+                  `}
+                  style={{ fontSize: '1.25rem' }}
+                >
+                  {selectedChallenge.title}
+                </h2>
+              </div>
 
-            {/* Tabs */}
-            <div className="flex justify-between gap-2 mb-6">
-              <button
-                className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
-                onClick={() => setChallengeTab('challenge')}
-              >Challenge</button>
-              <button
-                className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
-                onClick={() => handleTabChange('solvers', selectedChallenge.id)}
-              >{solvers.length || ""} solve</button>
-            </div>
+              {/* Tabs */}
+              <div className="flex justify-between gap-2 mb-6">
+                <button
+                  className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+                  onClick={() => setChallengeTab('challenge')}
+                >
+                  Challenge
+                </button>
+                <button
+                  className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+                  onClick={() => handleTabChange('solvers', selectedChallenge.id)}
+                >
+                  {solvers.length || ""} solve
+                </button>
+              </div>
 
-            {/* Tab Content */}
-            {challengeTab === 'challenge' && (
-              <>
-                {/* Badge bar: difficulty, category, coin */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-200 text-blue-800">
-                      {selectedChallenge.category}
-                    </span>
+              {/* Content: Challenge detail */}
+              {challengeTab === 'challenge' && (
+                <>
+                  {/* Badge bar */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-200 text-blue-800">
+                        {selectedChallenge.category}
+                      </span>
+                      <span className={`
+                        px-3 py-1 rounded text-sm font-semibold
+                        ${selectedChallenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''}
+                        ${selectedChallenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800' : ''}
+                        ${selectedChallenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}
+                      `}>
+                        {selectedChallenge.difficulty}
+                      </span>
+                    </div>
                     <span className={`
-                      px-3 py-1 rounded text-sm font-semibold
-                      ${selectedChallenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''}
-                      ${selectedChallenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800' : ''}
-                      ${selectedChallenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}
-                    `}>
-                      {selectedChallenge.difficulty}
-                    </span>
-                  </div>
-                  <span
-                    className={`
                       flex items-center gap-1 text-base font-bold
                       ${selectedChallenge.is_solved ? 'text-green-300' : 'text-yellow-300'}
-                    `}
-                  >
-                    🪙 {selectedChallenge.points}
-                  </span>
-                </div>
-                {/* Description */}
-                <div className="mb-3 text-gray-200 text-sm whitespace-pre-line">
-                  <MarkdownRenderer content={selectedChallenge.description} />
-                </div>
-                {/* Attachments */}
-                {selectedChallenge.attachments && selectedChallenge.attachments.length > 0 && (
-                  <div className="mb-3 space-y-3">
-                    {/* File Attachments */}
-                    {selectedChallenge.attachments.some(att => att.type === 'file') && (
-                      <div>
-                        <p className="text-xs text-gray-400 mb-1">📂 Files</p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedChallenge.attachments
-                            .filter(att => att.type === 'file')
-                            .map((attachment, idx) => {
-                              const displayName = attachment.name?.length > 40
-                                ? attachment.name.slice(0, 37) + "..."
-                                : attachment.name;
-
-                              return (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  title={attachment.name}
-                                  className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    downloadFile(attachment, `${selectedChallenge.id}-${idx}`);
-                                  }}
-                                  disabled={downloading[`${selectedChallenge.id}-${idx}`]}
-                                >
-                                  {downloading[`${selectedChallenge.id}-${idx}`] ? "Mengunduh..." : displayName}
-                                </button>
-                              );
-                            })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* URL Attachments */}
-                    {selectedChallenge.attachments.some(att => att.type !== 'file') && (
-                      <div>
-                        <p className="text-xs text-gray-400 mb-1">🔗 Links</p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedChallenge.attachments
-                            .filter(att => att.type !== 'file')
-                            .map((attachment, idx) => {
-                              const displayName = attachment.name?.length > 40
-                                ? attachment.name.slice(0, 37) + "..."
-                                : attachment.name;
-
-                              return (
-                                <a
-                                  key={idx}
-                                  href={attachment.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  title={attachment.url}
-                                  className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
-                                >
-                                  {displayName || attachment.url.slice(0, 40) + "..."}
-                                </a>
-                              );
-                            })}
-                        </div>
-                      </div>
-                    )}
+                    `}>
+                      🪙 {selectedChallenge.points}
+                    </span>
                   </div>
-                )}
-                {/* Show Hint Buttons (one per hint) */}
-                {Array.isArray(selectedChallenge.hint) && selectedChallenge.hint.length > 0 && (
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {(selectedChallenge.hint ?? []).map((hint: string, idx: number) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className="px-3 py-1 rounded bg-yellow-200 text-yellow-900 font-semibold text-xs hover:bg-yellow-300 transition"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setShowHintModal({ challenge: selectedChallenge, hintIdx: idx });
-                        }}
-                      >
-                        💡 Hint {(selectedChallenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
-                {/* Flag input */}
-                <form
-                  className="flex gap-2 mt-4"
-                  onSubmit={e => {
-                    e.preventDefault();
-                    handleFlagSubmit(selectedChallenge.id);
-                  }}
-                >
-                  <input
-                    type="text"
-                    value={flagInputs[selectedChallenge.id] || ''}
-                    onChange={e => handleFlagInputChange(selectedChallenge.id, e.target.value)}
-                    placeholder="Flag"
-                    className="flex-1 px-3 py-2 rounded border border-[#35355e] bg-[#181829] text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    disabled={submitting[selectedChallenge.id] || !flagInputs[selectedChallenge.id]?.trim()}
-                    className="px-5 py-2 rounded bg-gradient-to-br from-pink-500 to-pink-400 text-white font-bold shadow hover:from-pink-400 hover:to-pink-500 transition disabled:opacity-50"
-                  >
-                    {submitting[selectedChallenge.id] ? '...' : 'Submit'}
-                  </button>
-                </form>
-              </>
-            )}
-            {challengeTab === 'solvers' && (
-              <div>
-                <ul className="space-y-2 max-h-60 overflow-y-auto">
-                  {solvers.length === 0 ? (
-                    <li className="text-gray-400">No solves yet.</li>
-                  ) : (
-                    solvers.map((solver, idx) => (
-                      <li key={idx} className="flex justify-between text-gray-200 items-center">
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={`/user/${solver.username}`}
-                            className={`hover:underline ${idx === 0 ? 'font-bold text-red-400' : 'text-pink-300'}`}
-                          >
-                            {solver.username}
-                          </a>
-                          {idx === 0 && (
-                            <span title="First Blood" className="text-red-400 text-lg font-bold">🩸</span>
-                          )}
+                  {/* Description */}
+                  <div className="mb-3 text-gray-200 text-sm whitespace-pre-line">
+                    <MarkdownRenderer content={selectedChallenge.description} />
+                  </div>
+
+                  {/* Attachments */}
+                  {selectedChallenge.attachments && selectedChallenge.attachments.length > 0 && (
+                    <div className="mb-3 space-y-3">
+                      {/* File Attachments */}
+                      {selectedChallenge.attachments.some(att => att.type === 'file') && (
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">📂 Files</p>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedChallenge.attachments
+                              .filter(att => att.type === 'file')
+                              .map((attachment, idx) => {
+                                const displayName = attachment.name?.length > 40
+                                  ? attachment.name.slice(0, 37) + "..."
+                                  : attachment.name || 'file'
+                                const key = `${selectedChallenge.id}-${idx}`
+
+                                return (
+                                  <button
+                                    key={key}
+                                    type="button"
+                                    title={attachment.name}
+                                    className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      downloadFile(attachment, key)
+                                    }}
+                                    disabled={downloading[key]}
+                                  >
+                                    {downloading[key] ? "Mengunduh..." : displayName}
+                                  </button>
+                                )
+                              })}
+                          </div>
                         </div>
-                        <span className="text-xs text-gray-400">{new Date(solver.solvedAt).toLocaleString()}</span>
-                      </li>
-                    ))
+                      )}
+
+                      {/* URL Attachments */}
+                      {selectedChallenge.attachments.some(att => att.type !== 'file') && (
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">🔗 Links</p>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedChallenge.attachments
+                              .filter(att => att.type !== 'file')
+                              .map((attachment, idx) => {
+                                const displayName = attachment.name?.length > 40
+                                  ? attachment.name.slice(0, 37) + "..."
+                                  : attachment.name || (attachment.url ? attachment.url.slice(0, 40) + "..." : 'link')
+
+                                return (
+                                  <a
+                                    key={idx}
+                                    href={attachment.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={attachment.url}
+                                    className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
+                                  >
+                                    {displayName}
+                                  </a>
+                                )
+                              })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Hint Modal */}
-      {showHintModal.challenge && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
-          onClick={() => setShowHintModal({ challenge: null })}
-        >
-          <div
-            className="bg-[#232344] rounded-md shadow-2xl max-w-md w-full border border-[#35355e]"
-            style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="p-6 relative">
-              <div className="flex items-center mb-4">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-yellow-600 text-lg">💡</span>
+                  {/* Hint buttons */}
+                  {Array.isArray(selectedChallenge.hint) && selectedChallenge.hint.length > 0 && (
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {(selectedChallenge.hint ?? []).map((hint: string, idx: number) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className="px-3 py-1 rounded bg-yellow-200 text-yellow-900 font-semibold text-xs hover:bg-yellow-300 transition"
+                          onClick={e => {
+                            e.stopPropagation()
+                            setShowHintModal({ challenge: selectedChallenge, hintIdx: idx })
+                          }}
+                        >
+                          💡 Hint {(selectedChallenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Flag input */}
+                  <form
+                    className="flex gap-2 mt-4"
+                    onSubmit={e => {
+                      e.preventDefault()
+                      handleFlagSubmit(selectedChallenge.id)
+                    }}
+                  >
+                    <input
+                      type="text"
+                      value={flagInputs[selectedChallenge.id] || ''}
+                      onChange={e => handleFlagInputChange(selectedChallenge.id, e.target.value)}
+                      placeholder="Flag"
+                      className="flex-1 px-3 py-2 rounded border border-[#35355e] bg-[#181829] text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting[selectedChallenge.id] || !flagInputs[selectedChallenge.id]?.trim()}
+                      className="px-5 py-2 rounded bg-gradient-to-br from-pink-500 to-pink-400 text-white font-bold shadow hover:from-pink-400 hover:to-pink-500 transition disabled:opacity-50"
+                    >
+                      {submitting[selectedChallenge.id] ? '...' : 'Submit'}
+                    </button>
+                  </form>
+
+                  {/* Feedback box */}
+                  {flagFeedback[selectedChallenge.id] && (
+                    <div
+                      className={`mt-2 p-2 rounded text-sm font-semibold ${
+                        flagFeedback[selectedChallenge.id]?.success
+                          ? "bg-green-600 text-white"
+                          : "bg-red-600 text-white"
+                      }`}
+                    >
+                      {flagFeedback[selectedChallenge.id]?.message}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Content: Solvers */}
+              {challengeTab === 'solvers' && (
+                <div>
+                  <ul className="space-y-2 max-h-60 overflow-y-auto">
+                    {solvers.length === 0 ? (
+                      <li className="text-gray-400">No solves yet.</li>
+                    ) : (
+                      solvers.map((solver, idx) => (
+                        <li key={idx} className="flex justify-between text-gray-200 items-center">
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`/user/${solver.username}`}
+                              className={`hover:underline ${idx === 0 ? 'font-bold text-red-400' : 'text-pink-300'}`}
+                            >
+                              {solver.username}
+                            </a>
+                            {idx === 0 && (
+                              <span title="First Blood" className="text-red-400 text-lg font-bold">🩸</span>
+                            )}
+                          </div>
+                          <span className="text-xs text-gray-400">{new Date(solver.solvedAt).toLocaleString()}</span>
+                        </li>
+                      ))
+                    )}
+                  </ul>
                 </div>
-                <h3 className="text-lg font-semibold text-pink-300">
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+    {/* === Hint Dialog (gunakan Dialog juga biar konsisten) === */}
+     <Dialog
+        open={!!showHintModal.challenge}
+        onOpenChange={(open) => {
+          if (!open) setShowHintModal({ challenge: null })
+        }}
+      >
+        <DialogContent
+            className="bg-[#232344] rounded-md shadow-2xl max-w-md w-full border border-[#35355e] p-6 font-mono
+                      [&_button.absolute.right-4.top-4]:hidden"
+            style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
+          >
+          {showHintModal.challenge && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-pink-300">
+                  <span className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                    💡
+                  </span>
                   Hint for: {showHintModal.challenge.title}
-                </h3>
-              </div>
-              {/* Tombol X di pojok kanan atas */}
-              <button
-                onClick={() => setShowHintModal({ challenge: null })}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl font-bold focus:outline-none"
-                aria-label="Close"
-              >
-                ×
-              </button>
-              <div className="mb-6">
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="mt-4">
                 <div className="bg-[#35355e] border border-[#35355e] rounded-lg p-4">
                   {(() => {
                     const hints: string[] = Array.isArray(showHintModal.challenge.hint)
                       ? showHintModal.challenge.hint as string[]
-                      : [];
-                    let idx = (showHintModal as any).hintIdx ?? 0;
+                      : []
+                    const idx = (showHintModal as any).hintIdx ?? 0
+
                     if (!hints[idx]) {
-                      return <p className="text-gray-400 italic">No hint available.</p>;
+                      return <p className="text-gray-400 italic">No hint available.</p>
                     }
+
                     return (
-                      <div className="text-gray-200 leading-relaxed">
+                      <div className="text-gray-200 leading-relaxed whitespace-pre-wrap">
                         {hints[idx]}
                       </div>
-                    );
+                    )
                   })()}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
