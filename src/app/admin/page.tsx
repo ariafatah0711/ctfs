@@ -23,7 +23,7 @@ export default function AdminPage() {
     category: 'Web',
     points: 100,
     flag: '',
-    hint: '',
+    hint: [] as string[],
     difficulty: 'Easy',
     attachments: [] as Attachment[]
   })
@@ -67,7 +67,9 @@ export default function AdminPage() {
         description: (formData.description || "").trim(),
         category: (formData.category || "").trim(),
         points: Number(formData.points) || 0,
-        hint: (formData.hint || "").trim(),
+        hint: (formData.hint && formData.hint.length > 0)
+          ? formData.hint.filter(h => h.trim() !== '')
+          : null,
         difficulty: (formData.difficulty || "").trim(),
         attachments: formData.attachments || []
       }
@@ -107,7 +109,7 @@ export default function AdminPage() {
         category: 'Web',
         points: 100,
         flag: '',
-        hint: '',
+        hint: [],
         difficulty: 'Easy',
         attachments: []
       })
@@ -123,13 +125,30 @@ export default function AdminPage() {
 
   const handleEdit = (challenge: Challenge) => {
     setEditingChallenge(challenge)
+    let parsedHint: string[] = [];
+    if (Array.isArray(challenge.hint)) {
+      parsedHint = challenge.hint.filter(h => typeof h === 'string');
+    } else if (typeof challenge.hint === 'string' && challenge.hint.trim() !== '') {
+      try {
+        const arr = JSON.parse(challenge.hint);
+        if (Array.isArray(arr)) {
+          parsedHint = arr.filter(h => typeof h === 'string');
+        } else {
+          parsedHint = [challenge.hint];
+        }
+      } catch {
+        parsedHint = [challenge.hint];
+      }
+    } else {
+      parsedHint = [];
+    }
     setFormData({
       title: challenge.title,
       description: challenge.description,
       category: challenge.category,
       points: challenge.points,
       flag: challenge.flag, // Show current flag for editing
-      hint: challenge.hint || '',
+      hint: parsedHint,
       difficulty: challenge.difficulty,
       attachments: challenge.attachments || []
     })
@@ -163,10 +182,30 @@ export default function AdminPage() {
       category: 'Web',
       points: 100,
       flag: '',
-      hint: '',
+      hint: [],
       difficulty: 'Easy',
       attachments: []
     })
+  }
+
+  // Hint array handlers
+  function addHint() {
+    setFormData(prev => ({
+      ...prev,
+      hint: [...(prev.hint || []), '']
+    }))
+  }
+  function removeHint(index: number) {
+    setFormData(prev => ({
+      ...prev,
+      hint: prev.hint.filter((_, i) => i !== index)
+    }))
+  }
+  function updateHint(index: number, value: string) {
+    setFormData(prev => ({
+      ...prev,
+      hint: prev.hint.map((h, i) => i === index ? value : h)
+    }))
   }
 
   const addAttachment = () => {
@@ -355,16 +394,37 @@ export default function AdminPage() {
                 </div>
 
                 <div className="mb-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hint (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.hint}
-                    onChange={(e) => setFormData({ ...formData, hint: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    placeholder="Petunjuk untuk challenge..."
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Hint (Opsional)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={addHint}
+                      className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-md hover:bg-blue-200"
+                    >
+                      + Add Hint
+                    </button>
+                  </div>
+                  {formData.hint.length === 0 && (
+                    <p className="text-sm text-gray-500 italic">No hints added. Click Add Hint to add hints.</p>
+                  )}
+                  {formData.hint.map((hint, idx) => (
+                    <div key={idx} className="flex items-center space-x-2 mb-2">
+                      <input
+                        type="text"
+                        value={hint}
+                        onChange={e => updateHint(idx, e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        placeholder={`Hint #${idx + 1}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeHint(idx)}
+                        className="text-red-600 hover:text-red-800 text-sm"
+                      >✕</button>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Attachments */}

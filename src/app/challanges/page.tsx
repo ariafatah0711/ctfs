@@ -37,7 +37,7 @@ export default function ChallengesPage() {
   const [flagInputs, setFlagInputs] = useState<{[key: string]: string}>({})
   const [submitting, setSubmitting] = useState<{[key: string]: boolean}>({})
   const [expandedChallenges, setExpandedChallenges] = useState<{[key: string]: boolean}>({})
-  const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null}>({challenge: null})
+  const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
 
@@ -60,9 +60,34 @@ export default function ChallengesPage() {
       setUser(currentUser)
 
       const challengesData = await getChallenges(currentUser.id)
-      console.log('Challenges data:', challengesData) // Debug log
-      setChallenges(challengesData)
-      setLoading(false)
+      // Normalize hint field to string[] for each challenge
+      const normalizedChallenges = challengesData.map((challenge: any) => {
+        let hints: string[] = [];
+        const raw = challenge.hint;
+        if (Array.isArray(raw)) {
+          hints = raw.filter((h: any) => typeof h === 'string');
+        } else if (typeof raw === 'string') {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              hints = parsed.filter((h: any) => typeof h === 'string');
+            } else if (typeof parsed === 'string') {
+              hints = [parsed];
+            } else if (parsed === null) {
+              hints = [];
+            }
+          } catch {
+            if (raw.trim() !== '') hints = [raw];
+          }
+        } else if (raw && typeof raw === 'object') {
+          // ignore unexpected object
+        } else if (raw) {
+          hints = [String(raw)];
+        }
+        return { ...challenge, hint: hints };
+      });
+      setChallenges(normalizedChallenges);
+      setLoading(false);
     }
 
     fetchData()
@@ -411,6 +436,25 @@ export default function ChallengesPage() {
                     })}
                   </div>
                 )}
+                {/* Show Hint Buttons (one per hint) */}
+                {Array.isArray(selectedChallenge.hint) && selectedChallenge.hint.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {(selectedChallenge.hint ?? []).map((hint: string, idx: number) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className="px-3 py-1 rounded bg-yellow-200 text-yellow-900 font-semibold text-xs hover:bg-yellow-300 transition"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setShowHintModal({ challenge: selectedChallenge, hintIdx: idx });
+                        }}
+                      >
+                        💡 Hint {(selectedChallenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {/* Flag input */}
                 <form
                   className="flex gap-2 mt-4"
@@ -469,31 +513,49 @@ export default function ChallengesPage() {
 
       {/* Hint Modal */}
       {showHintModal.challenge && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="p-6">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+          onClick={() => setShowHintModal({ challenge: null })}
+        >
+          <div
+            className="bg-[#232344] rounded-md shadow-2xl max-w-md w-full border border-[#35355e]"
+            style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 relative">
               <div className="flex items-center mb-4">
                 <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
                   <span className="text-yellow-600 text-lg">💡</span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-pink-300">
                   Hint for: {showHintModal.challenge.title}
                 </h3>
               </div>
+              {/* Tombol X di pojok kanan atas */}
+              <button
+                onClick={() => setShowHintModal({ challenge: null })}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl font-bold focus:outline-none"
+                aria-label="Close"
+              >
+                ×
+              </button>
               <div className="mb-6">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <p className="text-gray-700 leading-relaxed">
-                    {showHintModal.challenge.hint}
-                  </p>
+                <div className="bg-[#35355e] border border-[#35355e] rounded-lg p-4">
+                  {(() => {
+                    const hints: string[] = Array.isArray(showHintModal.challenge.hint)
+                      ? showHintModal.challenge.hint as string[]
+                      : [];
+                    let idx = (showHintModal as any).hintIdx ?? 0;
+                    if (!hints[idx]) {
+                      return <p className="text-gray-400 italic">No hint available.</p>;
+                    }
+                    return (
+                      <div className="text-gray-200 leading-relaxed">
+                        {hints[idx]}
+                      </div>
+                    );
+                  })()}
                 </div>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowHintModal({ challenge: null })}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-md transition-colors"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>

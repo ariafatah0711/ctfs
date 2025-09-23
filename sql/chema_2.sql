@@ -90,7 +90,7 @@ CREATE TABLE public.challenges (
   description TEXT NOT NULL,
   category TEXT NOT NULL,
   points INTEGER NOT NULL,
-  hint TEXT,
+  hint JSONB DEFAULT NULL,
   difficulty TEXT,
   attachments JSONB DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT true,
@@ -240,7 +240,7 @@ CREATE OR REPLACE FUNCTION add_challenge(
   p_points INTEGER,
   p_flag TEXT,
   p_difficulty TEXT,
-  p_hint TEXT DEFAULT NULL,
+  p_hint JSONB DEFAULT NULL,
   p_attachments JSONB DEFAULT '[]'
 )
 RETURNS UUID AS $$
@@ -263,7 +263,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, TEXT, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB) TO authenticated;
 
 CREATE OR REPLACE FUNCTION delete_challenge(
   p_challenge_id UUID
@@ -290,7 +290,7 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_category TEXT,
   p_points INTEGER,
   p_difficulty TEXT,
-  p_hint TEXT DEFAULT NULL,
+  p_hint JSONB DEFAULT NULL,
   p_attachments JSONB DEFAULT '[]',
   p_is_active BOOLEAN DEFAULT TRUE,
   p_flag TEXT DEFAULT NULL
@@ -305,14 +305,14 @@ BEGIN
 
   UPDATE public.challenges
   SET title = p_title,
-      description = p_description,
-      category = p_category,
-      points = p_points,
-      difficulty = p_difficulty,
-      hint = p_hint,
-      attachments = p_attachments,
-      is_active = p_is_active,
-      updated_at = now()
+    description = p_description,
+    category = p_category,
+    points = p_points,
+    difficulty = p_difficulty,
+    hint = p_hint,
+    attachments = p_attachments,
+    is_active = p_is_active,
+    updated_at = now()
   WHERE id = p_challenge_id;
 
   IF p_flag IS NOT NULL THEN
@@ -325,7 +325,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION update_challenge(UUID, TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, BOOLEAN, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_challenge(UUID, TEXT, TEXT, TEXT, INTEGER, TEXT, JSONB, JSONB, BOOLEAN, TEXT) TO authenticated;
 
 -- ########################################################
 
@@ -413,7 +413,7 @@ WITH ins AS (
     'Flag disembunyikan sebagai Base64. Cari string yang sudah di-encode dan decode untuk mendapatkan flag. YXJpYQo=',
     'Cryptography',
     150,
-    'Flag adalah Base64 dari nama domain target.',
+    '["Flag adalah Base64 dari nama domain target."]',
     'Easy',
     '[]'::jsonb
   )
@@ -431,7 +431,7 @@ WITH ins AS (
     'Flag disembunyikan di file `robots.txt` pada domain target. Buka `https://smk.amablex90.my.id/robots.txt` dan cari baris yang menyimpan flag.',
     'Web',
     100,
-    'Cek https://smk.amablex90.my.id/robots.txt — flag ada di sana.',
+    '["Cek https://smk.amablex90.my.id/robots.txt — flag ada di sana."]',
     'Easy',
     '[
       {
@@ -480,7 +480,7 @@ WITH ins AS (
     'ini test doang: flag{test}',
     'Web',
     200,
-    'test',
+    '["test"]',
     'Medium',
     '[
       {

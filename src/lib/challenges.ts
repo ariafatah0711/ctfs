@@ -76,19 +76,25 @@ export async function addChallenge(challengeData: {
   category: string
   points: number
   flag: string
-  hint?: string
+  hint?: string | string[] | null
   attachments?: Attachment[]
   difficulty: string
 }): Promise<void> {
   try {
+    let hintValue: any = null;
+    if (Array.isArray(challengeData.hint)) {
+      hintValue = challengeData.hint.length > 0 ? JSON.stringify(challengeData.hint) : null;
+    } else if (typeof challengeData.hint === 'string' && challengeData.hint.trim() !== '') {
+      hintValue = JSON.stringify([challengeData.hint]);
+    }
     const { error } = await supabase.rpc('add_challenge', {
       p_title: challengeData.title,
       p_description: challengeData.description,
       p_category: challengeData.category,
       p_points: challengeData.points,
       p_flag: challengeData.flag,
-      p_difficulty: challengeData.difficulty,   // <- dipindah ke sini
-      p_hint: challengeData.hint || null,
+      p_difficulty: challengeData.difficulty,
+      p_hint: hintValue,
       p_attachments: challengeData.attachments || []
     });
     if (error) {
@@ -109,12 +115,18 @@ export async function updateChallenge(challengeId: string, challengeData: {
   category: string
   points: number
   flag?: string
-  hint?: string
+  hint?: string | string[] | null
   attachments?: Attachment[]
   difficulty: string
   is_active?: boolean
 }): Promise<void> {
   try {
+    let hintValue: any = null;
+    if (Array.isArray(challengeData.hint)) {
+      hintValue = challengeData.hint.length > 0 ? JSON.stringify(challengeData.hint) : null;
+    } else if (typeof challengeData.hint === 'string' && challengeData.hint.trim() !== '') {
+      hintValue = JSON.stringify([challengeData.hint]);
+    }
     const { error } = await supabase.rpc('update_challenge', {
       p_challenge_id: challengeId,
       p_title: challengeData.title,
@@ -122,7 +134,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_category: challengeData.category,
       p_points: challengeData.points,
       p_difficulty: challengeData.difficulty,
-      p_hint: challengeData.hint || null,
+      p_hint: hintValue,
       p_attachments: challengeData.attachments || [],
       p_is_active: challengeData.is_active !== undefined ? challengeData.is_active : true,
       p_flag: challengeData.flag || null
