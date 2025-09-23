@@ -15,37 +15,45 @@ import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/t
 /**
  * Ambil semua challenges
  */
-export async function getChallenges(userId?: string): Promise<ChallengeWithSolve[]> {
+export async function getChallenges(
+  userId?: string,
+  showAll: boolean = false
+): Promise<ChallengeWithSolve[]> {
   try {
-    const { data: challenges, error } = await supabase
+    let query = supabase
       .from('challenges')
       .select('*')
-      .eq('is_active', true)
-      .order('points', { ascending: true })
+      .order('points', { ascending: true });
+
+    if (!showAll) {
+      query = query.eq('is_active', true); // cuma ambil yang aktif kalau showAll=false
+    }
+
+    const { data: challenges, error } = await query;
 
     if (error) {
-      throw new Error(error.message)
+      throw new Error(error.message);
     }
 
     if (!userId) {
-      return challenges || []
+      return challenges || [];
     }
 
     // Ambil solves user untuk menandai challenge yang sudah diselesaikan
     const { data: solves } = await supabase
       .from('solves')
       .select('challenge_id')
-      .eq('user_id', userId)
+      .eq('user_id', userId);
 
-    const solvedChallengeIds = new Set(solves?.map(s => s.challenge_id) || [])
+    const solvedChallengeIds = new Set(solves?.map(s => s.challenge_id) || []);
 
     return challenges?.map(challenge => ({
       ...challenge,
-      is_solved: solvedChallengeIds.has(challenge.id)
-    })) || []
+      is_solved: solvedChallengeIds.has(challenge.id),
+    })) || [];
   } catch (error) {
-    console.error('Error fetching challenges:', error)
-    return []
+    console.error('Error fetching challenges:', error);
+    return [];
   }
 }
 
@@ -313,5 +321,28 @@ export async function getFlag(challengeId: string): Promise<string | null> {
   } catch (err) {
     console.error('Unexpected error fetching flag:', err);
     return null;
+  }
+}
+
+
+/**
+ * Set active / inactive challenge (Admin only)
+ */
+export async function setChallengeActive(challengeId: string, isActive: boolean): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc('set_challenge_active', {
+      p_challenge_id: challengeId,
+      p_active: isActive,
+    });
+
+    if (error) {
+      console.error('Error setting challenge active state:', error);
+      return false;
+    }
+
+    return data?.success === true;
+  } catch (err) {
+    console.error('Unexpected error setting challenge active state:', err);
+    return false;
   }
 }

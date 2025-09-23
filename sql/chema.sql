@@ -109,6 +109,15 @@ CREATE TABLE public.solves (
   UNIQUE(user_id, challenge_id)
 );
 
+-- Table untuk menampung solve chall nonaktif
+CREATE TABLE IF NOT EXISTS public.solves_nonactive (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  challenge_id UUID NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  moved_at TIMESTAMP WITH TIME ZONE DEFAULT now()  -- waktu dipindahin
+);
+
 -- -- Enable RLS
 -- ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
@@ -416,6 +425,87 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_challenge(UUID, TEXT, TEXT, TEXT, INTEGER, TEXT, JSONB, JSONB, BOOLEAN, TEXT) TO authenticated;
+
+-- ########################################################
+
+-- Table untuk menampung solve chall nonaktif
+CREATE TABLE IF NOT EXISTS public.solves_nonactive (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL,
+  challenge_id UUID NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  moved_at TIMESTAMP WITH TIME ZONE DEFAULT now()  -- waktu dipindahin
+);
+
+-- Trigger function
+CREATE OR REPLACE FUNCTION handle_challenge_activation()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- case: challenge dinonaktifin (true → false)
+  IF OLD.is_active = true AND NEW.is_active = false THEN
+    INSERT INTO public.solves_nonactive (user_id, challenge_id, created_at)
+    SELECT user_id, challenge_id, created_at
+    FROM public.solves
+    WHERE challenge_id = OLD.id;
+
+    DELETE FROM public.solves
+    WHERE challenge_id = OLD.id;
+  END IF;
+
+  -- case: challenge diaktifin lagi (false → true)
+  IF OLD.is_active = false AND NEW.is_active = true THEN
+    INSERT INTO public.solves (user_id, challenge_id, created_at)
+    SELECT user_id, challenge_id, created_at
+    FROM public.solves_nonactive
+    WHERE challenge_id = OLD.id
+    ON CONFLICT (user_id, challenge_id) DO NOTHING;
+
+    DELETE FROM public.solves_nonactive
+    WHERE challenge_id = OLD.id;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Attach trigger
+DROP TRIGGER IF EXISTS trigger_handle_challenge_activation ON public.challenges;
+CREATE TRIGGER trigger_handle_challenge_activation
+AFTER UPDATE OF is_active ON public.challenges
+FOR EACH ROW
+EXECUTE FUNCTION handle_challenge_activation();
+
+-- Function untuk aktif/nonaktifkan challenge
+CREATE OR REPLACE FUNCTION set_challenge_active(
+  p_challenge_id UUID,
+  p_active BOOLEAN
+)
+RETURNS JSON AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+BEGIN
+  -- cek admin
+  IF NOT is_admin() THEN
+    RETURN json_build_object('success', false, 'message', 'Only admin can change challenge status');
+  END IF;
+
+  -- update status chall
+  UPDATE public.challenges
+  SET is_active = p_active,
+      updated_at = now()
+  WHERE id = p_challenge_id;
+
+  -- response
+  RETURN json_build_object(
+    'success', true,
+    'challenge_id', p_challenge_id,
+    'is_active', p_active
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Kasih akses buat authenticated
+GRANT EXECUTE ON FUNCTION set_challenge_active(UUID, BOOLEAN) TO authenticated;
 
 -- ########################################################
 

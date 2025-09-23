@@ -3,24 +3,26 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 // shadcn/ui components (assumes you have them in your project)
-import ChallengeAdminFilterBar from "@/components/ChallengeAdminFilterBar"
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 
 import Navbar from '@/components/Navbar'
+import ChallengeAdminFilterBar from "@/components/ChallengeAdminFilterBar"
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 
 import { getCurrentUser, isAdmin } from '@/lib/auth'
-import { getChallenges, addChallenge, updateChallenge, deleteChallenge, getFlag } from '@/lib/challenges'
+import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag } from '@/lib/challenges'
 import { Challenge, User, Attachment } from '@/types'
 
 // A polished admin page using components + modal + subtle animations.
@@ -86,7 +88,7 @@ export default function AdminPage() {
         return
       }
 
-      const data = await getChallenges()
+      const data = await getChallenges(undefined, true)
       if (!mounted) return
       setChallenges(data)
       setLoading(false)
@@ -127,16 +129,16 @@ export default function AdminPage() {
   }
 
   const refresh = async () => {
-    const data = await getChallenges()
+    const data = await getChallenges(undefined, true) // showAll = true
     setChallenges(data)
   }
 
   const handleViewFlag = async (id: string) => {
     const flag = await getFlag(id)
     if (flag) {
-      alert(`${flag}`) // sementara pakai alert
+      toast.success(`Flag: ${flag}`)
     } else {
-      alert('Failed to take flag or you are not admin.')
+      toast.error('Failed to take flag or you are not admin.')
     }
   }
 
@@ -161,7 +163,7 @@ export default function AdminPage() {
         // notify
       } else {
         if (!formData.flag.trim()) {
-          alert('Flag is required for new challenges')
+          toast.error('Flag is required for new challenges')
           setSubmitting(false)
           return
         }
@@ -173,10 +175,10 @@ export default function AdminPage() {
       setOpenForm(false)
       setEditing(null)
       setFormData({ ...emptyForm })
-      alert('Saved successfully')
+      toast.success('Challenge saved successfully')
     } catch (err) {
       console.error(err)
-      alert('Failed to save challenge')
+      toast.error('Failed to save challenge')
     } finally {
       setSubmitting(false)
     }
@@ -187,10 +189,10 @@ export default function AdminPage() {
     try {
       await deleteChallenge(id)
       await refresh()
-      alert('Deleted')
+      toast.success('Challenge deleted successfully')
     } catch (err) {
       console.error(err)
-      alert('Delete failed')
+      toast.error('Failed to delete challenge')
     }
   }
 
@@ -283,13 +285,18 @@ export default function AdminPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <span
-                            className={`text-xs px-2 py-0.5 rounded-full ${
-                              ch.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                            }`}
-                          >
-                            {ch.is_active ? 'Active' : 'Inactive'}
-                          </span>
+                          <Switch
+                            checked={ch.is_active}
+                            onCheckedChange={async (checked) => {
+                              const ok = await setChallengeActive(ch.id, checked)
+                              if (ok) {
+                                setChallenges(prev =>
+                                  prev.map(c => c.id === ch.id ? { ...c, is_active: checked } : c)
+                                )
+                                toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
+                              }
+                            }}
+                          />
                           <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
                           <Button variant="ghost" size="sm" onClick={() => handleDelete(ch.id)}>🗑️</Button>
                           <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>🏳️ View Flag</Button>

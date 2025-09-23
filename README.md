@@ -5,6 +5,10 @@ Aplikasi CTF minimalis yang dibangun dengan Next.js dan Supabase. Aplikasi ini m
 ## 🚀 Fitur
 
 ```bash
+npx shadcn@latest add button card dialog input textarea select badge label skelaton table switch
+```
+
+```bash
 chall_id="10000000-0000-0000-0000-000000000001"
 USER_ID="00000000-0000-0000-0000-000000000001"
 

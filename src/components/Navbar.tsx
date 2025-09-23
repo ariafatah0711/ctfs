@@ -10,7 +10,7 @@ export default function Navbar() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [adminStatus, setAdminStatus] = useState<boolean>(false)
+  const [adminStatus, setAdminStatus] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
@@ -38,29 +38,26 @@ export default function Navbar() {
     return (
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/challanges" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">C</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">CTFS</span>
-              </Link>
-            </div>
+          <div className="flex justify-between h-16 items-center">
+            <Link href="/challanges" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">C</span>
+              </div>
+              <span className="text-xl font-bold text-gray-900">CTFS</span>
+            </Link>
           </div>
         </div>
       </nav>
     )
   }
 
-  if (!user) {
-    return null
-  }
+  if (!user) return null
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo + Desktop Menu */}
           <div className="flex items-center space-x-8">
             <Link href="/challanges" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -73,7 +70,7 @@ export default function Navbar() {
                 href="/challanges"
                 className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                challanges
+                Challenges
               </Link>
               <Link
                 href="/scoreboard"
@@ -92,33 +89,42 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Profile + Actions */}
           <div className="flex items-center space-x-4">
+            {/* Desktop */}
             <div className="hidden sm:flex items-center space-x-3">
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">{user.username}</div>
-                <div className="text-xs text-gray-500">{user.score} points</div>
-              </div>
               <Link
                 href="/profile"
-                className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors"
+                className="flex items-center space-x-2 group"
               >
-                <span className="text-gray-600 text-sm font-medium">
-                  {user.username.charAt(0).toUpperCase()}
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                  <span className="text-gray-600 text-sm font-medium">
+                    {user.username.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-900">
+                  {user.username}
                 </span>
               </Link>
+              <button
+                onClick={handleLogout}
+                className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Logout
+              </button>
             </div>
-            <button
-              onClick={handleLogout}
-              className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Logout
-            </button>
+
+            {/* Mobile toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
               </svg>
             </button>
           </div>
@@ -127,7 +133,7 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-50 bg-white">
-            {/* Header + Close Button */}
+            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <span className="text-lg font-bold text-gray-900">Menu</span>
               <button
@@ -141,7 +147,7 @@ export default function Navbar() {
             </div>
 
             {/* Menu Items */}
-            <div className="px-4 pt-4 pb-6 space-y-1">
+            <div className="px-4 pt-4 pb-6 space-y-2">
               <Link
                 href="/profile"
                 className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
@@ -152,10 +158,7 @@ export default function Navbar() {
                     {user.username.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">{user.username}</div>
-                  <div className="text-xs text-gray-500">{user.score} points</div>
-                </div>
+                <span className="text-sm font-medium text-gray-900">{user.username}</span>
               </Link>
 
               <Link
@@ -163,7 +166,7 @@ export default function Navbar() {
                 className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-base font-medium"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                challanges
+                Challenges
               </Link>
               <Link
                 href="/scoreboard"
