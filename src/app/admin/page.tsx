@@ -275,7 +275,15 @@ export default function AdminPage() {
                         className="flex items-center justify-between px-4 py-3"
                       >
                         <div className="flex items-center gap-4 truncate">
-                          <Badge className="shrink-0" variant={ch.difficulty === 'Easy' ? 'outline' : ch.difficulty === 'Medium' ? 'secondary' : 'destructive'}>
+                        <Badge
+                            className={
+                              ch.difficulty === 'Easy'
+                                ? 'bg-green-100 text-green-800'
+                                : ch.difficulty === 'Medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'
+                            }
+                          >
                             {ch.difficulty}
                           </Badge>
                           <div className="min-w-0">

@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar'
 import { ChallengeWithSolve } from '@/types'
 import { getFirstBloodChallengeIds } from '@/lib/challenges'
 import { useEffect, useState } from 'react'
-import { getUserDetail } from '@/lib/users'
+import { getUserDetail, getCategoryTotals } from '@/lib/users'
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,7 @@ export default function UserProfile({
 }: Props) {
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null)
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
+  const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
 
   useEffect(() => {
@@ -41,9 +42,14 @@ export default function UserProfile({
         setLoadingDetail(true)
         const detail = await getUserDetail(userId)
         setUserDetail(detail)
+
         if (detail) {
           const firstBlood = await getFirstBloodChallengeIds(detail.id)
           setFirstBloodIds(firstBlood)
+
+          const totals = await getCategoryTotals()
+          setCategoryTotals(totals)
+          console.log(totals)
         }
         setLoadingDetail(false)
       }
@@ -167,46 +173,35 @@ export default function UserProfile({
           </Card>
         </motion.div>
 
-        {/* Category Progress */}
-        {solvedChallenges.length > 0 && categories.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Category Progress</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {categories.map((category: string) => {
-                  const categoryChallenges = solvedChallenges.filter(c => c.category === category)
-                  const solvedInCategory = categoryChallenges.filter(c => c.is_solved)
-                  const progress = categoryChallenges.length > 0
-                    ? (solvedInCategory.length / categoryChallenges.length) * 100
-                    : 0
-                  if (solvedInCategory.length === 0) return null
-                  return (
-                    <div key={category}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-900">{category}</span>
-                        <span className="text-sm text-gray-500">{solvedInCategory.length}/{categoryChallenges.length}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${progress}%` }}
-                          transition={{ duration: 0.5 }}
-                          className="bg-blue-600 h-2 rounded-full"
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+      {/* Category Progress */}
+      {categoryTotals.map(({ category, total_challenges }) => {
+        const solvedInCategory = solvedChallenges.filter(c => c.category === category)
+        if (solvedInCategory.length === 0) return null // <- skip kalau user belum solve
+
+        const progress =
+          total_challenges > 0
+            ? (solvedInCategory.length / total_challenges) * 100
+            : 0
+
+        return (
+          <div key={category}>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-medium text-gray-900">{category}</span>
+              <span className="text-sm text-gray-500">
+                {solvedInCategory.length}/{total_challenges}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.5 }}
+                className="bg-blue-600 h-2 rounded-full"
+              />
+            </div>
+          </div>
+        )
+      })}
 
         {/* Recent Solved Challenges */}
         <motion.div

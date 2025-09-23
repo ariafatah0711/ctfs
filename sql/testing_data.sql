@@ -48,26 +48,26 @@ ON CONFLICT (id) DO NOTHING;
 -- =========================
 INSERT INTO public.challenges (id, title, description, category, points, hint, difficulty, is_active)
 VALUES
-  ('10000000-0000-0000-0000-000000000001', 'Dummy Challenge 1', 'Deskripsi dummy 1', 'Web', 100, '["Hint dummy 1"]', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000002', 'Dummy Challenge 2', 'Deskripsi dummy 2', 'Cryptography', 200, '["Hint dummy 2"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000003', 'Dummy Challenge 3', 'Deskripsi dummy 3', 'Forensics', 300, '["Hint dummy 3"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000004', 'Dummy Challenge 4', 'Deskripsi dummy 4', 'PWN', 400, '["Hint dummy 4"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000005', 'Dummy Challenge 5', 'Deskripsi dummy 5', 'Reverse', 500, '["Hint dummy 5"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000006', 'Dummy Challenge 6', 'Deskripsi dummy 6', 'Web', 150, '["Hint dummy 6"]', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000007', 'Dummy Challenge 7', 'Deskripsi dummy 7', 'Cryptography', 250, '["Hint dummy 7"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000008', 'Dummy Challenge 8', 'Deskripsi dummy 8', 'Forensics', 350, '["Hint dummy 8"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000009', 'Dummy Challenge 9', 'Deskripsi dummy 9', 'PWN', 450, '["Hint dummy 9"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000010', 'Dummy Challenge 10', 'Deskripsi dummy 10', 'Reverse', 550, '["Hint dummy 10"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000011', 'Dummy Challenge 11', 'Deskripsi dummy 11', 'Web', 120, '["Hint dummy 11"]', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000012', 'Dummy Challenge 12', 'Deskripsi dummy 12', 'Cryptography', 220, '["Hint dummy 12"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000013', 'Dummy Challenge 13', 'Deskripsi dummy 13', 'Forensics', 320, '["Hint dummy 13"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000014', 'Dummy Challenge 14', 'Deskripsi dummy 14', 'PWN', 420, '["Hint dummy 14"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000015', 'Dummy Challenge 15', 'Deskripsi dummy 15', 'Reverse', 520, '["Hint dummy 15"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000016', 'Dummy Challenge 16', 'Deskripsi dummy 16', 'Web', 180, '["Hint dummy 16"]', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000017', 'Dummy Challenge 17', 'Deskripsi dummy 17', 'Cryptography', 280, '["Hint dummy 17"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000018', 'Dummy Challenge 18', 'Deskripsi dummy 18', 'Forensics', 380, '["Hint dummy 18"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000019', 'Dummy Challenge 19', 'Deskripsi dummy 19', 'PWN', 480, '["Hint dummy 19"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000020', 'Dummy Challenge 20', 'Deskripsi dummy 20', 'Reverse', 580, '["Hint dummy 20"]', 'Hard', true)
+  ('10000000-0000-0000-0000-000000000001', 'Dummy Challenge 1', 'deskripsi: flag{dummy1}', 'Web', 100, '["Hint dummy 1"]', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000002', 'Dummy Challenge 2', 'deskripsi: flag{dummy2}', 'Cryptography', 200, '["Hint dummy 2"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000003', 'Dummy Challenge 3', 'deskripsi: flag{dummy3}', 'Forensics', 300, '["Hint dummy 3"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000004', 'Dummy Challenge 4', 'deskripsi: flag{dummy4}', 'PWN', 400, '["Hint dummy 4"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000005', 'Dummy Challenge 5', 'deskripsi: flag{dummy5}', 'Reverse', 500, '["Hint dummy 5"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000006', 'Dummy Challenge 6', 'deskripsi: flag{dummy6}', 'Web', 150, '["Hint dummy 6"]', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000007', 'Dummy Challenge 7', 'deskripsi: flag{dummy7}', 'Cryptography', 250, '["Hint dummy 7"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000008', 'Dummy Challenge 8', 'deskripsi: flag{dummy8}', 'Forensics', 350, '["Hint dummy 8"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000009', 'Dummy Challenge 9', 'deskripsi: flag{dummy9}', 'PWN', 450, '["Hint dummy 9"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000010', 'Dummy Challenge 10', 'deskripsi: flag{dummy{10}', 'Reverse', 550, '["Hint dummy 10"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000011', 'Dummy Challenge 11', 'deskripsi: flag{dummy{11}', 'Web', 120, '["Hint dummy 11"]', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000012', 'Dummy Challenge 12', 'deskripsi: flag{dummy{12}', 'Cryptography', 220, '["Hint dummy 12"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000013', 'Dummy Challenge 13', 'deskripsi: flag{dummy{13}', 'Forensics', 320, '["Hint dummy 13"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000014', 'Dummy Challenge 14', 'deskripsi: flag{dummy{14}', 'PWN', 420, '["Hint dummy 14"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000015', 'Dummy Challenge 15', 'deskripsi: flag{dummy{15}', 'Reverse', 520, '["Hint dummy 15"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000016', 'Dummy Challenge 16', 'deskripsi: flag{dummy{16}', 'Web', 180, '["Hint dummy 16"]', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000017', 'Dummy Challenge 17', 'deskripsi: flag{dummy{17}', 'Cryptography', 280, '["Hint dummy 17"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000018', 'Dummy Challenge 18', 'deskripsi: flag{dummy{18}', 'Forensics', 380, '["Hint dummy 18"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000019', 'Dummy Challenge 19', 'deskripsi: flag{dummy{19}', 'PWN', 480, '["Hint dummy 19"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000020', 'Dummy Challenge 20', 'deskripsi: flag{dummy{20}', 'Reverse', 580, '["Hint dummy 20"]', 'Hard', true)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.challenge_flags (challenge_id, flag)

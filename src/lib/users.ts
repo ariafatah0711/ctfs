@@ -113,3 +113,26 @@ export async function getAllUsers(): Promise<User[]> {
     return []
   }
 }
+
+
+// Get category totals (total challenge per kategori)
+export type CategoryTotal = {
+  category: string
+  total_challenges: number
+}
+
+export async function getCategoryTotals(): Promise<CategoryTotal[]> {
+  try {
+    const { data, error } = await supabase.rpc('get_category_totals')
+
+    if (error) {
+      console.error('Error fetching category totals:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Error fetching category totals:', error)
+    return []
+  }
+}

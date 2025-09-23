@@ -66,17 +66,17 @@ DROP VIEW IF EXISTS public.challenges_with_masked_flag CASCADE;
 DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
-DROP TABLE IF EXISTS public.users CASCADE;
+-- DROP TABLE IF EXISTS public.users CASCADE;
 
 -- 2. CREATE TABLES
 -- Users table (tanpa email, score, rank)
-CREATE TABLE public.users (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL,
-  is_admin BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-);
+-- CREATE TABLE public.users (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   username TEXT UNIQUE NOT NULL,
+--   is_admin BOOLEAN DEFAULT false,
+--   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+--   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+-- );
 
 -- Challenges table (metadata only)
 CREATE TABLE public.challenges (
@@ -506,6 +506,25 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Kasih akses buat authenticated
 GRANT EXECUTE ON FUNCTION set_challenge_active(UUID, BOOLEAN) TO authenticated;
+
+-- Function: get_category_totals
+-- Return: category + jumlah challenge aktif
+CREATE OR REPLACE FUNCTION get_category_totals()
+RETURNS TABLE (
+  category TEXT,
+  total_challenges INT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT c.category, COUNT(*)::int
+  FROM public.challenges c
+  WHERE c.is_active = true
+  GROUP BY c.category
+  ORDER BY c.category;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
 
 -- ########################################################
 
