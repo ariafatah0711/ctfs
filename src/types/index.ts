@@ -2,6 +2,7 @@ export interface User {
   id: string
   username: string
   score: number
+  rank?: number
   is_admin?: boolean
   created_at: string
   updated_at: string

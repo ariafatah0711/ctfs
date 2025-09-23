@@ -1,6 +1,6 @@
 import Navbar from '@/components/Navbar'
 import { User, ChallengeWithSolve } from '@/types'
-import { getFirstBloodChallengeIds, getUserRank } from '@/lib/challenges'
+import { getFirstBloodChallengeIds } from '@/lib/challenges'
 import { useEffect, useState } from 'react'
 
 type Props = {
@@ -23,7 +23,6 @@ export default function UserProfile({
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [allUsers, setAllUsers] = useState<User[]>([])
   const [userRank, setUserRank] = useState<number | null>(null)
-  const [rankLoading, setRankLoading] = useState<boolean>(true)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,23 +36,12 @@ export default function UserProfile({
   }, [user])
 
   useEffect(() => {
-    let cancelled = false;
-    async function fetchRank() {
-      setRankLoading(true);
-      if (!user) {
-        setUserRank(null);
-        setRankLoading(false);
-        return;
-      }
-      const rank = await getUserRank(user.username);
-      if (!cancelled) {
-        setUserRank(rank);
-        setRankLoading(false);
-      }
+    if (user && typeof user.rank === 'number') {
+      setUserRank(user.rank);
+    } else {
+      setUserRank(null);
     }
-    fetchRank();
-    return () => { cancelled = true; };
-  }, [user])
+  }, [user]);
 
   if (loading) {
     return (
@@ -133,10 +121,9 @@ export default function UserProfile({
             </div>
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">{user.username}</h1>
-              <p className="text-gray-600">CTF Player</p>
               <div className="flex items-center space-x-4 mt-2">
                 <div className="flex items-center space-x-1">
-                  <span className="text-sm text-gray-500">🏆</span>
+                  <span className="text-sm text-gray-500">🪙</span>
                   <span className="text-sm font-medium text-gray-900">{user.score} points</span>
                 </div>
               </div>
@@ -155,7 +142,7 @@ export default function UserProfile({
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-500">Rank</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {rankLoading ? <span className="text-base text-gray-400">Loading...</span> : (userRank ? `#${userRank}` : 'Unranked')}
+                  {userRank ? `#${userRank}` : 'Unranked'}
                 </p>
               </div>
             </div>
@@ -172,15 +159,15 @@ export default function UserProfile({
               </div>
             </div>
           </div>
-          {/* Total Points */}
+          {/* First Blood Solves */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 text-lg">�</span>
+              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                <span className="text-red-600 text-lg">🩸</span>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Total Points</p>
-                <p className="text-2xl font-bold text-gray-900">{user.score}</p>
+                <p className="text-sm font-medium text-gray-500">First Bloods</p>
+                <p className="text-2xl font-bold text-gray-900">{firstBloodIds.length}</p>
               </div>
             </div>
           </div>

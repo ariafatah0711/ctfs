@@ -56,8 +56,15 @@ export default function ChallengeStatsFilterBar({
           className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
         >
           <option value="all">All Difficulties</option>
-          {difficulties.map(difficulty => (
-            <option key={difficulty} value={difficulty}>{difficulty}</option>
+          {[...difficulties]
+            .sort((a, b) => {
+              const order = ["Easy", "Medium", "Hard"]
+              const idxA = order.indexOf(a)
+              const idxB = order.indexOf(b)
+              return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB)
+            })
+            .map(difficulty => (
+              <option key={difficulty} value={difficulty}>{difficulty}</option>
           ))}
         </select>
         <button

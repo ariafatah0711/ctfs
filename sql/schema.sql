@@ -28,23 +28,24 @@ DROP FUNCTION IF EXISTS get_leaderboard() CASCADE;
 DROP FUNCTION IF EXISTS is_admin(UUID) CASCADE;
 
 -- Drop existing tables
--- DROP TABLE IF EXISTS public.solves CASCADE;
+DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
--- DROP TABLE IF EXISTS public.users CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
 
 -- ==============================================
 -- 2. CREATE TABLES
 -- ==============================================
 
 -- Create users table (extends auth.users)
--- CREATE TABLE public.users (
---   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
---   username TEXT UNIQUE NOT NULL,
---   score INTEGER DEFAULT 0,
---   is_admin BOOLEAN DEFAULT false,
---   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
---   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
--- );
+CREATE TABLE public.users (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  score INTEGER DEFAULT 0,
+  rank INTEGER, -- langsung ditambah di sini
+  is_admin BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
 -- Create challenges table
 CREATE TABLE public.challenges (
@@ -221,6 +222,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- 2. Function untuk update rank semua user
+CREATE OR REPLACE FUNCTION update_all_user_ranks()
+RETURNS void AS $$
+DECLARE
+  rec RECORD;
+  i INTEGER := 1;
+BEGIN
+  FOR rec IN
+    SELECT id FROM public.users
+    ORDER BY score DESC, created_at ASC
+  LOOP
+    UPDATE public.users SET rank = i WHERE id = rec.id;
+    i := i + 1;
+  END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
 -- ==============================================
 -- 6. CREATE TRIGGERS
 -- ==============================================
@@ -252,6 +270,21 @@ CREATE TRIGGER trigger_auto_flag_hash
   BEFORE INSERT OR UPDATE ON public.challenges
   FOR EACH ROW
   EXECUTE FUNCTION auto_update_flag_hash();
+
+-- Trigger: update rank setiap score user berubah
+CREATE OR REPLACE FUNCTION after_user_score_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM update_all_user_ranks();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_update_user_ranks ON public.users;
+CREATE TRIGGER trigger_update_user_ranks
+  AFTER UPDATE OF score ON public.users
+  FOR EACH STATEMENT
+  EXECUTE FUNCTION after_user_score_update();
 
 -- ==============================================
 -- 7. INSERT SAMPLE DATA

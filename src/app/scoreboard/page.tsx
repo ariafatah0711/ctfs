@@ -130,40 +130,49 @@ export default function ScoreboardPage() {
         {/* Ranking Table Card */}
         <div className="bg-white rounded-xl shadow-md p-2 sm:p-6">
           <div className="overflow-x-auto">
-            <table className="min-w-[340px] w-full border border-gray-200 rounded-lg text-xs sm:text-sm">
+            <table className="min-w-[400px] w-full border border-gray-200 rounded-lg text-sm sm:text-base">
               <thead className="bg-gray-100 text-gray-700">
                 <tr>
-                  <th className="w-12 sm:w-16 px-1 sm:px-2 py-1 sm:py-2 text-center text-[10px] sm:text-xs font-medium uppercase">Rank</th>
-                  <th className="px-2 sm:px-4 py-1 sm:py-2 text-left text-[10px] sm:text-xs font-medium uppercase">User</th>
-                  <th className="px-2 sm:px-4 py-1 sm:py-2 text-left text-[10px] sm:text-xs font-medium uppercase">Score</th>
+                  <th className="w-14 sm:w-20 px-3 py-2 text-center font-semibold uppercase">Rank</th>
+                  <th className="px-4 py-2 text-left font-semibold uppercase">User</th>
+                  <th className="px-4 py-2 text-center font-semibold uppercase">Score</th>
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.slice(0, 25).map((entry, i) => (
-                  <tr
-                    key={entry.username}
-                    className={`transition-colors hover:bg-blue-50 ${
-                      i % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                    }`}
-                  >
-                    <td className="px-1 sm:px-2 py-1 sm:py-2 text-center font-mono text-[11px] sm:text-xs text-gray-600">
-                      {i + 1}
-                    </td>
-                    <td className="px-2 sm:px-4 py-1 sm:py-2">
-                      <Link
-                        href={`/user/${entry.username}`}
-                        className="hover:underline hover:text-blue-600 break-all"
-                      >
-                        {entry.username}
-                      </Link>
-                    </td>
-                    <td className="px-2 sm:px-4 py-1 sm:py-2 font-medium">
-                      {entry.progress.length > 0
-                        ? entry.progress[entry.progress.length - 1].score
-                        : 0}
-                    </td>
-                  </tr>
-                ))}
+                {leaderboard.slice(0, 100).map((entry, i) => {
+                  const isCurrentUser = entry.username === user?.username
+                  return (
+                    <tr
+                      key={entry.username}
+                      className={`transition-colors hover:bg-blue-50 ${
+                        isCurrentUser
+                          ? 'bg-blue-50 font-semibold' // warna spesial utk user login
+                          : i % 2 === 0
+                          ? 'bg-gray-50'
+                          : 'bg-white'
+                      }`}
+                    >
+                      <td className="px-3 py-2 text-center font-mono text-gray-600">
+                        {i + 1}
+                      </td>
+                      <td className="px-4 py-2 break-all">
+                        <Link
+                          href={`/user/${entry.username}`}
+                          className={`hover:underline ${
+                            isCurrentUser ? 'text-blue-700' : 'hover:text-blue-600'
+                          }`}
+                        >
+                          {entry.username}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2 text-center font-medium">
+                        {entry.progress.length > 0
+                          ? entry.progress[entry.progress.length - 1].score
+                          : 0}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
