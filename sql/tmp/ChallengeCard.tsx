@@ -119,7 +119,7 @@ export default function ChallengeCard({ challenge, onSolve }: ChallengeCardProps
               type="text"
               value={flag}
               onChange={(e) => setFlag(e.target.value)}
-              placeholder="Masukkan flag..."
+              placeholder="Sign Inkan flag..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               disabled={loading}
             />

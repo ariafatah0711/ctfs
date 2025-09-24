@@ -217,7 +217,7 @@ BEGIN
     GROUP BY u.id
   ) ranked WHERE ranked.id = p_id INTO v_rank;
 
-  -- Daftar solved challenges
+  -- Register solved challenges
   SELECT json_agg(json_build_object(
     'challenge_id', c.id,
     'title', c.title,

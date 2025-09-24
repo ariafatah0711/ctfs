@@ -240,7 +240,7 @@ export async function getLeaderboard() {
 }
 
 /**
- * Ambil daftar solver untuk sebuah challenge
+ * Ambil Register solver untuk sebuah challenge
  */
 export async function getSolversByChallenge(challengeId: string) {
   try {

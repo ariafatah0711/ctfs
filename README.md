@@ -332,7 +332,7 @@ VALUES (
 - **/** - Redirect ke login/challanges
 - **/login** - Halaman login
 - **/register** - Halaman register
-- **/challanges** - challanges dengan daftar challenges
+- **/challanges** - challanges dengan Register challenges
 - **/scoreboard** - Leaderboard ranking
 - **/admin** - Admin challanges (admin only)
 

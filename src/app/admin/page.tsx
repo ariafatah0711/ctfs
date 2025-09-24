@@ -17,9 +17,10 @@ import { Label } from '@/components/ui/label'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
-import Navbar from '@/components/Navbar'
-import ChallengeAdminFilterBar from "@/components/ChallengeAdminFilterBar"
+import ChallengeFilterBar from '@/components/challanges/ChallengeFilterBar'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
+import Loader from "@/components/custom/loading"
+import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
 import { getCurrentUser, isAdmin } from '@/lib/auth'
 import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag } from '@/lib/challenges'
@@ -38,6 +39,13 @@ export default function AdminPage() {
   const [editing, setEditing] = useState<Challenge | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+
+  const askDelete = (id: string) => {
+    setPendingDelete(id)
+    setConfirmOpen(true)
+  }
 
   const emptyForm = {
     title: '',
@@ -153,14 +161,15 @@ export default function AdminPage() {
         points: Number(formData.points) || 0,
         hint: (formData.hint && formData.hint.length > 0) ? formData.hint.filter(h => h.trim() !== '') : null,
         difficulty: (formData.difficulty || '').trim(),
-        attachments: formData.attachments || []
+        attachments: (formData.attachments || []).filter(
+          (a) => a.url.trim() !== '' // hanya kirim kalau ada url
+        ),
       }
 
       if ((formData.flag || '').trim()) payload.flag = formData.flag.trim()
 
       if (editing) {
         await updateChallenge(editing.id, payload)
-        // notify
       } else {
         if (!formData.flag.trim()) {
           toast.error('Flag is required for new challenges')
@@ -184,8 +193,7 @@ export default function AdminPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure want to delete this challenge?')) return
+  const doDelete = async (id: string) => {
     try {
       await deleteChallenge(id)
       await refresh()
@@ -226,174 +234,179 @@ export default function AdminPage() {
   const updateAttachment = (i: number, field: keyof Attachment, v: string) => setFormData(prev => ({ ...prev, attachments: prev.attachments.map((a, idx) => idx === i ? { ...a, [field]: v } : a) }))
   const removeAttachment = (i: number) => setFormData(prev => ({ ...prev, attachments: prev.attachments.filter((_, idx) => idx !== i) }))
 
-  if (loading) return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
-        </div>
-      </div>
-    </div>
-  )
-
   if (!user) return null
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Challenge List</span>
-                  <div className="flex items-center gap-2">
-                    <Button onClick={openAdd}>+ Add Challenge</Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-                <ChallengeAdminFilterBar
-                  filters={filters}
-                  categories={Array.from(new Set(challenges.map(c => c.category)))}
-                  difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
-                  onFilterChange={handleFilterChange}
-                  onClear={handleClearFilters}
-                />
-              <CardContent>
-              {filteredChallenges.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">No challenges found</div>
-                ) : (
-                  <div className="divide-y border rounded-md overflow-hidden">
-                    {filteredChallenges.map(ch => (
-                      <motion.div
-                        key={ch.id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="flex items-center justify-between px-4 py-3"
-                      >
-                        <div className="flex items-center gap-4 truncate">
-                        <Badge
-                            className={
-                              ch.difficulty === 'Easy'
-                                ? 'bg-green-100 text-green-800'
-                                : ch.difficulty === 'Medium'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-red-100 text-red-800'
-                            }
-                          >
-                            {ch.difficulty}
-                          </Badge>
-                          <div className="min-w-0">
-                            <div className="font-medium truncate">{ch.title}</div>
-                            <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={ch.is_active}
-                            onCheckedChange={async (checked) => {
-                              const ok = await setChallengeActive(ch.id, checked)
-                              if (ok) {
-                                setChallenges(prev =>
-                                  prev.map(c => c.id === ch.id ? { ...c, is_active: checked } : c)
-                                )
-                                toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
-                              }
-                            }}
-                          />
-                          <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(ch.id)}>🗑️</Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>🏳️ View Flag</Button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right column: quick stats + filters */}
-          <aside>
-            <Card className="sticky top-6">
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Quick stats */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 rounded-lg border bg-white shadow-sm"
-                  >
-                    <div className="text-sm text-muted-foreground">Total Challenges</div>
-                    <div className="text-2xl font-semibold">{challenges.length}</div>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="p-3 rounded-lg border bg-white shadow-sm"
-                  >
-                    <div className="text-sm text-muted-foreground">Active</div>
-                    <div className="text-2xl font-semibold">
-                      {challenges.filter(c => c.is_active).length}
+      {loading ? (
+        <Loader fullscreen color="text-orange-500" />
+      ) : (
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Challenge List</span>
+                    <div className="flex items-center gap-2">
+                      <Button onClick={openAdd}>+ Add Challenge</Button>
                     </div>
-                  </motion.div>
-                </div>
-
-                {/* Breakdown by category */}
-                <div className="mb-6">
-                  <div className="text-sm font-medium mb-2">By Category</div>
-                  <div className="space-y-2">
-                    {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
-                      const count = challenges.filter(c => c.category === cat).length
-                      return (
-                        <div key={cat} className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">{cat}</span>
-                          <Badge variant="outline">{count}</Badge>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                {/* Breakdown by difficulty */}
-                <div>
-                  <div className="text-sm font-medium mb-2">By Difficulty</div>
-                  <div className="space-y-2">
-                    {["Easy", "Medium", "Hard"].map(diff => {
-                      const count = challenges.filter(c => c.difficulty === diff).length
-                      return (
-                        <div key={diff} className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">{diff}</span>
+                  </CardTitle>
+                </CardHeader>
+                  <ChallengeFilterBar
+                    filters={filters}
+                    categories={Array.from(new Set(challenges.map(c => c.category)))}
+                    difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
+                    onFilterChange={handleFilterChange}
+                    onClear={handleClearFilters}
+                    showStatusFilter={false}
+                  />
+                <CardContent>
+                {filteredChallenges.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">No challenges found</div>
+                  ) : (
+                    <div className="divide-y border rounded-md overflow-hidden">
+                      {filteredChallenges.map(ch => (
+                        <motion.div
+                          key={ch.id}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center justify-between px-4 py-3"
+                        >
+                          <div className="flex items-center gap-4 truncate">
                           <Badge
-                            variant={
-                              diff === "Easy"
-                                ? "outline"
-                                : diff === "Medium"
-                                ? "secondary"
-                                : "destructive"
-                            }
-                          >
-                            {count}
-                          </Badge>
-                        </div>
-                      )
-                    })}
+                              className={
+                                ch.difficulty === 'Easy'
+                                  ? 'bg-green-100 text-green-800'
+                                  : ch.difficulty === 'Medium'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }
+                            >
+                              {ch.difficulty}
+                            </Badge>
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">{ch.title}</div>
+                              <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={ch.is_active}
+                              onCheckedChange={async (checked) => {
+                                const ok = await setChallengeActive(ch.id, checked)
+                                if (ok) {
+                                  setChallenges(prev =>
+                                    prev.map(c => c.id === ch.id ? { ...c, is_active: checked } : c)
+                                  )
+                                  toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
+                                }
+                              }}
+                            />
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
+                            <Button variant="ghost" size="sm" onClick={() => askDelete(ch.id)}>🗑️</Button>
+                            <ConfirmDialog
+                              open={confirmOpen}
+                              onOpenChange={setConfirmOpen}
+                              title="Delete Challenge"
+                              description="Are you sure you want to delete this challenge? This action cannot be undone."
+                              confirmLabel="Delete"
+                              onConfirm={async () => {
+                                if (pendingDelete) {
+                                  await doDelete(pendingDelete)
+                                  setPendingDelete(null)
+                                }
+                              }}
+                            />
+                            <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>🏳️ View Flag</Button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right column: quick stats + filters */}
+            <aside>
+              <Card className="sticky top-6">
+                <CardHeader>
+                  <CardTitle>Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {/* Quick stats */}
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 rounded-lg border bg-white shadow-sm"
+                    >
+                      <div className="text-sm text-muted-foreground">Total Challenges</div>
+                      <div className="text-2xl font-semibold">{challenges.length}</div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="p-3 rounded-lg border bg-white shadow-sm"
+                    >
+                      <div className="text-sm text-muted-foreground">Active</div>
+                      <div className="text-2xl font-semibold">
+                        {challenges.filter(c => c.is_active).length}
+                      </div>
+                    </motion.div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-        </div>
-      </main>
+
+                  {/* Breakdown by category */}
+                    <div className="mb-6">
+                      <div className="text-sm font-semibold mb-2 text-gray-700">By Category</div>
+                      <div className="space-y-2">
+                        {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
+                          const count = challenges.filter(c => c.category === cat).length
+                          return (
+                            <div key={cat} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
+                              <span className="text-sm font-medium">{cat}</span>
+                              <Badge className="bg-blue-100 text-blue-800">{count}</Badge>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                  {/* Breakdown by difficulty */}
+                  <div>
+                    <div className="text-sm font-semibold mb-2 text-gray-700">By Difficulty</div>
+                    <div className="space-y-2">
+                      {["Easy", "Medium", "Hard"].map(diff => {
+                        const count = challenges.filter(c => c.difficulty === diff).length
+                        return (
+                          <div key={diff} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
+                            <span className="text-sm font-medium">{diff}</span>
+                            <Badge
+                              className={
+                                diff === "Easy"
+                                  ? "bg-green-100 text-green-800"
+                                  : diff === "Medium"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
+                              }
+                            >
+                              {count}
+                            </Badge>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </aside>
+          </div>
+        </main>
+      )}
 
       {/* Dialog form for add/edit */}
       <AnimatePresence>
@@ -495,6 +508,7 @@ export default function AdminPage() {
                             value={a.name}
                             onChange={(e) => updateAttachment(idx, 'name', e.target.value)}
                             placeholder="File name / Label"
+                            required
                           />
 
                           {/* Attachment url */}
@@ -503,6 +517,7 @@ export default function AdminPage() {
                             value={a.url}
                             onChange={(e) => updateAttachment(idx, 'url', e.target.value)}
                             placeholder="URL"
+                            required
                           />
 
                           {/* Attachment type */}

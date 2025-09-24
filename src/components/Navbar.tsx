@@ -1,117 +1,109 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser, signOut, isAdmin } from '@/lib/auth'
-import { User } from '@/types'
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { signOut, isAdmin } from '@/lib/auth'
 
 export default function Navbar() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [adminStatus, setAdminStatus] = useState(false)
+  const { user, setUser, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [adminStatus, setAdminStatus] = useState(false)
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const currentUser = await getCurrentUser()
-      setUser(currentUser)
-
-      if (currentUser) {
-        const adminCheck = await isAdmin()
-        setAdminStatus(adminCheck)
-      }
-
-      setLoading(false)
+    if (user) {
+      isAdmin().then(setAdminStatus)
+    } else {
+      setAdminStatus(false)
     }
-
-    fetchUser()
-  }, [])
+  }, [user])
 
   const handleLogout = async () => {
     await signOut()
+    setUser(null)
+    setAdminStatus(false)
     router.push('/login')
   }
 
-  if (loading) {
-    return (
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <Link href="/challanges" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
-              </div>
-              <span className="text-xl font-bold text-gray-900">CTFS</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
-    )
-  }
-
-  if (!user) return null
-
+  if (loading) return null
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo + Desktop Menu */}
+          {/* Logo */}
           <div className="flex items-center space-x-8">
-            <Link href="/challanges" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">C</span>
               </div>
               <span className="text-xl font-bold text-gray-900">CTFS</span>
             </Link>
-            <div className="hidden md:flex space-x-1">
-              <Link
-                href="/challanges"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Challenges
-              </Link>
-              <Link
-                href="/scoreboard"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Scoreboard
-              </Link>
-              {adminStatus && (
+
+            {/* Menu hanya kalau login */}
+            {user && (
+              <div className="hidden md:flex space-x-1">
                 <Link
-                  href="/admin"
+                  href="/challanges"
                   className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
-                  Admin
+                  Challenges
                 </Link>
-              )}
-            </div>
+                <Link
+                  href="/scoreboard"
+                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Scoreboard
+                </Link>
+                {adminStatus && (
+                  <Link
+                    href="/admin"
+                    className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Admin
+                  </Link>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Profile + Actions */}
+          {/* Right section */}
           <div className="flex items-center space-x-4">
-            {/* Desktop */}
             <div className="hidden sm:flex items-center space-x-3">
-              <Link
-                href="/profile"
-                className="flex items-center space-x-2 group"
-              >
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-gray-300 transition-colors">
-                  <span className="text-gray-600 text-sm font-medium">
-                    {user.username.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">
-                  {user.username}
-                </span>
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Logout
-              </button>
+              {user ? (
+                <>
+                  <Link href="/profile" className="flex items-center space-x-2 group">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-gray-300 transition-colors">
+                      <span className="text-gray-600 text-sm font-medium">
+                        {user.username.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{user.username}</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile toggle */}
@@ -130,10 +122,9 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden fixed inset-0 z-50 bg-white">
-            {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
               <span className="text-lg font-bold text-gray-900">Menu</span>
               <button
@@ -146,50 +137,69 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Menu Items */}
             <div className="px-4 pt-4 pb-6 space-y-2">
-              <Link
-                href="/profile"
-                className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <span className="text-gray-600 text-sm font-medium">
-                    {user.username.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">{user.username}</span>
-              </Link>
-
-              <Link
-                href="/challanges"
-                className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-base font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Challenges
-              </Link>
-              <Link
-                href="/scoreboard"
-                className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-base font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Scoreboard
-              </Link>
-              {adminStatus && (
-                <Link
-                  href="/admin"
-                  className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-base font-medium"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Admin
-                </Link>
+              {user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-600 text-sm font-medium">
+                        {user.username.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">{user.username}</span>
+                  </Link>
+                  <Link
+                    href="/challanges"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Challenges
+                  </Link>
+                  <Link
+                    href="/scoreboard"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Scoreboard
+                  </Link>
+                  {adminStatus && (
+                    <Link
+                      href="/admin"
+                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="block bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Register
+                  </Link>
+                </>
               )}
-              <button
-                onClick={handleLogout}
-                className="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Logout
-              </button>
             </div>
           </div>
         )}
