@@ -7,8 +7,10 @@ export type UserDetail = {
   id: string
   username: string
   rank: number | null
+  score: number // 👈 tambahin ini
   solved_challenges: ChallengeWithSolve[]
 }
+
 
 export async function getUserDetail(userId: string): Promise<UserDetail | null> {
   try {
@@ -21,6 +23,7 @@ export async function getUserDetail(userId: string): Promise<UserDetail | null> 
       id: data.user.id,
       username: data.user.username,
       rank: data.user.rank ?? null,
+      score: data.user.score ?? 0, // 👈 ambil dari DB
       solved_challenges: (data.solved_challenges || []).map((c: any) => ({
         id: c.challenge_id,
         title: c.title,

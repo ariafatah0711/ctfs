@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-// import { getCurrentUser } from '@/lib/auth'
 import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { ChallengeWithSolve, User, Attachment } from '@/types'
 
@@ -31,7 +30,6 @@ export default function ChallengesPage() {
   const [challengeTab, setChallengeTab] = useState<'challenge' | 'solvers'>('challenge');
   const [solvers, setSolvers] = useState<Solver[]>([]);
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
-  const [loading, setLoading] = useState(true)
   const [flagInputs, setFlagInputs] = useState<{[key: string]: string}>({})
   const [flagFeedback, setFlagFeedback] = useState<{[key: string]: { success: boolean, message: string } | null}>({})
   const [submitting, setSubmitting] = useState<{[key: string]: boolean}>({})
@@ -45,12 +43,17 @@ export default function ChallengesPage() {
     difficulty: 'all',
     search: ''
   })
-  const { user } = require('@/contexts/AuthContext').useAuth();
+  const { user, loading } = require('@/contexts/AuthContext').useAuth();
+  // Redirect ke /login jika user belum login dan sudah selesai loading
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     const fetchChallenges = async () => {
       if (!user) {
-        setLoading(false)
         return
       }
       const challengesData = await getChallenges(user.id)
@@ -81,7 +84,6 @@ export default function ChallengesPage() {
         return { ...challenge, hint: hints };
       });
       setChallenges(normalizedChallenges);
-      setLoading(false);
     }
     fetchChallenges()
   }, [user])
@@ -208,6 +210,7 @@ export default function ChallengesPage() {
   }
 
   if (loading) return <Loader fullscreen color="text-orange-500" />
+  // Jangan render apapun jika belum login, biar redirect jalan
   if (!user) return null
   return (
     <div className="min-h-screen bg-gray-50">

@@ -2,28 +2,28 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth'
 import { getUserByUsername } from '@/lib/users'
 import UserProfile from '@/components/UserProfile'
+import { useAuth } from '@/contexts/AuthContext'
+import Loader from '@/components/custom/loading'
 
 export default function UserProfilePage() {
   const router = useRouter()
   const params = useParams()
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const { user, loading: authLoading } = useAuth()
+
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const currentUserData = await getCurrentUser()
-        if (!currentUserData) {
-          router.push('/login')
-          return
-        }
-        setCurrentUser(currentUserData)
+      if (!user) {
+        setLoading(false)
+        return
+      }
 
+      try {
         const username = params.username as string
         const userData = await getUserByUsername(username)
         if (!userData) {
@@ -32,8 +32,8 @@ export default function UserProfilePage() {
           return
         }
 
-  setUserId(userData.id)
-  setLoading(false)
+        setUserId(userData.id)
+        setLoading(false)
       } catch (err) {
         setError('Failed to load user profile')
         setLoading(false)
@@ -41,7 +41,15 @@ export default function UserProfilePage() {
     }
 
     fetchData()
-  }, [router, params])
+  }, [user, params])
+
+  // Tunggu authContext
+  if (authLoading) return <Loader fullscreen color="text-orange-500" />
+  // Redirect kalau belum login
+  if (!user) {
+    router.push('/login')
+    return null
+  }
 
   return (
     <UserProfile
@@ -49,7 +57,7 @@ export default function UserProfilePage() {
       loading={loading}
       error={error}
       onBack={() => router.back()}
-      isCurrentUser={false}
+      isCurrentUser={userId === user?.id}
     />
   )
 }

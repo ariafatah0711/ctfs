@@ -201,21 +201,34 @@ RETURNS JSON AS $$
 DECLARE
   v_user RECORD;
   v_rank BIGINT;
+  v_score INT;
   v_solves JSON;
 BEGIN
   -- Ambil user
   SELECT id, username INTO v_user FROM public.users WHERE id = p_id;
   IF NOT FOUND THEN
-  RETURN json_build_object('success', false, 'message', 'User not found');
+    RETURN json_build_object('success', false, 'message', 'User not found');
   END IF;
 
-  -- Hitung rank (berdasarkan jumlah solve, urutan waktu solve tercepat)
-  SELECT COALESCE(rank, 0) FROM (
-    SELECT u.id, CASE WHEN COUNT(s.id) = 0 THEN 0 ELSE ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, MIN(s.created_at) ASC) END AS rank
-    FROM public.users u
-    LEFT JOIN public.solves s ON u.id = s.user_id
-    GROUP BY u.id
-  ) ranked WHERE ranked.id = p_id INTO v_rank;
+  -- Hitung rank (sinkron dengan get_leaderboard)
+  SELECT rank INTO v_rank
+  FROM (
+      SELECT
+          u.id,
+          RANK() OVER (ORDER BY COALESCE(SUM(c.points), 0) DESC, MIN(s.created_at) ASC) AS rank
+      FROM public.users u
+      LEFT JOIN public.solves s ON u.id = s.user_id
+      LEFT JOIN public.challenges c ON s.challenge_id = c.id
+      GROUP BY u.id
+  ) ranked
+  WHERE ranked.id = p_id;
+
+  -- Hitung total score user
+  SELECT COALESCE(SUM(c.points), 0)
+  INTO v_score
+  FROM public.solves s
+  JOIN public.challenges c ON s.challenge_id = c.id
+  WHERE s.user_id = p_id;
 
   -- Register solved challenges
   SELECT json_agg(json_build_object(
@@ -236,7 +249,8 @@ BEGIN
     'user', json_build_object(
       'id', v_user.id,
       'username', v_user.username,
-      'rank', v_rank
+      'rank', COALESCE(v_rank, 0),
+      'score', COALESCE(v_score, 0)
     ),
     'solved_challenges', COALESCE(v_solves, '[]'::json)
   );

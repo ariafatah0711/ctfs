@@ -13,6 +13,7 @@ type UserDetail = {
   id: string
   username: string
   rank: number | null
+  score: number
   solved_challenges: ChallengeWithSolve[]
 }
 
@@ -117,6 +118,7 @@ export default function UserProfile({
                   </div>
                   <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-900">{userDetail.username}</h1>
+                    <p className="text-lg text-gray-500 mt-1">Score: <span className="font-semibold text-orange-600">{userDetail.score}</span></p>
                   </div>
                   {isCurrentUser && (
                     <Button variant="outline">Edit Profile</Button>

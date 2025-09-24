@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -12,7 +13,7 @@ import TitlePage from '@/components/custom/TitlePage'
 
 import { getLeaderboard } from '@/lib/challenges'
 import { useAuth } from '@/contexts/AuthContext'
-import { User, LeaderboardEntry } from '@/types'
+import { LeaderboardEntry } from '@/types'
 
 const Plot = dynamic(() => import('react-plotly.js'), {
   ssr: false,
@@ -20,9 +21,17 @@ const Plot = dynamic(() => import('react-plotly.js'), {
 })
 
 export default function ScoreboardPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
+
+  // 🔒 redirect kalau belum login
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login')
+    }
+  }, [user, authLoading, router])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,23 +41,21 @@ export default function ScoreboardPage() {
       }
       const data = await getLeaderboard()
 
-      // langsung sort pake total_points dari SQL
       data.sort((a: any, b: any) => {
-        const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0
-        const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0
-
-        // Urutkan berdasarkan score desc
+        const scoreA = a.progress.at(-1)?.score ?? 0
+        const scoreB = b.progress.at(-1)?.score ?? 0
         if (scoreB !== scoreA) return scoreB - scoreA
-
-        // Tie-breaker: siapa yang terakhir solve lebih cepat
-        const lastSolveA = a.progress.length > 0 ? new Date(a.progress[a.progress.length - 1].date).getTime() : Infinity
-        const lastSolveB = b.progress.length > 0 ? new Date(b.progress[b.progress.length - 1].date).getTime() : Infinity
-
+        const lastSolveA = a.progress.at(-1)
+          ? new Date(a.progress.at(-1).date).getTime()
+          : Infinity
+        const lastSolveB = b.progress.at(-1)
+          ? new Date(b.progress.at(-1).date).getTime()
+          : Infinity
         return lastSolveA - lastSolveB
       })
 
       const transformed: LeaderboardEntry[] = data.map((d: any, i: number) => {
-        const finalScore = d.progress.length > 0 ? d.progress[d.progress.length - 1].score : 0
+        const finalScore = d.progress.at(-1)?.score ?? 0
         return {
           id: String(i + 1),
           username: d.username,
@@ -66,6 +73,11 @@ export default function ScoreboardPage() {
     }
     fetchData()
   }, [user])
+
+  // tunggu authContext
+  if (authLoading) return <Loader fullscreen color="text-orange-500" />
+  // jangan render kalau belum login (biar redirect jalan)
+  if (!user) return null
 
   const isEmpty =
     leaderboard.length === 0 ||
