@@ -1,64 +1,4 @@
 -- =========================
--- Reset chall_test_file
--- =========================
-DELETE FROM public.solves
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file');
-DELETE FROM public.challenge_flags
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file');
-DELETE FROM public.challenge_flags
-WHERE flag_hash = encode(digest('flag{test_file}', 'sha256'), 'hex');
-DELETE FROM public.challenges WHERE title = 'chall_test_file';
-
-WITH ins AS (
-  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
-  VALUES (
-    'chall_test_file',
-    'Download file ini dan cari flag di dalamnya.
-     Flag: flag{test_file}',
-    'Misc',
-    50,
-    '["Flag ada di dalam metadata file."]',
-    'Easy',
-    '[{"url":"https://ariaf.my.id/assets/images/profile2-128.avif","name":"profile2-128.avif","type":"file"}]'::jsonb
-  )
-  RETURNING id
-)
-INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test_file}', encode(digest('flag{test_file}', 'sha256'), 'hex')
-FROM ins;
-
-
--- =========================
--- Reset chall_test_link
--- =========================
-DELETE FROM public.solves
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_link');
-DELETE FROM public.challenge_flags
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_link');
-DELETE FROM public.challenge_flags
-WHERE flag_hash = encode(digest('flag{test_link}', 'sha256'), 'hex');
-DELETE FROM public.challenges WHERE title = 'chall_test_link';
-
-WITH ins AS (
-  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
-  VALUES (
-    'chall_test_link',
-    'Akses link berikut dan temukan flag di halaman.
-     Flag: flag{test_link}',
-    'Misc',
-    75,
-    '["Flag tersembunyi di halaman web yang diberikan."]',
-    'Easy',
-    '[{"url":"https://ariaf.my.id","name":"https://ariaf.my.id","type":"link"}]'::jsonb
-  )
-  RETURNING id
-)
-INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test_link}', encode(digest('flag{test_link}', 'sha256'), 'hex')
-FROM ins;
-
-
--- =========================
 -- Reset chall_test_hint
 -- =========================
 DELETE FROM public.solves
@@ -87,7 +27,6 @@ INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
 SELECT id, 'flag{test_hint}', encode(digest('flag{test_hint}', 'sha256'), 'hex')
 FROM ins;
 
-
 -- =========================
 -- Reset chall_test_combination
 -- =========================
@@ -107,7 +46,7 @@ WITH ins AS (
     Flag: flag{test_combination}',
     'Misc',
     150,
-    '["Clue ada di file, jawaban ada di link."]',
+    '["Gunakan base64 decode.", "Periksa bagian comment di file."]',
     'Hard',
     '[{"url":"https://ariaf.my.id/assets/images/profile2-128.avif","name":"profile2-128.avif","type":"file"},
       {"url":"https://ariaf.my.id","name":"https://ariaf.my.id","type":"link"}]'::jsonb
@@ -119,21 +58,21 @@ SELECT id, 'flag{test_combination}', encode(digest('flag{test_combination}', 'sh
 FROM ins;
 
 -- =========================
--- Reset chall_test_file2
+-- Reset chall_test_file
 -- =========================
 DELETE FROM public.solves
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file2');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file');
 DELETE FROM public.challenge_flags
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file2');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file');
 DELETE FROM public.challenge_flags
-WHERE flag_hash = encode(digest('flag{test_file2}', 'sha256'), 'hex');
-DELETE FROM public.challenges WHERE title = 'chall_test_file2';
+WHERE flag_hash = encode(digest('flag{test_file}', 'sha256'), 'hex');
+DELETE FROM public.challenges WHERE title = 'chall_test_file';
 
 WITH ins AS (
   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
   VALUES (
-    'chall_test_file2',
-    'Challenge ini berisi dua file yang harus dianalisis. <br>Flag: flag{test_file2}',
+    'chall_test_file',
+    'Challenge ini berisi dua file yang harus dianalisis. <br>Flag: flag{test_file}',
     'Misc',
     120,
     '["Kedua file mengandung bagian dari flag."]',
@@ -144,26 +83,26 @@ WITH ins AS (
   RETURNING id
 )
 INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test_file2}', encode(digest('flag{test_file2}', 'sha256'), 'hex')
+SELECT id, 'flag{test_file}', encode(digest('flag{test_file}', 'sha256'), 'hex')
 FROM ins;
 
 
 -- =========================
--- Reset chall_test_url2
+-- Reset chall_test_url
 -- =========================
 DELETE FROM public.solves
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_url2');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_url');
 DELETE FROM public.challenge_flags
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_url2');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_url');
 DELETE FROM public.challenge_flags
-WHERE flag_hash = encode(digest('flag{test_url2}', 'sha256'), 'hex');
-DELETE FROM public.challenges WHERE title = 'chall_test_url2';
+WHERE flag_hash = encode(digest('flag{test_url}', 'sha256'), 'hex');
+DELETE FROM public.challenges WHERE title = 'chall_test_url';
 
 WITH ins AS (
   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
   VALUES (
-    'chall_test_url2',
-    'Challenge ini berisi dua link yang perlu dicek. <br>Flag: flag{test_url2}',
+    'chall_test_url',
+    'Challenge ini berisi dua link yang perlu dicek. <br>Flag: flag{test_url}',
     'Misc',
     90,
     '["Flag bisa muncul di salah satu halaman."]',
@@ -174,5 +113,50 @@ WITH ins AS (
   RETURNING id
 )
 INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test_url2}', encode(digest('flag{test_url2}', 'sha256'), 'hex')
+SELECT id, 'flag{test_url}', encode(digest('flag{test_url}', 'sha256'), 'hex')
+FROM ins;
+
+
+-- =========================
+-- Reset chall_test_markdown
+-- =========================
+DELETE FROM public.solves
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_markdown');
+DELETE FROM public.challenge_flags
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_markdown');
+DELETE FROM public.challenge_flags
+WHERE flag_hash = encode(digest('flag{test_markdown}', 'sha256'), 'hex');
+DELETE FROM public.challenges WHERE title = 'chall_test_markdown';
+
+WITH ins AS (
+  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
+  VALUES (
+    'chall_test_markdown',
+    $$
+# Markdown Challenge
+
+**Bold Text**, *Italic Text*, ~~Strikethrough~~
+
+- List item 1
+- List item 2
+- [Link ke Google](https://google.com)
+
+> Blockquote test
+
+```bash
+echo "hello markdown"
+```
+
+Flag: `flag{test_markdown}`
+    $$,
+    'Misc',
+    50,
+    '["Coba lihat apakah markdown render dengan baik."]',
+    'Easy',
+    '[]'::jsonb
+  )
+  RETURNING id
+)
+INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
+SELECT id, 'flag{test_markdown}', encode(digest('flag{test_markdown}', 'sha256'), 'hex')
 FROM ins;
