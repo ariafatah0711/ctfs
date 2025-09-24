@@ -1,6 +1,10 @@
 -- 0. DROP FK CONSTRAINT SEMENTARA (HANYA UNTUK TESTING!)
 ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_id_fkey;
 
+DELETE FROM public.solves WHERE id::text LIKE '20000000-%';
+DELETE FROM public.challenges WHERE id::text LIKE '10000000-%';
+DELETE FROM public.users WHERE id::text LIKE '00000000-%';
+
 -- =========================
 -- 1. Tambah banyak dummy users (35 user)
 -- =========================
@@ -57,17 +61,17 @@ VALUES
   ('10000000-0000-0000-0000-000000000007', 'Dummy Challenge 7', 'deskripsi: flag{dummy7}', 'Cryptography', 250, '["Hint dummy 7"]', 'Medium', true),
   ('10000000-0000-0000-0000-000000000008', 'Dummy Challenge 8', 'deskripsi: flag{dummy8}', 'Forensics', 350, '["Hint dummy 8"]', 'Hard', true),
   ('10000000-0000-0000-0000-000000000009', 'Dummy Challenge 9', 'deskripsi: flag{dummy9}', 'PWN', 450, '["Hint dummy 9"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000010', 'Dummy Challenge 10', 'deskripsi: flag{dummy{10}', 'Reverse', 550, '["Hint dummy 10"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000011', 'Dummy Challenge 11', 'deskripsi: flag{dummy{11}', 'Web', 120, '["Hint dummy 11"]', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000012', 'Dummy Challenge 12', 'deskripsi: flag{dummy{12}', 'Cryptography', 220, '["Hint dummy 12"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000013', 'Dummy Challenge 13', 'deskripsi: flag{dummy{13}', 'Forensics', 320, '["Hint dummy 13"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000014', 'Dummy Challenge 14', 'deskripsi: flag{dummy{14}', 'PWN', 420, '["Hint dummy 14"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000015', 'Dummy Challenge 15', 'deskripsi: flag{dummy{15}', 'Reverse', 520, '["Hint dummy 15"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000016', 'Dummy Challenge 16', 'deskripsi: flag{dummy{16}', 'Web', 180, '["Hint dummy 16"]', 'Easy', true),
-  ('10000000-0000-0000-0000-000000000017', 'Dummy Challenge 17', 'deskripsi: flag{dummy{17}', 'Cryptography', 280, '["Hint dummy 17"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000018', 'Dummy Challenge 18', 'deskripsi: flag{dummy{18}', 'Forensics', 380, '["Hint dummy 18"]', 'Hard', true),
-  ('10000000-0000-0000-0000-000000000019', 'Dummy Challenge 19', 'deskripsi: flag{dummy{19}', 'PWN', 480, '["Hint dummy 19"]', 'Medium', true),
-  ('10000000-0000-0000-0000-000000000020', 'Dummy Challenge 20', 'deskripsi: flag{dummy{20}', 'Reverse', 580, '["Hint dummy 20"]', 'Hard', true)
+  ('10000000-0000-0000-0000-000000000010', 'Dummy Challenge 10', 'deskripsi: flag{dummy10}', 'Reverse', 550, '["Hint dummy 10"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000011', 'Dummy Challenge 11', 'deskripsi: flag{dummy11}', 'Web', 120, '["Hint dummy 11"]', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000012', 'Dummy Challenge 12', 'deskripsi: flag{dummy12}', 'Cryptography', 220, '["Hint dummy 12"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000013', 'Dummy Challenge 13', 'deskripsi: flag{dummy13}', 'Forensics', 320, '["Hint dummy 13"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000014', 'Dummy Challenge 14', 'deskripsi: flag{dummy14}', 'PWN', 420, '["Hint dummy 14"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000015', 'Dummy Challenge 15', 'deskripsi: flag{dummy15}', 'Reverse', 520, '["Hint dummy 15"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000016', 'Dummy Challenge 16', 'deskripsi: flag{dummy16}', 'Web', 180, '["Hint dummy 16"]', 'Easy', true),
+  ('10000000-0000-0000-0000-000000000017', 'Dummy Challenge 17', 'deskripsi: flag{dummy17}', 'Cryptography', 280, '["Hint dummy 17"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000018', 'Dummy Challenge 18', 'deskripsi: flag{dummy18}', 'Forensics', 380, '["Hint dummy 18"]', 'Hard', true),
+  ('10000000-0000-0000-0000-000000000019', 'Dummy Challenge 19', 'deskripsi: flag{dummy19}', 'PWN', 480, '["Hint dummy 19"]', 'Medium', true),
+  ('10000000-0000-0000-0000-000000000020', 'Dummy Challenge 20', 'deskripsi: flag{dummy20}', 'Reverse', 580, '["Hint dummy 20"]', 'Hard', true)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.challenge_flags (challenge_id, flag)
@@ -100,7 +104,7 @@ ON CONFLICT (challenge_id) DO NOTHING;
 INSERT INTO public.solves (id, user_id, challenge_id, created_at)
 VALUES
   -- dummy1 (2 chall)
-  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', NOW() - INTERVAL '3 days'),
+  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', NOW() - INTERVAL '1 days' - (random() * INTERVAL '55minute'),
   ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000002', NOW() - INTERVAL '1 days'),
 
   -- dummy2 (3 chall)

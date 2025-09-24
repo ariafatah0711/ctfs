@@ -605,93 +605,97 @@ GRANT EXECUTE ON FUNCTION submit_flag(uuid, text) TO authenticated;
 -- Admin set manually:
 -- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
 
--- Insert sample challenges (flag_hash akan auto-generate dari trigger)
--- Insert Base64 challenge
-WITH ins AS (
-  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
-  VALUES (
-    'Base64',
-    'Flag disembunyikan sebagai Base64. Cari string yang sudah di-encode dan decode untuk mendapatkan flag. YXJpYQo=',
-    'Cryptography',
-    150,
-    '["Flag adalah Base64 dari nama domain target."]',
-    'Easy',
-    '[]'::jsonb
-  )
-  RETURNING id
-)
-INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'aria', encode(digest('aria', 'sha256'), 'hex')
-FROM ins;
+-- ########################################################
+-- VIEW: challenges with masked flag (for regular users)
+-- ########################################################
 
--- Insert Robots challenge
-WITH ins AS (
-  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
-  VALUES (
-    'Robots',
-    'Flag disembunyikan di file `robots.txt` pada domain target. Buka `https://smk.amablex90.my.id/robots.txt` dan cari baris yang menyimpan flag.',
-    'Web',
-    100,
-    '["Cek https://smk.amablex90.my.id/robots.txt — flag ada di sana."]',
-    'Easy',
-    '[
-      {
-        "url": "https://smk.amablex90.my.id",
-        "name": "https://smk.amablex90.my.id",
-        "type": "link"
-      }
-    ]'::jsonb
-  )
-  RETURNING id
-)
-INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{robots_txt_leaked_the_secret}', encode(digest('flag{robots_txt_leaked_the_secret}', 'sha256'), 'hex')
-FROM ins;
+-- -- Insert sample challenges (flag_hash akan auto-generate dari trigger)
+-- -- Insert Base64 challenge
+-- WITH ins AS (
+--   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
+--   VALUES (
+--     'Base64',
+--     'Flag disembunyikan sebagai Base64. Cari string yang sudah di-encode dan decode untuk mendapatkan flag. YXJpYQo=',
+--     'Cryptography',
+--     150,
+--     '["Flag adalah Base64 dari nama domain target."]',
+--     'Easy',
+--     '[]'::jsonb
+--   )
+--   RETURNING id
+-- )
+-- INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
+-- SELECT id, 'aria', encode(digest('aria', 'sha256'), 'hex')
+-- FROM ins;
 
--- Insert Hidden Flag challenge
-WITH ins AS (
-  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
-  VALUES (
-    'Hidden Flag in HTML',
-    'Hidden Flag in HTML',
-    'Web',
-    100,
-    NULL,
-    'Easy',
-    '[
-      {
-        "url": "https://ariaf.my.id/ctf_quest/web/easy/hidden_flag/index.html",
-        "name": "https://ariaf.my.id/ctf_quest/web/easy/hidden_flag/index.html",
-        "type": "link"
-      }
-    ]'::jsonb
-  )
-  RETURNING id
-)
-INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'CWA{hidden_in_plain_sight}', encode(digest('CWA{hidden_in_plain_sight}', 'sha256'), 'hex')
-FROM ins;
+-- -- Insert Robots challenge
+-- WITH ins AS (
+--   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
+--   VALUES (
+--     'Robots',
+--     'Flag disembunyikan di file `robots.txt` pada domain target. Buka `https://smk.amablex90.my.id/robots.txt` dan cari baris yang menyimpan flag.',
+--     'Web',
+--     100,
+--     '["Cek https://smk.amablex90.my.id/robots.txt — flag ada di sana."]',
+--     'Easy',
+--     '[
+--       {
+--         "url": "https://smk.amablex90.my.id",
+--         "name": "https://smk.amablex90.my.id",
+--         "type": "link"
+--       }
+--     ]'::jsonb
+--   )
+--   RETURNING id
+-- )
+-- INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
+-- SELECT id, 'flag{robots_txt_leaked_the_secret}', encode(digest('flag{robots_txt_leaked_the_secret}', 'sha256'), 'hex')
+-- FROM ins;
+
+-- -- Insert Hidden Flag challenge
+-- WITH ins AS (
+--   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
+--   VALUES (
+--     'Hidden Flag in HTML',
+--     'Hidden Flag in HTML',
+--     'Web',
+--     100,
+--     NULL,
+--     'Easy',
+--     '[
+--       {
+--         "url": "https://ariaf.my.id/ctf_quest/web/easy/hidden_flag/index.html",
+--         "name": "https://ariaf.my.id/ctf_quest/web/easy/hidden_flag/index.html",
+--         "type": "link"
+--       }
+--     ]'::jsonb
+--   )
+--   RETURNING id
+-- )
+-- INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
+-- SELECT id, 'CWA{hidden_in_plain_sight}', encode(digest('CWA{hidden_in_plain_sight}', 'sha256'), 'hex')
+-- FROM ins;
 
 
-WITH ins AS (
-  INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
-  VALUES (
-    'ada udang dibalik batu',
-    'ini test doang: flag{test}',
-    'Web',
-    200,
-    '["test"]',
-    'Medium',
-    '[
-      {
-        "url": "https://raw.githubusercontent.com/ariafatah0711/ctf_quest/refs/heads/main/Forensics/medium/ada_udang_dibalik_pixe/chall.png",
-        "name": "chall.png",
-        "type": "file"
-      }
-    ]'::jsonb
-  )
-  RETURNING id
-)
-INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test}', encode(digest('flag{test}', 'sha256'), 'hex')
-FROM ins;
+-- WITH ins AS (
+--   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
+--   VALUES (
+--     'ada udang dibalik batu',
+--     'ini test doang: flag{test}',
+--     'Web',
+--     200,
+--     '["test"]',
+--     'Medium',
+--     '[
+--       {
+--         "url": "https://raw.githubusercontent.com/ariafatah0711/ctf_quest/refs/heads/main/Forensics/medium/ada_udang_dibalik_pixe/chall.png",
+--         "name": "chall.png",
+--         "type": "file"
+--       }
+--     ]'::jsonb
+--   )
+--   RETURNING id
+-- )
+-- INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
+-- SELECT id, 'flag{test}', encode(digest('flag{test}', 'sha256'), 'hex')
+-- FROM ins;
