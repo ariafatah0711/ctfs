@@ -11,7 +11,7 @@ import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 
 import { getLeaderboard } from '@/lib/challenges'
-import { getCurrentUser } from '@/lib/auth'
+import { useAuth } from '@/contexts/AuthContext'
 import { User, LeaderboardEntry } from '@/types'
 
 const Plot = dynamic(() => import('react-plotly.js'), {
@@ -20,19 +20,16 @@ const Plot = dynamic(() => import('react-plotly.js'), {
 })
 
 export default function ScoreboardPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const { user } = useAuth()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        window.location.href = '/login'
+      if (!user) {
+        setLoading(false)
         return
       }
-      setUser(currentUser)
-
       const data = await getLeaderboard()
 
       // langsung sort pake total_points dari SQL
@@ -68,7 +65,7 @@ export default function ScoreboardPage() {
       setLoading(false)
     }
     fetchData()
-  }, [])
+  }, [user])
 
   const isEmpty =
     leaderboard.length === 0 ||

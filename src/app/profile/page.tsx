@@ -2,31 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth'
+import { useAuth } from '@/contexts/AuthContext'
 import UserProfile from '@/components/UserProfile'
+import Loader from '@/components/custom/loading'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const [userId, setUserId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, loading } = useAuth()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        router.push('/login')
-        return
-      }
-      setUserId(currentUser.id)
-      setLoading(false)
-    }
-    fetchData()
-  }, [router])
-
+  if (loading) return <div className="flex justify-center py-16"><Loader fullscreen color="text-orange-500" /></div>
+  if (!user) return null
   return (
     <UserProfile
-      userId={userId}
-      loading={loading}
+      userId={user.id}
+      loading={false}
       onBack={() => router.back()}
       isCurrentUser={true}
     />

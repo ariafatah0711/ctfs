@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-// shadcn/ui components (assumes you have them in your project)
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from '@/components/ui/textarea'
@@ -22,15 +21,14 @@ import MarkdownRenderer from '@/components/MarkdownRenderer'
 import Loader from "@/components/custom/loading"
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
-import { getCurrentUser, isAdmin } from '@/lib/auth'
+import { useAuth } from '@/contexts/AuthContext'
+import { isAdmin } from '@/lib/auth'
 import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag } from '@/lib/challenges'
-import { Challenge, User, Attachment } from '@/types'
+import { Challenge, Attachment } from '@/types'
 
-// A polished admin page using components + modal + subtle animations.
 export default function AdminPage() {
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { user, loading } = useAuth()
   const [isAdminUser, setIsAdminUser] = useState(false)
   const [challenges, setChallenges] = useState<Challenge[]>([])
 
@@ -55,7 +53,7 @@ export default function AdminPage() {
     flag: '',
     hint: [] as string[],
     difficulty: 'Easy',
-    attachments: [] as Attachment[]
+    attachments: [] as Attachment[],
   }
 
   const [filters, setFilters] = useState({
@@ -81,15 +79,16 @@ export default function AdminPage() {
   useEffect(() => {
     let mounted = true
     ;(async () => {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        router.push('/login')
+      if (loading) return
+
+      // if not logged in, redirect to challenges listing
+      if (!user) {
+        router.push('/challanges')
         return
       }
-      if (!mounted) return
-      setUser(currentUser)
 
       const adminCheck = await isAdmin()
+      if (!mounted) return
       setIsAdminUser(adminCheck)
       if (!adminCheck) {
         router.push('/challanges')
@@ -99,10 +98,10 @@ export default function AdminPage() {
       const data = await getChallenges(undefined, true)
       if (!mounted) return
       setChallenges(data)
-      setLoading(false)
     })()
+
     return () => { mounted = false }
-  }, [router])
+  }, [user, loading, router])
 
   const openAdd = () => {
     setEditing(null)
@@ -116,9 +115,13 @@ export default function AdminPage() {
     let parsedHint: string[] = []
     if (Array.isArray(c.hint)) parsedHint = c.hint.filter(h => typeof h === 'string')
     else if (typeof c.hint === 'string' && c.hint.trim() !== '') {
-      try { const arr = JSON.parse(c.hint); if (Array.isArray(arr)) parsedHint = arr.filter(h => typeof h === 'string')
-        else parsedHint = [c.hint]
-      } catch { parsedHint = [c.hint] }
+      try {
+        const arr = JSON.parse(c.hint as unknown as string)
+        if (Array.isArray(arr)) parsedHint = arr.filter(h => typeof h === 'string')
+        else parsedHint = [c.hint as unknown as string]
+      } catch {
+        parsedHint = [c.hint as unknown as string]
+      }
     }
 
     setEditing(c)
@@ -130,14 +133,14 @@ export default function AdminPage() {
       flag: c.flag || '',
       hint: parsedHint,
       difficulty: c.difficulty || 'Easy',
-      attachments: c.attachments || []
+      attachments: c.attachments || [],
     })
     setOpenForm(true)
     setShowPreview(false)
   }
 
   const refresh = async () => {
-    const data = await getChallenges(undefined, true) // showAll = true
+    const data = await getChallenges(undefined, true)
     setChallenges(data)
   }
 
@@ -161,9 +164,7 @@ export default function AdminPage() {
         points: Number(formData.points) || 0,
         hint: (formData.hint && formData.hint.length > 0) ? formData.hint.filter(h => h.trim() !== '') : null,
         difficulty: (formData.difficulty || '').trim(),
-        attachments: (formData.attachments || []).filter(
-          (a) => a.url.trim() !== '' // hanya kirim kalau ada url
-        ),
+        attachments: (formData.attachments || []).filter((a) => (a.url || '').trim() !== ''),
       }
 
       if ((formData.flag || '').trim()) payload.flag = formData.flag.trim()
@@ -176,7 +177,7 @@ export default function AdminPage() {
           setSubmitting(false)
           return
         }
-        payload.flag = formData.flag
+        payload.flag = formData.flag.trim()
         await addChallenge(payload)
       }
 
@@ -205,18 +206,9 @@ export default function AdminPage() {
   }
 
   const filteredChallenges = challenges.filter((c) => {
-    // search
-    if (filters.search && !c.title.toLowerCase().includes(filters.search.toLowerCase())) {
-      return false
-    }
-    // category
-    if (filters.category !== "all" && c.category !== filters.category) {
-      return false
-    }
-    // difficulty
-    if (filters.difficulty !== "all" && c.difficulty !== filters.difficulty) {
-      return false
-    }
+    if (filters.search && !c.title.toLowerCase().includes(filters.search.toLowerCase())) return false
+    if (filters.category !== "all" && c.category !== filters.category) return false
+    if (filters.difficulty !== "all" && c.difficulty !== filters.difficulty) return false
     return true
   })
 
@@ -226,189 +218,128 @@ export default function AdminPage() {
   const removeHint = (i: number) => setFormData(prev => ({ ...prev, hint: prev.hint.filter((_, idx) => idx !== i) }))
 
   // attachments
-  const addAttachment = () =>
-    setFormData(prev => ({
-      ...prev,
-      attachments: [...prev.attachments, { name: '', url: '', type: 'file' }]
-    }))
+  const addAttachment = () => setFormData(prev => ({ ...prev, attachments: [...prev.attachments, { name: '', url: '', type: 'file' }] }))
   const updateAttachment = (i: number, field: keyof Attachment, v: string) => setFormData(prev => ({ ...prev, attachments: prev.attachments.map((a, idx) => idx === i ? { ...a, [field]: v } : a) }))
   const removeAttachment = (i: number) => setFormData(prev => ({ ...prev, attachments: prev.attachments.filter((_, idx) => idx !== i) }))
 
+  if (loading) return <Loader fullscreen color="text-orange-500" />
   if (!user) return null
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {loading ? (
-        <Loader fullscreen color="text-orange-500" />
-      ) : (
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Challenge List</span>
-                    <div className="flex items-center gap-2">
-                      <Button onClick={openAdd}>+ Add Challenge</Button>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                  <ChallengeFilterBar
-                    filters={filters}
-                    categories={Array.from(new Set(challenges.map(c => c.category)))}
-                    difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
-                    onFilterChange={handleFilterChange}
-                    onClear={handleClearFilters}
-                    showStatusFilter={false}
-                  />
-                <CardContent>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Challenge List</span>
+                  <div className="flex items-center gap-2">
+                    <Button onClick={openAdd}>+ Add Challenge</Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+
+              <ChallengeFilterBar
+                filters={filters}
+                categories={Array.from(new Set(challenges.map(c => c.category)))}
+                difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
+                onFilterChange={handleFilterChange}
+                onClear={handleClearFilters}
+                showStatusFilter={false}
+              />
+
+              <CardContent>
                 {filteredChallenges.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">No challenges found</div>
-                  ) : (
-                    <div className="divide-y border rounded-md overflow-hidden">
-                      {filteredChallenges.map(ch => (
-                        <motion.div
-                          key={ch.id}
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center justify-between px-4 py-3"
-                        >
-                          <div className="flex items-center gap-4 truncate">
-                          <Badge
-                              className={
-                                ch.difficulty === 'Easy'
-                                  ? 'bg-green-100 text-green-800'
-                                  : ch.difficulty === 'Medium'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'
-                              }
-                            >
-                              {ch.difficulty}
-                            </Badge>
-                            <div className="min-w-0">
-                              <div className="font-medium truncate">{ch.title}</div>
-                              <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
-                            </div>
+                  <div className="text-center py-8 text-gray-500">No challenges found</div>
+                ) : (
+                  <div className="divide-y border rounded-md overflow-hidden">
+                    {filteredChallenges.map(ch => (
+                      <motion.div key={ch.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center justify-between px-4 py-3">
+                        <div className="flex items-center gap-4 truncate">
+                          <Badge className={ch.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : ch.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}>
+                            {ch.difficulty}
+                          </Badge>
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{ch.title}</div>
+                            <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
                           </div>
+                        </div>
 
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={ch.is_active}
-                              onCheckedChange={async (checked) => {
-                                const ok = await setChallengeActive(ch.id, checked)
-                                if (ok) {
-                                  setChallenges(prev =>
-                                    prev.map(c => c.id === ch.id ? { ...c, is_active: checked } : c)
-                                  )
-                                  toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
-                                }
-                              }}
-                            />
-                            <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
-                            <Button variant="ghost" size="sm" onClick={() => askDelete(ch.id)}>🗑️</Button>
-                            <ConfirmDialog
-                              open={confirmOpen}
-                              onOpenChange={setConfirmOpen}
-                              title="Delete Challenge"
-                              description="Are you sure you want to delete this challenge? This action cannot be undone."
-                              confirmLabel="Delete"
-                              onConfirm={async () => {
-                                if (pendingDelete) {
-                                  await doDelete(pendingDelete)
-                                  setPendingDelete(null)
-                                }
-                              }}
-                            />
-                            <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>🏳️ View Flag</Button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                        <div className="flex items-center gap-2">
+                          <Switch checked={ch.is_active} onCheckedChange={async (checked) => {
+                            const ok = await setChallengeActive(ch.id, checked)
+                            if (ok) {
+                              setChallenges(prev => prev.map(c => c.id === ch.id ? { ...c, is_active: checked } : c))
+                              toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
+                            }
+                          }} />
 
-            {/* Right column: quick stats + filters */}
-            <aside>
-              <Card className="sticky top-6">
-                <CardHeader>
-                  <CardTitle>Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {/* Quick stats */}
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-3 rounded-lg border bg-white shadow-sm"
-                    >
-                      <div className="text-sm text-muted-foreground">Total Challenges</div>
-                      <div className="text-2xl font-semibold">{challenges.length}</div>
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="p-3 rounded-lg border bg-white shadow-sm"
-                    >
-                      <div className="text-sm text-muted-foreground">Active</div>
-                      <div className="text-2xl font-semibold">
-                        {challenges.filter(c => c.is_active).length}
-                      </div>
-                    </motion.div>
+                          <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
+                          <Button variant="ghost" size="sm" onClick={() => askDelete(ch.id)}>🗑️</Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>🏳️ View Flag</Button>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-
-                  {/* Breakdown by category */}
-                    <div className="mb-6">
-                      <div className="text-sm font-semibold mb-2 text-gray-700">By Category</div>
-                      <div className="space-y-2">
-                        {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
-                          const count = challenges.filter(c => c.category === cat).length
-                          return (
-                            <div key={cat} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
-                              <span className="text-sm font-medium">{cat}</span>
-                              <Badge className="bg-blue-100 text-blue-800">{count}</Badge>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-
-                  {/* Breakdown by difficulty */}
-                  <div>
-                    <div className="text-sm font-semibold mb-2 text-gray-700">By Difficulty</div>
-                    <div className="space-y-2">
-                      {["Easy", "Medium", "Hard"].map(diff => {
-                        const count = challenges.filter(c => c.difficulty === diff).length
-                        return (
-                          <div key={diff} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-                            <span className="text-sm font-medium">{diff}</span>
-                            <Badge
-                              className={
-                                diff === "Easy"
-                                  ? "bg-green-100 text-green-800"
-                                  : diff === "Medium"
-                                  ? "bg-yellow-100 text-yellow-800"
-                                  : "bg-red-100 text-red-800"
-                              }
-                            >
-                              {count}
-                            </Badge>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </aside>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </main>
-      )}
 
-      {/* Dialog form for add/edit */}
+          <aside>
+            <Card className="sticky top-6">
+              <CardHeader>
+                <CardTitle>Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border bg-white shadow-sm">
+                    <div className="text-sm text-muted-foreground">Total Challenges</div>
+                    <div className="text-2xl font-semibold">{challenges.length}</div>
+                  </motion.div>
+
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border bg-white shadow-sm">
+                    <div className="text-sm text-muted-foreground">Active</div>
+                    <div className="text-2xl font-semibold">{challenges.filter(c => c.is_active).length}</div>
+                  </motion.div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="text-sm font-semibold mb-2 text-gray-700">By Category</div>
+                  <div className="space-y-2">
+                    {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
+                      const count = challenges.filter(c => c.category === cat).length
+                      return (
+                        <div key={cat} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
+                          <span className="text-sm font-medium">{cat}</span>
+                          <Badge className="bg-blue-100 text-blue-800">{count}</Badge>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-sm font-semibold mb-2 text-gray-700">By Difficulty</div>
+                  <div className="space-y-2">
+                    {["Easy", "Medium", "Hard"].map(diff => {
+                      const count = challenges.filter(c => c.difficulty === diff).length
+                      return (
+                        <div key={diff} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
+                          <span className="text-sm font-medium">{diff}</span>
+                          <Badge className={diff === "Easy" ? "bg-green-100 text-green-800" : diff === "Medium" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}>{count}</Badge>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </aside>
+        </div>
+      </main>
+
       <AnimatePresence>
         {openForm && (
           <Dialog open={openForm} onOpenChange={(v) => { if (!v) { setOpenForm(false); setEditing(null) } else setOpenForm(true) }}>
@@ -493,56 +424,27 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                <div className="md:col-span-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Attachments</Label>
-                    <Button type="button" variant="ghost" size="sm" onClick={addAttachment}>+ Add</Button>
-                  </div>
+                  <div className="md:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <Label>Attachments</Label>
+                      <Button type="button" variant="ghost" size="sm" onClick={addAttachment}>+ Add</Button>
+                    </div>
 
                     <div className="space-y-2 mt-2">
                       {formData.attachments.map((a, idx) => (
                         <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                          {/* Attachment name */}
-                          <Input
-                            className="col-span-3"
-                            value={a.name}
-                            onChange={(e) => updateAttachment(idx, 'name', e.target.value)}
-                            placeholder="File name / Label"
-                            required
-                          />
+                          <Input className="col-span-3" value={a.name} onChange={(e) => updateAttachment(idx, 'name', e.target.value)} placeholder="File name / Label" required />
+                          <Input className="col-span-6" value={a.url} onChange={(e) => updateAttachment(idx, 'url', e.target.value)} placeholder="URL" required />
 
-                          {/* Attachment url */}
-                          <Input
-                            className="col-span-6"
-                            value={a.url}
-                            onChange={(e) => updateAttachment(idx, 'url', e.target.value)}
-                            placeholder="URL"
-                            required
-                          />
-
-                          {/* Attachment type */}
-                          <Select
-                            value={a.type}
-                            onValueChange={(v) => updateAttachment(idx, 'type', v)}
-                          >
-                            <SelectTrigger className="col-span-2">
-                              <SelectValue placeholder="Type" />
-                            </SelectTrigger>
+                          <Select value={a.type} onValueChange={(v) => updateAttachment(idx, 'type', v)}>
+                            <SelectTrigger className="col-span-2"><SelectValue placeholder="Type" /></SelectTrigger>
                             <SelectContent>
                               <SelectItem value="file">File</SelectItem>
                               <SelectItem value="link">Link</SelectItem>
                             </SelectContent>
                           </Select>
 
-                          {/* Remove button */}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => removeAttachment(idx)}
-                            className="col-span-1"
-                          >
-                            ✕
-                          </Button>
+                          <Button type="button" variant="ghost" onClick={() => removeAttachment(idx)} className="col-span-1">✕</Button>
                         </div>
                       ))}
 
@@ -562,6 +464,22 @@ export default function AdminPage() {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* Confirm dialog outside of mapping so it's global */}
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete Challenge"
+        description="Are you sure you want to delete this challenge? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={async () => {
+          if (pendingDelete) {
+            await doDelete(pendingDelete)
+            setPendingDelete(null)
+            setConfirmOpen(false)
+          }
+        }}
+      />
     </div>
   )
 }

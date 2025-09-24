@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth'
+// import { getCurrentUser } from '@/lib/auth'
 import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { ChallengeWithSolve, User, Attachment } from '@/types'
 
@@ -15,9 +15,6 @@ import { Solver } from '@/components/challanges/SolversList';
 import ChallengeFilterBar from '@/components/challanges/ChallengeFilterBar'
 
 export default function ChallengesPage() {
-  // State untuk tab modal challenge
-  const [challengeTab, setChallengeTab] = useState<'challenge' | 'solvers'>('challenge');
-  const [solvers, setSolvers] = useState<Solver[]>([]);
   // Saat tab solvers dibuka, fetch solvers
   const handleTabChange = async (tab: 'challenge' | 'solvers', challengeId: string) => {
     setChallengeTab(tab);
@@ -31,7 +28,8 @@ export default function ChallengesPage() {
     }
   };
   const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
+  const [challengeTab, setChallengeTab] = useState<'challenge' | 'solvers'>('challenge');
+  const [solvers, setSolvers] = useState<Solver[]>([]);
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
   const [loading, setLoading] = useState(true)
   const [flagInputs, setFlagInputs] = useState<{[key: string]: string}>({})
@@ -41,26 +39,21 @@ export default function ChallengesPage() {
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
-
-  // Filter states
   const [filters, setFilters] = useState({
-    status: 'all', // 'all', 'solved', 'unsolved'
-    category: 'all', // 'all', 'Web', 'Reverse', 'Crypto', etc.
-    difficulty: 'all', // 'all', 'Easy', 'Medium', 'Hard'
-    search: '' // search by title/description
+    status: 'all',
+    category: 'all',
+    difficulty: 'all',
+    search: ''
   })
+  const { user } = require('@/contexts/AuthContext').useAuth();
 
   useEffect(() => {
-    const fetchData = async () => {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) {
-        router.push('/login')
+    const fetchChallenges = async () => {
+      if (!user) {
+        setLoading(false)
         return
       }
-
-      setUser(currentUser)
-
-      const challengesData = await getChallenges(currentUser.id)
+      const challengesData = await getChallenges(user.id)
       // Normalize hint field to string[] for each challenge
       const normalizedChallenges = challengesData.map((challenge: any) => {
         let hints: string[] = [];
@@ -90,9 +83,8 @@ export default function ChallengesPage() {
       setChallenges(normalizedChallenges);
       setLoading(false);
     }
-
-    fetchData()
-  }, [router])
+    fetchChallenges()
+  }, [user])
 
   // Tambahkan useEffect ini setelah deklarasi state
   useEffect(() => {
@@ -113,11 +105,9 @@ export default function ChallengesPage() {
     try {
       const result = await submitFlag(challengeId, flagInputs[challengeId].trim())
 
-      // Refresh challenge list & user
+      // Refresh challenge list
       const challengesData = await getChallenges(user.id)
       setChallenges(challengesData)
-      const updatedUser = await getCurrentUser()
-      setUser(updatedUser)
 
       // set feedback box
       setFlagFeedback(prev => ({
@@ -127,8 +117,6 @@ export default function ChallengesPage() {
 
       if (result.success) {
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
-        // setSelectedChallenge(null)
-        // setChallengeTab('challenge')
       }
     } catch (error) {
       console.error('Error submitting flag:', error)
@@ -219,6 +207,7 @@ export default function ChallengesPage() {
     }
   }
 
+  if (loading) return <Loader fullscreen color="text-orange-500" />
   if (!user) return null
   return (
     <div className="min-h-screen bg-gray-50">
