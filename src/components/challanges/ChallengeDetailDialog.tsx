@@ -4,6 +4,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SolversList, { Solver } from './SolversList';
 import HintDialog from './HintDialog';
 import { Attachment, ChallengeWithSolve } from '@/types';
+import { Description } from '@radix-ui/react-dialog';
 
 interface ChallengeDetailDialogProps {
   open: boolean;
@@ -92,7 +93,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             </div>
 
             {/* Description */}
-            <div className="mb-3 text-gray-200 text-sm whitespace-pre-line">
+            <div className="mb-3">
               <MarkdownRenderer content={challenge.description} />
             </div>
 
