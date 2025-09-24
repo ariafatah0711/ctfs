@@ -11,18 +11,32 @@ export interface AuthResponse {
  */
 export async function signUp(email: string, password: string, username: string): Promise<AuthResponse> {
   try {
+    // Cek username di public.users
+    const { data: existingUser, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .single();
+
+    if (existingUser) {
+      return { user: null, error: 'Username already taken' };
+    }
+
     // Sign up dengan Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          username: username,
-          display_name: username
+          // username: username,
+          // display_name: username
         }
       }
     })
 
+     if (authError?.message === 'User already registered') {
+      return { user: null, error: "Email already registered" }
+    }
     if (authError) {
       return { user: null, error: authError.message }
     }
@@ -55,7 +69,7 @@ export async function signUp(email: string, password: string, username: string):
 
     return { user: userData, error: null };
   } catch (error) {
-  return { user: null, error: 'Registration failed' }
+    return { user: null, error: 'Registration failed' }
   }
 }
 

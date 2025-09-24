@@ -145,24 +145,33 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Create profile function (RPC)
 CREATE OR REPLACE FUNCTION create_profile(p_id uuid, p_username text)
 RETURNS void AS $$
+DECLARE
+  v_username text := p_username;
+  v_suffix int := 1;
 BEGIN
-  -- 1. insert untuk user yang baru dipassing
+  -- Cari username unik
+  WHILE EXISTS (SELECT 1 FROM public.users WHERE username = v_username) LOOP
+    v_username := p_username || '_' || v_suffix;
+    v_suffix := v_suffix + 1;
+  END LOOP;
+
+  -- Insert user baru dengan username unik
   INSERT INTO public.users (id, username)
-  VALUES (p_id, p_username)
+  VALUES (p_id, v_username)
   ON CONFLICT (id) DO NOTHING;
 
-  -- 2. insert untuk semua user lain di auth.users yang belum ada di public.users
+  -- Insert user lain dari auth.users yang belum ada di public.users
   INSERT INTO public.users (id, username)
   SELECT
     au.id,
     COALESCE(
       au.raw_user_meta_data->>'username',
       au.raw_user_meta_data->>'display_name',
-      split_part(au.email, '@', 1) -- fallback
+      split_part(au.email, '@', 1)
     )
   FROM auth.users au
   LEFT JOIN public.users pu ON pu.id = au.id
-  WHERE pu.id IS NULL; -- cuma yang belum ada
+  WHERE pu.id IS NULL;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
