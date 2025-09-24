@@ -103,15 +103,31 @@ body::-webkit-scrollbar-thumb:hover {
   border-radius: 9999px;
 }
 
-/* Light mode */
-*::-webkit-scrollbar-thumb {
-  background-color: rgba(100, 100, 255, 0.4);
+/* hide */
+/* sembunyiin scrollbar, tapi scroll tetap jalan */
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari */
 }
 
-/* Dark mode */
-.dark *::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
+.scroll-hidden {
+  -ms-overflow-style: none;
+  /* IE & Edge lama */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
+/* Sembunyikan semua scrollbar tapi tetap bisa scroll */
+/* *::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+} */
+
+/* #### */
 
 @layer base {
   :root {
@@ -141,6 +157,7 @@ body::-webkit-scrollbar-thumb:hover {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -173,7 +190,20 @@ body::-webkit-scrollbar-thumb:hover {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+
+/* tmp */
+/* Light mode */
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 255, 0.4);
+}
+
+/* Dark mode */
+.dark *::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
 }

@@ -11,7 +11,7 @@ interface SolversListProps {
 
 const SolversList: React.FC<SolversListProps> = ({ solvers }) => {
   return (
-    <ul className="space-y-2 max-h-60 overflow-y-auto">
+    <ul className="space-y-2 max-h-60 overflow-y-auto scroll-hidden">
       {solvers.length === 0 ? (
         <li className="text-gray-400">No solves yet.</li>
       ) : (

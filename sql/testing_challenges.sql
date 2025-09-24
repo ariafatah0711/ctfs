@@ -119,22 +119,21 @@ SELECT id, 'flag{test_combination}', encode(digest('flag{test_combination}', 'sh
 FROM ins;
 
 -- =========================
--- Reset chall_test_double_file
+-- Reset chall_test_file2
 -- =========================
 DELETE FROM public.solves
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_double_file');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file2');
 DELETE FROM public.challenge_flags
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_double_file');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_file2');
 DELETE FROM public.challenge_flags
-WHERE flag_hash = encode(digest('flag{test_double_file}', 'sha256'), 'hex');
-DELETE FROM public.challenges WHERE title = 'chall_test_double_file';
+WHERE flag_hash = encode(digest('flag{test_file2}', 'sha256'), 'hex');
+DELETE FROM public.challenges WHERE title = 'chall_test_file2';
 
 WITH ins AS (
   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
   VALUES (
-    'chall_test_double_file',
-    'Challenge ini berisi dua file yang harus dianalisis.
-    Flag: flag{test_double_file}',
+    'chall_test_file2',
+    'Challenge ini berisi dua file yang harus dianalisis. <br>Flag: flag{test_file2}',
     'Misc',
     120,
     '["Kedua file mengandung bagian dari flag."]',
@@ -145,27 +144,26 @@ WITH ins AS (
   RETURNING id
 )
 INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test_double_file}', encode(digest('flag{test_double_file}', 'sha256'), 'hex')
+SELECT id, 'flag{test_file2}', encode(digest('flag{test_file2}', 'sha256'), 'hex')
 FROM ins;
 
 
 -- =========================
--- Reset chall_test_double_url
+-- Reset chall_test_url2
 -- =========================
 DELETE FROM public.solves
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_double_url');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_url2');
 DELETE FROM public.challenge_flags
-WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_double_url');
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_url2');
 DELETE FROM public.challenge_flags
-WHERE flag_hash = encode(digest('flag{test_double_url}', 'sha256'), 'hex');
-DELETE FROM public.challenges WHERE title = 'chall_test_double_url';
+WHERE flag_hash = encode(digest('flag{test_url2}', 'sha256'), 'hex');
+DELETE FROM public.challenges WHERE title = 'chall_test_url2';
 
 WITH ins AS (
   INSERT INTO public.challenges (title, description, category, points, hint, difficulty, attachments)
   VALUES (
-    'chall_test_double_url',
-    'Challenge ini berisi dua link yang perlu dicek.
-    Flag: flag{test_double_url}',
+    'chall_test_url2',
+    'Challenge ini berisi dua link yang perlu dicek. <br>Flag: flag{test_url2}',
     'Misc',
     90,
     '["Flag bisa muncul di salah satu halaman."]',
@@ -176,5 +174,5 @@ WITH ins AS (
   RETURNING id
 )
 INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
-SELECT id, 'flag{test_double_url}', encode(digest('flag{test_double_url}', 'sha256'), 'hex')
+SELECT id, 'flag{test_url2}', encode(digest('flag{test_url2}', 'sha256'), 'hex')
 FROM ins;
