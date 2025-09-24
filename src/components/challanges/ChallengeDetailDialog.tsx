@@ -51,7 +51,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
         {/* Header: title + close */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between">
           <h2
             className={`text-xl font-bold tracking-wide ${challenge.is_solved ? 'text-green-400' : 'text-pink-400'}`}
             style={{ fontSize: '1.25rem' }}
@@ -61,15 +61,15 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-between gap-2 mb-6">
+        <div className="flex justify-between gap-2">
           <button
-            className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+            className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
             onClick={() => setChallengeTab('challenge', challenge.id)}
           >
             Challenge
           </button>
           <button
-            className={`flex-1 px-4 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+            className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
             onClick={() => setChallengeTab('solvers', challenge.id)}
           >
             {solvers.length || ""} solve
@@ -80,12 +80,12 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         {challengeTab === 'challenge' && (
           <>
             {/* Badge bar */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 rounded text-sm font-semibold bg-blue-200 text-blue-800">
+                <span className="px-2 py-0.5 rounded text-sm font-semibold bg-blue-200 text-blue-800">
                   {challenge.category}
                 </span>
-                <span className={`px-3 py-1 rounded text-sm font-semibold ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''} ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800' : ''} ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}`}>{challenge.difficulty}</span>
+                <span className={`px-2 py-0.5 rounded text-sm font-semibold ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''} ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800' : ''} ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}`}>{challenge.difficulty}</span>
               </div>
               <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300' : 'text-yellow-300'}`}>
                 🪙 {challenge.points}
@@ -93,13 +93,13 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             </div>
 
             {/* Description */}
-            <div className="mb-3">
+            <div>
               <MarkdownRenderer content={challenge.description} />
             </div>
 
             {/* Attachments */}
             {challenge.attachments && challenge.attachments.length > 0 && (
-              <div className="mb-3 space-y-3">
+              <div className="mb-1 space-y-3">
                 {/* File Attachments */}
                 {challenge.attachments.some(att => att.type === 'file') && (
                   <div>
@@ -155,7 +155,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
             {/* Hint buttons */}
             {Array.isArray(challenge.hint) && challenge.hint.length > 0 && (
-              <div className="mb-3 flex flex-wrap gap-2">
+              <div className="mb-1 flex flex-wrap gap-2">
                 {(challenge.hint ?? []).map((hint: string, idx: number) => (
                   <button
                     key={idx}
@@ -174,7 +174,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
             {/* Flag input */}
             <form
-              className="flex gap-2 mt-4"
+              className="flex gap-2"
               onSubmit={e => {
                 e.preventDefault();
                 handleFlagSubmit(challenge.id);

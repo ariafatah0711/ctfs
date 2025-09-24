@@ -20,7 +20,7 @@ const HintDialog: React.FC<HintDialogProps> = ({ challenge, hintIdx = 0, open, o
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-pink-300">
-            <span className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">💡</span>
+            <span className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">💡</span>
             Hint for: {challenge.title}
           </DialogTitle>
         </DialogHeader>
