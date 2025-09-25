@@ -1,17 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from '@/lib/auth'
 import { useAuth } from '@/contexts/AuthContext'
+import Loader from '@/components/custom/loading'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { setUser } = useAuth()   // ambil dari context
+  const { setUser, user, loading: authLoading } = useAuth()
   const [formData, setFormData] = useState({ identifier: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // kalau user sudah login → redirect
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/challanges')
+    }
+  }, [user, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,8 +31,8 @@ export default function LoginPage() {
       if (error) {
         setError(error)
       } else if (user) {
-        setUser(user)                // simpan user ke context
-        router.push('/challanges')   // redirect
+        setUser(user) // simpan user ke context
+        router.push('/challanges')
       }
     } catch {
       setError('Login failed')
@@ -35,6 +43,11 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  // tampilkan loader pas masih cek auth session
+  if (authLoading) {
+    return <Loader fullscreen color="text-orange-500" />
   }
 
   return (

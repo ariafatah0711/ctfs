@@ -26,6 +26,7 @@ export default function UserProfilePage() {
       try {
         const username = params.username as string
         const userData = await getUserByUsername(username)
+
         if (!userData) {
           setError('User not found')
           setLoading(false)
@@ -35,6 +36,7 @@ export default function UserProfilePage() {
         setUserId(userData.id)
         setLoading(false)
       } catch (err) {
+        console.error('Error fetching user:', err)
         setError('Failed to load user profile')
         setLoading(false)
       }
@@ -45,10 +47,36 @@ export default function UserProfilePage() {
 
   // Tunggu authContext
   if (authLoading) return <Loader fullscreen color="text-orange-500" />
+
   // Redirect kalau belum login
   if (!user) {
     router.push('/login')
     return null
+  }
+
+  // Kalau masih loading
+  if (loading) {
+    return <Loader fullscreen color="text-orange-500" />
+  }
+
+  // Kalau error / user nggak ada
+  if (error) {
+    return (
+      <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50">
+        <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 text-center">
+          <h1 className="text-3xl font-extrabold text-gray-900">Oops!</h1>
+          <p className="mt-2 text-gray-600">
+            {error || "Something went wrong."}
+          </p>
+          <button
+            onClick={() => router.push('/challanges')}
+            className="mt-6 px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition"
+          >
+            Back to Challenges
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -116,7 +116,6 @@ INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
 SELECT id, 'flag{test_url}', encode(digest('flag{test_url}', 'sha256'), 'hex')
 FROM ins;
 
-
 -- =========================
 -- Reset chall_test_markdown
 -- =========================

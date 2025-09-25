@@ -1,34 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser } from '@/lib/auth'
+import Loader from '@/components/custom/loading'
 
 export default function Home() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
+  const { user, loading } = require('@/contexts/AuthContext').useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const user = await getCurrentUser()
+    if (!loading) {
       if (user) {
         router.push('/challanges')
       } else {
         router.push('/login')
       }
-      setLoading(false)
     }
-
-    checkAuth()
-  }, [router])
+  }, [user, loading, router])
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600"></div>
-      </div>
-    )
+    return <Loader fullscreen color="text-orange-500" />
   }
 
+  // jangan render apa-apa biar redirect jalan bersih
   return null
 }

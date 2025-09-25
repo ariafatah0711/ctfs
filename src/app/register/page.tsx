@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp } from '@/lib/auth'
 import { useAuth } from '@/contexts/AuthContext'
+import Loader from '@/components/custom/loading'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { setUser } = useAuth() // ambil dari context
+  const { setUser, user, loading: authLoading } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -18,12 +19,18 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // redirect kalau udah login
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/challanges')
+    }
+  }, [user, authLoading, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    // Validasi password
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -46,8 +53,8 @@ export default function RegisterPage() {
       if (error) {
         setError(error)
       } else if (user) {
-        setUser(user)               // simpan user ke context
-        router.push('/challanges')  // redirect
+        setUser(user)
+        router.push('/challanges')
       }
     } catch {
       setError('Registration failed')
@@ -61,6 +68,11 @@ export default function RegisterPage() {
       ...formData,
       [e.target.name]: e.target.value
     })
+  }
+
+  // kalau masih cek auth dari context → tampilkan loader
+  if (authLoading) {
+    return <Loader fullscreen color="text-orange-500" />
   }
 
   return (

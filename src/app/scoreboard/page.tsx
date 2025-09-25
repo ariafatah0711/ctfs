@@ -110,7 +110,7 @@ export default function ScoreboardPage() {
             <Loader fullscreen color="text-orange-500" />
           </div>
         ) : !user ? null : isEmpty ? (
-          <div className="flex flex-col items-center justify-center h-[70vh]">
+          <div className="flex flex-col items-center justify-center h-[70vh] text-center px-4">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -119,8 +119,13 @@ export default function ScoreboardPage() {
             >
               <span className="text-4xl text-gray-400">🎯</span>
             </motion.div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No challenges solved yet.</h3>
-            <p className="text-gray-500">Leaderboard is empty! Be the first to solve a challenge 🚀</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No challenges solved yet.
+            </h3>
+            <p className="text-gray-500 text-sm sm:text-base">
+              Leaderboard is empty!<br />
+              Be the first to solve a challenge 🚀
+            </p>
           </div>
         ) : (
           <>
