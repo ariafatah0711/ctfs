@@ -43,7 +43,7 @@ while len(rows) < total_solves:
     rows.append((solve_id, user_id, challenge_id, created_at))
     counter += 1
 
-with open("solves.sql", "w") as f:
+with open("dummy_solves.sql", "w") as f:
     f.write("DELETE FROM public.solves WHERE id::text LIKE '20000000-%';\n\nINSERT INTO public.solves (id, user_id, challenge_id, created_at) VALUES\n")
     for i, (sid, uid, cid, ts) in enumerate(rows):
         line = f"('{sid}', '{uid}', '{cid}', '{ts}')"
@@ -53,4 +53,4 @@ with open("solves.sql", "w") as f:
             line += "ON CONFLICT (user_id, challenge_id) DO NOTHING;\n"
         f.write(line)
 
-print("✅ solves.sql siap tanpa duplikat (user_id, challenge_id).")
+print("✅ dummy_solves.sql siap tanpa duplikat (user_id, challenge_id).")

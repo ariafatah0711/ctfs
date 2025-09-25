@@ -29,9 +29,11 @@ npm run build
 
 3. **Tambahkan Data Testing (Opsional)**
    - Untuk testing challenges: gunakan ```sql/testing_challenges.sql```.
-   - Untuk scoreboard dummy: gunakan folder sql/dummy_scoreboard/.
-     - Untuk testing challenges: gunakan sql/testing_challenges.sql.
-     - generate terlebih dahulu dengan ```create_solves.py``` atau gunakan yang sudah ada ```solves.sql```
+   - Untuk scoreboard dummy: gunakan folder ```sql/dummy_scoreboard/.```
+     - Untuk testing dummy challenges: gunakan ```dummy_user_challenges.sql```.
+     - untuk solves dummy nya gunakan ini ```dummy_solves.sql```
+       - namun perlu di generate terlebih dahulu dengan ```create_solves.py``` atau gunakan yang sudah ada ```dummy_solves.sql```
+     - untuk reset / hapus data dummy bisa gunakan ```sql/dummy_scoreboard/dummy_reset.sql```
 
 ## 4. Konfigurasi Environment
 
