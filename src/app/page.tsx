@@ -29,9 +29,11 @@ export default function Home() {
           transition={{ delay: 0.3 }}
           className="text-lg text-gray-700 max-w-2xl mb-8"
         >
-          A place to learn and compete in the field of{" "}
-          <span className="font-semibold">Cybersecurity</span> through{" "}
-          <span className="font-semibold">Capture The Flag (CTF)</span> challenges.
+          Practice your{" "}
+          <span className="font-semibold">cybersecurity skills</span> through{" "}
+          <span className="font-semibold">Jeopardy-style Capture The Flag (CTF)</span>{" "}
+          challenges — solve chall, collect flags, and climb the{" "}
+          <span className="font-semibold">leaderboard</span>.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -68,14 +70,74 @@ export default function Home() {
         {/* Bottom Bar */}
         <div className="border-t border-gray-200 py-4 text-center text-sm text-gray-500">
           <p>
-            Built with <span className="text-orange-500 font-semibold">Next.js</span>,{" "}
-            <span className="text-orange-500 font-semibold">TailwindCSS</span>,{" "}
-            <span className="text-orange-500 font-semibold">Framer Motion</span>,{" "}
-            and hosted with{" "}
-            <span className="text-orange-500 font-semibold">Supabase</span> and{" "}
-            <span className="text-orange-500 font-semibold">Vercel</span>.
+            Built with{" "}
+            <a
+              href="https://nextjs.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 font-semibold hover:underline"
+            >
+              Next.js
+            </a>
+            ,{" "}
+            <a
+              href="https://tailwindcss.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 font-semibold hover:underline"
+            >
+              TailwindCSS
+            </a>
+            ,{" "}
+            <a
+              href="https://www.framer.com/motion/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 font-semibold hover:underline"
+            >
+              Framer Motion
+            </a>
+            , and hosted with{" "}
+            <a
+              href="https://supabase.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 font-semibold hover:underline"
+            >
+              Supabase
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://vercel.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-orange-500 font-semibold hover:underline"
+            >
+              Vercel
+            </a>
+            .
           </p>
-          <p className="mt-1">© {new Date().getFullYear()} CTFS. All rights reserved.</p>
+          <p className="mt-1">
+            {/* Made With{" "}
+            <a
+              className="text-orange-500 font-semibold hover:underline"
+              href="https://github.com/ariafatah0711"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              aria
+            </a> */}
+            Source code available on{" "}
+            <a
+              className="text-orange-500 font-semibold hover:underline"
+              href="https://github.com/ariafatah0711/ctfs"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Github
+            </a>
+            , ©2025 CTFS. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

@@ -684,3 +684,17 @@ GRANT EXECUTE ON FUNCTION submit_flag(uuid, text) TO authenticated;
 
 -- Admin set manually:
 -- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
+
+
+-- ########################################################
+-- Keep Alive Table
+CREATE TABLE public."keep-alive" (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
+  FOR ALL
+  USING (true);
