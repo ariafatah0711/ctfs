@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from "next/link"
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,7 +24,7 @@ import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { isAdmin } from '@/lib/auth'
-import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag } from '@/lib/challenges'
+import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
 import { Challenge, Attachment } from '@/types'
 
 export default function AdminPage() {
@@ -31,6 +32,9 @@ export default function AdminPage() {
   const { user, loading } = useAuth()
   const [isAdminUser, setIsAdminUser] = useState(false)
   const [challenges, setChallenges] = useState<Challenge[]>([])
+  const [solvers, setSolvers] = useState<any[]>([])
+  const [solverOffset, setSolverOffset] = useState(0)
+  const [hasMoreSolvers, setHasMoreSolvers] = useState(true)
 
   // Dialog / form state
   const [openForm, setOpenForm] = useState(false)
@@ -96,6 +100,7 @@ export default function AdminPage() {
       }
 
       const data = await getChallenges(undefined, true)
+      fetchSolvers(0)
       if (!mounted) return
       setChallenges(data)
     })()
@@ -142,6 +147,13 @@ export default function AdminPage() {
   const refresh = async () => {
     const data = await getChallenges(undefined, true)
     setChallenges(data)
+  }
+
+  const fetchSolvers = async (offset = 0) => {
+    const data = await getSolversAll(50, offset)
+    setSolvers(prev => offset === 0 ? data : [...prev, ...data])
+    setSolverOffset(offset + 50)
+    setHasMoreSolvers(data.length === 50)
   }
 
   const handleViewFlag = async (id: string) => {
@@ -228,9 +240,10 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card className="mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          {/* Kiri: Challenge List */}
+          <div className="lg:col-span-3 order-1">
+            <Card className="h-full mb-6">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
@@ -239,7 +252,6 @@ export default function AdminPage() {
                   </div>
                 </CardTitle>
               </CardHeader>
-
               <ChallengeFilterBar
                 filters={filters}
                 categories={Array.from(new Set(challenges.map(c => c.category)))}
@@ -248,7 +260,6 @@ export default function AdminPage() {
                 onClear={handleClearFilters}
                 showStatusFilter={false}
               />
-
               <CardContent>
                 {filteredChallenges.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">No challenges found</div>
@@ -287,8 +298,10 @@ export default function AdminPage() {
             </Card>
           </div>
 
-          <aside>
-            <Card className="sticky top-6">
+          {/* Kanan: Sidebar */}
+          <aside className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h-[calc(100vh-6rem)] overflow-y-auto sticky top-24 scroll-hidden">
+            {/* Overview */}
+            <Card className="shrink-0">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
@@ -334,6 +347,48 @@ export default function AdminPage() {
                     })}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Solvers */}
+            <Card className="flex-1 flex flex-col">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Recent Solvers</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push('/admin/solvers')}
+                >
+                  View All
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto">
+                {solvers.length === 0 ? (
+                  <div className="text-gray-500 text-sm">No solvers yet</div>
+                ) : (
+                  <div className="space-y-2">
+                    {solvers.slice(0, 10).map(s => (
+                      <div
+                        key={s.solve_id}
+                        className="flex items-center justify-between border-b pb-1"
+                      >
+                        <div>
+                          <Link
+                            href={`/user/${s.username}`}
+                            className="font-medium text-blue-600 hover:underline"
+                          >
+                            {s.username}
+                          </Link>
+                          <span className="text-xs text-gray-500"> solved </span>
+                          <span className="text-xs">{s.challenge_title}</span>
+                        </div>
+                        <span className="text-xs text-gray-400">
+                          {new Date(s.solved_at).toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </aside>

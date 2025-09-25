@@ -53,6 +53,10 @@ code {
 }
 
 /* Scrollbar global */
+/* html {
+  scrollbar-gutter: stable;
+} */
+
 body {
   overflow-x: hidden;
   overflow-y: scroll !important;

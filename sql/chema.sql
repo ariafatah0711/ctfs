@@ -549,6 +549,63 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
 
+CREATE OR REPLACE FUNCTION get_solvers_all(
+  p_limit INT DEFAULT 250,
+  p_offset INT DEFAULT 0
+)
+RETURNS TABLE (
+  solve_id UUID,
+  user_id UUID,
+  username TEXT,
+  challenge_id UUID,
+  challenge_title TEXT,
+  solved_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can view all solvers';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    s.id,
+    u.id,
+    u.username,
+    c.id,
+    c.title,
+    s.created_at
+  FROM public.solves s
+  JOIN public.users u ON u.id = s.user_id
+  JOIN public.challenges c ON c.id = s.challenge_id
+  ORDER BY s.created_at DESC
+  LIMIT p_limit OFFSET p_offset;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_solvers_all(INT, INT) TO authenticated;
+
+-- delete solver function
+CREATE OR REPLACE FUNCTION delete_solver(
+  p_solve_id UUID
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+BEGIN
+  -- cek admin
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can delete solver';
+  END IF;
+
+  DELETE FROM public.solves WHERE id = p_solve_id;
+
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- kasih akses ke authenticated (biar dipanggil lewat supabase rpc)
+GRANT EXECUTE ON FUNCTION delete_solver(UUID) TO authenticated;
+
 -- ########################################################
 
 -- Enable RLS

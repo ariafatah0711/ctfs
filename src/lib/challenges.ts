@@ -346,3 +346,29 @@ export async function setChallengeActive(challengeId: string, isActive: boolean)
     return false;
   }
 }
+
+/**
+ * Ambil semua solver (Admin only) dengan pagination
+*/
+export async function getSolversAll(limit = 250, offset = 0) {
+  const { data, error } = await supabase.rpc('get_solvers_all', {
+    p_limit: limit,
+    p_offset: offset,
+  });
+
+  if (error) {
+    console.error('Error fetching solvers (paginated):', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function deleteSolver(solveId: string) {
+  const { data, error } = await supabase.rpc("delete_solver", {
+    p_solve_id: solveId,
+  })
+
+  if (error) throw error
+  return data
+}

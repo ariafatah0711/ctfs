@@ -8,6 +8,7 @@ import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Loader from '@/components/custom/loading'
+import BackButton from './custom/BackButton'
 
 type UserDetail = {
   id: string
@@ -94,13 +95,7 @@ export default function UserProfile({
           <>
             {/* Back Button */}
             {onBack && (
-              <Button
-                onClick={onBack}
-                variant="ghost"
-                className="flex items-center space-x-2"
-              >
-                ← Back
-              </Button>
+              <BackButton href="/admin" label="Go Back" />
             )}
 
             {/* Profile Header */}
