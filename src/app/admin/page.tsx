@@ -266,18 +266,24 @@ export default function AdminPage() {
                 ) : (
                   <div className="divide-y border rounded-md overflow-hidden">
                     {filteredChallenges.map(ch => (
-                      <motion.div key={ch.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex items-center justify-between px-4 py-3">
-                        <div className="flex items-center gap-4 truncate">
+                     <motion.div
+                        key={ch.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 gap-2"
+                      >
+                        <div className="flex items-center gap-2 truncate">
                           <Badge className={ch.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : ch.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}>
                             {ch.difficulty}
                           </Badge>
-                          <div className="min-w-0">
-                            <div className="font-medium truncate">{ch.title}</div>
-                            <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">{ch.title}</div>
+                              <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                           <Switch checked={ch.is_active} onCheckedChange={async (checked) => {
                             const ok = await setChallengeActive(ch.id, checked)
                             if (ok) {
@@ -288,7 +294,10 @@ export default function AdminPage() {
 
                           <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
                           <Button variant="ghost" size="sm" onClick={() => askDelete(ch.id)}>🗑️</Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>🏳️ View Flag</Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>
+                            <span className="hidden sm:inline">🏳️ View Flag</span>
+                            <span className="sm:hidden">🏳️ Flag</span>
+                          </Button>
                         </div>
                       </motion.div>
                     ))}
@@ -308,7 +317,7 @@ export default function AdminPage() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border bg-white shadow-sm">
-                    <div className="text-sm text-muted-foreground">Total Challenges</div>
+                    <div className="text-sm text-muted-foreground">Challenges</div>
                     <div className="text-2xl font-semibold">{challenges.length}</div>
                   </motion.div>
 
