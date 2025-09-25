@@ -7,6 +7,7 @@ import { getUserDetail, getCategoryTotals } from '@/lib/users'
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import EditProfileModal from './custom/EditProfileModal'
 import Loader from '@/components/custom/loading'
 import BackButton from './custom/BackButton'
 
@@ -15,6 +16,7 @@ type UserDetail = {
   username: string
   rank: number | null
   score: number
+  picture?: string | null
   solved_challenges: ChallengeWithSolve[]
 }
 
@@ -37,6 +39,7 @@ export default function UserProfile({
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
+  // Modal state removed, handled in EditProfileModal
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -106,21 +109,31 @@ export default function UserProfile({
             >
               <Card className="bg-white dark:bg-gray-800">
                 <CardContent className="flex items-center space-x-6 py-6">
-                  <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 dark:text-blue-300 text-2xl font-bold">
-                      {userDetail.username.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center overflow-hidden">
+                    {userDetail.picture ? (
+                      <img
+                        src={userDetail.picture}
+                        alt="Profile"
+                        className="w-full h-full object-cover rounded-full border border-gray-200 dark:border-gray-700"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span className="text-blue-600 dark:text-blue-300 text-2xl font-bold">
+                        {userDetail.username.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{userDetail.username}</h1>
                     <p className="text-lg text-gray-500 dark:text-gray-300 mt-1">Score: <span className="font-semibold text-orange-600 dark:text-orange-400">{userDetail.score}</span></p>
                   </div>
-                  {isCurrentUser && (
-                    <Button
-                      className="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
-                    >
-                      Edit Profile
-                    </Button>
+                  {isCurrentUser && userDetail && (
+                    <EditProfileModal
+                      userId={userDetail.id}
+                      currentUsername={userDetail.username}
+                      onUsernameChange={username => setUserDetail({ ...userDetail, username })}
+                      triggerButtonClass="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
+                    />
                   )}
                 </CardContent>
               </Card>

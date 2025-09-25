@@ -62,6 +62,10 @@ Ambil value dari project Supabase kamu.
    - Authorized redirect URIs:
      ```https://<YOUR_PROJECT_REF>.supabase.co/auth/v1/callback```
    - Simpan Client ID dan Client Secret → masukkan ke Supabase.
+3. Ubah Site URL untuk redirect setelah Login
+  - Dashboard → Authentication → URL Configuration → Site URL
+  - ubah sesuai url sesuai dengan site / domain website
+    misal: ```https://ctf.ariaf.my.id```
 
 ---
 

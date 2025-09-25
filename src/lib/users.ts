@@ -7,10 +7,10 @@ export type UserDetail = {
   id: string
   username: string
   rank: number | null
-  score: number // 👈 tambahin ini
+  score: number
+  picture?: string | null
   solved_challenges: ChallengeWithSolve[]
 }
-
 
 export async function getUserDetail(userId: string): Promise<UserDetail | null> {
   try {
@@ -23,7 +23,8 @@ export async function getUserDetail(userId: string): Promise<UserDetail | null> 
       id: data.user.id,
       username: data.user.username,
       rank: data.user.rank ?? null,
-      score: data.user.score ?? 0, // 👈 ambil dari DB
+      score: data.user.score ?? 0,
+      picture: data.user.picture ?? null,
       solved_challenges: (data.solved_challenges || []).map((c: any) => ({
         id: c.challenge_id,
         title: c.title,
@@ -137,5 +138,24 @@ export async function getCategoryTotals(): Promise<CategoryTotal[]> {
   } catch (error) {
     console.error('Error fetching category totals:', error)
     return []
+  }
+}
+
+// Update current user's username via RPC
+export async function updateUsername(userId: string, newUsername: string): Promise<{ error: string | null, username?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('update_username', {
+      p_id: userId,
+      p_username: newUsername
+    });
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update username' };
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update username' };
+    }
+    return { error: null, username: data.username };
+  } catch (error) {
+    return { error: 'Failed to update username' };
   }
 }

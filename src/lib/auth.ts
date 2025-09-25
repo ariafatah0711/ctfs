@@ -11,22 +11,61 @@ export interface AuthResponse {
  */
 export async function loginGoogle(): Promise<AuthResponse> {
   try {
+    const redirectUrl = `${window.location.origin}/challanges`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/challanges`,
+        redirectTo: redirectUrl,
       },
     })
 
     if (error) {
       return { user: null, error: error.message }
     }
-    // User akan di-handle oleh AuthContext setelah redirect
     return { user: null, error: null }
   } catch (error) {
     return { user: null, error: 'Google sign-in failed' }
   }
 }
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/challanges` // redirect ke forgot-password untuk input password baru
+    })
+    if (error) {
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (error) {
+    return { error: 'Failed to send reset email' }
+  }
+}
+
+/**
+ * Update current user's password
+ */
+export async function updatePassword(newPassword: string): Promise<{ error: string | null }> {
+  try {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      return { error: 'User not authenticated' }
+    }
+    // Update password directly
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) {
+      return { error: error.message }
+    }
+    return { error: null }
+  } catch (error) {
+    return { error: 'Failed to update password' }
+  }
+}
+
 
 /**
  * Sign up user baru

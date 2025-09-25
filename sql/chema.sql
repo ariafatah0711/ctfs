@@ -211,12 +211,18 @@ DECLARE
   v_rank BIGINT;
   v_score INT;
   v_solves JSON;
+  v_picture TEXT;
 BEGIN
   -- Ambil user
   SELECT id, username INTO v_user FROM public.users WHERE id = p_id;
   IF NOT FOUND THEN
     RETURN json_build_object('success', false, 'message', 'User not found');
   END IF;
+
+  -- Ambil picture dari auth.users.raw_user_meta_data.picture (jika ada)
+  SELECT au.raw_user_meta_data->>'picture' INTO v_picture
+  FROM auth.users au
+  WHERE au.id = v_user.id;
 
   -- Hitung rank (sinkron dengan get_leaderboard)
   SELECT rank INTO v_rank
@@ -258,12 +264,42 @@ BEGIN
       'id', v_user.id,
       'username', v_user.username,
       'rank', COALESCE(v_rank, 0),
-      'score', COALESCE(v_score, 0)
+      'score', COALESCE(v_score, 0),
+      'picture', v_picture
     ),
     'solved_challenges', COALESCE(v_solves, '[]'::json)
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Update username function (RPC)
+
+CREATE OR REPLACE FUNCTION update_username(p_id uuid, p_username text)
+RETURNS json AS $$
+DECLARE
+  v_username text := p_username;
+  v_old_username text;
+  v_exists int;
+BEGIN
+  -- Cek user ada
+  SELECT username INTO v_old_username FROM public.users WHERE id = p_id;
+  IF NOT FOUND THEN
+    RETURN json_build_object('success', false, 'message', 'User not found');
+  END IF;
+
+  -- Cek username sudah dipakai user lain (case-insensitive, kecuali user sendiri)
+  SELECT count(*) INTO v_exists FROM public.users WHERE lower(username) = lower(v_username) AND id <> p_id;
+  IF v_exists > 0 THEN
+    RETURN json_build_object('success', false, 'message', 'Username already taken');
+  END IF;
+
+  -- Update username
+  UPDATE public.users SET username = v_username, updated_at = now() WHERE id = p_id;
+  RETURN json_build_object('success', true, 'username', v_username);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION update_username(uuid, text) TO authenticated;
 
 -- Leaderboard: urutkan berdasarkan jumlah solve
 CREATE OR REPLACE FUNCTION get_leaderboard()
@@ -687,6 +723,7 @@ GRANT EXECUTE ON FUNCTION submit_flag(uuid, text) TO authenticated;
 
 -- ########################################################
 -- Keep Alive Table
+DROP TABLE IF EXISTS public."keep-alive" CASCADE;
 CREATE TABLE public."keep-alive" (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
