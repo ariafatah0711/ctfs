@@ -202,6 +202,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+CREATE OR REPLACE FUNCTION get_user_profile(p_id UUID)
+RETURNS TABLE (
+  id UUID,
+  username TEXT,
+  picture TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    u.id,
+    u.username,
+    au.raw_user_meta_data->>'picture' AS picture
+  FROM public.users u
+  LEFT JOIN auth.users au ON au.id = u.id
+  WHERE u.id = p_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+GRANT EXECUTE ON FUNCTION get_user_profile(UUID) TO authenticated;
+
 -- Function: detail_user(p_id UUID)
 -- Mengembalikan: id, username, rank, solved challenges (id, title, category, points, difficulty, solved_at)
 CREATE OR REPLACE FUNCTION detail_user(p_id UUID)

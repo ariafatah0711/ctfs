@@ -227,15 +227,12 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    // Cek user di tabel users
-    let { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    // Ambil user profile via RPC
+    let { data, error } = await supabase.rpc('get_user_profile', { p_id: user.id });
+    let userData = data && data.length > 0 ? data[0] : null;
 
     // Jika belum ada, auto-create profile (misal login Google)
-    if (userError || !userData) {
+    if (!userData) {
       const username =
         user.user_metadata?.username ||
         (user.email ? user.email.split("@")[0] : "user_" + user.id.substring(0, 8));
@@ -248,17 +245,14 @@ export async function getCurrentUser(): Promise<User | null> {
         console.error("Auto create_profile error:", rpcError);
         return null;
       }
-      // Ambil ulang
-      const { data: newUserData, error: newUserError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      if (newUserError) {
+      // Ambil ulang pakai RPC
+      const { data: newData, error: newError } = await supabase.rpc('get_user_profile', { p_id: user.id });
+      userData = newData && newData.length > 0 ? newData[0] : null;
+      if (newError || !userData) {
         return null;
       }
-      userData = newUserData;
     }
+    console.log("Current user data:", userData);
     return userData;
   } catch (error) {
     return null;

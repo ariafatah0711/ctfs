@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SolversList, { Solver } from './SolversList';
 import HintDialog from './HintDialog';
@@ -50,15 +50,15 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         onClick={e => e.stopPropagation()}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
-        {/* Header: title + close */}
-        <div className="flex items-center justify-between">
+        {/* Header: title + close (DialogTitle for accessibility) */}
+        <DialogTitle asChild>
           <h2
             className={`text-xl font-bold tracking-wide ${challenge.is_solved ? 'text-green-400 dark:text-green-300' : 'text-pink-400 dark:text-pink-300'}`}
             style={{ fontSize: '1.25rem' }}
           >
             {challenge.title}
           </h2>
-        </div>
+        </DialogTitle>
 
         {/* Tabs */}
   <div className="flex justify-between gap-2">
@@ -79,6 +79,10 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         {/* Content: Challenge detail */}
         {challengeTab === 'challenge' && (
           <>
+            {/* Description for accessibility (DialogDescription) */}
+            <DialogDescription asChild>
+              <div className="sr-only">{challenge.description}</div>
+            </DialogDescription>
             {/* Badge bar */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

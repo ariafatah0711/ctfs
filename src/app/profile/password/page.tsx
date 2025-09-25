@@ -23,7 +23,23 @@ export default function ChangePasswordPage() {
     )
   }
 
-  if (!user) return null
+  if (!user) {
+    return (
+      <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Anda perlu login terlebih dahulu
+          </h2>
+          <a
+            href="/login"
+            className="inline-block mt-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
+          >
+            Login
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
