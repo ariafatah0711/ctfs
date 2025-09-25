@@ -22,6 +22,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
+      <head>
+        <title>CTFS - Capture The Flag Simple</title>
+        <meta name="description" content="Aplikasi CTF minimalis dengan Next.js dan Supabase" />
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body className={inter.className}>
         <ThemeProvider>
           <AuthProvider>

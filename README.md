@@ -3,8 +3,8 @@
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/your-username/your-ctf-repo.git
-cd your-ctf-repo
+git clone https://github.com/ariafatah0711/ctfs
+cd ctfs
 ```
 
 ## 2. Install Dependencies
