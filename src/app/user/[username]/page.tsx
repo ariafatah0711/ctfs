@@ -62,15 +62,15 @@ export default function UserProfilePage() {
   // Kalau error / user nggak ada
   if (error) {
     return (
-      <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50">
-        <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-8 text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900">Oops!</h1>
-          <p className="mt-2 text-gray-600">
+      <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center">
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Oops!</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">
             {error || "Something went wrong."}
           </p>
           <button
             onClick={() => router.push('/challanges')}
-            className="mt-6 px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition"
+            className="mt-6 px-6 py-2 rounded-lg bg-primary-600 dark:bg-primary-700 text-white font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition"
           >
             Back to Challenges
           </button>

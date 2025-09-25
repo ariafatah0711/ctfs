@@ -133,7 +133,6 @@ body::-webkit-scrollbar-thumb:hover {
 
 select {
   appearance: none;
-  /* hilangin default arrow */
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
@@ -141,6 +140,13 @@ select {
   background-position: right 0.75rem center;
   background-size: 1.25rem;
   padding-right: 2rem;
+}
+
+.dark select {
+  background-color: #181829;
+  color: #f3f4f6;
+  border-color: #35355e;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
 }
 
 /* #### */

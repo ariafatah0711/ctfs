@@ -28,7 +28,7 @@ export default function ChallengeFilterBar({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-lg shadow border border-gray-200 p-4 mb-4"
+  className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4 mb-4"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <input
@@ -36,14 +36,14 @@ export default function ChallengeFilterBar({
           value={filters.search}
           onChange={e => onFilterChange({ ...filters, search: e.target.value })}
           placeholder="🔍 Search challenge..."
-          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
           style={{ minWidth: 160 }}
         />
         {showStatusFilter && (
           <select
             value={filters.status || 'all'}
             onChange={e => onFilterChange({ ...filters, status: e.target.value })}
-            className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+            className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
           >
             <option value="all">All Status</option>
             <option value="unsolved">Unsolved</option>
@@ -53,7 +53,7 @@ export default function ChallengeFilterBar({
         <select
           value={filters.category}
           onChange={e => onFilterChange({ ...filters, category: e.target.value })}
-          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
         >
           <option value="all">All Categories</option>
           {categories.map(category => (
@@ -63,7 +63,7 @@ export default function ChallengeFilterBar({
         <select
           value={filters.difficulty}
           onChange={e => onFilterChange({ ...filters, difficulty: e.target.value })}
-          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 transition"
+          className="w-full sm:w-auto flex-1 px-4 py-2 text-base border border-gray-300 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
         >
           <option value="all">All Difficulties</option>
           {[...difficulties]
@@ -79,7 +79,7 @@ export default function ChallengeFilterBar({
         </select>
         <button
           onClick={onClear}
-          className="w-full sm:w-auto px-4 py-2 text-base text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition"
+          className="w-full sm:w-auto px-4 py-2 text-base text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 rounded hover:bg-blue-100 dark:hover:bg-blue-800 transition"
         >
           Clear
         </button>

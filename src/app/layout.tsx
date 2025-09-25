@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast"
 
 import Navbar from '@/components/Navbar'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -22,15 +23,17 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={inter.className}>
-        <AuthProvider>   {/* ✅ Bungkus seluruh app */}
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />   {/* ✅ Navbar otomatis dapat user dari context */}
-            <div className="pt-16">
-              {children}
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <Navbar />
+              <div className="pt-16">
+                {children}
+              </div>
+              <Toaster position="top-right" reverseOrder={false} />
             </div>
-            <Toaster position="top-right" reverseOrder={false} />
-          </div>
-        </AuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

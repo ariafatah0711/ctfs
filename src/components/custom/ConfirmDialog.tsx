@@ -34,13 +34,13 @@ export default function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-gray-900">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-gray-900 dark:text-white">{title}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-sm text-gray-700 dark:text-gray-300">{description}</p>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-gray-700 dark:text-gray-200">
             {cancelLabel}
           </Button>
           <Button onClick={handleConfirm} disabled={loading}>

@@ -14,7 +14,7 @@ export default function TitlePage({
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration }}
-      className={`${size} font-bold text-center ${className}`}
+  className={`${size} font-bold text-center text-gray-900 dark:text-white drop-shadow ${className}`}
     >
       {children}
     </motion.h1>

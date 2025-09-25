@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
 
@@ -11,6 +12,7 @@ export default function Navbar() {
   const { user, setUser, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     if (user) {
@@ -21,6 +23,7 @@ export default function Navbar() {
   }, [user])
 
   const handleLogout = async () => {
+    setMobileMenuOpen(false)
     await signOut()
     setUser(null)
     setAdminStatus(false)
@@ -29,37 +32,37 @@ export default function Navbar() {
 
   if (loading) return null
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 w-full z-50">
+    <nav className={`shadow-sm border-b fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950 border-gray-800' : 'bg-white border-gray-300'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+        <div className="flex justify-between h-14 items-center">
           {/* Logo */}
           <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} transition-all duration-200`}>
+                <span className="text-white font-extrabold text-lg tracking-wide">C</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">CTFS</span>
+              <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>CTFS</span>
             </Link>
 
             {/* Menu hanya kalau login */}
             {user && (
-              <div className="hidden md:flex space-x-1">
+              <div className="hidden md:flex space-x-2">
                 <Link
                   href="/challanges"
-                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
                   Challenges
                 </Link>
                 <Link
                   href="/scoreboard"
-                  className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
                   Scoreboard
                 </Link>
                 {adminStatus && (
                   <Link
                     href="/admin"
-                    className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                   >
                     Admin
                   </Link>
@@ -69,21 +72,21 @@ export default function Navbar() {
           </div>
 
           {/* Right section */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-5">
             <div className="hidden sm:flex items-center space-x-3">
               {user ? (
                 <>
-                  <Link href="/profile" className="flex items-center space-x-2 group">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center group-hover:bg-gray-300 transition-colors">
-                      <span className="text-gray-600 text-sm font-medium">
+                  <Link href="/profile" className="flex items-center gap-2 group">
+                    <div className="w-9 h-9 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center shadow group-hover:bg-gray-300 dark:group-hover:bg-gray-700 transition-all duration-150">
+                      <span className="text-gray-700 dark:text-gray-200 text-base font-semibold">
                         {user.username.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{user.username}</span>
+                    <span className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{user.username}</span>
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150"
                   >
                     Logout
                   </button>
@@ -92,24 +95,49 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    className={`px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
-                    className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    className={`px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
                   >
                     Register
                   </Link>
                 </>
               )}
             </div>
+            {/* Theme Switcher Icon Only - pindah ke kanan */}
+            <button
+              onClick={toggleTheme}
+              className="focus:outline-none transition-colors duration-150 ml-1"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fde047" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-moon transition-all duration-150">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-sun transition-all duration-150">
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              )}
+            </button>
 
             {/* Mobile toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
@@ -124,12 +152,12 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-50 bg-white">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <span className="text-lg font-bold text-gray-900">Menu</span>
+          <div className={`md:hidden fixed inset-0 z-50 ${theme === 'dark' ? 'bg-gray-950/95' : 'bg-white/95'} transition-all duration-200 backdrop-blur-sm`}>
+            <div className={`flex items-center justify-between px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+              <span className={`text-lg font-bold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Menu</span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -137,7 +165,7 @@ export default function Navbar() {
               </button>
             </div>
 
-            <div className="px-4 pt-4 pb-6 space-y-2">
+            <div className="px-4 pt-4 pb-6 space-y-2 animate-fade-in">
               {user ? (
                 <>
                   <Link
@@ -145,23 +173,23 @@ export default function Navbar() {
                     className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-gray-600 text-sm font-medium">
+                    <div className="w-9 h-9 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center shadow">
+                      <span className="text-gray-700 dark:text-gray-200 text-base font-semibold">
                         {user.username.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{user.username}</span>
+                    <span className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{user.username}</span>
                   </Link>
                   <Link
                     href="/challanges"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Challenges
                   </Link>
                   <Link
                     href="/scoreboard"
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Scoreboard
@@ -169,7 +197,7 @@ export default function Navbar() {
                   {adminStatus && (
                     <Link
                       href="/admin"
-                      className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                      className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Admin
@@ -177,7 +205,7 @@ export default function Navbar() {
                   )}
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    className="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150"
                   >
                     Logout
                   </button>
@@ -186,14 +214,14 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
-                    className="block bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Register

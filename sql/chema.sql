@@ -68,8 +68,7 @@ DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
 
--- 2. CREATE TABLES
-Users table (tanpa email, score, rank)
+-- 2. CREATE TABLES Users table (tanpa email, score, rank)
 CREATE TABLE public.users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,

@@ -21,7 +21,7 @@ export default function BackButton({ href, label = "Back" }: Props) {
     <Button
       onClick={handleClick}
       variant="ghost"
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 text-gray-700 dark:text-gray-200"
     >
       ← {label}
     </Button>

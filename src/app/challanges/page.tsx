@@ -213,7 +213,7 @@ export default function ChallengesPage() {
   // Jangan render apapun jika belum login, biar redirect jalan
   if (!user) return null
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         <TitlePage>🚩 challanges</TitlePage>
 
@@ -232,16 +232,16 @@ export default function ChallengesPage() {
             <Loader fullscreen color="text-orange-500" />
           ) : filteredChallenges.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-gray-400">🔍</span>
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl text-gray-400 dark:text-gray-500">🔍</span>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 {challenges.length === 0
                   ? "No challenges available"
                   : "No challenges match your filters"
                 }
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 dark:text-gray-400">
                 {challenges.length === 0
                   ? "Check back later for new challenges"
                   : "Try adjusting your filter criteria"
@@ -258,8 +258,8 @@ export default function ChallengesPage() {
             ).map(([category, categoryChallenges]) => (
               <div key={category} className="mb-12">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-orange-400 text-2xl">{'»'}</span>
-                  <h2 className="text-xl sm:text-2xl tracking-widest text-gray-800 font-bold uppercase">{category}</h2>
+                  <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
+                  <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">{category}</h2>
                 </div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

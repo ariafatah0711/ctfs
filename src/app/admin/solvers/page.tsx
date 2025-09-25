@@ -87,14 +87,14 @@ export default function AdminSolversPage() {
   if (!user || !isAdminUser) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="max-w-5xl mx-auto py-6 sm:px-6 lg:px-8">
         {/* Back Button */}
         <div className="mb-4">
           <BackButton href="/admin" label="Go Back" />
         </div>
 
-        <Card>
+  <Card className="bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>All Solvers</CardTitle>
             <Button variant="outline" size="sm" onClick={() => fetchSolvers(0)}>
@@ -103,24 +103,24 @@ export default function AdminSolversPage() {
           </CardHeader>
           <CardContent>
             {solvers.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No solvers found</div>
+              <div className="text-center py-8 text-gray-500 dark:text-gray-300">No solvers found</div>
             ) : (
-              <div className="divide-y border rounded-md overflow-hidden">
+              <div className="divide-y border dark:border-gray-700 rounded-md overflow-hidden">
                 {solvers.map((s) => (
                   <div
                     key={s.solve_id}
-                    className="flex items-center justify-between px-4 py-3"
+                    className="flex items-center justify-between px-4 py-3 transition-colors border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <div className="truncate">
                       <Link
                         href={`/user/${s.username}`}
-                        className="font-medium text-blue-600 hover:underline"
+                        className="font-medium text-blue-600 dark:text-blue-300 hover:underline"
                       >
                         {s.username}
                       </Link>
-                      <span className="text-xs text-gray-500"> solved </span>
-                      <span className="text-xs">{s.challenge_title}</span>
-                      <span className="ml-2 text-xs text-gray-400">
+                      <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
+                      <span className="text-xs text-gray-700 dark:text-gray-200 font-semibold">{s.challenge_title}</span>
+                      <span className="ml-2 text-xs text-gray-400 dark:text-gray-300">
                         {new Date(s.solved_at).toLocaleString()}
                       </span>
                     </div>

@@ -13,22 +13,22 @@ const SolversList: React.FC<SolversListProps> = ({ solvers }) => {
   return (
     <ul className="space-y-2 max-h-60 overflow-y-auto scroll-hidden">
       {solvers.length === 0 ? (
-        <li className="text-gray-400">No solves yet.</li>
+        <li className="text-gray-400 dark:text-gray-500">No solves yet.</li>
       ) : (
         solvers.map((solver, idx) => (
-          <li key={idx} className="flex justify-between text-gray-200 items-center">
+          <li key={idx} className="flex justify-between items-center text-gray-700 dark:text-gray-200">
             <div className="flex items-center gap-2">
               <a
                 href={`/user/${solver.username}`}
-                className={`hover:underline ${idx === 0 ? 'font-bold text-red-400' : 'text-pink-300'}`}
+                className={`hover:underline ${idx === 0 ? 'font-bold text-red-500 dark:text-red-400' : 'text-pink-600 dark:text-pink-300'}`}
               >
                 {solver.username}
               </a>
               {idx === 0 && (
-                <span title="First Blood" className="text-red-400 text-lg font-bold">🩸</span>
+                <span title="First Blood" className="text-red-500 dark:text-red-400 text-lg font-bold">🩸</span>
               )}
             </div>
-            <span className="text-xs text-gray-400">{new Date(solver.solvedAt).toLocaleString()}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-300">{new Date(solver.solvedAt).toLocaleString()}</span>
           </li>
         ))
       )}

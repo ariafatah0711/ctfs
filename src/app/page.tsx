@@ -12,14 +12,14 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gray-50">
+    <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center flex-1 text-center px-6 bg-gradient-to-b from-orange-50 to-gray-50">
+  <section className="flex flex-col items-center justify-center flex-1 text-center px-6 bg-gradient-to-b from-orange-50 to-gray-50 dark:from-gray-900 dark:to-gray-900">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-5xl font-extrabold text-orange-600 mb-4"
+          className="text-5xl font-extrabold text-orange-600 dark:text-orange-400 mb-4"
         >
           Welcome to CTFS Platform 🚩
         </motion.h1>
@@ -27,7 +27,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-lg text-gray-700 max-w-2xl mb-8"
+          className="text-lg text-gray-700 dark:text-gray-200 max-w-2xl mb-8"
         >
           Practice your{" "}
           <span className="font-semibold">cybersecurity skills</span> through{" "}
@@ -66,9 +66,9 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-100 border-t border-gray-200 mt-8">
+  <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8">
         {/* Bottom Bar */}
-        <div className="border-t border-gray-200 py-4 text-center text-sm text-gray-500">
+  <div className="border-t border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
             Built with{" "}
             <a

@@ -15,21 +15,21 @@ const HintDialog: React.FC<HintDialogProps> = ({ challenge, hintIdx = 0, open, o
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className="bg-[#232344] rounded-md shadow-2xl max-w-md w-full border border-[#35355e] p-6 font-mono [&_button.absolute.right-4.top-4]:hidden"
+        className="bg-[#232344] dark:bg-gray-900 rounded-md shadow-2xl max-w-md w-full border border-[#35355e] dark:border-gray-700 p-6 font-mono [&_button.absolute.right-4.top-4]:hidden"
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-pink-300">
-            <span className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">💡</span>
+          <DialogTitle className="flex items-center gap-2 text-pink-300 dark:text-pink-200">
+            <span className="w-8 h-8 bg-blue-200 dark:bg-blue-900 rounded-full flex items-center justify-center">💡</span>
             Hint for: {challenge.title}
           </DialogTitle>
         </DialogHeader>
         <div className="mt-4">
-          <div className="bg-[#35355e] border border-[#35355e] rounded-lg p-4">
+          <div className="bg-[#35355e] dark:bg-gray-800 border border-[#35355e] dark:border-gray-700 rounded-lg p-4">
             {hints[hintIdx] ? (
-              <div className="text-gray-200 leading-relaxed whitespace-pre-wrap">{hints[hintIdx]}</div>
+              <div className="text-gray-200 dark:text-gray-100 leading-relaxed whitespace-pre-wrap">{hints[hintIdx]}</div>
             ) : (
-              <p className="text-gray-400 italic">No hint available.</p>
+              <p className="text-gray-400 dark:text-gray-400 italic">No hint available.</p>
             )}
           </div>
         </div>

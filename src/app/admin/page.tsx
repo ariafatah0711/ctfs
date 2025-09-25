@@ -238,12 +238,12 @@ export default function AdminPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Kiri: Challenge List */}
           <div className="lg:col-span-3 order-1">
-            <Card className="h-full mb-6">
+            <Card className="h-full mb-6 bg-white dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
@@ -274,12 +274,12 @@ export default function AdminPage() {
                         className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 gap-2"
                       >
                         <div className="flex items-center gap-2 truncate">
-                          <Badge className={ch.difficulty === 'Easy' ? 'bg-green-100 text-green-800' : ch.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}>
+                          <Badge className={ch.difficulty === 'Easy' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : ch.difficulty === 'Medium' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}>
                             {ch.difficulty}
                           </Badge>
                             <div className="min-w-0">
-                              <div className="font-medium truncate">{ch.title}</div>
-                              <div className="text-xs text-muted-foreground truncate">{ch.category} • {ch.points} pts</div>
+                              <div className="font-medium truncate text-gray-900 dark:text-white">{ch.title}</div>
+                              <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">{ch.category} • {ch.points} pts</div>
                             </div>
                           </div>
 
@@ -310,32 +310,32 @@ export default function AdminPage() {
           {/* Kanan: Sidebar */}
           <aside className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h-[calc(100vh-6rem)] overflow-y-auto sticky top-24 scroll-hidden">
             {/* Overview */}
-            <Card className="shrink-0">
+            <Card className="shrink-0 bg-white dark:bg-gray-800">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border bg-white shadow-sm">
-                    <div className="text-sm text-muted-foreground">Challenges</div>
-                    <div className="text-2xl font-semibold">{challenges.length}</div>
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border bg-white dark:bg-gray-800 shadow-sm">
+                    <div className="text-sm text-muted-foreground dark:text-gray-300">Challenges</div>
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{challenges.length}</div>
                   </motion.div>
 
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border bg-white shadow-sm">
-                    <div className="text-sm text-muted-foreground">Active</div>
-                    <div className="text-2xl font-semibold">{challenges.filter(c => c.is_active).length}</div>
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border bg-white dark:bg-gray-800 shadow-sm">
+                    <div className="text-sm text-muted-foreground dark:text-gray-300">Active</div>
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{challenges.filter(c => c.is_active).length}</div>
                   </motion.div>
                 </div>
 
                 <div className="mb-6">
-                  <div className="text-sm font-semibold mb-2 text-gray-700">By Category</div>
+                  <div className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">By Category</div>
                   <div className="space-y-2">
                     {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
                       const count = challenges.filter(c => c.category === cat).length
                       return (
-                        <div key={cat} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
-                          <span className="text-sm font-medium">{cat}</span>
-                          <Badge className="bg-blue-100 text-blue-800">{count}</Badge>
+                        <div key={cat} className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-lg">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{cat}</span>
+                          <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">{count}</Badge>
                         </div>
                       )
                     })}
@@ -343,14 +343,14 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <div className="text-sm font-semibold mb-2 text-gray-700">By Difficulty</div>
+                  <div className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">By Difficulty</div>
                   <div className="space-y-2">
                     {["Easy", "Medium", "Hard"].map(diff => {
                       const count = challenges.filter(c => c.difficulty === diff).length
                       return (
-                        <div key={diff} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-                          <span className="text-sm font-medium">{diff}</span>
-                          <Badge className={diff === "Easy" ? "bg-green-100 text-green-800" : diff === "Medium" ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}>{count}</Badge>
+                        <div key={diff} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{diff}</span>
+                          <Badge className={diff === "Easy" ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" : diff === "Medium" ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200" : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"}>{count}</Badge>
                         </div>
                       )
                     })}
@@ -360,9 +360,9 @@ export default function AdminPage() {
             </Card>
 
             {/* Recent Solvers */}
-            <Card className="flex-1 flex flex-col">
+            <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Recent Solvers</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white">Recent Solvers</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -373,25 +373,25 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto">
                 {solvers.length === 0 ? (
-                  <div className="text-gray-500 text-sm">No solvers yet</div>
+                  <div className="text-gray-500 dark:text-gray-300 text-sm">No solvers yet</div>
                 ) : (
                   <div className="space-y-2">
                     {solvers.slice(0, 10).map(s => (
                       <div
                         key={s.solve_id}
-                        className="flex items-center justify-between border-b pb-1"
+                        className="flex items-center justify-between border-b dark:border-gray-700 pb-1"
                       >
                         <div>
                           <Link
                             href={`/user/${s.username}`}
-                            className="font-medium text-blue-600 hover:underline"
+                            className="font-medium text-blue-600 dark:text-blue-300 hover:underline"
                           >
                             {s.username}
                           </Link>
-                          <span className="text-xs text-gray-500"> solved </span>
-                          <span className="text-xs">{s.challenge_title}</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
+                          <span className="text-xs text-gray-700 dark:text-gray-200">{s.challenge_title}</span>
                         </div>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-400 dark:text-gray-300">
                           {new Date(s.solved_at).toLocaleString()}
                         </span>
                       </div>
@@ -407,9 +407,9 @@ export default function AdminPage() {
       <AnimatePresence>
         {openForm && (
           <Dialog open={openForm} onOpenChange={(v) => { if (!v) { setOpenForm(false); setEditing(null) } else setOpenForm(true) }}>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100">
               <DialogHeader>
-                <DialogTitle>{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>
+                <DialogTitle className="text-gray-900 dark:text-gray-100">{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>
               </DialogHeader>
 
               <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e) }} className="space-y-4">
@@ -458,11 +458,11 @@ export default function AdminPage() {
                     </div>
 
                     {showPreview ? (
-                      <div className="border rounded p-3 bg-gray-50">
+                      <div className="border rounded p-3 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
                         <MarkdownRenderer content={formData.description || '*No description provided*'} />
                       </div>
                     ) : (
-                      <Textarea required rows={5} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                      <Textarea required rows={5} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700" />
                     )}
                   </div>
 
@@ -520,8 +520,8 @@ export default function AdminPage() {
                 </div>
 
                 <DialogFooter className="flex items-center justify-end gap-2">
-                  <Button type="button" variant="ghost" onClick={() => { setOpenForm(false); setEditing(null) }}>Cancel</Button>
-                  <Button type="submit" disabled={submitting}>{submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}</Button>
+                  <Button type="button" variant="ghost" onClick={() => { setOpenForm(false); setEditing(null) }} className="dark:text-gray-100">Cancel</Button>
+                  <Button type="submit" disabled={submitting} className="dark:text-gray-100">{submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}</Button>
                 </DialogFooter>
               </form>
             </DialogContent>

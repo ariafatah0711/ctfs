@@ -17,16 +17,18 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
     >
       <Card
         onClick={onClick}
-        className={`cursor-pointer shadow-md rounded-md ${
-          challenge.is_solved ? "bg-green-600" : "bg-blue-600"
-        }`}
+        className={`cursor-pointer shadow-md rounded-md transition-colors
+          ${challenge.is_solved
+            ? 'bg-green-600 dark:bg-green-700'
+            : 'bg-blue-600 dark:bg-blue-700'}
+        `}
       >
         <CardHeader className="flex items-center justify-center">
-          <h3 className="text-white font-semibold text-center truncate">
+          <h3 className="text-white dark:text-gray-100 font-semibold text-center truncate">
             {challenge.title}
           </h3>
         </CardHeader>
-        <CardContent className="flex items-center justify-center gap-2 text-yellow-300 font-bold">
+        <CardContent className="flex items-center justify-center gap-2 text-yellow-300 dark:text-yellow-200 font-bold">
           🪙 {challenge.points}
         </CardContent>
       </Card>

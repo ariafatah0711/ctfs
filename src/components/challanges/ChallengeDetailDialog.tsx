@@ -46,14 +46,14 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className="w-full max-w-lg rounded-md bg-[#232344] border border-[#35355e] p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="w-full max-w-lg rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         onClick={e => e.stopPropagation()}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
         {/* Header: title + close */}
         <div className="flex items-center justify-between">
           <h2
-            className={`text-xl font-bold tracking-wide ${challenge.is_solved ? 'text-green-400' : 'text-pink-400'}`}
+            className={`text-xl font-bold tracking-wide ${challenge.is_solved ? 'text-green-400 dark:text-green-300' : 'text-pink-400 dark:text-pink-300'}`}
             style={{ fontSize: '1.25rem' }}
           >
             {challenge.title}
@@ -61,15 +61,15 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="flex justify-between gap-2">
+  <div className="flex justify-between gap-2">
           <button
-            className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+            className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] dark:bg-gray-800 text-pink-300 dark:text-pink-200' : 'bg-[#232344] dark:bg-gray-900 text-gray-300 dark:text-gray-400 hover:text-pink-200'}`}
             onClick={() => setChallengeTab('challenge', challenge.id)}
           >
             Challenge
           </button>
           <button
-            className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] text-pink-300' : 'bg-[#232344] text-gray-300 hover:text-pink-200'}`}
+            className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] dark:bg-gray-800 text-pink-300 dark:text-pink-200' : 'bg-[#232344] dark:bg-gray-900 text-gray-300 dark:text-gray-400 hover:text-pink-200'}`}
             onClick={() => setChallengeTab('solvers', challenge.id)}
           >
             {solvers.length || ""} solve
@@ -82,12 +82,16 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             {/* Badge bar */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-sm font-semibold bg-blue-200 text-blue-800">
+                <span className="px-2 py-0.5 rounded text-sm font-semibold bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                   {challenge.category}
                 </span>
-                <span className={`px-2 py-0.5 rounded text-sm font-semibold ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800' : ''} ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800' : ''} ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800' : ''}`}>{challenge.difficulty}</span>
+                <span className={`px-2 py-0.5 rounded text-sm font-semibold
+                  ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : ''}
+                  ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : ''}
+                  ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200' : ''}
+                `}>{challenge.difficulty}</span>
               </div>
-              <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300' : 'text-yellow-300'}`}>
+              <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300 dark:text-green-200' : 'text-yellow-300 dark:text-yellow-200'}`}>
                 🪙 {challenge.points}
               </span>
             </div>
@@ -185,7 +189,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 value={flagInputs[challenge.id] || ''}
                 onChange={e => handleFlagInputChange(challenge.id, e.target.value)}
                 placeholder="Flag"
-                className="flex-1 px-3 py-2 rounded border border-[#35355e] bg-[#181829] text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="flex-1 px-3 py-2 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
                 autoFocus
               />
               <button
@@ -200,7 +204,11 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             {/* Feedback box */}
             {flagFeedback[challenge.id] && (
               <div
-                className={`mt-2 p-2 rounded text-sm font-semibold ${flagFeedback[challenge.id]?.success ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}
+                className={`mt-2 p-2 rounded text-sm font-semibold
+                  ${flagFeedback[challenge.id]?.success
+                    ? 'bg-green-600 text-white dark:bg-green-700 dark:text-white'
+                    : 'bg-red-600 text-white dark:bg-red-700 dark:text-white'}
+                `}
               >
                 {flagFeedback[challenge.id]?.message}
               </div>
