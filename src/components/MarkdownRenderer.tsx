@@ -20,12 +20,12 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
           h3: ({...props}) => <h3 className="text-lg font-semibold mt-4 mb-2" {...props} />,
           code: ({inline, children, ...props}: any) =>
             inline ? (
-              <code className="bg-gray-800 px-1 py-0.5 rounded text-sm font-mono" {...props}>
+              <code className="bg-gray-800 px-1 py-0.5 rounded text-sm font-mono break-all max-w-full break-words" {...props}>
                 {children}
               </code>
             ) : (
-              <pre className="bg-gray-900 p-3 rounded-md overflow-x-auto text-sm font-mono">
-                <code {...props}>{children}</code>
+              <pre className="bg-gray-900 p-3 rounded-md overflow-x-auto text-sm font-mono whitespace-pre-wrap break-all max-w-full">
+                <code className="break-all max-w-full break-words" {...props}>{children}</code>
               </pre>
             ),
           a: ({...props}) => <a className="text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
