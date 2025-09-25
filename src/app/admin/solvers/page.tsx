@@ -94,7 +94,7 @@ export default function AdminSolversPage() {
           <BackButton href="/admin" label="Go Back" />
         </div>
 
-  <Card className="bg-white dark:bg-gray-800">
+        <Card className="bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>All Solvers</CardTitle>
             <Button variant="outline" size="sm" onClick={() => fetchSolvers(0)}>

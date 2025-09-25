@@ -2,23 +2,20 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from "next/link"
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Label } from '@/components/ui/label'
+import ChallengeListItem from '@/components/admin/ChallengeListItem'
+import ChallengeOverviewCard from '@/components/admin/ChallengeOverviewCard'
+import RecentSolversList from '@/components/admin/RecentSolversList'
+import ChallengeFormDialog from '@/components/admin/ChallengeFormDialog'
 
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 import ChallengeFilterBar from '@/components/challanges/ChallengeFilterBar'
-import MarkdownRenderer from '@/components/MarkdownRenderer'
+// import MarkdownRenderer from '@/components/MarkdownRenderer' // unused
 import Loader from "@/components/custom/loading"
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
@@ -30,11 +27,11 @@ import { Challenge, Attachment } from '@/types'
 export default function AdminPage() {
   const router = useRouter()
   const { user, loading } = useAuth()
-  const [isAdminUser, setIsAdminUser] = useState(false)
+  // const [isAdminUser, setIsAdminUser] = useState(false) // unused
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [solvers, setSolvers] = useState<any[]>([])
-  const [solverOffset, setSolverOffset] = useState(0)
-  const [hasMoreSolvers, setHasMoreSolvers] = useState(true)
+  // const [solverOffset, setSolverOffset] = useState(0) // unused
+  // const [hasMoreSolvers, setHasMoreSolvers] = useState(true) // unused
 
   // Dialog / form state
   const [openForm, setOpenForm] = useState(false)
@@ -93,7 +90,6 @@ export default function AdminPage() {
 
       const adminCheck = await isAdmin()
       if (!mounted) return
-      setIsAdminUser(adminCheck)
       if (!adminCheck) {
         router.push('/challanges')
         return
@@ -144,16 +140,14 @@ export default function AdminPage() {
     setShowPreview(false)
   }
 
-  const refresh = async () => {
-    const data = await getChallenges(undefined, true)
-    setChallenges(data)
-  }
+  // const refresh = async () => {
+  //   const data = await getChallenges(undefined, true)
+  //   setChallenges(data)
+  // } // unused
 
   const fetchSolvers = async (offset = 0) => {
-    const data = await getSolversAll(50, offset)
-    setSolvers(prev => offset === 0 ? data : [...prev, ...data])
-    setSolverOffset(offset + 50)
-    setHasMoreSolvers(data.length === 50)
+  const data = await getSolversAll(50, offset)
+  setSolvers(prev => offset === 0 ? data : [...prev, ...data])
   }
 
   const handleViewFlag = async (id: string) => {
@@ -193,7 +187,8 @@ export default function AdminPage() {
         await addChallenge(payload)
       }
 
-      await refresh()
+      const data = await getChallenges(undefined, true)
+      setChallenges(data)
       setOpenForm(false)
       setEditing(null)
       setFormData({ ...emptyForm })
@@ -209,7 +204,8 @@ export default function AdminPage() {
   const doDelete = async (id: string) => {
     try {
       await deleteChallenge(id)
-      await refresh()
+      const data = await getChallenges(undefined, true)
+      setChallenges(data)
       toast.success('Challenge deleted successfully')
     } catch (err) {
       console.error(err)
@@ -266,40 +262,20 @@ export default function AdminPage() {
                 ) : (
                   <div className="divide-y border rounded-md overflow-hidden">
                     {filteredChallenges.map(ch => (
-                     <motion.div
+                      <ChallengeListItem
                         key={ch.id}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 gap-2"
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <Badge className={ch.difficulty === 'Easy' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' : ch.difficulty === 'Medium' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'}>
-                            {ch.difficulty}
-                          </Badge>
-                            <div className="min-w-0">
-                              <div className="font-medium truncate text-gray-900 dark:text-white">{ch.title}</div>
-                              <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">{ch.category} • {ch.points} pts</div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2">
-                          <Switch checked={ch.is_active} onCheckedChange={async (checked) => {
-                            const ok = await setChallengeActive(ch.id, checked)
-                            if (ok) {
-                              setChallenges(prev => prev.map(c => c.id === ch.id ? { ...c, is_active: checked } : c))
-                              toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
-                            }
-                          }} />
-
-                          <Button variant="ghost" size="sm" onClick={() => openEdit(ch)}>✏️</Button>
-                          <Button variant="ghost" size="sm" onClick={() => askDelete(ch.id)}>🗑️</Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleViewFlag(ch.id)}>
-                            <span className="hidden sm:inline">🏳️ View Flag</span>
-                            <span className="sm:hidden">🏳️ Flag</span>
-                          </Button>
-                        </div>
-                      </motion.div>
+                        challenge={ch}
+                        onEdit={openEdit}
+                        onDelete={askDelete}
+                        onViewFlag={handleViewFlag}
+                        onToggleActive={async (id, checked) => {
+                          const ok = await setChallengeActive(id, checked)
+                          if (ok) {
+                            setChallenges(prev => prev.map(c => c.id === id ? { ...c, is_active: checked } : c))
+                            toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
+                          }
+                        }}
+                      />
                     ))}
                   </div>
                 )}
@@ -310,222 +286,33 @@ export default function AdminPage() {
           {/* Kanan: Sidebar */}
           <aside className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h-[calc(100vh-6rem)] overflow-y-auto sticky top-24 scroll-hidden">
             {/* Overview */}
-            <Card className="shrink-0 bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border bg-white dark:bg-gray-800 shadow-sm">
-                    <div className="text-sm text-muted-foreground dark:text-gray-300">Challenges</div>
-                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{challenges.length}</div>
-                  </motion.div>
-
-                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border bg-white dark:bg-gray-800 shadow-sm">
-                    <div className="text-sm text-muted-foreground dark:text-gray-300">Active</div>
-                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{challenges.filter(c => c.is_active).length}</div>
-                  </motion.div>
-                </div>
-
-                <div className="mb-6">
-                  <div className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">By Category</div>
-                  <div className="space-y-2">
-                    {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
-                      const count = challenges.filter(c => c.category === cat).length
-                      return (
-                        <div key={cat} className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 px-3 py-2 rounded-lg">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{cat}</span>
-                          <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">{count}</Badge>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-200">By Difficulty</div>
-                  <div className="space-y-2">
-                    {["Easy", "Medium", "Hard"].map(diff => {
-                      const count = challenges.filter(c => c.difficulty === diff).length
-                      return (
-                        <div key={diff} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900">
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">{diff}</span>
-                          <Badge className={diff === "Easy" ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" : diff === "Medium" ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200" : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"}>{count}</Badge>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ChallengeOverviewCard challenges={challenges} />
 
             {/* Recent Solvers */}
-            <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-gray-900 dark:text-white">Recent Solvers</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/admin/solvers')}
-                >
-                  View All
-                </Button>
-              </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto">
-                {solvers.length === 0 ? (
-                  <div className="text-gray-500 dark:text-gray-300 text-sm">No solvers yet</div>
-                ) : (
-                  <div className="space-y-2">
-                    {solvers.slice(0, 10).map(s => (
-                      <div
-                        key={s.solve_id}
-                        className="flex items-center justify-between border-b dark:border-gray-700 pb-1"
-                      >
-                        <div>
-                          <Link
-                            href={`/user/${s.username}`}
-                            className="font-medium text-blue-600 dark:text-blue-300 hover:underline"
-                          >
-                            {s.username}
-                          </Link>
-                          <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
-                          <span className="text-xs text-gray-700 dark:text-gray-200">{s.challenge_title}</span>
-                        </div>
-                        <span className="text-xs text-gray-400 dark:text-gray-300">
-                          {new Date(s.solved_at).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <RecentSolversList solvers={solvers} onViewAll={() => router.push('/admin/solvers')} />
           </aside>
         </div>
       </main>
 
       <AnimatePresence>
         {openForm && (
-          <Dialog open={openForm} onOpenChange={(v) => { if (!v) { setOpenForm(false); setEditing(null) } else setOpenForm(true) }}>
-            <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100">
-              <DialogHeader>
-                <DialogTitle className="text-gray-900 dark:text-gray-100">{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>
-              </DialogHeader>
-
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e) }} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <Label>Title</Label>
-                    <Input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-                  </div>
-
-                  <div>
-                    <Label>Category</Label>
-                    <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Web">Web</SelectItem>
-                        <SelectItem value="Reverse">Reverse</SelectItem>
-                        <SelectItem value="Crypto">Crypto</SelectItem>
-                        <SelectItem value="Forensics">Forensics</SelectItem>
-                        <SelectItem value="Pwn">Pwn</SelectItem>
-                        <SelectItem value="Misc">Misc</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Points</Label>
-                    <Input type="number" required value={String(formData.points)} onChange={(e) => setFormData({ ...formData, points: Number(e.target.value) })} />
-                  </div>
-
-                  <div>
-                    <Label>Difficulty</Label>
-                    <Select value={formData.difficulty} onValueChange={(v) => setFormData({ ...formData, difficulty: v })}>
-                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Easy">Easy</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Deskripsi</Label>
-                      <Button type="button" variant="ghost" size="sm" onClick={() => setShowPreview(prev => !prev)}>{showPreview ? 'Edit' : 'Preview'}</Button>
-                    </div>
-
-                    {showPreview ? (
-                      <div className="border rounded p-3 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-                        <MarkdownRenderer content={formData.description || '*No description provided*'} />
-                      </div>
-                    ) : (
-                      <Textarea required rows={5} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700" />
-                    )}
-                  </div>
-
-                  <div>
-                    <Label>Flag</Label>
-                    <Input required={!editing} value={formData.flag} onChange={(e) => setFormData({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} />
-                    <p className="text-xs text-muted-foreground mt-1">{editing ? 'Leave blank to keep current flag.' : 'Flag is required for new challenges.'}</p>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Hints</Label>
-                      <Button type="button" variant="ghost" size="sm" onClick={addHint}>+ Add</Button>
-                    </div>
-                    {formData.hint.length === 0 && <p className="text-xs text-muted-foreground">No hints added</p>}
-                    <div className="space-y-2 mt-2">
-                      {formData.hint.map((h, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                          <Input value={h} onChange={(e) => updateHint(idx, e.target.value)} />
-                          <Button type="button" variant="ghost" onClick={() => removeHint(idx)}>✕</Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <div className="flex items-center justify-between">
-                      <Label>Attachments</Label>
-                      <Button type="button" variant="ghost" size="sm" onClick={addAttachment}>+ Add</Button>
-                    </div>
-
-                    <div className="space-y-2 mt-2">
-                      {formData.attachments.map((a, idx) => (
-                        <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                          <Input className="col-span-3" value={a.name} onChange={(e) => updateAttachment(idx, 'name', e.target.value)} placeholder="File name / Label" required />
-                          <Input className="col-span-6" value={a.url} onChange={(e) => updateAttachment(idx, 'url', e.target.value)} placeholder="URL" required />
-
-                          <Select value={a.type} onValueChange={(v) => updateAttachment(idx, 'type', v)}>
-                            <SelectTrigger className="col-span-2"><SelectValue placeholder="Type" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="file">File</SelectItem>
-                              <SelectItem value="link">Link</SelectItem>
-                            </SelectContent>
-                          </Select>
-
-                          <Button type="button" variant="ghost" onClick={() => removeAttachment(idx)} className="col-span-1">✕</Button>
-                        </div>
-                      ))}
-
-                      {formData.attachments.length === 0 && (
-                        <p className="text-xs text-muted-foreground">No attachments added</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <DialogFooter className="flex items-center justify-end gap-2">
-                  <Button type="button" variant="ghost" onClick={() => { setOpenForm(false); setEditing(null) }} className="dark:text-gray-100">Cancel</Button>
-                  <Button type="submit" disabled={submitting} className="dark:text-gray-100">{submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <ChallengeFormDialog
+            open={openForm}
+            editing={editing}
+            formData={formData}
+            submitting={submitting}
+            showPreview={showPreview}
+            onOpenChange={(v) => { if (!v) { setOpenForm(false); setEditing(null) } else setOpenForm(true) }}
+            onSubmit={(e) => { e?.preventDefault(); handleSubmit(e) }}
+            onChange={setFormData}
+            onAddHint={addHint}
+            onUpdateHint={updateHint}
+            onRemoveHint={removeHint}
+            onAddAttachment={addAttachment}
+            onUpdateAttachment={updateAttachment}
+            onRemoveAttachment={removeAttachment}
+            setShowPreview={setShowPreview}
+          />
         )}
       </AnimatePresence>
 

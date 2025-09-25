@@ -1,0 +1,51 @@
+import React from 'react'
+import Link from 'next/link'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+
+interface Solver {
+  solve_id: string
+  username: string
+  challenge_title: string
+  solved_at: string
+}
+
+interface RecentSolversListProps {
+  solvers: Solver[]
+  onViewAll: () => void
+}
+
+const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAll }) => {
+  return (
+    <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-gray-900 dark:text-white">Recent Solvers</CardTitle>
+        <Button variant="outline" size="sm" onClick={onViewAll}>View All</Button>
+      </CardHeader>
+      <CardContent className="flex-1 overflow-y-auto">
+        {solvers.length === 0 ? (
+          <div className="text-gray-500 dark:text-gray-300 text-sm">No solvers yet</div>
+        ) : (
+          <div className="space-y-2">
+            {solvers.slice(0, 10).map(s => (
+              <div key={s.solve_id} className="flex items-center justify-between border-b dark:border-gray-700 pb-1">
+                <div>
+                  <Link href={`/user/${s.username}`} className="font-medium text-blue-600 dark:text-blue-300 hover:underline">
+                    {s.username}
+                  </Link>
+                  <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
+                  <span className="text-xs text-gray-700 dark:text-gray-200">{s.challenge_title}</span>
+                </div>
+                <span className="text-xs text-gray-400 dark:text-gray-300">
+                  {new Date(s.solved_at).toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+export default RecentSolversList
