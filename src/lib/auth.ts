@@ -7,10 +7,37 @@ export interface AuthResponse {
 }
 
 /**
+ * Login dengan Google OAuth
+ */
+export async function loginGoogle(): Promise<AuthResponse> {
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/challanges`,
+      },
+    })
+
+    if (error) {
+      return { user: null, error: error.message }
+    }
+    // User akan di-handle oleh AuthContext setelah redirect
+    return { user: null, error: null }
+  } catch (error) {
+    return { user: null, error: 'Google sign-in failed' }
+  }
+}
+
+/**
  * Sign up user baru
  */
 export async function signUp(email: string, password: string, username: string): Promise<AuthResponse> {
   try {
+    // Validasi hanya email @gmail.com yang boleh daftar
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      return { user: null, error: 'Only @gmail.com emails are allowed for registration' }
+    }
+
     // Cek username di public.users
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
@@ -159,18 +186,43 @@ export async function signOut(): Promise<void> {
 export async function getCurrentUser(): Promise<User | null> {
   try {
     const { data: { user } } = await supabase.auth.getUser()
-
     if (!user) return null
 
-    const { data: userData } = await supabase
+    // Cek user di tabel users
+    let { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    return userData
+    // Jika belum ada, auto-create profile (misal login Google)
+    if (userError || !userData) {
+      const username =
+        user.user_metadata?.username ||
+        (user.email ? user.email.split("@")[0] : "user_" + user.id.substring(0, 8));
+
+      const { error: rpcError } = await supabase.rpc('create_profile', {
+        p_id: user.id,
+        p_username: username
+      });
+      if (rpcError) {
+        console.error("Auto create_profile error:", rpcError);
+        return null;
+      }
+      // Ambil ulang
+      const { data: newUserData, error: newUserError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (newUserError) {
+        return null;
+      }
+      userData = newUserData;
+    }
+    return userData;
   } catch (error) {
-    return null
+    return null;
   }
 }
 

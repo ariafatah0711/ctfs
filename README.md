@@ -11,6 +11,12 @@ cd your-ctf-repo
 
 ```bash
 npm install
+
+# dev
+npm run dev
+
+# build
+npm run build
 ```
 
 ## 3. Supabase Setup
@@ -22,7 +28,10 @@ npm install
    Upload file `sql/chema.sql` ke Supabase SQL editor dan jalankan untuk setup database schema.
 
 3. **Tambahkan Data Testing (Opsional)**
-   Jika ingin testing dengan data dummy, tambahkan SQL insert sesuai kebutuhan di bawah schema. atau gunakan yang sudah ada di 'sql/testing_challenges.sql' atau jika inigin test scoreboard leaderboard bisa coba pake yang 'sql/dummy_scoreboard/'
+   - Untuk testing challenges: gunakan ```sql/testing_challenges.sql```.
+   - Untuk scoreboard dummy: gunakan folder sql/dummy_scoreboard/.
+     - Untuk testing challenges: gunakan sql/testing_challenges.sql.
+     - generate terlebih dahulu dengan ```create_solves.py``` atau gunakan yang sudah ada ```solves.sql```
 
 ## 4. Konfigurasi Environment
 
@@ -41,6 +50,18 @@ Ambil value dari project Supabase kamu.
 2. Login ke [Vercel](https://vercel.com/) dan import repository.
 3. Set environment variables di Vercel sesuai `.env.local`.
 4. Deploy!
+
+## 6. Setup Authentication (Login Gmail)
+1. Enable Google Provider di Supabase
+   - Dashboard → Authentication → Providers → Google → Enable.
+   - Masukkan Client ID dan Client Secret dari Google Cloud Console.
+2. Buat OAuth Client di Google
+   - Buka Google Cloud Console
+   - APIs & Services → Credentials → Create OAuth Client ID.
+   - Pilih Application type: Web.
+   - Authorized redirect URIs:
+     ```https://<YOUR_PROJECT_REF>.supabase.co/auth/v1/callback```
+   - Simpan Client ID dan Client Secret → masukkan ke Supabase.
 
 ---
 

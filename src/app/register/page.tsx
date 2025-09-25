@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { signUp } from '@/lib/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import Loader from '@/components/custom/loading'
+import GoogleLoginButton from '@/components/GoogleLoginButton'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -154,6 +155,8 @@ export default function RegisterPage() {
           >
             {loading ? 'Processing...' : 'Register'}
           </button>
+          {/* Tombol Google Register/Sign-In */}
+          <GoogleLoginButton />
         </form>
       </div>
     </div>
