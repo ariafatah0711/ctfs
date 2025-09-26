@@ -1,4 +1,5 @@
 import React from 'react'
+import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +44,12 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   onRemoveAttachment,
   setShowPreview,
 }) => {
+
+  // ✅ Pindahkan useState ke sini
+  const [categories, setCategories] = useState<string[]>([
+    "Web", "Reverse", "Crypto", "Forensics", "Pwn", "Misc", "Osint"
+  ]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100">
@@ -60,12 +67,11 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
               <Select value={formData.category} onValueChange={v => onChange({ ...formData, category: v })}>
                 <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Web">Web</SelectItem>
-                  <SelectItem value="Reverse">Reverse</SelectItem>
-                  <SelectItem value="Crypto">Crypto</SelectItem>
-                  <SelectItem value="Forensics">Forensics</SelectItem>
-                  <SelectItem value="Pwn">Pwn</SelectItem>
-                  <SelectItem value="Misc">Misc</SelectItem>
+                    <SelectContent>
+                      {categories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
                 </SelectContent>
               </Select>
             </div>
