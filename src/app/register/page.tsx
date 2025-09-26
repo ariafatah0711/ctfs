@@ -100,7 +100,7 @@ export default function RegisterPage() {
               type="text"
               required
               placeholder="Username"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
               value={formData.username}
               onChange={handleChange}
             />
@@ -112,7 +112,7 @@ export default function RegisterPage() {
               autoComplete="email"
               required
               placeholder="Email address"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
               value={formData.email}
               onChange={handleChange}
             />
@@ -124,7 +124,7 @@ export default function RegisterPage() {
               autoComplete="new-password"
               required
               placeholder="Password"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
               value={formData.password}
               onChange={handleChange}
             />
@@ -136,7 +136,7 @@ export default function RegisterPage() {
               autoComplete="new-password"
               required
               placeholder="Confirm Password"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:bg-gray-900 dark:text-gray-100 sm:text-sm"
               value={formData.confirmPassword}
               onChange={handleChange}
             />

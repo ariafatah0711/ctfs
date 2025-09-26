@@ -144,8 +144,21 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
             </div>
           </div>
           <DialogFooter className="flex items-center justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="dark:text-gray-100">Cancel</Button>
-            <Button type="submit" disabled={submitting} className="dark:text-gray-100">{submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}</Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-600 dark:text-white dark:hover:bg-primary-700"
+            >
+              {submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

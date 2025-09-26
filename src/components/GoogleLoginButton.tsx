@@ -29,7 +29,7 @@ export default function GoogleLoginButton() {
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="flex items-center justify-center gap-2 w-full py-2 px-4 text-sm font-medium rounded-md border border-gray-300 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-red-400 disabled:opacity-50"
+        className="flex items-center justify-center gap-2 w-full py-2 px-4 text-sm font-medium rounded-md border border-gray-400 bg-white text-gray-800 shadow-sm hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-red-400 disabled:opacity-50 dark:border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
       >
         {/* Google SVG logo */}
         <svg
