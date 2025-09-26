@@ -98,7 +98,7 @@ export default function UserProfile({
           <>
             {/* Back Button */}
             {onBack && (
-              <BackButton href="/admin" label="Go Back" />
+              <Button onClick={onBack} className="mb-4">Go Back</Button>
             )}
 
             {/* Profile Header */}

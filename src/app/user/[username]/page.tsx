@@ -24,7 +24,7 @@ export default function UserProfilePage() {
       }
 
       try {
-        const username = params.username as string
+        const username = decodeURIComponent(params.username as string)
         const userData = await getUserByUsername(username)
 
         if (!userData) {
