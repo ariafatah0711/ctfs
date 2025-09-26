@@ -1,194 +1,132 @@
-# CTF Platform Setup & Deployment Guide
+# CTFS (Capture The Flag Simple)
 
-## 1. Clone Repository
+> 🚩 **Free & Simple CTF Platform** — Deploy seamlessly with **Vercel** + **Supabase**. Perfect for individuals or teams who want a free and lightweight CTF platform.
+
+---
+
+## 🎬 Quick Demo
+
+
+[https://ctf.ariaf.my.id](https://ctf.ariaf.my.id)
+
+## 📖 Deployment Guide
+
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/ariafatah0711/ctfs
 cd ctfs
 ```
 
-## 2. Install Dependencies
+### 2. Supabase Setup
 
-```bash
-npm install
+#### Required
 
-# dev
-npm run dev
+1. **Create Supabase Project**
+   Log in to [Supabase](https://supabase.com/) and create a new project.
 
-# build
-npm run build
-```
+2. **Import Schema**
+   Upload `sql/schema.sql` into the **Supabase SQL editor** and run it to set up the database schema.
 
-## 3. Supabase Setup
+3. **Set Up Admin User**
+   In the **users** table, change the `this.admin` column value to `true` via the Supabase dashboard.
 
-1. **Buat Project Supabase**
-   Login ke [Supabase](https://supabase.com/) dan buat project baru.
+#### Optional
 
-2. **Copy Schema**
-   Upload file `sql/chema.sql` ke Supabase SQL editor dan jalankan untuk setup database schema.
+4. **Optional Testing Data**
 
-3. **Tambahkan Data Testing (Opsional)**
-   - Untuk testing challenges: gunakan ```sql/testing_challenges.sql```.
-   - Untuk scoreboard dummy: gunakan folder ```sql/dummy_scoreboard/.```
-     - Untuk testing dummy challenges: gunakan ```dummy_user_challenges.sql```.
-     - untuk solves dummy nya gunakan ini ```dummy_solves.sql```
-       - namun perlu di generate terlebih dahulu dengan ```create_solves.py``` atau gunakan yang sudah ada ```dummy_solves.sql```
-     - untuk reset / hapus data dummy bisa gunakan ```sql/dummy_scoreboard/dummy_reset.sql```
+   * Testing challenges → `sql/testing_challenges.sql`
+   * Dummy scoreboard → `sql/dummy_scoreboard/`
 
-## 4. Konfigurasi Environment
+     * Dummy challenges → `dummy_user_challenges.sql`
+     * Dummy solves → `dummy_solves.sql` (can be generated using `create_solves.py` or use the pre-generated file)
+     * Reset dummy data → `dummy_reset.sql`
 
-Buat file `.env.local` di root project, isi dengan:
+### 3. Environment Configuration
+
+Create a `.env.local` file at the project root:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Ambil value dari project Supabase kamu.
+Retrieve values from your Supabase project.
 
-## 5. Hosting ke Vercel
+### 4. Deployment
 
-1. Push project ke GitHub.
-2. Login ke [Vercel](https://vercel.com/) dan import repository.
-3. Set environment variables di Vercel sesuai `.env.local`.
+#### 1. Local Testing
+
+```bash
+npm install
+
+# development
+npm run dev
+```
+
+Test build:
+
+```bash
+# build
+npm run build
+```
+
+#### 2. Deploy to Vercel
+
+##### Using Vercel CLI
+
+```bash
+npm i -g vercel
+
+vercel login
+vercel link
+
+# set environment variables (can also be added from the Vercel dashboard)
+vercel env add
+```
+
+Deploy:
+
+```bash
+vercel --prod
+```
+
+##### Using Vercel Dashboard
+
+1. Push the project to GitHub.
+2. Log in to [Vercel](https://vercel.com/) and import the repository.
+3. Set environment variables in Vercel based on `.env.local`.
 4. Deploy!
 
-## 6. Setup Authentication (Login Gmail)
-1. Enable Google Provider di Supabase
-   - Dashboard → Authentication → Providers → Google → Enable.
-   - Masukkan Client ID dan Client Secret dari Google Cloud Console.
-2. Buat OAuth Client di Google
-   - Buka Google Cloud Console
-   - APIs & Services → Credentials → Create OAuth Client ID.
-   - Pilih Application type: Web.
-   - Authorized redirect URIs:
-     ```https://<YOUR_PROJECT_REF>.supabase.co/auth/v1/callback```
-   - Simpan Client ID dan Client Secret → masukkan ke Supabase.
-3. Ubah Site URL untuk redirect setelah Login
-  - Dashboard → Authentication → URL Configuration → Site URL
-  - ubah sesuai url sesuai dengan site / domain website
-    misal: ```https://ctf.ariaf.my.id```
+### 5. Authentication Setup (Google Login)
+
+1. **Enable Google Provider in Supabase**
+   Dashboard → Authentication → Providers → Google → Enable.
+   Enter **Client ID** and **Client Secret** from Google Cloud Console.
+
+2. **Create OAuth Client in Google Cloud Console**
+
+   * APIs & Services → Credentials → Create OAuth Client ID.
+   * Application type: **Web**.
+   * Authorized redirect URIs:
+
+     ```
+     https://<YOUR_PROJECT_REF>.supabase.co/auth/v1/callback
+     ```
+
+3. **Configure Redirect URL**
+   Dashboard → Authentication → URL Configuration → Site URL.
+   Set this to your domain, for example:
+
+   ```
+   https://ctf.ariaf.my.id
+   ```
 
 ---
 
-**Note:**
-Jika ada perubahan schema, ulangi langkah Supabase SQL dan deploy ulang ke Vercel.
+## ⚠️ Notes
 
-> jika mengubah schema ulang hati hati bisa saja datanya kehapus
+* If you modify the schema, re-run the Supabase SQL setup and redeploy to Vercel.
+* **Warning:** Schema changes may wipe existing data.
 
-<!-- ### test security -->
-<!-- ```bash
-chall_id="10000000-0000-0000-0000-000000000001"
-USER_ID="00000000-0000-0000-0000-000000000001"
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/solves"   -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Content-Type: application/json" \
-  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{dummy1}\"}"
-
-JWT="eyJhbGciOiJIUzI1NiIsImtpZCI6Imp6c0lrN0MzdFk0SWpUZGUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2piZGN4ZHZwYmZtcWNoZnBhd3FwLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI1YzMzMzFmMy05NzI3LTRlYzQtODk0ZS02MzhmYmMyNTNiYTQiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU4NjM2MjcwLCJpYXQiOjE3NTg2MzI2NzAsImVtYWlsIjoiY2FsaG91bnNndDA3QGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZGlzcGxheV9uYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImNhbGhvdW5zZ3QwN0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiI1YzMzMzFmMy05NzI3LTRlYzQtODk0ZS02MzhmYmMyNTNiYTQiLCJ1c2VybmFtZSI6ImFkbWluIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTg2MjkwNzZ9XSwic2Vzc2lvbl9pZCI6ImUxZTA3YjUzLTVhYjctNGRmYS05YTA2LTYwMTAxM2Q5NDJmYyIsImlzX2Fub255bW91cyI6ZmFsc2V9.ct0HmJ6RXccRTpG0iA8XicytvfJ6PmGBtH0LOB1uaq0"
-
-curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/is_admin" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}"
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}"
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/solves" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}"
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}"
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenge_flags" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}"
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenges" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Test Insert/Delete Only",
-    "description": "Challenge ini cuma buat test security insert & delete.",
-    "category": "Testing",
-    "points": 50,
-    "hint": "No hint, this is just a test",
-    "difficulty": "Easy",
-    "attachments": "[]"
-  }'
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/challenge_flags" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"challenge_id\": \"${chall_id}\",
-    \"flag\": \"flag{test_insert_delete}\"
-  }"
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/users?id=eq.${USER_ID}" \
-  -X PATCH \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d '{"is_admin": true}'
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{tes}\"}"
-
-curl "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/submit_flag" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d "{\"p_challenge_id\": \"${chall_id}\", \"p_flag\": \"flag{dummy1}\"}"
-
-CHALL_TEST_RAW=$(curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/add_challenge" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "p_title":"Test Add Challenge (auto)",
-    "p_description":"Dipakai untuk testing hak akses",
-    "p_category":"Testing",
-    "p_points":10,
-    "p_flag":"flag{autotest_add}",
-    "p_difficulty":"Easy",
-    "p_hint": null,
-    "p_attachments": "[]"
-  }')
-
-CHALL_TEST=$(echo "${CHALL_TEST_RAW}" | tr -d '"')
-echo $CHALL_TEST
-
-curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/update_challenge" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "p_challenge_id":"'"${CHALL_TEST}"'",
-    "p_title":"Updated Title (test)",
-    "p_description":"Updated desc",
-    "p_category":"Web",
-    "p_points":99,
-    "p_difficulty":"Hard",
-    "p_hint": null,
-    "p_attachments": "[]",
-    "p_is_active": true,
-    "p_flag": "flag{updated_flag_optional}"
-  }'
-
-curl -s "${NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/delete_challenge" \
-  -H "apikey: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}" \
-  -H "Authorization: Bearer ${JWT}" \
-  -H "Content-Type: application/json" \
-  -d '{"p_challenge_id":"'"${CHALL_TEST}"'"}'
-``` -->
+---
