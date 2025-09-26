@@ -30,7 +30,7 @@ const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAl
             {solvers.slice(0, 10).map(s => (
               <div key={s.solve_id} className="flex items-center justify-between border-b dark:border-gray-700 pb-1">
                 <div>
-                  <Link href={`/user/${s.username}`} className="font-medium text-blue-600 dark:text-blue-300 hover:underline">
+                  <Link href={`/user/${encodeURIComponent(s.username)}`} className="font-medium text-blue-600 dark:text-blue-300 hover:underline">
                     {s.username}
                   </Link>
                   <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>

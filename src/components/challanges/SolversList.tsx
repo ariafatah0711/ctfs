@@ -19,7 +19,7 @@ const SolversList: React.FC<SolversListProps> = ({ solvers }) => {
           <li key={idx} className="flex justify-between items-center text-gray-700 dark:text-gray-200">
             <div className="flex items-center gap-2">
               <a
-                href={`/user/${solver.username}`}
+                href={`/user/${encodeURIComponent(solver.username)}`}
                 className={`hover:underline ${idx === 0 ? 'font-bold text-red-500 dark:text-red-400' : 'text-pink-600 dark:text-pink-300'}`}
               >
                 {solver.username}

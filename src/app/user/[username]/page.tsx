@@ -16,6 +16,15 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Redirect if trailing ? in URL (e.g. /user/siapa%20ya?)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search === '?' && window.location.hash === '') {
+      // Remove trailing ? and reload
+      const cleanUrl = window.location.pathname
+      window.history.replaceState({}, '', cleanUrl)
+    }
+  }, [])
+
   useEffect(() => {
     const fetchData = async () => {
       if (!user) {

@@ -36,7 +36,7 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
                   <TableCell className="text-center font-mono text-gray-600 dark:text-gray-300">{i + 1}</TableCell>
                   <TableCell>
                     <Link
-                      href={`/user/${entry.username}`}
+                      href={`/user/${encodeURIComponent(entry.username)}`}
                       className={`hover:underline ${
                         isCurrentUser ? 'text-blue-700 dark:text-blue-300' : 'hover:text-blue-600 dark:hover:text-blue-400'
                       }`}
