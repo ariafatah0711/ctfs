@@ -90,7 +90,12 @@ export default function Navbar() {
                         </span>
                       </div>
                     )}
-                    <span className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{user.username}</span>
+                    <span
+                      className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[100px] md:max-w-[160px] block`}
+                      title={user.username}
+                    >
+                      {user.username}
+                    </span>
                   </Link>
                   <button
                     onClick={handleLogout}
@@ -201,7 +206,12 @@ export default function Navbar() {
                         </span>
                       </div>
                     )}
-                    <span className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{user.username}</span>
+                    <span
+                      className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[120px] block`}
+                      title={user.username}
+                    >
+                      {user.username}
+                    </span>
                   </Link>
                   <Link
                     href="/challanges"

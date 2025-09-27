@@ -9,6 +9,12 @@ interface ScoreboardTableProps {
 }
 
 const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername }) => {
+  function truncateUsername(username: string, maxLength = 16) {
+    return username.length > maxLength
+      ? username.slice(0, maxLength - 3) + '...'
+      : username
+  }
+
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader>
@@ -39,7 +45,8 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
                       href={`/user/${encodeURIComponent(entry.username)}`}
                       className={`hover:underline ${
                         isCurrentUser ? 'text-blue-700 dark:text-blue-300' : 'hover:text-blue-600 dark:hover:text-blue-400'
-                      }`}
+                      } max-w-[120px] md:max-w-xs truncate whitespace-nowrap block`}
+                      title={entry.username}
                     >
                       {entry.username}
                     </Link>

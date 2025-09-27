@@ -67,6 +67,8 @@ export default function UserProfile({
   const hasError = error || !userDetail
   const solvedChallenges = userDetail?.solved_challenges || []
 
+  // Username truncation handled by Tailwind utility classes below
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-6">
@@ -124,7 +126,9 @@ export default function UserProfile({
                     )}
                   </div>
                   <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{userDetail.username}</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate whitespace-nowrap max-w-[160px] sm:max-w-xs block" title={userDetail.username}>
+                      {userDetail.username}
+                    </h1>
                     <p className="text-lg text-gray-500 dark:text-gray-300 mt-1">Score: <span className="font-semibold text-orange-600 dark:text-orange-400">{userDetail.score}</span></p>
                   </div>
                   {isCurrentUser && userDetail && (
