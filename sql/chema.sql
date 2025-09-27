@@ -292,14 +292,19 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Update username function (RPC)
-
 CREATE OR REPLACE FUNCTION update_username(p_id uuid, p_username text)
 RETURNS json AS $$
 DECLARE
   v_username text := p_username;
   v_old_username text;
   v_exists int;
+  v_user_id uuid := auth.uid()::uuid;
 BEGIN
+  -- Cek user hanya bisa ubah username sendiri
+  IF p_id IS DISTINCT FROM v_user_id THEN
+    RETURN json_build_object('success', false, 'message', 'Cannot change other user''s username');
+  END IF;
+
   -- Cek user ada
   SELECT username INTO v_old_username FROM public.users WHERE id = p_id;
   IF NOT FOUND THEN

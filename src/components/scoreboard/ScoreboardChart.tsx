@@ -14,19 +14,23 @@ interface ScoreboardChartProps {
 }
 
 const ScoreboardChart: React.FC<ScoreboardChartProps> = ({ leaderboard, isDark }) => {
+  // Fungsi untuk truncate username
+  const truncate = (str: string, n: number) => str.length > n ? str.slice(0, n) + '...' : str;
+
   const chartData = leaderboard.slice(0, 10).map((entry) => {
     const x = entry.progress.map((p) => {
       const date = new Date(p.date)
       const offset = date.getTimezoneOffset() * 60000
       return new Date(date.getTime() - offset).toISOString().slice(0, 16)
     })
+    const shortName = truncate(entry.username, 16);
     return {
       x,
       y: entry.progress.map((p) => p.score),
-      text: entry.progress.map((p) => `${entry.username} - ${p.score}`),
+      text: entry.progress.map((p) => `${shortName} - ${p.score}`),
       hovertemplate: '%{x}<br>%{text}<extra></extra>',
       mode: 'lines+markers',
-      name: entry.username,
+      name: shortName,
       line: { shape: 'hv', width: 3 },
       marker: { size: 6 },
     }
