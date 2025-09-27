@@ -581,11 +581,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Kasih akses buat authenticated
 GRANT EXECUTE ON FUNCTION set_challenge_active(UUID, BOOLEAN) TO authenticated;
 
--- Function: get_category_totals
--- Return: category + jumlah challenge aktif
 CREATE OR REPLACE FUNCTION get_category_totals()
 RETURNS TABLE (
   category TEXT,
@@ -602,6 +599,74 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
+
+-- Function: get_notifications
+-- Mengambil notifikasi chall baru & first blood
+DROP FUNCTION IF EXISTS get_notifications(integer, integer);
+
+CREATE OR REPLACE FUNCTION get_notifications(
+  p_limit INT DEFAULT 50,
+  p_offset INT DEFAULT 0
+)
+RETURNS TABLE (
+  notif_type TEXT,
+  notif_challenge_id UUID,
+  notif_challenge_title TEXT,
+  notif_category TEXT,
+  notif_user_id UUID,
+  notif_username TEXT,
+  notif_created_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    t.type,
+    t.challenge_id,
+    t.challenge_title,
+    t.category,
+    t.user_id,
+    t.username,
+    t.created_at
+  FROM (
+    -- Notifikasi chall baru
+    SELECT
+      'new_challenge'::text AS type,
+      c.id AS challenge_id,
+      c.title AS challenge_title,
+      c.category,
+      NULL::uuid AS user_id,
+      NULL::text AS username,
+      c.created_at
+    FROM public.challenges c
+    WHERE c.is_active = true
+
+    UNION ALL
+
+    -- Notifikasi first blood
+    SELECT
+      'first_blood'::text AS type,
+      c.id AS challenge_id,
+      c.title AS challenge_title,
+      c.category,
+      s.user_id,
+      u.username,
+      s.created_at
+    FROM public.challenges c
+    JOIN (
+      SELECT challenge_id, MIN(created_at) AS first_solve
+      FROM public.solves
+      GROUP BY challenge_id
+    ) fs ON fs.challenge_id = c.id
+    JOIN public.solves s ON s.challenge_id = c.id AND s.created_at = fs.first_solve
+    JOIN public.users u ON u.id = s.user_id
+    WHERE c.is_active = true
+  ) t
+  ORDER BY t.created_at DESC
+  LIMIT p_limit OFFSET p_offset;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_notifications(INT, INT) TO authenticated;
 
 CREATE OR REPLACE FUNCTION get_solvers_all(
   p_limit INT DEFAULT 250,

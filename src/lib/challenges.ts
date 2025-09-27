@@ -372,3 +372,19 @@ export async function deleteSolver(solveId: string) {
   if (error) throw error
   return data
 }
+
+/**
+ * Ambil notifikasi (chall baru & first blood)
+ */
+export async function getNotifications(limit = 100, offset = 0) {
+  const { data, error } = await supabase.rpc('get_notifications', {
+    p_limit: limit,
+    p_offset: offset,
+  });
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+  console.log(data)
+  return data || [];
+}
