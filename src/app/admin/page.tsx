@@ -238,7 +238,12 @@ export default function AdminPage() {
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Kiri: Challenge List */}
-          <div className="lg:col-span-3 order-1">
+          <motion.div
+            className="lg:col-span-3 order-1"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <Card className="h-full mb-6 bg-white dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -258,9 +263,21 @@ export default function AdminPage() {
               />
               <CardContent>
                 {filteredChallenges.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">No challenges found</div>
+                  <motion.div
+                    className="text-center py-8 text-gray-500"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    No challenges found
+                  </motion.div>
                 ) : (
-                  <div className="divide-y border rounded-md overflow-hidden">
+                  <motion.div
+                    className="divide-y border rounded-md overflow-hidden"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
                     {filteredChallenges.map(ch => (
                       <ChallengeListItem
                         key={ch.id}
@@ -277,20 +294,37 @@ export default function AdminPage() {
                         }}
                       />
                     ))}
-                  </div>
+                  </motion.div>
                 )}
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
           {/* Kanan: Sidebar */}
-          <aside className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h-[calc(100vh-6rem)] overflow-y-auto sticky top-24 scroll-hidden">
+          <motion.aside
+            className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h-[calc(100vh-6rem)] overflow-y-auto sticky top-24 scroll-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
             {/* Overview */}
-            <ChallengeOverviewCard challenges={challenges} />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <ChallengeOverviewCard challenges={challenges} />
+            </motion.div>
 
             {/* Recent Solvers */}
-            <RecentSolversList solvers={solvers} onViewAll={() => router.push('/admin/solvers')} />
-          </aside>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <RecentSolversList solvers={solvers} onViewAll={() => router.push('/admin/solvers')} />
+            </motion.div>
+          </motion.aside>
         </div>
       </main>
 

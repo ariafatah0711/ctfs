@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getNotifications } from "@/lib/challenges";
 import Link from "next/link";
 
@@ -31,9 +32,12 @@ export default function NotificationList() {
   return (
     <ul className="space-y-2">
       {notifications.map((notif, idx) => (
-        <li
+        <motion.li
           key={idx}
           className="border rounded-lg px-4 py-3 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex items-center gap-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: idx * 0.03 }}
         >
           {/* Icon */}
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 mr-2">
@@ -63,7 +67,9 @@ export default function NotificationList() {
                     className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
                   >
                     <span className="inline-flex items-center gap-1">
-                      {notif.notif_username}
+                      {notif.notif_username && notif.notif_username.length > 20
+                        ? `${notif.notif_username.slice(0, 20)}...`
+                        : notif.notif_username}
                     </span>
                   </Link>
                 </span>
@@ -77,7 +83,7 @@ export default function NotificationList() {
           <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 whitespace-nowrap">
             {notif.notif_created_at ? new Date(notif.notif_created_at).toLocaleString() : ""}
           </span>
-        </li>
+        </motion.li>
       ))}
     </ul>
   );

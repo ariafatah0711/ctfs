@@ -13,6 +13,8 @@ import ConfirmDialog from "@/components/custom/ConfirmDialog"
 import Loader from "@/components/custom/loading"
 import BackButton from "@/components/custom/BackButton"
 
+
+import { motion } from "framer-motion"
 import toast from "react-hot-toast"
 
 export default function AdminSolversPage() {
@@ -105,18 +107,27 @@ export default function AdminSolversPage() {
             {solvers.length === 0 ? (
               <div className="text-center py-8 text-gray-500 dark:text-gray-300">No solvers found</div>
             ) : (
-              <div className="divide-y border dark:border-gray-700 rounded-md overflow-hidden">
-                {solvers.map((s) => (
-                  <div
+              <motion.div
+                className="divide-y border dark:border-gray-700 rounded-md overflow-hidden"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                {solvers.map((s, idx) => (
+                  <motion.div
                     key={s.solve_id}
                     className="flex items-center justify-between px-4 py-3 transition-colors border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: idx * 0.03 }}
                   >
                     <div className="truncate">
                       <Link
                         href={`/user/${s.username}`}
                         className="font-medium text-blue-600 dark:text-blue-300 hover:underline"
+                        title={s.username}
                       >
-                        {s.username}
+                        {s.username.length > 20 ? `${s.username.slice(0, 30)}...` : s.username}
                       </Link>
                       <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
                       <span className="text-xs text-gray-700 dark:text-gray-200 font-semibold">{s.challenge_title}</span>
@@ -132,9 +143,9 @@ export default function AdminSolversPage() {
                     >
                       🗑️
                     </Button>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             )}
 
             {hasMore && (
