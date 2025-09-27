@@ -33,11 +33,6 @@ export default function UserProfilePage() {
       }
 
       const username = decodeURIComponent(params.username as string)
-      // Cegah akses user lain jika bukan admin
-      if (!user.is_admin && username !== user.username) {
-        router.replace(`/user/${user.username}`)
-        return
-      }
 
       try {
         const userData = await getUserByUsername(username)
