@@ -18,12 +18,14 @@ const SolversList: React.FC<SolversListProps> = ({ solvers }) => {
         solvers.map((solver, idx) => (
           <li key={idx} className="flex justify-between items-center text-gray-700 dark:text-gray-200">
             <div className="flex items-center gap-2">
-              <a
-                href={`/user/${encodeURIComponent(solver.username)}`}
-                className={`hover:underline ${idx === 0 ? 'font-bold text-red-500 dark:text-red-400' : 'text-pink-600 dark:text-pink-300'}`}
-              >
-                {solver.username}
-              </a>
+                <a
+                  href={`/user/${encodeURIComponent(solver.username)}`}
+                  className={`hover:underline ${idx === 0 ? 'font-bold text-red-500 dark:text-red-400' : 'text-pink-600 dark:text-pink-300'} max-w-[120px] truncate block`}
+                  style={{maxWidth: '120px'}}
+                  title={solver.username}
+                >
+                  {solver.username}
+                </a>
               {idx === 0 && (
                 <span title="First Blood" className="text-red-500 dark:text-red-400 text-lg font-bold">🩸</span>
               )}
