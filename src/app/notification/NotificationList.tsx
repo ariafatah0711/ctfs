@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getNotifications } from "@/lib/challenges";
+import Link from "next/link";
 
 export type Notification = {
   notif_type: "new_challenge" | "first_blood";
@@ -28,26 +29,54 @@ export default function NotificationList() {
   if (notifications.length === 0) return <div>No notifications found.</div>;
 
   return (
-    <ul className="space-y-4">
+    <ul className="space-y-2">
       {notifications.map((notif, idx) => (
-  <li key={idx} className="border rounded px-3 py-2 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex items-center text-sm">
-          {notif.notif_type === "new_challenge" ? (
-            <>
-              <span className="font-semibold text-blue-600 dark:text-blue-300 mr-1">New Challenge:</span>
-              <span className="dark:text-gray-100 mr-1">{notif.notif_challenge_title}</span>
-              <span className="text-gray-500 dark:text-gray-400 mr-1">[{notif.notif_category}]</span>
-              <span className="text-gray-400 dark:text-gray-500 ml-auto">{notif.notif_created_at ? new Date(notif.notif_created_at).toLocaleString() : ""}</span>
-            </>
-          ) : (
-            <>
-              <span className="font-semibold text-green-600 dark:text-green-300 mr-1">First Blood 🩸:</span>
-              <span className="dark:text-gray-100 mr-1">{notif.notif_username}</span>
-              <span className="text-gray-700 dark:text-gray-300 mr-1">solved</span>
-              <b className="dark:text-gray-100 mr-1">{notif.notif_challenge_title}</b>
-              <span className="text-gray-500 dark:text-gray-400 mr-1">[{notif.notif_category}]</span>
-              <span className="text-gray-400 dark:text-gray-500 ml-auto">{notif.notif_created_at ? new Date(notif.notif_created_at).toLocaleString() : ""}</span>
-            </>
-          )}
+        <li
+          key={idx}
+          className="border rounded-lg px-4 py-3 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex items-center gap-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150"
+        >
+          {/* Icon */}
+          <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 mr-2">
+            {notif.notif_type === "new_challenge" ? (
+              <svg width="20" height="20" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M12 19V6" />
+                <path d="M5 12l7-7 7 7" />
+              </svg>
+            ) : (
+              <span className="text-lg">🩸</span>
+            )}
+          </span>
+          {/* Content */}
+          <div className="flex-1 flex flex-wrap items-center gap-x-2">
+            {notif.notif_type === "new_challenge" ? (
+              <>
+                <span className="font-semibold text-blue-600 dark:text-blue-300">New Challenge:</span>
+                <span className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</span>
+                <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
+              </>
+            ) : (
+              <>
+                <span className="font-semibold text-green-600 dark:text-green-300">First Blood</span>
+                <span className="inline-flex items-center gap-1">
+                  <Link
+                    href={notif.notif_username ? `/user/${notif.notif_username}` : "#"}
+                    className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {notif.notif_username}
+                    </span>
+                  </Link>
+                </span>
+                <span className="text-gray-700 dark:text-gray-300">solved</span>
+                <b className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</b>
+                <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
+              </>
+            )}
+          </div>
+          {/* Date */}
+          <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 whitespace-nowrap">
+            {notif.notif_created_at ? new Date(notif.notif_created_at).toLocaleString() : ""}
+          </span>
         </li>
       ))}
     </ul>
