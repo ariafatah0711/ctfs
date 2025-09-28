@@ -3,6 +3,7 @@
 import { ChallengeWithSolve } from '@/types'
 import { getFirstBloodChallengeIds } from '@/lib/challenges'
 import { useEffect, useState, Fragment } from 'react'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getUserDetail, getCategoryTotals } from '@/lib/users'
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,17 +38,27 @@ type Badge = {
 
 function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount: number): Badge[] {
   const badges: Badge[] = [];
-  // Rank
-  if (rank === 1) return [{ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: '🥇' }];
-  if (rank && rank <= 3) return [{ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: '🥈' }];
-  if (rank && rank <= 10) return [{ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: '🥉' }];
-  if (rank && rank <= 25) badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: '🏅' });
-  else if (rank && rank <= 50) badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: '🎖️' });
+  // Rank (push, don't return early)
+  if (rank === 1) {
+    badges.push({ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: '🥇' });
+  } else if (rank && rank <= 3) {
+    badges.push({ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: '🥈' });
+  } else if (rank && rank <= 10) {
+    badges.push({ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: '🥉' });
+  } else if (rank && rank <= 25) {
+    badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: '🏅' });
+  } else if (rank && rank <= 50) {
+    badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: '🎖️' });
+  }
 
-  // First Blood
-  if (firstBloodCount >= 10) badges.push({ label: 'King of First Bloods', color: 'bg-pink-200 text-pink-900 border-pink-400', icon: '👑' });
-  else if (firstBloodCount >= 5) badges.push({ label: '5+ First Bloods', color: 'bg-red-200 text-red-800 border-red-400', icon: '🩸' });
-  else if (firstBloodCount >= 1) badges.push({ label: 'First Blood', color: 'bg-red-100 text-red-700 border-red-200', icon: '⚡' });
+  // First Blood (show only the highest tier)
+  if (firstBloodCount >= 10) {
+    badges.push({ label: 'King of First Bloods', color: 'bg-pink-200 text-pink-900 border-pink-400', icon: '👑' });
+  } else if (firstBloodCount >= 5) {
+    badges.push({ label: '5+ First Bloods', color: 'bg-red-200 text-red-800 border-red-400', icon: '🩸' });
+  } else if (firstBloodCount >= 1) {
+    badges.push({ label: 'First Blood', color: 'bg-red-100 text-red-700 border-red-200', icon: '⚡' });
+  }
 
   // Solved
   if (solvedCount >= 100) badges.push({ label: '100+ Solves', color: 'bg-green-700 text-white border-green-800', icon: '💯' });
@@ -69,6 +80,7 @@ export default function UserProfile({
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
+  const [showAllModal, setShowAllModal] = useState(false)
   // Modal state removed, handled in EditProfileModal
 
   useEffect(() => {
@@ -81,7 +93,9 @@ export default function UserProfile({
 
         if (detail) {
           const firstBlood = await getFirstBloodChallengeIds(detail.id)
-          setFirstBloodIds(firstBlood)
+          // Filter: hanya id yang juga ada di solved_challenges
+          const solvedIds = new Set((detail.solved_challenges || []).map(c => c.id))
+          setFirstBloodIds(firstBlood.filter(id => solvedIds.has(id)))
 
           const totals = await getCategoryTotals()
           setCategoryTotals(totals)
@@ -263,8 +277,13 @@ export default function UserProfile({
               transition={{ duration: 0.7 }}
             >
                 <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader>
+                  <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-gray-900 dark:text-white">Recent Solved Challenges</CardTitle>
+                    {solvedChallenges.length > 10 && (
+                      <Button size="sm" variant="outline" onClick={() => setShowAllModal(true)}>
+                        Show All
+                      </Button>
+                    )}
                   </CardHeader>
                   <CardContent>
                     {solvedChallenges.length === 0 ? (
@@ -302,6 +321,70 @@ export default function UserProfile({
                   </CardContent>
                 </Card>
             </motion.div>
+
+            {/* Modal Show All Solved Challenges (Compact Clean Version) */}
+            <Dialog open={showAllModal} onOpenChange={setShowAllModal}>
+              <DialogContent className="max-w-3xl w-full p-0 border-0 shadow-2xl bg-white dark:bg-gray-900 rounded-2xl overflow-hidden">
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
+                  <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
+                    All Solved Challenges
+                  </DialogTitle>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowAllModal(false)}
+                    className="text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400"
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                {/* Body */}
+                <div className="p-0">
+                  {solvedChallenges.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                      No solved challenges yet
+                    </div>
+                  ) : (
+                    <div className="overflow-y-auto max-h-[70vh] divide-y divide-gray-200 dark:divide-gray-700 scroll-hidden">
+                      {solvedChallenges.map((challenge) => (
+                        <div
+                          key={challenge.id}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-3"
+                        >
+                          {/* Left */}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900 dark:text-white">
+                                {challenge.title}
+                              </span>
+                              {firstBloodIds.includes(challenge.id) && (
+                                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300">
+                                  🩸 First Blood
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {challenge.category} • {challenge.difficulty} •{" "}
+                              {challenge.solved_at
+                                ? new Date(challenge.solved_at).toLocaleString()
+                                : "-"}
+                            </p>
+                          </div>
+
+                          {/* Right */}
+                          <span className="text-sm font-semibold text-green-600 dark:text-green-300 whitespace-nowrap">
+                            +{challenge.points}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </>
         )}
       </div>
