@@ -2,7 +2,7 @@
 
 import { ChallengeWithSolve } from '@/types'
 import { getFirstBloodChallengeIds } from '@/lib/challenges'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { getUserDetail, getCategoryTotals } from '@/lib/users'
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,6 +26,36 @@ type Props = {
   error?: string | null
   onBack?: () => void
   isCurrentUser?: boolean
+}
+
+// Badge type
+type Badge = {
+  label: string;
+  color: string;
+  icon: string;
+};
+
+function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount: number): Badge[] {
+  const badges: Badge[] = [];
+  // Rank
+  if (rank === 1) return [{ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: '🥇' }];
+  if (rank && rank <= 3) return [{ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: '🥈' }];
+  if (rank && rank <= 10) return [{ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: '🥉' }];
+  if (rank && rank <= 25) badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: '🏅' });
+  else if (rank && rank <= 50) badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: '🎖️' });
+
+  // First Blood
+  if (firstBloodCount >= 10) badges.push({ label: 'King of First Bloods', color: 'bg-pink-200 text-pink-900 border-pink-400', icon: '👑' });
+  else if (firstBloodCount >= 5) badges.push({ label: '5+ First Bloods', color: 'bg-red-200 text-red-800 border-red-400', icon: '🩸' });
+  else if (firstBloodCount >= 1) badges.push({ label: 'First Blood', color: 'bg-red-100 text-red-700 border-red-200', icon: '⚡' });
+
+  // Solved
+  if (solvedCount >= 100) badges.push({ label: '100+ Solves', color: 'bg-green-700 text-white border-green-800', icon: '💯' });
+  else if (solvedCount >= 50) badges.push({ label: '50+ Solves', color: 'bg-green-600 text-white border-green-700', icon: '🏆' });
+  else if (solvedCount >= 25) badges.push({ label: '25+ Solves', color: 'bg-green-500 text-white border-green-600', icon: '🎯' });
+  else if (solvedCount >= 10) badges.push({ label: '10+ Solves', color: 'bg-green-400 text-white border-green-500', icon: '🔥' });
+
+  return badges;
 }
 
 export default function UserProfile({
@@ -130,6 +160,19 @@ export default function UserProfile({
                       {userDetail.username}
                     </h1>
                     <p className="text-lg text-gray-500 dark:text-gray-300 mt-1">Score: <span className="font-semibold text-orange-600 dark:text-orange-400">{userDetail.score}</span></p>
+                    {/* BADGES */}
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {getUserBadges(userDetail.rank, firstBloodIds.length, solvedChallenges.length).map((badge, idx) => (
+                        <span
+                          key={badge.label + idx}
+                          className={`inline-flex items-center border border-gray-300 dark:border-gray-600 px-1.5 py-0.5 rounded-md text-xs font-medium shadow-sm ${badge.color} transition-all duration-150 hover:scale-105`}
+                          style={{ lineHeight: '1.2', minWidth: 0 }}
+                        >
+                          <span className="mr-1 text-base" style={{fontSize:'1em'}}>{badge.icon}</span>
+                          <span className="truncate max-w-[100px]">{badge.label}</span>
+                        </span>
+                      ))}
+                    </div>
                   </div>
                   {isCurrentUser && userDetail && (
                     <EditProfileModal

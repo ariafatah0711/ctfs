@@ -243,16 +243,16 @@ BEGIN
   FROM auth.users au
   WHERE au.id = v_user.id;
 
-  -- Hitung rank (sinkron dengan get_leaderboard)
+  -- Hitung rank (sinkron dengan get_leaderboard, tie-break pakai waktu solve terakhir)
   SELECT rank INTO v_rank
   FROM (
-      SELECT
-          u.id,
-          RANK() OVER (ORDER BY COALESCE(SUM(c.points), 0) DESC, MIN(s.created_at) ASC) AS rank
-      FROM public.users u
-      LEFT JOIN public.solves s ON u.id = s.user_id
-      LEFT JOIN public.challenges c ON s.challenge_id = c.id
-      GROUP BY u.id
+    SELECT
+      u.id,
+      RANK() OVER (ORDER BY COALESCE(SUM(c.points), 0) DESC, MAX(s.created_at) ASC) AS rank
+    FROM public.users u
+    LEFT JOIN public.solves s ON u.id = s.user_id
+    LEFT JOIN public.challenges c ON s.challenge_id = c.id
+    GROUP BY u.id
   ) ranked
   WHERE ranked.id = p_id;
 
