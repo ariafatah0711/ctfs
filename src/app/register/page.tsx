@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp } from '@/lib/auth'
+import { isValidUsername } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import Loader from '@/components/custom/loading'
 import GoogleLoginButton from '@/components/GoogleLoginButton'
@@ -31,6 +32,15 @@ export default function RegisterPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+
+    // Validasi username
+    const usernameError = isValidUsername(formData.username)
+    if (usernameError) {
+      setError(usernameError)
+      setLoading(false)
+      return
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')

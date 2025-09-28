@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { updateUsername } from '@/lib/users'
+import { isValidUsername } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
@@ -37,12 +38,14 @@ export default function EditProfileModal({
     setError('')
     setSuccess('')
     setLoading(true)
-    if (!username.trim()) {
-      setError('Username cannot be empty')
+    const usernameTrimmed = username.trim()
+    const usernameError = isValidUsername(usernameTrimmed)
+    if (usernameError) {
+      setError(usernameError)
       setLoading(false)
       return
     }
-    const { error, username: newUsername } = await updateUsername(userId, username.trim())
+  const { error, username: newUsername } = await updateUsername(userId, usernameTrimmed)
     if (error) {
       setError(error)
     } else {
