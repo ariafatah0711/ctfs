@@ -518,6 +518,7 @@ CREATE OR REPLACE FUNCTION update_challenge(
 RETURNS BOOLEAN AS $$
 DECLARE
   v_user_id UUID := auth.uid()::uuid;
+  v_solver_count INT;
 BEGIN
   IF NOT is_admin() THEN
     RAISE EXCEPTION 'Only admin can update challenge';
@@ -525,19 +526,34 @@ BEGIN
 
   UPDATE public.challenges
   SET title = p_title,
-    description = p_description,
-    category = p_category,
-    points = p_points,
-    max_points = p_max_points,
-    difficulty = p_difficulty,
-    hint = p_hint,
-    attachments = p_attachments,
-    is_active = p_is_active,
-    is_dynamic = p_is_dynamic,
-    min_points = p_min_points,
-    decay_per_solve = p_decay_per_solve,
-    updated_at = now()
+      description = p_description,
+      category = p_category,
+      points = p_points,
+      max_points = p_max_points,
+      difficulty = p_difficulty,
+      hint = p_hint,
+      attachments = p_attachments,
+      is_active = p_is_active,
+      is_dynamic = p_is_dynamic,
+      min_points = p_min_points,
+      decay_per_solve = p_decay_per_solve,
+      updated_at = now()
   WHERE id = p_challenge_id;
+
+  -- Jika dynamic, update kolom points sesuai rumus
+  IF p_is_dynamic THEN
+    SELECT COUNT(*) INTO v_solver_count FROM public.solves WHERE challenge_id = p_challenge_id;
+    -- Samakan dengan submit_flag: pakai jumlah_solver - 1 (kecuali 0)
+    IF v_solver_count > 0 THEN
+      v_solver_count := v_solver_count - 1;
+    END IF;
+    UPDATE public.challenges
+    SET points = GREATEST(
+        COALESCE(p_min_points, 0),
+        COALESCE(p_max_points, 0) - COALESCE(p_decay_per_solve, 0) * v_solver_count
+    )
+    WHERE id = p_challenge_id;
+  END IF;
 
   IF p_flag IS NOT NULL THEN
     UPDATE public.challenge_flags

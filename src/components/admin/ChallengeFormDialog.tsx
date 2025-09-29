@@ -1,11 +1,12 @@
 import React from 'react'
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { Attachment, Challenge } from '@/types'
 
@@ -52,7 +53,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border dark:border-gray-700 text-gray-900 dark:text-gray-100">
+  <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-gray-100">{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>
         </DialogHeader>
@@ -60,95 +61,168 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="md:col-span-2 flex items-center gap-4">
               <Label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
+                <Switch
                   checked={!!formData.is_dynamic}
-                  onChange={e => onChange({ ...formData, is_dynamic: e.target.checked })}
-                  className="mr-2"
+                  onCheckedChange={v => {
+                    // Sinkronkan points <-> max_points saat toggle
+                    if (v) {
+                      // Aktifkan dynamic: set max_points = points jika ada
+                      onChange({
+                        ...formData,
+                        is_dynamic: true,
+                        max_points: formData.points ?? '',
+                      });
+                    } else {
+                      // Nonaktifkan dynamic: set points = max_points jika ada
+                      onChange({
+                        ...formData,
+                        is_dynamic: false,
+                        points: formData.max_points ?? '',
+                      });
+                    }
+                  }}
+                  className="mr-2 data-[state=checked]:bg-primary-500 data-[state=checked]:border-primary-500 bg-gray-200 border-gray-300 dark:bg-gray-700 dark:border-gray-500 transition-colors"
                 />
                 Dynamic Scoring
               </Label>
             </div>
             <div>
               <Label>Title</Label>
-              <Input required value={formData.title} onChange={e => onChange({ ...formData, title: e.target.value })} />
+              <Input
+                required
+                value={formData.title}
+                onChange={e => onChange({ ...formData, title: e.target.value })}
+                className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+              />
             </div>
             <div>
               <Label>Category</Label>
               <Select value={formData.category} onValueChange={v => onChange({ ...formData, category: v })}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                    <SelectContent>
-                      {categories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
+                <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </SelectContent>
               </Select>
             </div>
-            {/* Points field only if NOT dynamic */}
+
+            {/* Points & Difficulty (static) */}
             {!formData.is_dynamic && (
-              <div>
-                <Label>Points</Label>
-                <Input type="number" required min={0} value={formData.points ?? ''} onChange={e => onChange({ ...formData, points: Number(e.target.value) })} />
-              </div>
+              <>
+                <div>
+                  <Label>Points</Label>
+                  <Input
+                    type="number"
+                    required
+                    min={0}
+                    value={formData.points === undefined || formData.points === null ? '' : formData.points}
+                    onChange={e => {
+                      let val = e.target.value.replace(/^0+(?=\d)/, '');
+                      if (val === '') {
+                        onChange({ ...formData, points: '', max_points: '' });
+                      } else {
+                        onChange({ ...formData, points: Number(val), max_points: Number(val) });
+                      }
+                    }}
+                    className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1">Difficulty</Label>
+                  <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
+                    <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
 
-            {/* Dynamic Score Fields only if dynamic */}
+            {/* Dynamic Score Fields & Difficulty (dynamic) */}
             {formData.is_dynamic && (
               <>
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
-                  <div className="flex flex-col">
-                    <Label htmlFor="max_points" className="mb-1">Max Points</Label>
-                    <Input
-                      id="max_points"
-                      type="number"
-                      min={0}
-                      value={formData.max_points ?? ''}
-                      onChange={e => onChange({ ...formData, max_points: Number(e.target.value) })}
-                      className="w-full"
-                      placeholder="Nilai awal"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <Label htmlFor="min_points" className="mb-1">Min Points</Label>
-                    <Input
-                      id="min_points"
-                      type="number"
-                      min={0}
-                      value={formData.min_points ?? ''}
-                      onChange={e => onChange({ ...formData, min_points: Number(e.target.value) })}
-                      className="w-full"
-                      placeholder="Batas minimum"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="max_points" className="mb-1">Max Points</Label>
+                  <Input
+                    id="max_points"
+                    type="number"
+                    min={0}
+                    value={formData.max_points === undefined || formData.max_points === null ? '' : formData.max_points}
+                    onChange={e => {
+                      let val = e.target.value.replace(/^0+(?=\d)/, '');
+                      if (val === '') {
+                        onChange({ ...formData, max_points: '', points: '' });
+                      } else {
+                        onChange({ ...formData, max_points: Number(val), points: Number(val) });
+                      }
+                    }}
+                    className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    placeholder="Nilai awal"
+                  />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full md:col-span-2">
-                  <div className="flex flex-col">
-                    <Label htmlFor="decay_per_solve" className="mb-1">Decay/Solve</Label>
-                    <Input
-                      id="decay_per_solve"
-                      type="number"
-                      min={0}
-                      value={formData.decay_per_solve ?? ''}
-                      onChange={e => onChange({ ...formData, decay_per_solve: Number(e.target.value) })}
-                      className="w-full"
-                      placeholder="Turun tiap solve"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <Label className="mb-1">Difficulty</Label>
-                    <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
-                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Easy">Easy</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label className="mb-1">Difficulty</Label>
+                  <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
+                    <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <span className="text-xs text-muted-foreground mt-1 block">Dynamic score: <b>Max Points</b> (nilai awal), <b>Min Points</b> (batas bawah), <b>Decay/Solve</b> (penurunan per solve)</span>
+                <div>
+                  <Label htmlFor="min_points" className="mb-1">Min Points</Label>
+                  <Input
+                    id="min_points"
+                    type="number"
+                    min={0}
+                    value={formData.min_points === undefined || formData.min_points === null ? '' : formData.min_points}
+                    onChange={e => {
+                      let val = e.target.value.replace(/^0+(?=\d)/, '');
+                      let maxVal = (formData.max_points === undefined || formData.max_points === null || formData.max_points === '') ? 0 : Number(formData.max_points);
+                      if (val === '') {
+                        onChange({ ...formData, min_points: '' });
+                      } else {
+                        let minVal = Number(val);
+                        if (minVal > maxVal) {
+                          minVal = maxVal;
+                        }
+                        onChange({ ...formData, min_points: minVal });
+                      }
+                    }}
+                    className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    placeholder="Batas minimum"
+                  />
+                  {formData.max_points !== '' && formData.min_points > formData.max_points && (
+                    <p className="text-xs text-red-500 mt-1">Min Points tidak boleh lebih dari Max Points</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="decay_per_solve" className="mb-1">Decay/Solve</Label>
+                  <Input
+                    id="decay_per_solve"
+                    type="number"
+                    min={0}
+                    value={formData.decay_per_solve === undefined || formData.decay_per_solve === null ? '' : formData.decay_per_solve}
+                    onChange={e => {
+                      let val = e.target.value.replace(/^0+(?=\d)/, '');
+                      if (val === '') {
+                        onChange({ ...formData, decay_per_solve: '' });
+                      } else {
+                        onChange({ ...formData, decay_per_solve: Number(val) });
+                      }
+                    }}
+                    className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    placeholder="Turun tiap solve"
+                  />
+                </div>
               </>
             )}
 
@@ -162,12 +236,12 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   <MarkdownRenderer content={formData.description || '*No description provided*'} />
                 </div>
               ) : (
-                <Textarea required rows={5} value={formData.description} onChange={e => onChange({ ...formData, description: e.target.value })} className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700" />
+                <Textarea required rows={5} value={formData.description} onChange={e => onChange({ ...formData, description: e.target.value })} className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm scroll-hidden" />
               )}
             </div>
             <div>
               <Label>Flag</Label>
-              <Input required={!editing} value={formData.flag} onChange={e => onChange({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} />
+              <Input required={!editing} value={formData.flag} onChange={e => onChange({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm" />
               <p className="text-xs text-muted-foreground mt-1">{editing ? 'Leave blank to keep current flag.' : 'Flag is required for new challenges.'}</p>
             </div>
             <div className="md:col-span-2">
