@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# HINT: rahasia ada di subdomain berikut
+# flag.ctf.ariaf.my.id

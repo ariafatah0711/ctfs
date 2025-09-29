@@ -140,6 +140,31 @@ vercel --prod
 
    ![Site URL](images/README/image-2.png)
 
+## 6. Opsional Supabase Reset Emils
+```html
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+   <tr>
+      <td style="padding: 32px; text-align: center;">
+      <h2 style="color: #111827; margin-bottom: 16px;">Reset Password</h2>
+      <p style="color: #374151; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+         Kamu menerima email ini karena ada permintaan untuk reset password akunmu.
+         Klik tombol di bawah untuk membuat password baru.
+      </p>
+      <a href="{{ .ConfirmationURL }}"
+         style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 15px;">
+         Reset Password
+      </a>
+      <p style="color: #6b7280; font-size: 13px; line-height: 1.6; margin-top: 24px;">
+         Jika kamu tidak meminta reset password, abaikan email ini.
+      </p>
+      </td>
+   </tr>
+</table>
+<p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 16px;">{{ .SiteURL }}
+   © {{ .SiteURL }} - Semua hak dilindungi
+</p>
+```
+
 ---
 
 ## 🗄️ Supabase Backup (GitHub Actions)
