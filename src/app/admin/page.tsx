@@ -51,10 +51,14 @@ export default function AdminPage() {
     description: '',
     category: 'Web',
     points: 100,
+    max_points: 100,
     flag: '',
     hint: [] as string[],
     difficulty: 'Easy',
     attachments: [] as Attachment[],
+    is_dynamic: false,
+    min_points: 0,
+    decay_per_solve: 0,
   }
 
   const [filters, setFilters] = useState({
@@ -131,10 +135,14 @@ export default function AdminPage() {
       description: c.description || '',
       category: c.category || 'Web',
       points: c.points || 100,
+      max_points: c.max_points || c.points || 100,
       flag: c.flag || '',
       hint: parsedHint,
       difficulty: c.difficulty || 'Easy',
       attachments: c.attachments || [],
+      is_dynamic: c.is_dynamic ?? false,
+      min_points: c.min_points ?? 0,
+      decay_per_solve: c.decay_per_solve ?? 0,
     })
     setOpenForm(true)
     setShowPreview(false)
@@ -171,10 +179,16 @@ export default function AdminPage() {
         hint: (formData.hint && formData.hint.length > 0) ? formData.hint.filter(h => h.trim() !== '') : null,
         difficulty: (formData.difficulty || '').trim(),
         attachments: (formData.attachments || []).filter((a) => (a.url || '').trim() !== ''),
-      }
+  }
+  if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;
+  if (typeof formData.min_points !== 'undefined') payload.min_points = Number(formData.min_points) || 0;
+  if (typeof formData.decay_per_solve !== 'undefined') payload.decay_per_solve = Number(formData.decay_per_solve) || 0;
 
       if ((formData.flag || '').trim()) payload.flag = formData.flag.trim()
 
+      if (formData.is_dynamic) {
+        payload.max_points = Number(formData.max_points) || Number(formData.points) || 0;
+      }
       if (editing) {
         await updateChallenge(editing.id, payload)
       } else {

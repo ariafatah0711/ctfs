@@ -58,6 +58,17 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="md:col-span-2 flex items-center gap-4">
+              <Label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={!!formData.is_dynamic}
+                  onChange={e => onChange({ ...formData, is_dynamic: e.target.checked })}
+                  className="mr-2"
+                />
+                Dynamic Scoring
+              </Label>
+            </div>
             <div>
               <Label>Title</Label>
               <Input required value={formData.title} onChange={e => onChange({ ...formData, title: e.target.value })} />
@@ -75,21 +86,72 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Points</Label>
-              <Input type="number" required value={String(formData.points)} onChange={e => onChange({ ...formData, points: Number(e.target.value) })} />
-            </div>
-            <div>
-              <Label>Difficulty</Label>
-              <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Easy">Easy</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
-                  <SelectItem value="Hard">Hard</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Points field only if NOT dynamic */}
+            {!formData.is_dynamic && (
+              <div>
+                <Label>Points</Label>
+                <Input type="number" required min={0} value={formData.points ?? ''} onChange={e => onChange({ ...formData, points: Number(e.target.value) })} />
+              </div>
+            )}
+
+            {/* Dynamic Score Fields only if dynamic */}
+            {formData.is_dynamic && (
+              <>
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+                  <div className="flex flex-col">
+                    <Label htmlFor="max_points" className="mb-1">Max Points</Label>
+                    <Input
+                      id="max_points"
+                      type="number"
+                      min={0}
+                      value={formData.max_points ?? ''}
+                      onChange={e => onChange({ ...formData, max_points: Number(e.target.value) })}
+                      className="w-full"
+                      placeholder="Nilai awal"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <Label htmlFor="min_points" className="mb-1">Min Points</Label>
+                    <Input
+                      id="min_points"
+                      type="number"
+                      min={0}
+                      value={formData.min_points ?? ''}
+                      onChange={e => onChange({ ...formData, min_points: Number(e.target.value) })}
+                      className="w-full"
+                      placeholder="Batas minimum"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full md:col-span-2">
+                  <div className="flex flex-col">
+                    <Label htmlFor="decay_per_solve" className="mb-1">Decay/Solve</Label>
+                    <Input
+                      id="decay_per_solve"
+                      type="number"
+                      min={0}
+                      value={formData.decay_per_solve ?? ''}
+                      onChange={e => onChange({ ...formData, decay_per_solve: Number(e.target.value) })}
+                      className="w-full"
+                      placeholder="Turun tiap solve"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <Label className="mb-1">Difficulty</Label>
+                    <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Easy">Easy</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <span className="text-xs text-muted-foreground mt-1 block">Dynamic score: <b>Max Points</b> (nilai awal), <b>Min Points</b> (batas bawah), <b>Decay/Solve</b> (penurunan per solve)</span>
+              </>
+            )}
+
             <div className="md:col-span-2">
               <div className="flex items-center justify-between">
                 <Label>Deskripsi</Label>

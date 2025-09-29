@@ -159,3 +159,37 @@ Flag: `flag{test_markdown}`
 INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
 SELECT id, 'flag{test_markdown}', encode(digest('flag{test_markdown}', 'sha256'), 'hex')
 FROM ins;
+
+-- =========================
+-- Reset chall_test_dynamic
+-- =========================
+DELETE FROM public.solves
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_dynamic');
+DELETE FROM public.challenge_flags
+WHERE challenge_id IN (SELECT id FROM public.challenges WHERE title = 'chall_test_dynamic');
+DELETE FROM public.challenge_flags
+WHERE flag_hash = encode(digest('flag{test_dynamic}', 'sha256'), 'hex');
+DELETE FROM public.challenges WHERE title = 'chall_test_dynamic';
+
+WITH ins AS (
+  INSERT INTO public.challenges (
+    title, description, category, points, max_points, hint, difficulty, attachments, is_dynamic, min_points, decay_per_solve
+  )
+  VALUES (
+    'chall_test_dynamic',
+    'Challenge ini pakai dynamic scoring. Nilai awal 500 poin, turun 50 poin tiap solve, minimal 200 poin.\nFlag: flag{test_dynamic}',
+    'Crypto',
+    500,    -- points (akan diupdate setiap solve)
+    500,    -- max_points (nilai awal)
+    '["Perhatikan pola ciphertext.", "Ada kaitan dengan base64 juga."]',
+    'Hard',
+    '[]'::jsonb,
+    true,   -- is_dynamic
+    100,    -- min_points
+    10      -- decay_per_solve
+  )
+  RETURNING id
+)
+INSERT INTO public.challenge_flags (challenge_id, flag, flag_hash)
+SELECT id, 'flag{test_dynamic}', encode(digest('flag{test_dynamic}', 'sha256'), 'hex')
+FROM ins;

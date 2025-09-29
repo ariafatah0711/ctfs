@@ -21,12 +21,16 @@ export interface Challenge {
   description: string
   category: string
   points: number
+  max_points?: number
   flag: string
   flag_hash: string
   hint?: string
   attachments?: Attachment[]
   difficulty: string
   is_active: boolean
+  is_dynamic: boolean
+  min_points: number
+  decay_per_solve: number
   created_at: string
   updated_at: string
 }

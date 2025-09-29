@@ -84,13 +84,23 @@ CREATE TABLE public.challenges (
   description TEXT NOT NULL,
   category TEXT NOT NULL,
   points INTEGER NOT NULL,
+  max_points INTEGER DEFAULT NULL, -- untuk dynamic score
   hint JSONB DEFAULT NULL,
   difficulty TEXT,
   attachments JSONB DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT true,
+  is_dynamic BOOLEAN DEFAULT false,
+  min_points INTEGER DEFAULT 0,
+  decay_per_solve INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+ALTER TABLE public.challenges
+ADD COLUMN IF NOT EXISTS is_dynamic BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS max_points INTEGER DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS min_points INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS decay_per_solve INTEGER DEFAULT 0;
 
 -- Challenge flags table (separate, admin-only)
 CREATE TABLE public.challenge_flags (
@@ -355,20 +365,26 @@ CREATE OR REPLACE FUNCTION submit_flag(
 RETURNS json AS $$
 DECLARE
   v_user_id uuid := auth.uid()::uuid;
-  v_flag_hash text;
-  v_points int;
-  v_existing int;
-  v_is_correct boolean;
+  v_flag_hash TEXT;
+  v_points INTEGER;
+  v_max_points INTEGER;
+  v_is_dynamic BOOLEAN;
+  v_min_points INTEGER;
+  v_decay_per_solve INTEGER;
+  v_solver_count INTEGER;
+  v_awarded_points INTEGER;
+  v_existing INT;
+  v_is_correct BOOLEAN;
 BEGIN
   IF v_user_id IS NULL THEN
-  RETURN json_build_object('success', false, 'message', 'Not authenticated');
+    RETURN json_build_object('success', false, 'message', 'Not authenticated');
   END IF;
 
-  SELECT cf.flag_hash, c.points
-  INTO v_flag_hash, v_points
-  FROM challenge_flags cf
-  JOIN challenges c ON c.id = cf.challenge_id
-  WHERE cf.challenge_id = p_challenge_id;
+  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.min_points, c.decay_per_solve
+    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_min_points, v_decay_per_solve
+    FROM challenge_flags cf
+    JOIN challenges c ON c.id = cf.challenge_id
+    WHERE cf.challenge_id = p_challenge_id;
 
   IF v_flag_hash IS NULL THEN
     RETURN json_build_object('success', false, 'message', 'Challenge not found');
@@ -388,10 +404,23 @@ BEGIN
     RETURN json_build_object('success', true, 'message', 'Correct, but already solved.');
   END IF;
 
+  -- Hitung awarded points (dynamic or static)
+  IF v_is_dynamic THEN
+    -- Hitung points baru dari max_points
+    SELECT COUNT(*) INTO v_solver_count FROM solves WHERE challenge_id = p_challenge_id;
+    v_awarded_points := GREATEST(v_min_points, COALESCE(v_max_points, v_points) - v_decay_per_solve * v_solver_count);
+
+    -- Update kolom points di tabel challenges
+    UPDATE challenges
+    SET points = v_awarded_points
+    WHERE id = p_challenge_id;
+  ELSE
+    v_awarded_points := v_points;
+  END IF;
 
   INSERT INTO solves(user_id, challenge_id) VALUES (v_user_id, p_challenge_id);
 
-  RETURN json_build_object('success', true, 'message', format('Correct! +%s points.', v_points));
+  RETURN json_build_object('success', true, 'message', format('Correct! +%s points.', v_awarded_points));
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -414,6 +443,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_flag(p_challenge_id uuid) TO authenticated;
 
+-- Add challenge function (RPC)
 CREATE OR REPLACE FUNCTION add_challenge(
   p_title TEXT,
   p_description TEXT,
@@ -422,7 +452,11 @@ CREATE OR REPLACE FUNCTION add_challenge(
   p_flag TEXT,
   p_difficulty TEXT,
   p_hint JSONB DEFAULT NULL,
-  p_attachments JSONB DEFAULT '[]'
+  p_attachments JSONB DEFAULT '[]',
+  p_is_dynamic BOOLEAN DEFAULT false,
+  p_min_points INTEGER DEFAULT 0,
+  p_decay_per_solve INTEGER DEFAULT 0,
+  p_max_points INTEGER DEFAULT NULL
 )
 RETURNS UUID AS $$
 DECLARE
@@ -433,8 +467,8 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add challenge';
   END IF;
 
-  INSERT INTO public.challenges(title, description, category, points, hint, attachments, difficulty, is_active)
-  VALUES (p_title, p_description, p_category, p_points, p_hint, p_attachments, p_difficulty, true)
+  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_dynamic, min_points, decay_per_solve)
+  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_dynamic, p_min_points, p_decay_per_solve)
   RETURNING id INTO v_challenge_id;
 
   INSERT INTO public.challenge_flags(challenge_id, flag)
@@ -444,7 +478,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_challenge TO authenticated;
 
 CREATE OR REPLACE FUNCTION delete_challenge(
   p_challenge_id UUID
@@ -464,6 +498,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION delete_challenge(UUID) TO authenticated;
 
+-- Update challenge function (RPC)
 CREATE OR REPLACE FUNCTION update_challenge(
   p_challenge_id UUID,
   p_title TEXT,
@@ -474,7 +509,11 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_hint JSONB DEFAULT NULL,
   p_attachments JSONB DEFAULT '[]',
   p_is_active BOOLEAN DEFAULT TRUE,
-  p_flag TEXT DEFAULT NULL
+  p_flag TEXT DEFAULT NULL,
+  p_is_dynamic BOOLEAN DEFAULT false,
+  p_min_points INTEGER DEFAULT 0,
+  p_decay_per_solve INTEGER DEFAULT 0,
+  p_max_points INTEGER DEFAULT NULL
 )
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -489,10 +528,14 @@ BEGIN
     description = p_description,
     category = p_category,
     points = p_points,
+    max_points = p_max_points,
     difficulty = p_difficulty,
     hint = p_hint,
     attachments = p_attachments,
     is_active = p_is_active,
+    is_dynamic = p_is_dynamic,
+    min_points = p_min_points,
+    decay_per_solve = p_decay_per_solve,
     updated_at = now()
   WHERE id = p_challenge_id;
 
@@ -506,7 +549,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION update_challenge(UUID, TEXT, TEXT, TEXT, INTEGER, TEXT, JSONB, JSONB, BOOLEAN, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_challenge(
+  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, text, boolean, integer, integer, integer
+) TO authenticated;
 
 -- ########################################################
 

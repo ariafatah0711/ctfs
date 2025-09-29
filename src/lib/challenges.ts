@@ -23,7 +23,7 @@ export async function getChallenges(
     let query = supabase
       .from('challenges')
       .select('*')
-      .order('points', { ascending: true });
+      .order('points', { ascending: true }); // kolom baru sudah otomatis ikut jika pakai select('*')
 
     if (!showAll) {
       query = query.eq('is_active', true); // cuma ambil yang aktif kalau showAll=false
@@ -83,10 +83,14 @@ export async function addChallenge(challengeData: {
   description: string
   category: string
   points: number
+  max_points?: number
   flag: string
   hint?: string | string[] | null
   attachments?: Attachment[]
   difficulty: string
+  is_dynamic?: boolean
+  min_points?: number
+  decay_per_solve?: number
 }): Promise<void> {
   try {
     let hintValue: any = null;
@@ -100,10 +104,14 @@ export async function addChallenge(challengeData: {
       p_description: challengeData.description,
       p_category: challengeData.category,
       p_points: challengeData.points,
+      p_max_points: challengeData.max_points ?? null,
       p_flag: challengeData.flag,
       p_difficulty: challengeData.difficulty,
       p_hint: hintValue,
-      p_attachments: challengeData.attachments || []
+      p_attachments: challengeData.attachments || [],
+      p_is_dynamic: challengeData.is_dynamic ?? false,
+      p_min_points: challengeData.min_points ?? 0,
+      p_decay_per_solve: challengeData.decay_per_solve ?? 0
     });
     if (error) {
       throw new Error(error.message)
@@ -122,11 +130,15 @@ export async function updateChallenge(challengeId: string, challengeData: {
   description: string
   category: string
   points: number
+  max_points?: number
   flag?: string
   hint?: string | string[] | null
   attachments?: Attachment[]
   difficulty: string
   is_active?: boolean
+  is_dynamic?: boolean
+  min_points?: number
+  decay_per_solve?: number
 }): Promise<void> {
   try {
     let hintValue: any = null;
@@ -141,11 +153,15 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_description: challengeData.description,
       p_category: challengeData.category,
       p_points: challengeData.points,
+      p_max_points: challengeData.max_points ?? null,
       p_difficulty: challengeData.difficulty,
       p_hint: hintValue,
       p_attachments: challengeData.attachments || [],
       p_is_active: challengeData.is_active !== undefined ? challengeData.is_active : true,
-      p_flag: challengeData.flag || null
+      p_flag: challengeData.flag || null,
+      p_is_dynamic: challengeData.is_dynamic ?? false,
+      p_min_points: challengeData.min_points ?? 0,
+      p_decay_per_solve: challengeData.decay_per_solve ?? 0
     });
     if (error) {
       throw new Error(error.message)
