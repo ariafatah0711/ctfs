@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { sendPasswordReset } from '@/lib/auth'
 import Link from 'next/link'
 
@@ -31,7 +32,12 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8"
+      >
         <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Forgot Password
         </h2>
@@ -62,13 +68,13 @@ export default function ForgotPasswordPage() {
           >
             {loading ? 'Processing...' : 'Send Reset Email'}
           </button>
-        </form>
-        <div className="mt-4 text-center">
+  </form>
+  <div className="mt-4 text-center">
           <Link href="/login" className="text-primary-600 dark:text-primary-400 hover:underline text-sm">
             Back to Login
           </Link>
         </div>
-      </div>
-    </div>
+  </motion.div>
+  </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { updatePassword } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
@@ -68,7 +69,12 @@ export default function ChangePasswordPage() {
 
   return (
     <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8"
+      >
         <h2 className="text-center text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Change Password
         </h2>
@@ -109,7 +115,7 @@ export default function ChangePasswordPage() {
             {loading ? 'Processing...' : 'Update Password'}
           </button>
         </form>
-      </div>
-    </div>
+      </motion.div>
+  </div>
   )
 }

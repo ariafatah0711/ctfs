@@ -12,22 +12,24 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900">
-      {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center flex-1 text-center px-6 bg-gradient-to-b from-orange-50 to-gray-50 dark:from-gray-900 dark:to-gray-900 relative overflow-hidden">
-        {/* Decorative background shapes */}
-        <div className="absolute inset-0 pointer-events-none select-none">
-        <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
-        </div>
+    <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
+      {/* Global Decorative background shapes */}
+      <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
+      <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
 
+      {/* Hero Section */}
+      <section className="flex flex-col items-center justify-center flex-1 text-center px-6 relative z-10">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="text-5xl md:text-6xl font-extrabold text-orange-600 dark:text-orange-400 mb-4 drop-shadow-lg"
         >
-          Welcome to <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">CTFS Platform</span> 🚩
+          Welcome to{" "}
+          <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
+            CTFS Platform
+          </span>{" "}
+          🚩
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
@@ -35,7 +37,19 @@ export default function Home() {
           transition={{ delay: 0.3 }}
           className="text-lg md:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mb-8"
         >
-          Practice your <span className="font-semibold text-orange-600 dark:text-orange-400">cybersecurity skills</span> through <span className="font-semibold text-orange-600 dark:text-orange-400">Jeopardy-style Capture The Flag (CTF)</span> challenges — solve chall, collect flags, and climb the <span className="font-semibold text-orange-600 dark:text-orange-400">leaderboard</span>.
+          Practice your{" "}
+          <span className="font-semibold text-orange-600 dark:text-orange-400">
+            cybersecurity skills
+          </span>{" "}
+          through{" "}
+          <span className="font-semibold text-orange-600 dark:text-orange-400">
+            Jeopardy-style Capture The Flag (CTF)
+          </span>{" "}
+          challenges — solve chall, collect flags, and climb the{" "}
+          <span className="font-semibold text-orange-600 dark:text-orange-400">
+            leaderboard
+          </span>
+          .
         </motion.p>
 
         {/* Flag Format Info Box */}
@@ -81,8 +95,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8">
-        {/* Bottom Bar */}
+      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8 relative z-10">
         <div className="border-t border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
             Built with{" "}
@@ -133,15 +146,6 @@ export default function Home() {
             .
           </p>
           <p className="mt-1">
-            {/* Made With{" "}
-            <a
-              className="text-orange-500 font-semibold hover:underline"
-              href="https://github.com/ariafatah0711"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              aria
-            </a> */}
             Source code available on{" "}
             <a
               className="text-orange-500 font-semibold hover:underline"

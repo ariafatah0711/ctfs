@@ -30,7 +30,7 @@ export default function RootLayout({
           <AuthProvider>
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
               <Navbar />
-              <div className="pt-16">
+              <div className="pt-14">
                 {children}
               </div>
               <Toaster position="top-right" reverseOrder={false} />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp } from '@/lib/auth'
@@ -88,7 +89,12 @@ export default function RegisterPage() {
 
   return (
     <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8"
+      >
         <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
           Register for CTFS
         </h2>
@@ -168,7 +174,7 @@ export default function RegisterPage() {
           {/* Tombol Google Register/Sign-In */}
           <GoogleLoginButton />
         </form>
-      </div>
-    </div>
+      </motion.div>
+  </div>
   )
 }
