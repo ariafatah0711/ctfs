@@ -20,7 +20,7 @@ const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAl
     <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-gray-900 dark:text-white">Recent Solvers</CardTitle>
-        <Button variant="outline" size="sm" onClick={onViewAll}>View All</Button>
+        <Button variant="default" size="sm" onClick={onViewAll}>View All</Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto">
         {solvers.length === 0 ? (

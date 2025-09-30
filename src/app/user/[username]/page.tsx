@@ -79,7 +79,7 @@ export default function UserProfilePage() {
             {error || "Something went wrong."}
           </p>
           <button
-            onClick={() => router.push('/challanges')}
+            onClick={() => router.push('/challenges')}
             className="mt-6 px-6 py-2 rounded-lg bg-primary-600 dark:bg-primary-700 text-white font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition"
           >
             Back to Challenges

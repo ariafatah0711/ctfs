@@ -5,13 +5,13 @@ import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challeng
 import { ChallengeWithSolve, User, Attachment } from '@/types'
 
 import { motion } from 'framer-motion'
-import ChallengeCard from '@/components/challanges/ChallengeCard'
-import ChallengeDetailDialog from '@/components/challanges/ChallengeDetailDialog'
+import ChallengeCard from '@/components/challenges/ChallengeCard'
+import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 
-import { Solver } from '@/components/challanges/SolversList';
-import ChallengeFilterBar from '@/components/challanges/ChallengeFilterBar'
+import { Solver } from '@/components/challenges/SolversList';
+import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
@@ -215,7 +215,7 @@ export default function ChallengesPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        <TitlePage>🚩 challanges</TitlePage>
+        <TitlePage>🚩 challenges</TitlePage>
 
         <ChallengeFilterBar
           filters={filters}

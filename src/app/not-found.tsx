@@ -11,7 +11,7 @@ export default function NotFound() {
 
   useEffect(() => {
     if (!loading) {
-      router.replace(user ? '/challanges' : '/login')
+      router.replace(user ? '/challenges' : '/login')
     }
   }, [user, loading, router])
 

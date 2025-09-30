@@ -37,7 +37,7 @@ export default function AdminSolversPage() {
       if (loading) return
 
       if (!user) {
-        router.push("/challanges")
+        router.push("/challenges")
         return
       }
 
@@ -45,7 +45,7 @@ export default function AdminSolversPage() {
       if (!mounted) return
       setIsAdminUser(adminCheck)
       if (!adminCheck) {
-        router.push("/challanges")
+        router.push("/challenges")
         return
       }
 

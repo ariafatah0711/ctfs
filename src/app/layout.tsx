@@ -11,7 +11,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'CTFS - Capture The Flag System',
+  title: 'CTFS - Capture The Flag Simple',
   description: 'Aplikasi CTF minimalis dengan Next.js dan Supabase',
 }
 

@@ -18,7 +18,7 @@ export default function LoginPage() {
   // kalau user sudah login → redirect
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/challanges')
+      router.push('/challenges')
     }
   }, [user, authLoading, router])
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
         setError(error)
       } else if (user) {
         setUser(user) // simpan user ke context
-        router.push('/challanges')
+        router.push('/challenges')
       }
     } catch {
       setError('Login failed')

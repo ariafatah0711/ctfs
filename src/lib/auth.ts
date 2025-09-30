@@ -11,7 +11,7 @@ export interface AuthResponse {
  */
 export async function loginGoogle(): Promise<AuthResponse> {
   try {
-    const redirectUrl = `${window.location.origin}/challanges`
+    const redirectUrl = `${window.location.origin}/challenges`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -34,7 +34,7 @@ export async function loginGoogle(): Promise<AuthResponse> {
 export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/challanges` // redirect ke forgot-password untuk input password baru
+      redirectTo: `${window.location.origin}/challenges` // redirect ke forgot-password untuk input password baru
     })
     if (error) {
       return { error: error.message }

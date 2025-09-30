@@ -14,7 +14,7 @@ import ChallengeFormDialog from '@/components/admin/ChallengeFormDialog'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
-import ChallengeFilterBar from '@/components/challanges/ChallengeFilterBar'
+import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 // import MarkdownRenderer from '@/components/MarkdownRenderer' // unused
 import Loader from "@/components/custom/loading"
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
@@ -88,14 +88,14 @@ export default function AdminPage() {
 
       // if not logged in, redirect to challenges listing
       if (!user) {
-        router.push('/challanges')
+        router.push('/challenges')
         return
       }
 
       const adminCheck = await isAdmin()
       if (!mounted) return
       if (!adminCheck) {
-        router.push('/challanges')
+        router.push('/challenges')
         return
       }
 

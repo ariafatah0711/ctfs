@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -10,6 +10,7 @@ import { signOut, isAdmin } from '@/lib/auth'
 export default function Navbar() {
   const router = useRouter()
   const { user, setUser, loading } = useAuth()
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
   const { theme, toggleTheme } = useTheme()
@@ -48,7 +49,7 @@ export default function Navbar() {
             {user && (
               <div className="hidden md:flex space-x-2">
                 <Link
-                  href="/challanges"
+                  href="/challenges"
                   className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
                   Challenges
@@ -121,13 +122,40 @@ export default function Navbar() {
                 </>
               )}
             </div>
-            {/* Notification Icon (link to /notification) */}
-            <Link href="/notification" className="mr-2" title="Notifications" aria-label="Notifications">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-bell transition-all duration-150">
+            {/* Notification Icon (toggle to /notification or back) */}
+            <button
+              className={`mr-2 rounded-full p-1 transition-colors duration-150 ${pathname === '/notification' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
+              title="Notifications"
+              aria-label="Notifications"
+              onClick={() => {
+                if (pathname === '/notification') {
+                  // Go back or to home if already on /notification
+                  if (window.history.length > 1) {
+                    router.back()
+                  } else {
+                    router.push('/')
+                  }
+                } else {
+                  router.push('/notification')
+                }
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={pathname === '/notification' ? (theme === 'dark' ? '#60a5fa' : '#2563eb') : '#3b82f6'}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="feather feather-bell transition-all duration-150"
+              >
                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
-            </Link>
+            </button>
             {/* Theme Switcher Icon Only - moved right */}
             <button
               onClick={toggleTheme}
@@ -214,7 +242,7 @@ export default function Navbar() {
                     </span>
                   </Link>
                   <Link
-                    href="/challanges"
+                    href="/challenges"
                     className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >

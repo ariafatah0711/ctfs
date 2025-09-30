@@ -14,49 +14,64 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-  <section className="flex flex-col items-center justify-center flex-1 text-center px-6 bg-gradient-to-b from-orange-50 to-gray-50 dark:from-gray-900 dark:to-gray-900">
+      <section className="flex flex-col items-center justify-center flex-1 text-center px-6 bg-gradient-to-b from-orange-50 to-gray-50 dark:from-gray-900 dark:to-gray-900 relative overflow-hidden">
+        {/* Decorative background shapes */}
+        <div className="absolute inset-0 pointer-events-none select-none">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
+          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
+        </div>
+
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-5xl font-extrabold text-orange-600 dark:text-orange-400 mb-4"
+          className="text-5xl md:text-6xl font-extrabold text-orange-600 dark:text-orange-400 mb-4 drop-shadow-lg"
         >
-          Welcome to CTFS Platform 🚩
+          Welcome to <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">CTFS Platform</span> 🚩
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-lg text-gray-700 dark:text-gray-200 max-w-2xl mb-8"
+          className="text-lg md:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mb-8"
         >
-          Practice your{" "}
-          <span className="font-semibold">cybersecurity skills</span> through{" "}
-          <span className="font-semibold">Jeopardy-style Capture The Flag (CTF)</span>{" "}
-          challenges — solve chall, collect flags, and climb the{" "}
-          <span className="font-semibold">leaderboard</span>.
+          Practice your <span className="font-semibold text-orange-600 dark:text-orange-400">cybersecurity skills</span> through <span className="font-semibold text-orange-600 dark:text-orange-400">Jeopardy-style Capture The Flag (CTF)</span> challenges — solve chall, collect flags, and climb the <span className="font-semibold text-orange-600 dark:text-orange-400">leaderboard</span>.
         </motion.p>
 
+        {/* Flag Format Info Box */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="mb-8 flex items-center justify-center"
+        >
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 border border-orange-200 dark:border-orange-700 rounded-lg px-4 py-2 shadow-md text-base md:text-lg font-mono text-orange-600 dark:text-orange-400">
+            <span className="font-bold">Flag format:</span>
+            <span className="select-all">FGTE&#123;your_flag_here&#125;</span>
+          </div>
+        </motion.div>
+
         {/* CTA Buttons */}
-        <div className="flex gap-4">
+        <div className="flex gap-4 z-10">
           {user ? (
             <Button
               asChild
-              className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl"
+              className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl shadow-lg"
             >
-              <a href="/challanges">Start Challenges</a>
+              <a href="/challenges">Start Challenges</a>
             </Button>
           ) : (
             <>
               <Button
                 asChild
-                className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl"
+                className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl shadow-lg"
               >
                 <a href="/login">Login</a>
               </Button>
               <Button
                 asChild
                 variant="outline"
-                className="px-6 py-3 rounded-xl border-orange-600 text-orange-600 hover:bg-orange-50"
+                className="px-6 py-3 rounded-xl border-orange-600 text-orange-600 hover:bg-orange-50 shadow-lg"
               >
                 <a href="/register">Register</a>
               </Button>
@@ -66,9 +81,9 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-  <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8">
+      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8">
         {/* Bottom Bar */}
-  <div className="border-t border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="border-t border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
             Built with{" "}
             <a
