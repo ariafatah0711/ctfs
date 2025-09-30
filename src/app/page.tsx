@@ -17,8 +17,8 @@ export default function Home() {
       <section className="flex flex-col items-center justify-center flex-1 text-center px-6 bg-gradient-to-b from-orange-50 to-gray-50 dark:from-gray-900 dark:to-gray-900 relative overflow-hidden">
         {/* Decorative background shapes */}
         <div className="absolute inset-0 pointer-events-none select-none">
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
-          <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
+        <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
+        <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
         </div>
 
         <motion.h1
