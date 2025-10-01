@@ -24,7 +24,17 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
         `}
       >
         <CardHeader className="flex items-center justify-center">
-          <h3 className="text-white dark:text-gray-100 font-semibold text-center truncate">
+          <h3
+            className="text-white dark:text-gray-100 font-semibold text-center truncate"
+            style={{
+              maxWidth: '180px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'block',
+            }}
+            title={challenge.title}
+          >
             {challenge.title}
           </h3>
         </CardHeader>
