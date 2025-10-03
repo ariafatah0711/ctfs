@@ -793,6 +793,39 @@ GRANT EXECUTE ON FUNCTION delete_solver(UUID) TO authenticated;
 
 -- ########################################################
 
+-- Admin / site info function: return counts (users, admins, solves, unique solvers, challenges)
+CREATE OR REPLACE FUNCTION get_info()
+RETURNS JSON AS $$
+DECLARE
+  v_total_users BIGINT;
+  v_total_admins BIGINT;
+  v_total_solves BIGINT;
+  v_unique_solvers BIGINT;
+  v_total_challenges BIGINT;
+  v_active_challenges BIGINT;
+BEGIN
+  SELECT COUNT(*)::BIGINT INTO v_total_users FROM public.users;
+  SELECT COUNT(*)::BIGINT INTO v_total_admins FROM public.users WHERE is_admin = TRUE;
+  SELECT COUNT(*)::BIGINT INTO v_total_solves FROM public.solves;
+  SELECT COUNT(DISTINCT user_id)::BIGINT INTO v_unique_solvers FROM public.solves;
+  SELECT COUNT(*)::BIGINT INTO v_total_challenges FROM public.challenges;
+  SELECT COUNT(*)::BIGINT INTO v_active_challenges FROM public.challenges WHERE is_active = TRUE;
+
+  RETURN json_build_object(
+    'total_users', v_total_users,
+    'total_admins', v_total_admins,
+    'total_solves', v_total_solves,
+    'unique_solvers', v_unique_solvers,
+    'total_challenges', v_total_challenges,
+    'active_challenges', v_active_challenges,
+    'success', true
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_info() TO authenticated;
+
+
 -- Enable RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;

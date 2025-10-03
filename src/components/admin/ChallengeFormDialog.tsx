@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import { Attachment, Challenge } from '@/types'
+import { getFlag } from '@/lib/challenges'
 
 interface ChallengeFormDialogProps {
   open: boolean
@@ -51,7 +53,13 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
     "Web", "Reverse", "Crypto", "Forensics", "Pwn", "Misc", "Osint"
   ]);
 
+  // small modal for viewing flag in the form
+  const [flagPreviewOpen, setFlagPreviewOpen] = useState(false)
+  const [flagLoading, setFlagLoading] = useState(false)
+  const [fetchedFlag, setFetchedFlag] = useState<string | null>(null)
+
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
   <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl">
         <DialogHeader>
@@ -241,7 +249,43 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
             </div>
             <div>
               <Label>Flag</Label>
-              <Input required={!editing} value={formData.flag} onChange={e => onChange({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm" />
+              <div className="flex items-center gap-2 pointer-events-auto">
+                <Input required={!editing} value={formData.flag} onChange={e => onChange({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} className="flex-1 transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm" />
+                <Button
+                  aria-label="Show flag"
+                  title="Show flag"
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      if (editing && editing.id) {
+                        setFlagLoading(true)
+                        const flag = await getFlag(editing.id)
+                        setFlagLoading(false)
+                        if (flag) {
+                          setFetchedFlag(flag)
+                          setFlagPreviewOpen(true)
+                        } else {
+                          toast.error('Unable to fetch flag (permission or error)')
+                        }
+                      } else {
+                        setFetchedFlag(formData.flag || null)
+                        setFlagPreviewOpen(true)
+                      }
+                    } catch (err) {
+                      setFlagLoading(false)
+                      console.error(err)
+                      toast.error('Failed to fetch flag')
+                    }
+                  }}
+                  disabled={flagLoading || (!editing && !formData.flag)}
+                  className="flex-none pointer-events-auto text-gray-800 dark:text-gray-200"
+                >
+                  {flagLoading ? 'Loading…' : <span className="inline-flex items-center gap-1">🔍 <span className="capitalize">show flag</span></span>}
+                </Button>
+              </div>
+              {/* flag preview modal is rendered outside as a sibling Dialog to avoid nested overlay issues */}
               <p className="text-xs text-muted-foreground mt-1">{editing ? 'Leave blank to keep current flag.' : 'Flag is required for new challenges.'}</p>
             </div>
             <div className="md:col-span-2">
@@ -303,8 +347,61 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
             </Button>
           </DialogFooter>
         </form>
+          </DialogContent>
+    </Dialog>
+
+    {/* Flag preview modal rendered as a sibling Dialog (portal) */}
+    <Dialog
+      open={flagPreviewOpen}
+      onOpenChange={(v) => {
+        if (!v) {
+          setFlagPreviewOpen(false);
+          setFetchedFlag(null);
+        }
+      }}
+    >
+      <DialogContent className="max-w-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-2xl">
+        <DialogHeader className="px-4 pt-4 pb-2 border-b border-gray-200 dark:border-gray-700">
+          <DialogTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            Flag
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="px-4 py-2">
+          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-md p-2 font-mono text-sm text-gray-900 dark:text-gray-100 relative max-h-28 overflow-auto">
+            <pre className="whitespace-pre-wrap break-words">{fetchedFlag ?? formData.flag ?? "(empty)"}</pre>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard?.writeText(fetchedFlag ?? formData.flag ?? "");
+                toast.success("Copied");
+              }}
+              disabled={!(fetchedFlag ?? formData.flag)}
+              className="px-3 text-gray-700 dark:text-gray-200"
+            >
+              Copy
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setFlagPreviewOpen(false);
+                setFetchedFlag(null);
+              }}
+              size="sm"
+              className="px-3 bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
+            >
+              Close
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
+    </>
   )
 }
 

@@ -90,12 +90,12 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                   {challenge.category}
                 </span>
                 <span className={`px-2 py-0.5 rounded text-sm font-semibold
-                  ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200' : ''}
-                  ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : ''}
-                  ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200' : ''}
-                `}>{challenge.difficulty}</span>
+                  ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800 dark:bg-green-600 dark:text-white' : ''}
+                  ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-white' : ''}
+                  ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800 dark:bg-red-600 dark:text-white' : ''}
+                `}><span className="inline-block min-w-[64px] text-center">{challenge.difficulty}</span></span>
               </div>
-              <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300 dark:text-green-200' : 'text-yellow-300 dark:text-yellow-200'}`}>
+              <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300 dark:text-white' : 'text-yellow-300 dark:text-white'}`}>
                 🪙 {challenge.points}
               </span>
             </div>

@@ -308,7 +308,7 @@ export default function UserProfile({
                                 )}
                               </h3>
                               <p className="text-xs text-gray-500 dark:text-gray-300">
-                                {challenge.category} • {challenge.difficulty}
+                                {challenge.category} • {challenge.difficulty} • {challenge.solved_at ? new Date(challenge.solved_at).toLocaleString() : '-'}
                               </p>
                             </div>
                             <span className="text-sm font-medium text-green-600 dark:text-green-300">
@@ -367,10 +367,7 @@ export default function UserProfile({
                               )}
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {challenge.category} • {challenge.difficulty} •{" "}
-                              {challenge.solved_at
-                                ? new Date(challenge.solved_at).toLocaleString()
-                                : "-"}
+                              {challenge.category} • {challenge.difficulty} • {challenge.solved_at ? new Date(challenge.solved_at).toLocaleString() : '-'}
                             </p>
                           </div>
 

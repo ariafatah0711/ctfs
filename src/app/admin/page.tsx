@@ -22,6 +22,7 @@ import ConfirmDialog from '@/components/custom/ConfirmDialog'
 import { useAuth } from '@/contexts/AuthContext'
 import { isAdmin } from '@/lib/auth'
 import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
+import { getInfo } from '@/lib/users'
 import { Challenge, Attachment } from '@/types'
 
 export default function AdminPage() {
@@ -30,6 +31,7 @@ export default function AdminPage() {
   // const [isAdminUser, setIsAdminUser] = useState(false) // unused
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [solvers, setSolvers] = useState<any[]>([])
+  const [siteInfo, setSiteInfo] = useState<any | null>(null)
   // const [solverOffset, setSolverOffset] = useState(0) // unused
   // const [hasMoreSolvers, setHasMoreSolvers] = useState(true) // unused
 
@@ -100,9 +102,11 @@ export default function AdminPage() {
       }
 
       const data = await getChallenges(undefined, true)
+      const info = await getInfo()
       fetchSolvers(0)
       if (!mounted) return
       setChallenges(data)
+      setSiteInfo(info)
     })()
 
     return () => { mounted = false }
@@ -327,7 +331,7 @@ export default function AdminPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ChallengeOverviewCard challenges={challenges} />
+              <ChallengeOverviewCard challenges={challenges} info={siteInfo || undefined} />
             </motion.div>
 
             {/* Recent Solvers */}
