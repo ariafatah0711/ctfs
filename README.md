@@ -7,8 +7,13 @@
 
 ## 🎬 Quick Demo
 
-
 [https://ctf.ariaf.my.id](https://ctf.ariaf.my.id)
+
+![alt text](images/README/image-4.png)
+![alt text](images/README/image-7.png)
+<!-- ![alt text](images/README/image-5.png) -->
+![alt text](images/README/image-6.png)
+![alt text](images/README/image-8.png)
 
 ## 📖 Deployment Guide
 
