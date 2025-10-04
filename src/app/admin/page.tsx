@@ -262,7 +262,7 @@ export default function AdminPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="h-full mb-6 bg-white dark:bg-gray-800">
+            <Card className="h-full mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
@@ -271,15 +271,17 @@ export default function AdminPage() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <ChallengeFilterBar
-                filters={filters}
-                categories={Array.from(new Set(challenges.map(c => c.category)))}
-                difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
-                onFilterChange={handleFilterChange}
-                onClear={handleClearFilters}
-                showStatusFilter={false}
-              />
               <CardContent>
+                <div className="mb-4">
+                  <ChallengeFilterBar
+                    filters={filters}
+                    categories={Array.from(new Set(challenges.map(c => c.category)))}
+                    difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
+                    onFilterChange={handleFilterChange}
+                    onClear={handleClearFilters}
+                    showStatusFilter={false}
+                  />
+                </div>
                 {filteredChallenges.length === 0 ? (
                   <motion.div
                     className="text-center py-8 text-gray-500"
@@ -291,7 +293,7 @@ export default function AdminPage() {
                   </motion.div>
                 ) : (
                   <motion.div
-                    className="divide-y border rounded-md overflow-hidden"
+                    className="divide-y border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}

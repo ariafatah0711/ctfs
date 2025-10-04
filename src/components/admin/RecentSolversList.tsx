@@ -17,14 +17,16 @@ interface RecentSolversListProps {
 
 const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAll }) => {
   return (
-    <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800">
+    <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800 min-h-[180px]">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-gray-900 dark:text-white">Recent Solvers</CardTitle>
         <Button variant="default" size="sm" onClick={onViewAll}>View All</Button>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto">
+      <CardContent className="flex-1 overflow-y-auto min-h-[140px]">
         {solvers.length === 0 ? (
-          <div className="text-gray-500 dark:text-gray-300 text-sm">No solvers yet</div>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-gray-500 dark:text-gray-300 text-sm">No solvers yet</div>
+          </div>
         ) : (
           <div className="space-y-2">
             {solvers.slice(0, 10).map(s => (

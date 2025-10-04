@@ -16,7 +16,8 @@ interface ChallengeOverviewCardProps {
 
 const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenges, info }) => {
   return (
-  <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+  // <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+  <Card className="shrink-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <CardHeader>
         <CardTitle>Overview</CardTitle>
       </CardHeader>
@@ -87,7 +88,7 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
                 <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </summary>
-            <div className="pt-1 max-h-48 overflow-auto space-y-2 pr-2">
+            <div className="pt-1 max-h-48 overflow-auto space-y-2 pr-2 scroll-hidden">
               {Array.from(new Set(challenges.map(c => c.category))).map(cat => {
                 const count = challenges.filter(c => c.category === cat).length
                 return (
