@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 
 type Props = {
-  href?: string // optional: kalau mau force redirect ke path tertentu
+  href?: string // optional: if you want to force redirect to a specific path
   label?: string
 }
 

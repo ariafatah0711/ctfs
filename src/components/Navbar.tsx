@@ -45,7 +45,7 @@ export default function Navbar() {
               <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>CTFS</span>
             </Link>
 
-            {/* Menu hanya kalau login */}
+            {/* Menu shown only when logged in */}
             {user && (
               <div className="hidden md:flex space-x-2">
                 <Link

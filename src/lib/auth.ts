@@ -7,7 +7,7 @@ export interface AuthResponse {
 }
 
 /**
- * Login dengan Google OAuth
+ * Sign in with Google OAuth
  */
 export async function loginGoogle(): Promise<AuthResponse> {
   try {
@@ -34,7 +34,7 @@ export async function loginGoogle(): Promise<AuthResponse> {
 export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/challenges` // redirect ke forgot-password untuk input password baru
+      redirectTo: `${window.location.origin}/challenges` // redirect to forgot-password for new password input
     })
     if (error) {
       return { error: error.message }
@@ -68,16 +68,16 @@ export async function updatePassword(newPassword: string): Promise<{ error: stri
 
 
 /**
- * Sign up user baru
+ * Register a new user
  */
 export async function signUp(email: string, password: string, username: string): Promise<AuthResponse> {
   try {
-    // Validasi hanya email @gmail.com yang boleh daftar
+  // Validate only @gmail.com emails are allowed for registration
     if (!email.toLowerCase().endsWith('@gmail.com')) {
       return { user: null, error: 'Only @gmail.com emails are allowed for registration' }
     }
 
-    // Cek username di public.users
+  // Check username in public.users
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
       .select('id')
@@ -88,7 +88,7 @@ export async function signUp(email: string, password: string, username: string):
       return { user: null, error: 'Username already taken' };
     }
 
-    // Sign up dengan Supabase Auth
+  // Sign up with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -111,7 +111,7 @@ export async function signUp(email: string, password: string, username: string):
       return { user: null, error: 'Failed to create account' }
     }
 
-    // Buat profil user via RPC
+  // Create user profile via RPC
     const { data: rpcData, error: rpcError } = await supabase.rpc('create_profile', {
       p_id: authData.user.id,
       p_username: username
@@ -122,7 +122,7 @@ export async function signUp(email: string, password: string, username: string):
       return { user: null, error: `Failed to create user profile: ${rpcError.message}` }
     }
 
-    // Ambil data user dari tabel users
+  // Fetch user data from the users table
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -143,7 +143,7 @@ export async function signIn(identifier: string, password: string): Promise<Auth
   try {
     let email = identifier;
 
-    // Kalau bukan email, berarti username → ambil email via RPC
+  // If identifier is not an email, treat it as username → fetch email via RPC
     if (!identifier.includes('@')) {
       const { data: rpcEmail, error: rpcError } = await supabase.rpc('get_email_by_username', {
         p_username: identifier
@@ -169,7 +169,7 @@ export async function signIn(identifier: string, password: string): Promise<Auth
       return { user: null, error: 'Login failed' };
     }
 
-    // Coba ambil dari public.users
+  // Try to fetch from public.users
     let { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -177,7 +177,7 @@ export async function signIn(identifier: string, password: string): Promise<Auth
       .single();
 
     if (userError || !userData) {
-      // Auto create profile kalau belum ada
+  // Auto-create profile if it doesn't exist
       const username =
         data.user.user_metadata?.username ??
         (data.user.email ? data.user.email.split("@")[0] : "user_" + data.user.id.substring(0, 8));
@@ -192,7 +192,7 @@ export async function signIn(identifier: string, password: string): Promise<Auth
         return { user: null, error: 'Failed to create user profile' };
       }
 
-      // Ambil ulang
+  // Fetch again
       const { data: newUserData, error: newUserError } = await supabase
         .from('users')
         .select('*')
@@ -227,11 +227,11 @@ export async function getCurrentUser(): Promise<User | null> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return null
 
-    // Ambil user profile via RPC
+  // Fetch user profile via RPC
     let { data, error } = await supabase.rpc('get_user_profile', { p_id: user.id });
     let userData = data && data.length > 0 ? data[0] : null;
 
-    // Jika belum ada, auto-create profile (misal login Google)
+  // If not present, auto-create profile (e.g., Google login)
     if (!userData) {
       const username =
         user.user_metadata?.username ||
@@ -245,7 +245,7 @@ export async function getCurrentUser(): Promise<User | null> {
         console.error("Auto create_profile error:", rpcError);
         return null;
       }
-      // Ambil ulang pakai RPC
+  // Fetch again using RPC
       const { data: newData, error: newError } = await supabase.rpc('get_user_profile', { p_id: user.id });
       userData = newData && newData.length > 0 ? newData[0] : null;
       if (newError || !userData) {
@@ -264,7 +264,7 @@ export async function getCurrentUser(): Promise<User | null> {
  */
 export async function isAdmin(): Promise<boolean> {
   try {
-    // Tidak perlu parameter, cukup panggil is_admin()
+  // No parameters required, just call is_admin()
     const { data, error } = await supabase.rpc('is_admin');
     if (error) {
       console.error('Error checking admin status:', error);

@@ -10,7 +10,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
 
-  // 🔒 redirect ke /login kalau belum login
+  // 🔒 redirect to /login if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login')

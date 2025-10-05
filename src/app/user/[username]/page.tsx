@@ -58,18 +58,18 @@ export default function UserProfilePage() {
   // Tunggu authContext
   if (authLoading) return <Loader fullscreen color="text-orange-500" />
 
-  // Redirect kalau belum login
+  // Redirect if not logged in
   if (!user) {
     router.push('/login')
     return null
   }
 
-  // Kalau masih loading
+  // If still loading
   if (loading) {
     return <Loader fullscreen color="text-orange-500" />
   }
 
-  // Kalau error / user nggak ada
+  // If error / user not found
   if (error) {
     return (
       <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">

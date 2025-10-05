@@ -21,7 +21,7 @@ export default function ScoreboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
 
-  // 🔒 redirect kalau belum login
+  // 🔒 redirect if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login')
@@ -71,14 +71,14 @@ export default function ScoreboardPage() {
 
   // tunggu authContext
   if (authLoading) return <Loader fullscreen color="text-orange-500" />
-  // jangan render kalau belum login (biar redirect jalan)
+  // do not render if not logged in (so redirect can happen)
   if (!user) return null
 
   const isEmpty =
     leaderboard.length === 0 ||
     leaderboard.every(e => (e.progress?.length ?? 0) === 0 || (e.score ?? 0) === 0)
 
-  // detect dark mode dari context agar re-render saat theme berubah
+  // detect dark mode from context to re-render when theme changes
   const isDark = theme === 'dark'
 
   return (

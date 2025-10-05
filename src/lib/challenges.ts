@@ -1,4 +1,4 @@
-// Ambil rank user saja (berdasarkan username)
+// Get user rank only (by username)
 export async function getUserRank(username: string): Promise<number | null> {
   const leaderboard = await getLeaderboard();
   leaderboard.sort((a, b) => {
@@ -13,7 +13,7 @@ import { supabase } from './supabase'
 import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/types'
 
 /**
- * Ambil semua challenges
+ * Get all challenges
  */
 export async function getChallenges(
   userId?: string,
@@ -23,10 +23,10 @@ export async function getChallenges(
     let query = supabase
       .from('challenges')
       .select('*')
-      .order('points', { ascending: true }); // kolom baru sudah otomatis ikut jika pakai select('*')
+  .order('points', { ascending: true }); // new columns are automatically included when using select('*')
 
     if (!showAll) {
-      query = query.eq('is_active', true); // cuma ambil yang aktif kalau showAll=false
+      query = query.eq('is_active', true); // only fetch active ones when showAll=false
     }
 
     const { data: challenges, error } = await query;
@@ -39,7 +39,7 @@ export async function getChallenges(
       return challenges || [];
     }
 
-    // Ambil solves user untuk menandai challenge yang sudah diselesaikan
+  // Fetch user's solves to mark challenges that have been solved
     const { data: solves } = await supabase
       .from('solves')
       .select('challenge_id')
@@ -58,7 +58,7 @@ export async function getChallenges(
 }
 
 /**
- * Submit flag untuk challenge
+ * Submit flag for a challenge
  */
 export async function submitFlag(challengeId: string, flag: string) {
   const { data, error } = await supabase.rpc('submit_flag', {
@@ -69,14 +69,14 @@ export async function submitFlag(challengeId: string, flag: string) {
 
   if (error) {
     console.error('RPC error:', error);
-    return { success: false, message: 'Gagal submit flag' };
+    return { success: false, message: 'Failed to submit flag' };
   }
 
   return data;
 }
 
 /**
- * Tambah challenge baru (Admin only)
+ * Add a new challenge (Admin only)
  */
 export async function addChallenge(challengeData: {
   title: string
@@ -212,7 +212,7 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
 }
 
 /**
- * Ambil leaderboard dengan progress
+ * Get leaderboard with progress
  */
 export async function getLeaderboard() {
   const { data, error } = await supabase
@@ -249,14 +249,14 @@ export async function getLeaderboard() {
   return Object.values(userProgress).map(user => ({
     username: user.username,
     progress: [
-      { date: startDate, score: 0 }, // mulai dari 0
+      { date: startDate, score: 0 }, // start from 0
       ...user.progress
     ]
   }))
 }
 
 /**
- * Ambil Register solver untuk sebuah challenge
+ * Get registered solvers for a challenge
  */
 export async function getSolversByChallenge(challengeId: string) {
   try {
@@ -268,7 +268,7 @@ export async function getSolversByChallenge(challengeId: string) {
 
     if (error) throw error
 
-    // Pakai any agar TypeScript tidak protes
+  // Use any to avoid TypeScript complaints
     return ((data as any[]) || []).map(row => ({
       username: row.users.username,
       solvedAt: row.created_at
@@ -284,7 +284,7 @@ export async function getSolversByChallenge(challengeId: string) {
  */
 export async function getFirstBloodChallengeIds(userId: string): Promise<string[]> {
   try {
-    // Ambil semua challenge yang pernah di-solve user
+  // Fetch all challenges the user has solved
     const { data: solves, error } = await supabase
       .from('solves')
       .select('challenge_id, created_at')
@@ -295,7 +295,7 @@ export async function getFirstBloodChallengeIds(userId: string): Promise<string[
 
     const challengeIds = solves.map(s => s.challenge_id)
 
-    // Ambil solve pertama untuk setiap challenge yang sudah di-solve user
+  // Fetch the first solve for each challenge the user has solved
     const { data: firstSolves, error: firstError } = await supabase
       .from('solves')
       .select('challenge_id, user_id, created_at')
@@ -304,7 +304,7 @@ export async function getFirstBloodChallengeIds(userId: string): Promise<string[
 
     if (firstError) throw firstError
 
-    // Map: challenge_id => user_id first solver
+  // Map: challenge_id => user_id of first solver
     const firstBloodIds: string[] = []
     for (const cid of challengeIds) {
       const first = firstSolves.find(s => s.challenge_id === cid)
@@ -320,7 +320,7 @@ export async function getFirstBloodChallengeIds(userId: string): Promise<string[
 }
 
 /**
- * Ambil flag challenge (Admin only)
+ * Get challenge flag (Admin only)
  */
 export async function getFlag(challengeId: string): Promise<string | null> {
   try {
@@ -333,7 +333,7 @@ export async function getFlag(challengeId: string): Promise<string | null> {
       return null;
     }
 
-    return data; // data sudah berupa text (flag)
+  return data; // data is already text (flag)
   } catch (err) {
     console.error('Unexpected error fetching flag:', err);
     return null;
@@ -342,7 +342,7 @@ export async function getFlag(challengeId: string): Promise<string | null> {
 
 
 /**
- * Set active / inactive challenge (Admin only)
+ * Set challenge active / inactive (Admin only)
  */
 export async function setChallengeActive(challengeId: string, isActive: boolean): Promise<boolean> {
   try {
@@ -364,8 +364,8 @@ export async function setChallengeActive(challengeId: string, isActive: boolean)
 }
 
 /**
- * Ambil semua solver (Admin only) dengan pagination
-*/
+ * Get all solvers (Admin only) with pagination
+ */
 export async function getSolversAll(limit = 250, offset = 0) {
   const { data, error } = await supabase.rpc('get_solvers_all', {
     p_limit: limit,
@@ -390,7 +390,7 @@ export async function deleteSolver(solveId: string) {
 }
 
 /**
- * Ambil notifikasi (chall baru & first blood)
+ * Get notifications (new challenges & first blood)
  */
 export async function getNotifications(limit = 100, offset = 0) {
   const { data, error } = await supabase.rpc('get_notifications', {

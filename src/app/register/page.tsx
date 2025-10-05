@@ -22,7 +22,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // redirect kalau udah login
+  // redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
       router.push('/challenges')
@@ -82,7 +82,7 @@ export default function RegisterPage() {
     })
   }
 
-  // kalau masih cek auth dari context → tampilkan loader
+  // if still checking auth from context → show loader
   if (authLoading) {
     return <Loader fullscreen color="text-orange-500" />
   }

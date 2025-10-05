@@ -72,7 +72,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'solvers' ? 'bg-[#35355e] dark:bg-gray-800 text-pink-300 dark:text-pink-200' : 'bg-[#232344] dark:bg-gray-900 text-gray-300 dark:text-gray-400 hover:text-pink-200'}`}
             onClick={() => setChallengeTab('solvers', challenge.id)}
           >
-            {solvers.length || ""} solve
+            {solvers.length ? `${solvers.length} ${solvers.length === 1 ? 'solve' : 'solves'}` : "0 solves"}
           </button>
         </div>
 
@@ -128,7 +128,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                             }}
                             disabled={downloading[key]}
                           >
-                            {downloading[key] ? "Mengunduh..." : displayName}
+                                            {downloading[key] ? "Downloading..." : displayName}
                           </button>
                         );
                       })}
@@ -179,7 +179,6 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 ))}
               </div>
             )}
-
             {/* Flag input */}
             <form
               className="flex gap-2"

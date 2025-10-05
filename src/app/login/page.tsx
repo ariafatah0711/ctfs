@@ -16,7 +16,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // kalau user sudah login → redirect
+  // if user already logged in → redirect
   useEffect(() => {
     if (!authLoading && user) {
       router.push('/challenges')
@@ -47,7 +47,7 @@ export default function LoginPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  // tampilkan loader pas masih cek auth session
+  // show loader while checking auth session
   if (authLoading) {
     return <Loader fullscreen color="text-orange-500" />
   }
