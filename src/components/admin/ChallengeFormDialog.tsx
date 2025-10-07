@@ -61,7 +61,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-  <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl">
+      <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-gray-100">{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>
         </DialogHeader>

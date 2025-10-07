@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getNotifications } from "@/lib/challenges";
 import Link from "next/link";
+import Loader from "@/components/custom/loading";
 
 export type Notification = {
   notif_type: "new_challenge" | "first_blood";
@@ -26,8 +27,36 @@ export default function NotificationList() {
     })();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (notifications.length === 0) return <div>No notifications found.</div>;
+  if (loading) return <Loader fullscreen color="text-orange-500" />;
+
+  if (notifications.length === 0)
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="border rounded-lg px-4 py-6 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex flex-col items-center justify-center text-center text-sm text-gray-600 dark:text-gray-300"
+      >
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 mb-3">
+          <svg
+            width="22"
+            height="22"
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            viewBox="0 0 24 24"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <circle cx="12" cy="16" r="1" />
+          </svg>
+        </div>
+        <p className="font-medium text-gray-700 dark:text-gray-200">No notifications found</p>
+        <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">You’re all caught up!</p>
+      </motion.div>
+    );
 
   return (
     <ul className="space-y-2">
@@ -42,7 +71,16 @@ export default function NotificationList() {
           {/* Icon */}
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 mr-2">
             {notif.notif_type === "new_challenge" ? (
-              <svg width="20" height="20" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="#3b82f6"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
                 <path d="M12 19V6" />
                 <path d="M5 12l7-7 7 7" />
               </svg>
@@ -50,6 +88,7 @@ export default function NotificationList() {
               <span className="text-lg">🩸</span>
             )}
           </span>
+
           {/* Content */}
           <div className="flex-1 flex flex-wrap items-center gap-x-2">
             {notif.notif_type === "new_challenge" ? (
@@ -79,6 +118,7 @@ export default function NotificationList() {
               </>
             )}
           </div>
+
           {/* Date */}
           <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 whitespace-nowrap">
             {notif.notif_created_at ? new Date(notif.notif_created_at).toLocaleString() : ""}
