@@ -1,4 +1,5 @@
 import React from 'react'
+import { formatRelativeDate } from '@/lib/utils'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -39,7 +40,7 @@ const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAl
                     <span className="text-xs text-gray-700 dark:text-gray-200">{s.challenge_title}</span>
                   </div>
                   <span className="text-xs text-gray-400 dark:text-gray-300">
-                    {new Date(s.solved_at).toLocaleString()}
+                    {formatRelativeDate(s.solved_at)}
                   </span>
                 </div>
             ))}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatRelativeDate } from '@/lib/utils'
 
 export type Solver = {
   username: string;
@@ -30,7 +31,7 @@ const SolversList: React.FC<SolversListProps> = ({ solvers }) => {
                 <span title="First Blood" className="text-red-500 dark:text-red-400 text-lg font-bold">🩸</span>
               )}
             </div>
-            <span className="text-xs text-gray-400 dark:text-gray-300">{new Date(solver.solvedAt).toLocaleString()}</span>
+            <span className="text-xs text-gray-400 dark:text-gray-300">{formatRelativeDate(solver.solvedAt)}</span>
           </li>
         ))
       )}

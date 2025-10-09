@@ -176,9 +176,57 @@ export default function ChallengesPage() {
     return true
   })
 
+  // Preferred order for categories (customize as needed)
+  const preferredOrder = ['intro', 'misc', 'osint', 'crypto', 'forensic', 'web', 'reverse']
+  // const preferredOrder = ['misc', 'osint', 'crypto']
+
   // Get unique categories and difficulties for filter options
-  const categories = Array.from(new Set(challenges.map(c => c.category))).sort()
+  const allCategories = Array.from(new Set(challenges.map(c => c.category))).filter(Boolean)
+  // Build categories by fuzzy-matching preferredOrder items (substring, case-insensitive)
+  const matchedCategorySet = new Set<string>()
+  const categories = [
+    ...preferredOrder.flatMap(p => {
+      const pLower = p.toLowerCase()
+      const found = allCategories.find(c => {
+        const cLower = c.toLowerCase()
+        return cLower.includes(pLower) || pLower.includes(cLower)
+      })
+      if (found && !matchedCategorySet.has(found)) {
+        matchedCategorySet.add(found)
+        return found
+      }
+      return [] as string[]
+    }),
+    ...allCategories.filter(c => !matchedCategorySet.has(c)).sort()
+  ]
+
   const difficulties = Array.from(new Set(challenges.map(c => c.difficulty))).sort()
+
+  // Pre-compute grouping and ordering for rendering to avoid JSX IIFE parsing issues
+  const grouped = filteredChallenges.reduce((acc, challenge) => {
+    if (!acc[challenge.category]) acc[challenge.category] = []
+    acc[challenge.category].push(challenge)
+    return acc
+  }, {} as {[key: string]: ChallengeWithSolve[]})
+
+  const groupKeys = Object.keys(grouped)
+  // Fuzzy match group keys against preferredOrder
+  const matchedKeySet = new Set<string>()
+  const orderedKeys = [
+    ...preferredOrder.flatMap(p => {
+      const pLower = p.toLowerCase()
+      const found = groupKeys.find(k => {
+        const kLower = k.toLowerCase()
+        return kLower.includes(pLower) || pLower.includes(kLower)
+      })
+      if (found && !matchedKeySet.has(found)) {
+        matchedKeySet.add(found)
+        return found
+      }
+      return [] as string[]
+    }),
+    ...groupKeys.filter(k => !matchedKeySet.has(k)).sort()
+  ]
 
   const downloadFile = async (attachment: Attachment, attachmentKey: string) => {
     setDownloading(prev => ({ ...prev, [attachmentKey]: true }))
@@ -249,13 +297,7 @@ export default function ChallengesPage() {
               </p>
             </div>
           ) : (
-            Object.entries(
-              filteredChallenges.reduce((acc, challenge) => {
-                if (!acc[challenge.category]) acc[challenge.category] = []
-                acc[challenge.category].push(challenge)
-                return acc
-              }, {} as {[key: string]: ChallengeWithSolve[]})
-            ).map(([category, categoryChallenges]) => (
+            orderedKeys.map((category) => (
               <div key={category} className="mb-12">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
@@ -267,7 +309,7 @@ export default function ChallengesPage() {
                   transition={{ duration: 0.5 }}
                   className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
                 >
-                  {categoryChallenges.map((challenge) => (
+                  {grouped[category].map((challenge) => (
                     <ChallengeCard
                       key={challenge.id}
                       challenge={challenge}

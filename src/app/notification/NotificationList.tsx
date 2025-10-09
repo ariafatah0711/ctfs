@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { getNotifications } from "@/lib/challenges";
 import Link from "next/link";
 import Loader from "@/components/custom/loading";
+import { formatRelativeDate } from '@/lib/utils'
 
 export type Notification = {
   notif_type: "new_challenge" | "first_blood";
@@ -121,7 +122,7 @@ export default function NotificationList() {
 
           {/* Date */}
           <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 whitespace-nowrap">
-            {notif.notif_created_at ? new Date(notif.notif_created_at).toLocaleString() : ""}
+            {notif.notif_created_at ? formatRelativeDate(notif.notif_created_at) : ""}
           </span>
         </motion.li>
       ))}

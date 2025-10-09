@@ -5,6 +5,7 @@ import { getFirstBloodChallengeIds } from '@/lib/challenges'
 import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getUserDetail, getCategoryTotals } from '@/lib/users'
+import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -135,7 +136,7 @@ export default function UserProfile({
                 ? 'Failed to load your profile.'
                 : "The user you are looking for doesn’t exist or has been removed."}
             </p>
-            {onBack && <Button onClick={onBack}>Go Back</Button>}
+            {onBack && <BackButton onClick={onBack} label="Go Back" />}
           </div>
         )}
 
@@ -144,7 +145,7 @@ export default function UserProfile({
           <>
             {/* Back Button */}
             {onBack && (
-              <Button onClick={onBack} className="mb-4">Go Back</Button>
+              <BackButton onClick={onBack} label="Go Back" className="mb-4" />
             )}
 
             {/* Profile Header */}
@@ -308,7 +309,7 @@ export default function UserProfile({
                                 )}
                               </h3>
                               <p className="text-xs text-gray-500 dark:text-gray-300">
-                                {challenge.category} • {challenge.difficulty} • {challenge.solved_at ? new Date(challenge.solved_at).toLocaleString() : '-'}
+                                {challenge.category} • {challenge.difficulty} • {challenge.solved_at ? formatRelativeDate(challenge.solved_at) : '-'}
                               </p>
                             </div>
                             <span className="text-sm font-medium text-green-600 dark:text-green-300">
@@ -367,7 +368,7 @@ export default function UserProfile({
                               )}
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {challenge.category} • {challenge.difficulty} • {challenge.solved_at ? new Date(challenge.solved_at).toLocaleString() : '-'}
+                              {challenge.category} • {challenge.difficulty} • {challenge.solved_at ? formatRelativeDate(challenge.solved_at) : '-'}
                             </p>
                           </div>
 

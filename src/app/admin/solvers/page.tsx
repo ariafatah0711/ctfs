@@ -13,9 +13,9 @@ import ConfirmDialog from "@/components/custom/ConfirmDialog"
 import Loader from "@/components/custom/loading"
 import BackButton from "@/components/custom/BackButton"
 
-
 import { motion } from "framer-motion"
 import toast from "react-hot-toast"
+import { formatRelativeDate } from '@/lib/utils'
 
 export default function AdminSolversPage() {
   const router = useRouter()
@@ -132,7 +132,7 @@ export default function AdminSolversPage() {
                       <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
                       <span className="text-xs text-gray-700 dark:text-gray-200 font-semibold">{s.challenge_title}</span>
                       <span className="ml-2 text-xs text-gray-400 dark:text-gray-300">
-                        {new Date(s.solved_at).toLocaleString()}
+                        {formatRelativeDate(s.solved_at)}
                       </span>
                     </div>
 
