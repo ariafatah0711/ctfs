@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SolversList, { Solver } from './SolversList';
@@ -41,6 +42,8 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   showHintModal,
   setShowHintModal,
 }) => {
+  const [bulkDownloading, setBulkDownloading] = useState<{ [key: string]: boolean }>({});
+  const [copiedAll, setCopiedAll] = useState<{ [key: string]: boolean }>({});
   if (!challenge) return null;
 
   return (
@@ -113,6 +116,47 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                   <div>
                     <p className="text-xs text-gray-400 mb-1">📂 Files</p>
                     <div className="flex flex-wrap gap-2">
+                      {/* Copy wget commands for all files (compact icon/text) */}
+                      <button
+                      key="copy-wget-all"
+                      type="button"
+                      title="Copy wget commands for all files"
+                      className="px-2 py-1 bg-green-700 hover:bg-green-600 text-white text-xs rounded-md shadow transition"
+                      onClick={e => {
+                        e.stopPropagation();
+                        const fileAttachments = challenge.attachments!.filter(att => att.type === 'file' && (att.url || att.name));
+                        if (!fileAttachments.length) return;
+                        const commands = fileAttachments.map((att, idx) => {
+                          const url = att.url || '';
+                          const filename = (att.name && att.name.trim()) || url.split('/').pop() || `file-${idx}`;
+                          const escUrl = url.replace(/'/g, "'\\'\'");
+                          const escName = filename.replace(/'/g, "'\\'\'");
+                          return `wget '${escUrl}' -O '${escName}'`;
+                        });
+                        const joined = commands.join(' && ');
+                        if (!navigator.clipboard) {
+                          toast.error('Clipboard not available')
+                          return
+                        }
+                        navigator.clipboard.writeText(joined).then(() => {
+                          const key = `${challenge.id}-copied`;
+                          setCopiedAll(prev => ({ ...prev, [key]: true }));
+                          setTimeout(() => setCopiedAll(prev => ({ ...prev, [key]: false })), 2000);
+                          toast.success('Copied wget commands to clipboard')
+                        }).catch((err) => {
+                          console.error('Copy failed', err)
+                          toast.error('Failed to copy to clipboard')
+                        });
+                      }}
+                    >
+                      <span className="text-xs font-mono">
+                        {copiedAll[`${challenge.id}-copied`] ? 'Copied!' : 'copy wget'}
+                      </span>
+                    </button>
+
+                    {/* 🧱 Pembatas visual */}
+                    <span className="text-gray-500">|</span>
+
                       {challenge.attachments.filter(att => att.type === 'file').map((attachment, idx) => {
                         const displayName = attachment.name?.length > 40 ? attachment.name.slice(0, 37) + "..." : attachment.name || 'file';
                         const key = `${challenge.id}-${idx}`;
@@ -128,7 +172,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                             }}
                             disabled={downloading[key]}
                           >
-                                            {downloading[key] ? "Downloading..." : displayName}
+                            {downloading[key] ? "Downloading..." : displayName}
                           </button>
                         );
                       })}
