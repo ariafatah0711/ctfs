@@ -27,9 +27,9 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
   onToggleActive,
 }) => {
   return (
-    <div className="w-full px-4 py-3">
+  <div className="w-full px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 order-2 sm:order-1">
           <DifficultyBadge difficulty={challenge.difficulty} />
 
           <div className="min-w-0">
@@ -45,7 +45,7 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 justify-end">
+        <div className="flex items-center gap-2 justify-start sm:justify-end order-1 sm:order-2">
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-300">
               <span className="hidden sm:inline">Active</span>
@@ -58,7 +58,7 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
             <Button variant="ghost" size="sm" onClick={() => onDelete(challenge.id)} aria-label={`Delete ${challenge.title}`}>🗑️</Button>
             <Button variant="ghost" size="sm" onClick={() => onViewFlag(challenge.id)} aria-label={`View flag for ${challenge.title}`}>
               <span className="hidden sm:inline">🏳️ View Flag</span>
-              <span className="sm:hidden">🏳️ Flag</span>
+              <span className="sm:hidden">🏳️</span>
             </Button>
           </div>
         </div>

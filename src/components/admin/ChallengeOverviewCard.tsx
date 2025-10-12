@@ -53,7 +53,7 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
           </motion.div>
         </div>
         <div className="mb-6">
-          <details className="group" open>
+          <details className="group">
             <summary className="cursor-pointer list-none flex items-center justify-between mb-3">
               <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">By Difficulty</div>
               <svg className="w-4 h-4 text-gray-500 group-open:rotate-180 transition-transform" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
