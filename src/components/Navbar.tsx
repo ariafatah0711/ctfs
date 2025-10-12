@@ -6,10 +6,12 @@ import { useEffect, useState } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
+import { useNotifications } from '@/contexts/NotificationsContext'
 
 export default function Navbar() {
   const router = useRouter()
   const { user, setUser, loading } = useAuth()
+  const { unreadCount } = useNotifications()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
@@ -123,39 +125,50 @@ export default function Navbar() {
               )}
             </div>
             {/* Notification Icon (toggle to /notification or back) */}
-            <button
-              className={`mr-2 rounded-full p-1 transition-colors duration-150 ${pathname === '/notification' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
-              title="Notifications"
-              aria-label="Notifications"
-              onClick={() => {
-                if (pathname === '/notification') {
-                  // Go back or to home if already on /notification
-                  if (window.history.length > 1) {
-                    router.back()
+            <div className="relative mr-2">
+              <button
+                className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/notification' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
+                title="Notifications"
+                aria-label="Notifications"
+                onClick={() => {
+                  if (pathname === '/notification') {
+                    // Go back or to home if already on /notification
+                    if (window.history.length > 1) {
+                      router.back()
+                    } else {
+                      router.push('/')
+                    }
                   } else {
-                    router.push('/')
+                    router.push('/notification')
                   }
-                } else {
-                  router.push('/notification')
-                }
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={pathname === '/notification' ? (theme === 'dark' ? '#60a5fa' : '#2563eb') : '#3b82f6'}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="feather feather-bell transition-all duration-150"
+                }}
               >
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={pathname === '/notification' ? (theme === 'dark' ? '#60a5fa' : '#2563eb') : '#3b82f6'}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="feather feather-bell transition-all duration-150"
+                >
+                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </button>
+
+              {unreadCount > 0 && (
+                (() => {
+                  const display = unreadCount > 99 ? '99+' : String(unreadCount)
+                  return (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">{display}</span>
+                  )
+                })()
+              )}
+            </div>
             {/* Theme Switcher Icon Only - moved right */}
             <button
               onClick={toggleTheme}

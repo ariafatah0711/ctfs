@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast"
 import Navbar from '@/components/Navbar'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { NotificationsProvider } from '@/contexts/NotificationsContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,13 +29,15 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <AuthProvider>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-              <Navbar />
-              <div className="pt-14">
-                {children}
+            <NotificationsProvider>
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <Navbar />
+                <div className="pt-14">
+                  {children}
+                </div>
+                <Toaster position="top-right" reverseOrder={false} />
               </div>
-              <Toaster position="top-right" reverseOrder={false} />
-            </div>
+            </NotificationsProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
