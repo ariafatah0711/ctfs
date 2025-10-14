@@ -40,3 +40,5 @@ next-env.d.ts
 _tmp
 
 .vercel
+
+state.json
