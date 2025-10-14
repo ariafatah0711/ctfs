@@ -42,9 +42,14 @@ export default function AdminPage() {
   const [showPreview, setShowPreview] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
+  const [pendingDeleteDetail, setPendingDeleteDetail] = useState<Challenge | null>(null)
+  const [deleteConfirmInput, setDeleteConfirmInput] = useState("")
 
   const askDelete = (id: string) => {
     setPendingDelete(id)
+    const ch = challenges.find((c) => c.id === id)
+    setPendingDeleteDetail(ch || null)
+    setDeleteConfirmInput("")
     setConfirmOpen(true)
   }
 
@@ -375,15 +380,45 @@ export default function AdminPage() {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title="Delete Challenge"
-        description="Are you sure you want to delete this challenge? This action cannot be undone."
+        description={
+          <div>
+            <div className="mb-2">Are you sure you want to delete this challenge? This action cannot be undone.</div>
+            {pendingDeleteDetail && (
+              <>
+                <div className="mt-2 p-3 rounded bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 text-sm font-semibold flex flex-col gap-1">
+                  <span>🏆 <b>Title:</b> <span className="font-mono">{pendingDeleteDetail.title}</span></span>
+                  <span>📂 <b>Category:</b> <span className="font-mono">{pendingDeleteDetail.category}</span></span>
+                  <span>⭐ <b>Points:</b> <span className="font-mono">{pendingDeleteDetail.is_dynamic ? `${pendingDeleteDetail.min_points}~${pendingDeleteDetail.max_points}` : pendingDeleteDetail.points}</span></span>
+                  <span>🎯 <b>Difficulty:</b> <span className="font-mono">{pendingDeleteDetail.difficulty}</span></span>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Type <b>{pendingDeleteDetail.title}</b> to confirm:
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+                    value={deleteConfirmInput}
+                    onChange={e => setDeleteConfirmInput(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        }
         confirmLabel="Delete"
         onConfirm={async () => {
           if (pendingDelete) {
             await doDelete(pendingDelete)
             setPendingDelete(null)
+            setPendingDeleteDetail(null)
+            setDeleteConfirmInput("")
             setConfirmOpen(false)
           }
         }}
+        // @ts-ignore
+        confirmDisabled={!!pendingDeleteDetail && deleteConfirmInput !== pendingDeleteDetail.title}
       />
     </div>
   )

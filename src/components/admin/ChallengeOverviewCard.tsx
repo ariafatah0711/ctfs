@@ -1,6 +1,8 @@
 import React from 'react'
+import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Challenge } from '@/types'
 import { motion } from 'framer-motion'
 
@@ -18,8 +20,11 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
   return (
   // <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
   <Card className="shrink-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-      <CardHeader>
-        <CardTitle>Overview</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-gray-900 dark:text-white">Overview</CardTitle>
+        <Link href="/admin/overview">
+          <Button variant="default" size="sm">View All</Button>
+        </Link>
       </CardHeader>
       <CardContent>
         {info && (

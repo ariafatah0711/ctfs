@@ -4,14 +4,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 
+import { ReactNode } from "react"
 type ConfirmDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   title?: string
-  description?: string
+  description?: ReactNode
   onConfirm: () => void
   confirmLabel?: string
   cancelLabel?: string
+  confirmDisabled?: boolean
 }
 
 export default function ConfirmDialog({
@@ -22,6 +24,7 @@ export default function ConfirmDialog({
   onConfirm,
   confirmLabel = "Yes",
   cancelLabel = "Cancel",
+  confirmDisabled = false,
 }: ConfirmDialogProps) {
   const [loading, setLoading] = useState(false)
 
@@ -38,12 +41,12 @@ export default function ConfirmDialog({
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">{title}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-gray-700 dark:text-gray-300">{description}</p>
+        <div className="text-sm text-gray-700 dark:text-gray-300">{description}</div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-gray-700 dark:text-gray-200">
             {cancelLabel}
           </Button>
-          <Button onClick={handleConfirm} disabled={loading}>
+          <Button onClick={handleConfirm} disabled={loading || confirmDisabled}>
             {loading ? "..." : confirmLabel}
           </Button>
         </DialogFooter>

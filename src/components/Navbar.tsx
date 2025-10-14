@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import ImageWithFallback from './ImageWithFallback'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
@@ -80,19 +81,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link href="/profile" className="flex items-center gap-2 group">
-                    {user.picture ? (
-                      <img
-                        src={user.picture}
-                        alt={user.username}
-                        className="w-9 h-9 rounded-full object-cover shadow"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center shadow group-hover:bg-gray-300 dark:group-hover:bg-gray-700 transition-all duration-150">
-                        <span className="text-gray-700 dark:text-gray-200 text-base font-semibold">
-                          {user.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                    <ImageWithFallback src={user.picture} alt={user.username} size={36} className="rounded-full" />
                     <span
                       className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[100px] md:max-w-[160px] block`}
                       title={user.username}
@@ -234,19 +223,7 @@ export default function Navbar() {
                     className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {user.picture ? (
-                      <img
-                        src={user.picture}
-                        alt={user.username}
-                        className="w-9 h-9 rounded-full object-cover shadow"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center shadow">
-                        <span className="text-gray-700 dark:text-gray-200 text-base font-semibold">
-                          {user.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
+                    <ImageWithFallback src={user.picture} alt={user.username} size={36} className="rounded-full" />
                     <span
                       className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[120px] block`}
                       title={user.username}
