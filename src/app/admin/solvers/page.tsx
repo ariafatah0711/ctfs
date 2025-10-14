@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { isAdmin } from "@/lib/auth"
 import { getSolversAll, deleteSolver } from "@/lib/challenges"
@@ -145,10 +146,13 @@ export default function AdminSolversPage() {
 
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="icon"
                       onClick={() => askDelete(s.solve_id)}
+                      aria-label="Delete Solver"
+                      title="Delete Solver"
+                      className="text-red-600 dark:text-red-400"
                     >
-                      🗑️
+                      <Trash2 size={16} />
                     </Button>
                   </motion.div>
                 ))}

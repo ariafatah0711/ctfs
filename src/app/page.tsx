@@ -50,7 +50,16 @@ export default function Home() {
           <span className="font-semibold text-orange-600 dark:text-orange-400">
             leaderboard
           </span>
-          .
+          {/* . Join our{" "}
+          <a
+            href={APP.links.discord}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-orange-600 dark:text-orange-400 hover:underline"
+          >
+            Discord community
+          </a>{" "}
+          for discussions and help! */}
         </motion.p>
 
         {/* Flag Format Info Box */}

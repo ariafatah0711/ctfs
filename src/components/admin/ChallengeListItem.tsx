@@ -1,7 +1,7 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
+import { Pencil, Trash2, Flag, CheckCircle2, CircleOff } from 'lucide-react'
 import { Challenge } from '@/types'
 
 interface ChallengeListItemProps {
@@ -26,6 +26,10 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
   onViewFlag,
   onToggleActive,
 }) => {
+  const handleToggleActive = async (id: string, checked: boolean) => {
+    await onToggleActive(id, checked); // update ke backend
+  };
+
   return (
   <div className="w-full px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -37,30 +41,60 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
             <div className="text-xs text-muted-foreground dark:text-gray-300 truncate flex items-center gap-2">
               <span className="truncate">{challenge.category} • {challenge.points} pts</span>
               {challenge.is_dynamic && (
-                <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-600 dark:text-white px-1 py-0.5">
-                  <span className="inline-block min-w-[14px] text-center text-[10px] leading-4 font-semibold">D</span>
-                </Badge>
+                <>
+                  <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-600 dark:text-white px-1 py-0.5">
+                    <span className="inline-block min-w-[14px] text-center text-[10px] leading-4 font-semibold">D</span>
+                  </Badge>
+                  <span className="ml-1 text-[10px] text-gray-700 dark:text-gray-300 font-mono align-middle">
+                    {`${challenge.max_points ?? '-'}-${challenge.min_points ?? '-'}-${challenge.decay_per_solve ?? '-'}`}
+                  </span>
+                </>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 justify-start sm:justify-end order-1 sm:order-2">
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-300">
-              <span className="hidden sm:inline">Active</span>
-              <Switch checked={challenge.is_active} onCheckedChange={async (checked) => onToggleActive(challenge.id, checked)} />
-            </label>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => onEdit(challenge)} aria-label={`Edit ${challenge.title}`}>✏️</Button>
-            <Button variant="ghost" size="sm" onClick={() => onDelete(challenge.id)} aria-label={`Delete ${challenge.title}`}>🗑️</Button>
-            <Button variant="ghost" size="sm" onClick={() => onViewFlag(challenge.id)} aria-label={`View flag for ${challenge.title}`}>
-              <span className="hidden sm:inline">🏳️ View Flag</span>
-              <span className="sm:hidden">🏳️</span>
-            </Button>
-          </div>
+        <div className="flex items-center gap-1 justify-start sm:justify-end order-1 sm:order-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`${challenge.is_active ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`}
+            onClick={async () => onToggleActive(challenge.id, !challenge.is_active)}
+            aria-label={challenge.is_active ? "Deactivate Challenge" : "Activate Challenge"}
+            title={challenge.is_active ? "Deactivate Challenge" : "Activate Challenge"}
+          >
+            {challenge.is_active ? <CheckCircle2 size={16} /> : <CircleOff size={16} />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(challenge)}
+            aria-label="Edit Challenge"
+            title="Edit Challenge"
+            className="text-blue-600 dark:text-blue-400"
+          >
+            <Pencil size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(challenge.id)}
+            aria-label="Delete Challenge"
+            title="Delete Challenge"
+            className="text-red-600 dark:text-red-400"
+          >
+            <Trash2 size={16} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onViewFlag(challenge.id)}
+            aria-label="View Flag"
+            title="View Flag"
+            className="text-gray-600 dark:text-gray-300"
+          >
+            <Flag size={16} />
+          </Button>
         </div>
       </div>
     </div>

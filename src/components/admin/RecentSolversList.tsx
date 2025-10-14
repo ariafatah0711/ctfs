@@ -30,7 +30,7 @@ const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAl
           </div>
         ) : (
           <div className="space-y-2">
-            {solvers.slice(0, 10).map(s => (
+            {solvers.slice(0, 15).map(s => (
                 <div key={s.solve_id} className="flex items-center justify-between border-b dark:border-gray-700 pb-1">
                   <div>
                     <Link href={`/user/${encodeURIComponent(s.username)}`} className="font-medium text-blue-600 dark:text-blue-300 hover:underline" title={s.username}>

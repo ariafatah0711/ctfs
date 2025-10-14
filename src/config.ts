@@ -8,6 +8,7 @@ export const APP = {
   year: new Date().getFullYear(),
   links: {
     github: 'https://github.com/ariafatah0711/ctfs',
+    discord: 'https://discord.com/invite/A5rgMZBHPr', // Ganti dengan link Discord yang valid
     nextjs: 'https://nextjs.org/',
     tailwind: 'https://tailwindcss.com/',
     framer: 'https://www.framer.com/motion/',
