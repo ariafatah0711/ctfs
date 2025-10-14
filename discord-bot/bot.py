@@ -1,4 +1,3 @@
-# python3 -m pip install --user -r req.txt
 import asyncio
 import json
 import logging
@@ -179,13 +178,13 @@ async def update_table(channel, solves: List[Dict[str, Any]], state: Dict[str, A
     #     )
 
     lines = []
-    for s in solves[-20:]:
+    for s in solves[-10:]:
         rel_time = format_relative_date(s.get("time", ""))
         lines.append(f"{s['user']} → {s['challenge']} ({s['category']}) \n| {rel_time}")
 
     embed = discord.Embed(
-        title="🏆 First Blood Table (20 latest)",
-        description="Showing the latest 20 first blood solves.",
+        title="🏆 First Blood Table (10 latest)",
+        description="Showing the latest 10 first blood solves.",
         color=0xff0000
     )
 
