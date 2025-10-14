@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import Loader from "@/components/custom/loading"
 import { Button } from "@/components/ui/button"
+import APP from '@/config'
 
 export default function Home() {
   const { user, loading } = require("@/contexts/AuthContext").useAuth();
@@ -27,7 +28,7 @@ export default function Home() {
         >
           Welcome to{" "}
           <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
-            CTFS Platform
+            {APP.fullName}
           </span>{" "}
           🚩
         </motion.h1>
@@ -61,7 +62,7 @@ export default function Home() {
         >
           <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 border border-orange-200 dark:border-orange-700 rounded-lg px-4 py-2 shadow-md text-base md:text-lg font-mono text-orange-600 dark:text-orange-400">
             <span className="font-bold">Flag format:</span>
-            <span className="select-all">FGTE&#123;your_flag_here&#125;</span>
+            <span className="select-all">{APP.flagFormat}</span>
           </div>
         </motion.div>
 
@@ -149,13 +150,13 @@ export default function Home() {
             Source code available on{" "}
             <a
               className="text-orange-500 font-semibold hover:underline"
-              href="https://github.com/ariafatah0711/ctfs"
+              href={APP.links.github}
               target="_blank"
               rel="noopener noreferrer"
             >
               Github
             </a>
-            , ©2025 CTFS. All rights reserved.
+            , ©{APP.year} {APP.shortName}. All rights reserved.
           </p>
         </div>
       </footer>

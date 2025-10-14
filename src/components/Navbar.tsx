@@ -8,6 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
 import { useNotifications } from '@/contexts/NotificationsContext'
+import APP from '@/config'
 
 export default function Navbar() {
   const router = useRouter()
@@ -43,9 +44,9 @@ export default function Navbar() {
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center gap-2 group">
               <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} transition-all duration-200`}>
-                <span className="text-white font-extrabold text-lg tracking-wide">C</span>
+                <span className="text-white font-extrabold text-lg tracking-wide">{APP.shortName.charAt(0)}</span>
               </div>
-              <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>CTFS</span>
+              <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
             </Link>
 
             {/* Menu shown only when logged in */}

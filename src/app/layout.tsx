@@ -8,12 +8,13 @@ import Navbar from '@/components/Navbar'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { NotificationsProvider } from '@/contexts/NotificationsContext'
+import APP from '@/config'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'CTFS - Capture The Flag Simple',
-  description: 'Aplikasi CTF minimalis dengan Next.js dan Supabase',
+  title: `${APP.shortName} - ${APP.fullName}`,
+  description: APP.description,
 }
 
 export default function RootLayout({
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="id">
       <head>
         <link rel="icon" href="/favicon.ico" />
+        <title>{APP.fullName}</title>
       </head>
       <body className={inter.className}>
         <ThemeProvider>
