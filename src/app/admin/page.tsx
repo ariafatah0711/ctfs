@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ChevronDown } from 'lucide-react'
 import ChallengeListItem from '@/components/admin/ChallengeListItem'
 import ChallengeOverviewCard from '@/components/admin/ChallengeOverviewCard'
 import RecentSolversList from '@/components/admin/RecentSolversList'
@@ -32,6 +33,7 @@ export default function AdminPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [solvers, setSolvers] = useState<any[]>([])
   const [siteInfo, setSiteInfo] = useState<any | null>(null)
+  const overviewRef = useRef<HTMLDivElement>(null)
   // const [solverOffset, setSolverOffset] = useState(0) // unused
   // const [hasMoreSolvers, setHasMoreSolvers] = useState(true) // unused
 
@@ -259,6 +261,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div id="overview-section" className="pt-4 lg:pt-0" ref={overviewRef}></div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Kiri: Challenge List */}
           <motion.div
@@ -335,6 +338,7 @@ export default function AdminPage() {
           >
             {/* Overview */}
             <motion.div
+              ref={overviewRef}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -421,6 +425,19 @@ export default function AdminPage() {
         // @ts-ignore
         confirmDisabled={!!pendingDeleteDetail && deleteConfirmInput !== pendingDeleteDetail.title}
       />
+
+      <motion.button
+        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-primary-500 text-white shadow-lg cursor-pointer lg:hidden hover:bg-primary-600 transition-colors"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => {
+          overviewRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }}
+      >
+        <ChevronDown className="w-6 h-6" />
+      </motion.button>
     </div>
   )
 }
