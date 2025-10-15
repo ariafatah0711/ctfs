@@ -300,22 +300,25 @@ async def poll_loop():
 
 @client.event
 async def on_ready():
-    # Safely read client.user attributes (can be None in some typing contexts)
     user = client.user
     user_name = getattr(user, "name", "<unknown>")
     user_disc = getattr(user, "discriminator", "????")
     logger.info("Logged in as %s#%s", user_name, user_disc)
 
     channel = client.get_channel(CHANNEL_ID)
-    if channel:
+
+    # Cek apakah file state.json atau solves.json belum ada
+    state_exists = os.path.exists(STATE_FILE)
+    solves_exists = os.path.exists(SOLVES_FILE)
+
+    if channel and (not state_exists or not solves_exists):
         try:
             def is_me(m):
                 return m.author == client.user
-            # only attempt purge if the channel supports it (TextChannel)
             purge_fn = getattr(channel, "purge", None)
             if callable(purge_fn):
                 await channel.purge(limit=None, check=is_me)
-            logger.info("Cleared my own messages in channel %s", channel.name)
+            logger.info("Purged messages because state or solves file not found")
         except Exception as e:
             logger.error("Failed to clear channel: %s", e)
 
