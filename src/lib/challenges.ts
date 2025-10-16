@@ -18,44 +18,94 @@ import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/t
 export async function getChallenges(
   userId?: string,
   showAll: boolean = false
-): Promise<ChallengeWithSolve[]> {
+): Promise<(ChallengeWithSolve & { has_first_blood: boolean })[]> {
   try {
+    // 🔹 Ambil challenge list
     let query = supabase
       .from('challenges')
       .select('*')
-    .order('points', { ascending: true }); // new columns are automatically included when using select('*')
+      .order('points', { ascending: true });
 
-    if (!showAll) {
-      query = query.eq('is_active', true); // only fetch active ones when showAll=false
-    }
+    if (!showAll) query = query.eq('is_active', true);
 
     const { data: challenges, error } = await query;
+    if (error) throw new Error(error.message);
+    if (!challenges) return [];
 
-    if (error) {
-      throw new Error(error.message);
+    // 🔹 Ambil notifikasi (dari server, bukan localStorage)
+    const notifications = (await getNotifications(500, 0)) as any[];
+
+    // Ambil semua challenge_id yang sudah punya notif first_blood
+    const fbIds = new Set(
+      notifications
+        .filter(n => n.notif_type === 'first_blood')
+        .map(n => n.notif_challenge_id)
+    );
+
+    // 🔹 Cek solved user (optional)
+    let solvedIds = new Set<string>();
+    if (userId) {
+      const { data: solves } = await supabase
+        .from('solves')
+        .select('challenge_id')
+        .eq('user_id', userId);
+
+      solvedIds = new Set(solves?.map(s => s.challenge_id) || []);
     }
 
-    if (!userId) {
-      return challenges || [];
-    }
-
-  // Fetch user's solves to mark challenges that have been solved
-    const { data: solves } = await supabase
-      .from('solves')
-      .select('challenge_id')
-      .eq('user_id', userId);
-
-    const solvedChallengeIds = new Set(solves?.map(s => s.challenge_id) || []);
-
-    return challenges?.map(challenge => ({
-      ...challenge,
-      is_solved: solvedChallengeIds.has(challenge.id),
-    })) || [];
-  } catch (error) {
-    console.error('Error fetching challenges:', error);
+    // 🔹 Gabungkan semua info
+    return challenges.map(ch => ({
+      ...ch,
+      is_solved: solvedIds.has(ch.id),
+      has_first_blood: fbIds.has(ch.id), // true kalau udah punya first blood
+    }));
+  } catch (err) {
+    console.error('Error fetching challenges:', err);
     return [];
   }
 }
+
+// export async function getChallenges(
+//   userId?: string,
+//   showAll: boolean = false
+// ): Promise<ChallengeWithSolve[]> {
+//   try {
+//     let query = supabase
+//       .from('challenges')
+//       .select('*')
+//     .order('points', { ascending: true }); // new columns are automatically included when using select('*')
+
+//     if (!showAll) {
+//       query = query.eq('is_active', true); // only fetch active ones when showAll=false
+//     }
+
+//     const { data: challenges, error } = await query;
+
+//     if (error) {
+//       throw new Error(error.message);
+//     }
+
+//     if (!userId) {
+//       return challenges || [];
+//     }
+
+//   // Fetch user's solves to mark challenges that have been solved
+//     const { data: solves } = await supabase
+//       .from('solves')
+//       .select('challenge_id')
+//       .eq('user_id', userId);
+
+//     const solvedChallengeIds = new Set(solves?.map(s => s.challenge_id) || []);
+
+//     return challenges?.map(challenge => ({
+//       ...challenge,
+//       is_solved: solvedChallengeIds.has(challenge.id),
+//     })) || [];
+//   } catch (error) {
+//     console.error('Error fetching challenges:', error);
+//     return [];
+//   }
+// }
 
 /**
  * Submit flag for a challenge

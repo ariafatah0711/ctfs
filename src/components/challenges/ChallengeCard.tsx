@@ -1,20 +1,32 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { ChallengeWithSolve, Attachment } from "@/types";
+import { ChallengeWithSolve } from "@/types";
 import React from "react";
 
 interface ChallengeCardProps {
-  challenge: ChallengeWithSolve;
+  challenge: ChallengeWithSolve & { has_first_blood?: boolean };
   onClick: () => void;
 }
 
 const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => {
+  const isNew = !challenge.has_first_blood; // 🆕 kondisi
+
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.97 }}
       key={challenge.id}
+      className="relative overflow-hidden"
     >
+      {/* 🟩 Ribbon pojok kanan atas */}
+      {isNew && (
+        <div className="absolute top-2 right-[-28px] rotate-45 translate-y-[16px]">
+          <div className="bg-green-500 text-white text-[10px] font-bold px-8 py-1 shadow-md">
+            NEW CHALL
+          </div>
+        </div>
+      )}
+
       <Card
         onClick={onClick}
         className={`cursor-pointer shadow-md rounded-md transition-colors
@@ -27,17 +39,18 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
           <h3
             className="text-white dark:text-gray-100 font-semibold text-center truncate"
             style={{
-              maxWidth: '180px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              display: 'block',
+              maxWidth: "180px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              display: "block",
             }}
             title={challenge.title}
           >
             {challenge.title}
           </h3>
         </CardHeader>
+
         <CardContent className="flex items-center justify-center gap-2 text-yellow-300 dark:text-yellow-200 font-bold">
           🪙 {challenge.points}
         </CardContent>
