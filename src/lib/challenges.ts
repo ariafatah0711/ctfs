@@ -1,12 +1,12 @@
 // Get user rank only (by username)
 export async function getUserRank(username: string): Promise<number | null> {
   const leaderboard = await getLeaderboard();
-  leaderboard.sort((a, b) => {
+  leaderboard.sort((a: any, b: any) => {
     const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0;
     const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0;
     return scoreB - scoreA;
   });
-  const idx = leaderboard.findIndex(entry => entry.username === username);
+  const idx = leaderboard.findIndex((entry: any) => entry.username === username);
   return idx !== -1 ? idx + 1 : null;
 }
 import { supabase } from './supabase'
