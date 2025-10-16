@@ -18,7 +18,7 @@ import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/t
 export async function getChallenges(
   userId?: string,
   showAll: boolean = false
-): Promise<(ChallengeWithSolve & { has_first_blood: boolean })[]> {
+): Promise<(ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]> {
   try {
     // 🔹 Ambil challenge list
     let query = supabase
@@ -32,14 +32,14 @@ export async function getChallenges(
     if (error) throw new Error(error.message);
     if (!challenges) return [];
 
-    // 🔹 Ambil notifikasi (dari server, bukan localStorage)
+    // 🔹 Ambil notif first blood dari RPC
     const notifications = (await getNotifications(500, 0)) as any[];
 
-    // Ambil semua challenge_id yang sudah punya notif first_blood
+    // Cuma ambil yang notif_type = first_blood
     const fbIds = new Set(
       notifications
-        .filter(n => n.notif_type === 'first_blood')
-        .map(n => n.notif_challenge_id)
+        .filter((n) => n.notif_type === 'first_blood')
+        .map((n) => n.notif_challenge_id)
     );
 
     // 🔹 Cek solved user (optional)
@@ -50,62 +50,27 @@ export async function getChallenges(
         .select('challenge_id')
         .eq('user_id', userId);
 
-      solvedIds = new Set(solves?.map(s => s.challenge_id) || []);
+      solvedIds = new Set(solves?.map((s) => s.challenge_id) || []);
     }
 
-    // 🔹 Gabungkan semua info
-    return challenges.map(ch => ({
-      ...ch,
-      is_solved: solvedIds.has(ch.id),
-      has_first_blood: fbIds.has(ch.id), // true kalau udah punya first blood
-    }));
+    return challenges.map(ch => {
+      const createdAt = new Date(ch.created_at);
+      const isRecentlyCreated = (Date.now() - createdAt.getTime()) < 24 * 60 * 60 * 1000; // < 1 hari
+      const hasFirstBlood = fbIds.has(ch.id);
+
+      return {
+        ...ch,
+        is_solved: solvedIds.has(ch.id),
+        has_first_blood: hasFirstBlood,
+        is_recently_created: isRecentlyCreated,
+        is_new: isRecentlyCreated || !hasFirstBlood, // ✅ ini logika yang kamu mau
+      };
+    });
   } catch (err) {
     console.error('Error fetching challenges:', err);
     return [];
   }
 }
-
-// export async function getChallenges(
-//   userId?: string,
-//   showAll: boolean = false
-// ): Promise<ChallengeWithSolve[]> {
-//   try {
-//     let query = supabase
-//       .from('challenges')
-//       .select('*')
-//     .order('points', { ascending: true }); // new columns are automatically included when using select('*')
-
-//     if (!showAll) {
-//       query = query.eq('is_active', true); // only fetch active ones when showAll=false
-//     }
-
-//     const { data: challenges, error } = await query;
-
-//     if (error) {
-//       throw new Error(error.message);
-//     }
-
-//     if (!userId) {
-//       return challenges || [];
-//     }
-
-//   // Fetch user's solves to mark challenges that have been solved
-//     const { data: solves } = await supabase
-//       .from('solves')
-//       .select('challenge_id')
-//       .eq('user_id', userId);
-
-//     const solvedChallengeIds = new Set(solves?.map(s => s.challenge_id) || []);
-
-//     return challenges?.map(challenge => ({
-//       ...challenge,
-//       is_solved: solvedChallengeIds.has(challenge.id),
-//     })) || [];
-//   } catch (error) {
-//     console.error('Error fetching challenges:', error);
-//     return [];
-//   }
-// }
 
 /**
  * Submit flag for a challenge

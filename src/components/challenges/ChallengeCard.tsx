@@ -4,12 +4,21 @@ import { ChallengeWithSolve } from "@/types";
 import React from "react";
 
 interface ChallengeCardProps {
-  challenge: ChallengeWithSolve & { has_first_blood?: boolean };
+  challenge: ChallengeWithSolve & {
+    has_first_blood?: boolean;
+    is_new?: boolean;
+  };
   onClick: () => void;
 }
 
 const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => {
-  const isNew = !challenge.has_first_blood; // 🆕 kondisi
+  const isRecentlyCreated = challenge.is_new;
+  const noFirstBlood = !challenge.has_first_blood;
+
+  // 🔹 Tentukan label sesuai kondisi
+  let ribbonLabel: string | null = null;
+  if (noFirstBlood) ribbonLabel = "🩸NEW CHALL🩸";
+  else if (isRecentlyCreated) ribbonLabel = "NEW CHALL";
 
   return (
     <motion.div
@@ -19,10 +28,10 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
       className="relative overflow-hidden"
     >
       {/* 🟩 Ribbon pojok kanan atas */}
-      {isNew && (
-        <div className="absolute top-2 right-[-28px] rotate-45 translate-y-[16px]">
+      {ribbonLabel && (
+        <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px]">
           <div className="bg-green-500 text-white text-[10px] font-bold px-8 py-1 shadow-md">
-            NEW CHALL
+            {ribbonLabel}
           </div>
         </div>
       )}
