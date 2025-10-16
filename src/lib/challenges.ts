@@ -23,7 +23,7 @@ export async function getChallenges(
     let query = supabase
       .from('challenges')
       .select('*')
-  .order('points', { ascending: true }); // new columns are automatically included when using select('*')
+    .order('points', { ascending: true }); // new columns are automatically included when using select('*')
 
     if (!showAll) {
       query = query.eq('is_active', true); // only fetch active ones when showAll=false
@@ -404,37 +404,13 @@ export async function getSolversByChallenge(challengeId: string) {
  */
 export async function getFirstBloodChallengeIds(userId: string): Promise<string[]> {
   try {
-  // Fetch all challenges the user has solved
-    const { data: solves, error } = await supabase
-      .from('solves')
-      .select('challenge_id, created_at')
-      .eq('user_id', userId)
-
+    const { data, error } = await supabase.rpc('get_user_first_bloods', { p_user_id: userId })
+    console.log(data, error)
     if (error) throw error
-    if (!solves || solves.length === 0) return []
-
-    const challengeIds = solves.map(s => s.challenge_id)
-
-  // Fetch the first solve for each challenge the user has solved
-    const { data: firstSolves, error: firstError } = await supabase
-      .from('solves')
-      .select('challenge_id, user_id, created_at')
-      .in('challenge_id', challengeIds)
-      .order('created_at', { ascending: true })
-
-    if (firstError) throw firstError
-
-  // Map: challenge_id => user_id of first solver
-    const firstBloodIds: string[] = []
-    for (const cid of challengeIds) {
-      const first = firstSolves.find(s => s.challenge_id === cid)
-      if (first && first.user_id === userId) {
-        firstBloodIds.push(cid)
-      }
-    }
-    return firstBloodIds
+    // data is expected to be array of { challenge_id }
+    return (data || []).map((r: any) => r.challenge_id)
   } catch (err) {
-    console.error('Error fetching first bloods:', err)
+    console.error('Error fetching first bloods (rpc):', err)
     return []
   }
 }

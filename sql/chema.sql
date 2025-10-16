@@ -691,6 +691,27 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
 
+-- RPC: get_user_first_bloods
+-- Mengembalikan daftar challenge_id di mana user adalah first solver (deterministik)
+CREATE OR REPLACE FUNCTION get_user_first_bloods(p_user_id UUID)
+RETURNS TABLE(challenge_id UUID)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT t.challenge_id
+  FROM (
+    SELECT
+      s.challenge_id,
+      s.user_id,
+      ROW_NUMBER() OVER (PARTITION BY s.challenge_id ORDER BY s.created_at ASC, s.id ASC) AS rn
+    FROM public.solves s
+  ) AS t
+  WHERE t.rn = 1 AND t.user_id = p_user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+GRANT EXECUTE ON FUNCTION get_user_first_bloods(UUID) TO authenticated;
+
 -- Function: get_notifications
 -- Mengambil notifikasi chall baru & first blood
 DROP FUNCTION IF EXISTS get_notifications(integer, integer);

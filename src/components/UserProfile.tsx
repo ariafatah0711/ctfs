@@ -95,6 +95,7 @@ export default function UserProfile({
 
         if (detail) {
           const firstBlood = await getFirstBloodChallengeIds(detail.id)
+          console.log(firstBlood)
           // Filter: hanya id yang juga ada di solved_challenges
           const solvedIds = new Set((detail.solved_challenges || []).map(c => c.id))
           setFirstBloodIds(firstBlood.filter(id => solvedIds.has(id)))

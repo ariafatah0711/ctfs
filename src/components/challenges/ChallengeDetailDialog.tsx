@@ -104,8 +104,8 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             </div>
 
             {/* Description */}
-            <div>
-              <MarkdownRenderer content={challenge.description} />
+            <div className="max-w-full overflow-x-auto break-words">
+              <MarkdownRenderer content={challenge.description} className="max-w-full break-words" />
             </div>
 
             {/* Attachments */}
