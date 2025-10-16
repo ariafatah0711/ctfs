@@ -215,6 +215,30 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
  * Get leaderboard with progress
  */
 export async function getLeaderboard() {
+  const { data, error } = await supabase.rpc('get_leaderboard')
+  // console.log("getLeaderboard", data, error)
+  if (error) throw error
+  return data
+}
+
+/**
+ * Get lightweight leaderboard summary: username and final score (no progress history)
+ */
+export async function getLeaderboardSummary() {
+  // Reuse the RPC but strip progress to a lightweight shape
+  const data = await getLeaderboard()
+  // data is expected to be array of { username, progress }
+  return (data || []).map((d: any) => ({
+    id: d.id,
+    username: d.username,
+    // prefer explicit score field from RPC; otherwise fall back to progress array
+    score: typeof d.score === 'number' ? d.score : (d.progress?.at(-1)?.score ?? 0),
+    rank: d.rank,
+    last_solve: d.last_solve,
+  }))
+}
+
+export async function getTopProgress(topUsers: string[]) {
   const { data, error } = await supabase
     .from('solves')
     .select(`
@@ -222,38 +246,134 @@ export async function getLeaderboard() {
       challenges(points),
       users(id, username)
     `)
+    .in('user_id', topUsers)
     .order('created_at', { ascending: true })
+  // console.log('Get Solves User', topUsers, data, error)
 
   if (error) throw error
 
-  // transform ke leaderboard progress
-  const userProgress: Record<string, { username: string, progress: { date: string, score: number }[] }> = {}
-
-  data.forEach((row: any) => {
-    const uid = (row.users as { id: string, username: string }).id
-    if (!userProgress[uid]) {
-      userProgress[uid] = {
-        username: (row.users as { id: string, username: string }).username,
-        progress: []
-      }
+  // Build progress curve per user
+  const rows: any[] = (data as any[]) || []
+  const progress: Record<string, { username: string; history: { date: string; score: number }[] }> = {}
+  for (const row of rows) {
+    const user = row.users
+    if (!user) continue
+    if (!progress[user.id]) {
+      progress[user.id] = { username: user.username, history: [] }
     }
-    const prevScore = userProgress[uid].progress.at(-1)?.score || 0
-    userProgress[uid].progress.push({
+
+    const prev = progress[user.id].history.at(-1)?.score || 0
+    progress[user.id].history.push({
       date: row.created_at,
-      score: prevScore + row.challenges.points
+      score: prev + (row.challenges?.points || 0)
     })
+  }
+
+  return progress
+}
+
+/**
+ * Fetch progress curves for a list of usernames (convenience wrapper).
+ * Internally resolves usernames -> ids then reuses getTopProgress which expects user ids.
+ */
+export async function getTopProgressByUsernames(usernames: string[]) {
+  if (!usernames || usernames.length === 0) return {}
+
+  // Fetch user ids for the provided usernames
+  const { data: users, error: usersError } = await supabase
+    .from('users')
+    .select('id, username')
+    .in('username', usernames)
+
+  if (usersError) throw usersError
+
+  const idToUsername: Record<string, string> = {}
+  const ids: string[] = (users || []).map((u: any) => {
+    idToUsername[u.id] = u.username
+    return u.id
   })
 
-  const startDate = data[0]?.created_at || new Date().toISOString()
+  if (ids.length === 0) return {}
 
-  return Object.values(userProgress).map(user => ({
-    username: user.username,
-    progress: [
-      { date: startDate, score: 0 }, // start from 0
-      ...user.progress
-    ]
-  }))
+  const progressById = await getTopProgress(ids)
+
+  // Transform to username-keyed map
+  const result: Record<string, { username: string; history: { date: string; score: number }[] }> = {}
+  for (const id of Object.keys(progressById)) {
+    const entry = progressById[id]
+    const uname = idToUsername[id]
+    if (!uname) continue
+    result[uname] = {
+      username: entry.username,
+      history: entry.history,
+    }
+  }
+
+  return result
 }
+
+// export async function getLeaderboard() {
+//   const batchSize = 1000
+//   let allSolves: any[] = []
+//   let from = 0
+
+//   console.log('Fetching solves with pagination...')
+
+//   // 🔁 Fetch solves by batches until all retrieved
+//   while (true) {
+//     const { data, error } = await supabase
+//       .from('solves')
+//       .select(`
+//         created_at,
+//         challenges(points),
+//         users(id, username)
+//       `)
+//       .order('created_at', { ascending: true })
+//       .range(from, from + batchSize - 1)
+
+//     if (error) throw error
+
+//     allSolves = allSolves.concat(data)
+//     console.log(`Fetched ${data.length} solves (total ${allSolves.length})`)
+
+//     // stop if we’ve reached the last batch
+//     if (data.length < batchSize) break
+//     from += batchSize
+//   }
+
+//   console.log(`✅ Total solves fetched: ${allSolves.length}`)
+
+//   // 🧩 Build progress per user
+//   const userProgress: Record<string, { username: string, progress: { date: string, score: number }[] }> = {}
+//   const startDate = allSolves[0]?.created_at || new Date().toISOString()
+
+//   for (const row of allSolves) {
+//     const user = row.users
+//     if (!userProgress[user.id]) {
+//       userProgress[user.id] = { username: user.username, progress: [{ date: startDate, score: 0 }] }
+//     }
+
+//     const prevScore = userProgress[user.id].progress.at(-1)?.score || 0
+//     const points = row.challenges?.points || 0
+
+//     userProgress[user.id].progress.push({
+//       date: row.created_at,
+//       score: prevScore + points,
+//     })
+//   }
+
+//   // 🏁 Final leaderboard (sorted by score)
+//   const leaderboard = Object.values(userProgress)
+//     .map(user => ({
+//       username: user.username,
+//       score: user.progress.at(-1)?.score || 0,
+//       progress: user.progress,
+//     }))
+//     .sort((a, b) => b.score - a.score)
+
+//   console.log(`🏆 Leaderboard built with ${leaderboard.length} users`)
+//   return leaderboard
+// }
 
 /**
  * Get registered solvers for a challenge
@@ -401,6 +521,6 @@ export async function getNotifications(limit = 100, offset = 0) {
     console.error('Error fetching notifications:', error);
     return [];
   }
-  console.log(data)
+  // console.log(data)
   return data || [];
 }

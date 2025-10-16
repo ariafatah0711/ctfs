@@ -336,11 +336,34 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION update_username(uuid, text) TO authenticated;
 
 -- Leaderboard: urutkan berdasarkan jumlah solve
+-- CREATE OR REPLACE FUNCTION get_leaderboard()
+-- RETURNS TABLE (
+--   id UUID,
+--   username TEXT,
+--   solves BIGINT,
+--   rank BIGINT
+-- ) AS $$
+-- BEGIN
+--   RETURN QUERY
+--   SELECT
+--     u.id,
+--     u.username,
+--     COUNT(s.id) as solves,
+--     ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, MIN(s.created_at) ASC) as rank
+--   FROM public.users u
+--   LEFT JOIN public.solves s ON u.id = s.user_id
+--   GROUP BY u.id, u.username
+--   ORDER BY solves DESC, MIN(s.created_at) ASC;
+-- END;
+-- $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Leaderboard by total points (score)
 CREATE OR REPLACE FUNCTION get_leaderboard()
 RETURNS TABLE (
   id UUID,
   username TEXT,
-  solves INTEGER,
+  score BIGINT,
+  last_solve TIMESTAMPTZ,
   rank BIGINT
 ) AS $$
 BEGIN
@@ -348,12 +371,14 @@ BEGIN
   SELECT
     u.id,
     u.username,
-    COUNT(s.id) as solves,
-    ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, MIN(s.created_at) ASC) as rank
+    COALESCE(SUM(c.points), 0) AS score,
+    MAX(s.created_at) AS last_solve,
+    ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(c.points), 0) DESC, MAX(s.created_at) ASC) AS rank
   FROM public.users u
   LEFT JOIN public.solves s ON u.id = s.user_id
+  LEFT JOIN public.challenges c ON s.challenge_id = c.id
   GROUP BY u.id, u.username
-  ORDER BY solves DESC, MIN(s.created_at) ASC;
+  ORDER BY score DESC, MAX(s.created_at) ASC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

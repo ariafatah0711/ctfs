@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 
-import { getLeaderboard } from '@/lib/challenges'
+import { getLeaderboardSummary, getTopProgressByUsernames } from '@/lib/challenges'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LeaderboardEntry } from '@/types'
@@ -34,36 +34,38 @@ export default function ScoreboardPage() {
         setLoading(false)
         return
       }
-      const data = await getLeaderboard()
+      // 1) Fetch lightweight summary (username + score)
+      const summary = await getLeaderboardSummary()
 
-      data.sort((a: any, b: any) => {
-        const scoreA = a.progress.at(-1)?.score ?? 0
-        const scoreB = b.progress.at(-1)?.score ?? 0
-        if (scoreB !== scoreA) return scoreB - scoreA
-        const lastSolveA = a.progress.at(-1)
-          ? new Date(a.progress.at(-1).date).getTime()
-          : Infinity
-        const lastSolveB = b.progress.at(-1)
-          ? new Date(b.progress.at(-1).date).getTime()
-          : Infinity
-        return lastSolveA - lastSolveB
-      })
+      // 2) Sort by score desc. We want to show top 100 in the table
+      summary.sort((a: any, b: any) => b.score - a.score)
+      const top100 = summary.slice(0, 100)
 
-      const transformed: LeaderboardEntry[] = data.map((d: any, i: number) => {
-        const finalScore = d.progress.at(-1)?.score ?? 0
-        return {
-          id: String(i + 1),
-          username: d.username,
-          score: finalScore,
-          rank: i + 1,
-          progress: d.progress.map((p: any) => ({
-            date: String(p.date),
-            score: p.score,
-          })),
-        }
-      })
+      // Build base leaderboard entries for table (no progress history yet)
+      const baseLeaderboard: LeaderboardEntry[] = top100.map((t: any, i: number) => ({
+        id: String(i + 1),
+        username: t.username,
+        score: t.score ?? 0,
+        rank: i + 1,
+        progress: [],
+      }))
 
-      setLeaderboard(transformed)
+      // 3) For the chart we still only need detailed progress for top 10 — fetch those
+      const topForChart = top100.slice(0, 10)
+      const topUsernames = topForChart.map((t: any) => t.username)
+      const progressMap = await getTopProgressByUsernames(topUsernames)
+
+      // 4) Merge detailed progress for the top 10 into the base leaderboard
+      for (let i = 0; i < topForChart.length; i++) {
+        const uname = topForChart[i].username
+        const history = progressMap[uname]?.history ?? []
+        const finalScore = history.at(-1)?.score ?? topForChart[i].score ?? 0
+        baseLeaderboard[i].progress = history.map((p: any) => ({ date: String(p.date), score: p.score }))
+        baseLeaderboard[i].score = finalScore
+      }
+
+      // 5) Set leaderboard: table will receive top 100, chart will use first entries with progress
+      setLeaderboard(baseLeaderboard)
       setLoading(false)
     }
     fetchData()
