@@ -12,6 +12,7 @@ import APP from '@/config'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP.baseUrl),
   title: `${APP.shortName} - ${APP.fullName}`,
   description: APP.description,
   openGraph: {
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: `${APP.shortName} - ${APP.fullName}`,
+        type: 'image/png',
       },
     ],
     locale: 'id_ID',
@@ -36,6 +38,22 @@ export const metadata: Metadata = {
     description: APP.description,
     images: [`${APP.baseUrl}/${APP.image_icon}`],
   },
+  other: {
+    // Structured data biar Google bisa detect
+    'application/ld+json': JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": APP.baseUrl,
+      "name": `${APP.shortName} - ${APP.fullName}`,
+      "description": APP.description,
+      "image": `${APP.baseUrl}/${APP.image_icon}`,
+      "publisher": {
+        "@type": "Organization",
+        "name": APP.fullName,
+        "logo": `${APP.baseUrl}/${APP.image_icon}`
+      }
+    })
+  }
 }
 
 export default function RootLayout({
