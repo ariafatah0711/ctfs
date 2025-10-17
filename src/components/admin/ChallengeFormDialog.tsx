@@ -60,13 +60,14 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   const [flagLoading, setFlagLoading] = useState(false)
   const [fetchedFlag, setFetchedFlag] = useState<string | null>(null)
   const [copySuccess, setCopySuccess] = useState(false)
-  const [testFlagInput, setTestFlagInput] = useState("");
-  const [testFlagResult, setTestFlagResult] = useState<null | boolean>(null);
 
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl [&_button.absolute.right-4.top-4]:hidden">
+      <DialogContent
+        className="max-w-3xl w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl [&_button.absolute.right-4.top-4] p-4 md:p-8 max-h-[90vh] overflow-y-auto scroll-hidden"
+        style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
+      >
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-gray-100">{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>
         </DialogHeader>
@@ -252,10 +253,11 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 <Textarea required rows={5} value={formData.description} onChange={e => onChange({ ...formData, description: e.target.value })} className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm scroll-hidden" />
               )}
             </div>
-            <div>
+            <div className="md:col-span-2">
               <Label>Flag</Label>
-              <div className="flex items-center gap-2 pointer-events-auto">
-                <Input required={!editing} value={formData.flag} onChange={e => onChange({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} className="flex-1 transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm" />
+              {/* <div className="grid grid-cols-12 gap-2 pointer-events-auto"> */}
+              <div className="flex gap-2 pointer-events-auto">
+                <Input required={!editing} value={formData.flag} onChange={e => onChange({ ...formData, flag: e.target.value })} placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'} className="col-span-11 transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm" />
                 <Button
                   aria-label="Show flag"
                   title="Show flag"
@@ -290,8 +292,6 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   {flagLoading ? <span className="animate-pulse">…</span> : <Flag size={18} />}
                 </Button>
               </div>
-              {/* flag preview modal is rendered outside as a sibling Dialog to avoid nested overlay issues */}
-              <p className="text-xs text-muted-foreground mt-1">{editing ? 'Leave blank to keep current flag.' : 'Flag is required for new challenges.'}</p>
             </div>
             <div className="md:col-span-2">
               <div className="flex items-center justify-between">
@@ -334,7 +334,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
               </div>
             </div>
           </div>
-          <DialogFooter className="flex items-center justify-end gap-2">
+          <DialogFooter className="flex flex-row items-center justify-end gap-2 sticky bottom-0 bg-white dark:bg-gray-900 z-10 pt-2">
             <Button
               type="button"
               variant="ghost"

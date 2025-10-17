@@ -533,7 +533,7 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_difficulty TEXT,
   p_hint JSONB DEFAULT NULL,
   p_attachments JSONB DEFAULT '[]',
-  p_is_active BOOLEAN DEFAULT TRUE,
+  p_is_active BOOLEAN DEFAULT NULL,
   p_flag TEXT DEFAULT NULL,
   p_is_dynamic BOOLEAN DEFAULT false,
   p_min_points INTEGER DEFAULT 0,
@@ -558,7 +558,7 @@ BEGIN
       difficulty = p_difficulty,
       hint = p_hint,
       attachments = p_attachments,
-      is_active = p_is_active,
+      is_active = COALESCE(p_is_active, is_active), -- hanya update jika p_is_active tidak NULL
       is_dynamic = p_is_dynamic,
       min_points = p_min_points,
       decay_per_solve = p_decay_per_solve,

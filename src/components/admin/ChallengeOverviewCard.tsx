@@ -30,19 +30,19 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
         {info && (
           <div className="grid grid-cols-2 gap-4 mb-6">
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-              <div className="text-xs text-muted-foreground dark:text-gray-300">Users</div>
+              <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Users</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_users}</div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-              <div className="text-xs text-muted-foreground dark:text-gray-300">Admins</div>
+              <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Admins</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_admins}</div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-              <div className="text-xs text-muted-foreground dark:text-gray-300">Unique Solvers</div>
+              <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Uniq Solvers</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.unique_solvers}</div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-              <div className="text-xs text-muted-foreground dark:text-gray-300">Total Solves</div>
+              <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Solves</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_solves}</div>
             </motion.div>
           </div>

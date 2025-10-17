@@ -172,7 +172,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_difficulty: challengeData.difficulty,
       p_hint: hintValue,
       p_attachments: challengeData.attachments || [],
-      p_is_active: challengeData.is_active !== undefined ? challengeData.is_active : true,
+      p_is_active: challengeData.is_active, // kirim undefined jika tidak ada perubahan
       p_flag: challengeData.flag || null,
       p_is_dynamic: challengeData.is_dynamic ?? false,
       p_min_points: challengeData.min_points ?? 0,

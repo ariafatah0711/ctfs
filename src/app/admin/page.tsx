@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { ChevronDown, Copy, Check } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 import ChallengeListItem from '@/components/admin/ChallengeListItem'
 import ChallengeOverviewCard from '@/components/admin/ChallengeOverviewCard'
 import RecentSolversList from '@/components/admin/RecentSolversList'
@@ -16,7 +15,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
-// import MarkdownRenderer from '@/components/MarkdownRenderer' // unused
 import Loader from "@/components/custom/loading"
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
@@ -29,13 +27,9 @@ import { Challenge, Attachment } from '@/types'
 export default function AdminPage() {
   const router = useRouter()
   const { user, loading } = useAuth()
-  // const [isAdminUser, setIsAdminUser] = useState(false) // unused
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [solvers, setSolvers] = useState<any[]>([])
   const [siteInfo, setSiteInfo] = useState<any | null>(null)
-  const overviewRef = useRef<HTMLDivElement>(null)
-  // const [solverOffset, setSolverOffset] = useState(0) // unused
-  // const [hasMoreSolvers, setHasMoreSolvers] = useState(true) // unused
 
   // Dialog / form state
   const [openForm, setOpenForm] = useState(false)
@@ -194,7 +188,7 @@ export default function AdminPage() {
     if (flag) {
       // Create new toast
       const renderToast = (isCopied: boolean) => (
-        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg p-4 max-w-[500px] border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg p-4 min-w-[300px] max-w-[800px] border border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center mb-2">
             <div className="font-medium text-sm text-gray-700 dark:text-gray-200">Flag:</div>
             <button
@@ -348,8 +342,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div id="overview-section" className="pt-4 lg:pt-0" ref={overviewRef}></div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
           {/* Kiri: Challenge List */}
           <motion.div
@@ -358,7 +351,7 @@ export default function AdminPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="h-full mb-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <Card className="h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
@@ -418,7 +411,6 @@ export default function AdminPage() {
 
           {/* Kanan: Sidebar */}
           <motion.aside
-            // className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h-[calc(100vh-6rem)] overflow-y-auto sticky top-0 scroll-hidden"
             className="lg:col-span-1 order-2 lg:order-none flex flex-col gap-6 h-auto lg:h overflow-y-auto sticky top-0 scroll-hidden"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -426,7 +418,6 @@ export default function AdminPage() {
           >
             {/* Overview */}
             <motion.div
-              ref={overviewRef}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -513,19 +504,6 @@ export default function AdminPage() {
         // @ts-ignore
         confirmDisabled={!!pendingDeleteDetail && deleteConfirmInput !== pendingDeleteDetail.title}
       />
-
-      <motion.button
-        className="fixed bottom-6 right-6 z-50 p-4 rounded-full bg-primary-500 text-white shadow-lg cursor-pointer lg:hidden hover:bg-primary-600 transition-colors"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => {
-          overviewRef.current?.scrollIntoView({ behavior: 'smooth' })
-        }}
-      >
-        <ChevronDown className="w-6 h-6" />
-      </motion.button>
     </div>
   )
 }
