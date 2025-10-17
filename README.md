@@ -9,11 +9,23 @@
 
 [https://ctf.ariaf.my.id](https://ctf.ariaf.my.id)
 
-![alt text](images/README/image-4.png)
-![alt text](images/README/image-7.png)
-<!-- ![alt text](images/README/image-5.png) -->
-![alt text](images/README/image-6.png)
-![alt text](images/README/image-8.png)
+### Page Screenshot
+![Home Page](images/README/image-9.png)
+![Scoreboard](images/README/image-10.png)
+![Admin Dashboard](images/README/image-11.png)
+![Admin Overview](images/README/image-17.png)
+![Notifications](images/README/image-12.png)
+
+<details>
+<summary>📸 More Screenshot Demo (Click to expand)</summary>
+
+### User Features
+![Profile Page](images/README/image-13.png)
+![Admin Solves](images/README/image-16.png)
+![Login](images/README/image-14.png)
+![Signup](images/README/image-15.png)
+
+</details>
 
 ## 📖 Deployment Guide
 
@@ -48,7 +60,34 @@ cd ctfs
        - Dummy solves → `dummy_solves.sql` (can be generated using `create_solves.py` or use the pre-generated file)
        - Reset dummy data → `dummy_reset.sql`
 
-### 3. Environment Configuration
+### 3. Application Configuration
+
+The application can be customized through `src/config.ts`:
+
+```typescript
+export const APP = {
+  shortName: 'FGTE',              // Short name for your CTF platform
+  fullName: 'CTFS Platform',      // Full name of your platform
+  description: 'Your description', // Platform description
+  flagFormat: 'FGTE{your_flag_here}', // Flag format for challenges
+  challengeCategories: [          // Available challenge categories
+    'Intro',
+    'Misc',
+    'Osint',
+    'Crypto',
+    'Forensics',
+    'Web',
+    'Reverse',
+  ],
+  links: {                        // Platform-related links
+    github: 'your_github_repo',
+    discord: 'your_discord_invite',
+    // ... other links
+  },
+}
+```
+
+### 4. Environment Configuration
 
 Create a `.env.local` file at the project root:
 
@@ -61,11 +100,10 @@ Get these values from your Supabase project dashboard.
 
 ### 4. Deployment
 
-
 #### 1. Local Development & Testing
 
 ```bash
-# Install dependencies
+# Install dependencies (requires Node.js 18+ and npm 9+)
 npm install
 
 # Start development server
