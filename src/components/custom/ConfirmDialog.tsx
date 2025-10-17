@@ -37,7 +37,7 @@ export default function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white dark:bg-gray-900">
+      <DialogContent className="bg-white dark:bg-gray-900 [&_button.absolute]:scale-125 [&_button.absolute]:text-red-500 [&_button.absolute]:hover:text-red-700">
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">{title}</DialogTitle>
         </DialogHeader>

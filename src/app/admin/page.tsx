@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Copy, Check } from 'lucide-react'
 import ChallengeListItem from '@/components/admin/ChallengeListItem'
 import ChallengeOverviewCard from '@/components/admin/ChallengeOverviewCard'
 import RecentSolversList from '@/components/admin/RecentSolversList'
@@ -159,22 +159,110 @@ export default function AdminPage() {
     setShowPreview(false)
   }
 
-  // const refresh = async () => {
-  //   const data = await getChallenges(undefined, true)
-  //   setChallenges(data)
-  // } // unused
-
   const fetchSolvers = async (offset = 0) => {
   const data = await getSolversAll(50, offset)
   setSolvers(prev => offset === 0 ? data : [...prev, ...data])
   }
 
+  const [copySuccess, setCopySuccess] = useState<string | null>(null)
+  const [activeToast, setActiveToast] = useState<string | null>(null)
+  const [isRequesting, setIsRequesting] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout>()
+
   const handleViewFlag = async (id: string) => {
+    // Jika sedang ada request yang berjalan, abaikan request baru
+    if (isRequesting) return
+
+    // Clear timeout sebelumnya jika ada
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+
+    // Set flag bahwa sedang ada request
+    setIsRequesting(true)
+
+    // Dismiss toast yang aktif
+    if (activeToast) {
+      toast.dismiss(activeToast)
+      setActiveToast(null)
+    }
+
+    // Tambah delay kecil untuk animasi dismiss
+    await new Promise(resolve => setTimeout(resolve, 100))
+
     const flag = await getFlag(id)
     if (flag) {
-      toast.success(`Flag: ${flag}`)
+      // Create new toast
+      const renderToast = (isCopied: boolean) => (
+        <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-lg rounded-lg p-4 max-w-[500px] border border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between items-center mb-2">
+            <div className="font-medium text-sm text-gray-700 dark:text-gray-200">Flag:</div>
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(flag)
+                setCopySuccess(id)
+                // Update toast content to show copied state
+                toast.custom(renderToast(true), {
+                  id: id,
+                  duration: 6000,
+                  position: 'top-right',
+                })
+                // Reset after 2 seconds
+                setTimeout(() => {
+                  setCopySuccess(null)
+                  toast.custom(renderToast(false), {
+                    id: id,
+                    duration: 6000,
+                    position: 'top-right',
+                  })
+                }, 2000)
+              }}
+              className="flex items-center gap-1 px-2 py-1 text-xs rounded bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-700 dark:text-indigo-300 transition-colors"
+            >
+              {isCopied ? (
+                <><Check size={14} /> Copied!</>
+              ) : (
+                <><Copy size={14} /> Copy Flag</>
+              )}
+            </button>
+          </div>
+          <div className="font-mono text-sm bg-indigo-50 dark:bg-gray-800 p-3 rounded break-all border-2 border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-100">
+            {flag}
+          </div>
+        </div>
+      );
+
+      const toastId = toast.custom(renderToast(false),
+        {
+          duration: 6000,
+          position: 'top-right',
+          id: id // Use challenge id as toast id
+        }
+      )
+      setActiveToast(id)
+
+      // Set timeout untuk mengizinkan request baru setelah 300ms
+      timeoutRef.current = setTimeout(() => {
+        setIsRequesting(false)
+      }, 300)
     } else {
-      toast.error('Failed to take flag or you are not admin.')
+      if (activeToast) {
+        toast.dismiss(activeToast)
+      }
+      const errorToastId = toast.error('Failed to take flag or you are not admin.')
+      setActiveToast(errorToastId)
+
+      // Set timeout untuk mengizinkan request baru setelah 300ms
+      timeoutRef.current = setTimeout(() => {
+        setIsRequesting(false)
+      }, 300)
+    }
+
+    // Cleanup jika component unmount
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
     }
   }
 

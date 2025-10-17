@@ -49,7 +49,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className="w-full max-w-lg rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="w-full max-w-lg rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scroll-hidden [&_button.absolute.right-4.top-4]:hidden"
         onClick={e => e.stopPropagation()}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
@@ -64,7 +64,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         </DialogTitle>
 
         {/* Tabs */}
-  <div className="flex justify-between gap-2">
+         <div className="flex justify-between gap-2">
           <button
             className={`flex-1 px-2 py-1 rounded-t-md font-bold text-sm transition-colors ${challengeTab === 'challenge' ? 'bg-[#35355e] dark:bg-gray-800 text-pink-300 dark:text-pink-200' : 'bg-[#232344] dark:bg-gray-900 text-gray-300 dark:text-gray-400 hover:text-pink-200'}`}
             onClick={() => setChallengeTab('challenge', challenge.id)}

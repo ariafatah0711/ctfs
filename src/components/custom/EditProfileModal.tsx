@@ -61,7 +61,7 @@ export default function EditProfileModal({
       <DialogTrigger asChild>
         <Button className={triggerButtonClass}>Edit Profile</Button>
       </DialogTrigger>
-      <DialogContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100">
+      <DialogContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 [&_button.absolute.right-4.top-4]:hidden">
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">Edit Profile</DialogTitle>
           <DialogDescription className="text-gray-500 dark:text-gray-300">Update your username below.</DialogDescription>
