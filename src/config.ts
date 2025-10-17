@@ -1,11 +1,18 @@
 export const APP = {
-//   shortName: 'CTFS',
-//   fullName: 'CTFS Platform',
   shortName: 'FGTE',
   fullName: 'CTFS Platform',
   description: 'Aplikasi CTF minimalis dengan Next.js dan Supabase',
   flagFormat: 'FGTE{your_flag_here}',
   year: new Date().getFullYear(),
+  challengeCategories: [
+    'intro',
+    'misc',
+    'osint',
+    'crypto',
+    'forensics',
+    'web',
+    'reverse',
+  ],
   links: {
     github: 'https://github.com/ariafatah0711/ctfs',
     discord: 'https://discord.com/invite/A5rgMZBHPr', // Ganti dengan link Discord yang valid

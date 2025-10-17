@@ -5,7 +5,6 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SolversList, { Solver } from './SolversList';
 import HintDialog from './HintDialog';
 import { Attachment, ChallengeWithSolve } from '@/types';
-import { Description } from '@radix-ui/react-dialog';
 
 interface ChallengeDetailDialogProps {
   open: boolean;
@@ -42,14 +41,13 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   showHintModal,
   setShowHintModal,
 }) => {
-  const [bulkDownloading, setBulkDownloading] = useState<{ [key: string]: boolean }>({});
   const [copiedAll, setCopiedAll] = useState<{ [key: string]: boolean }>({});
   if (!challenge) return null;
 
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className="w-full max-w-lg rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scroll-hidden [&_button.absolute.right-4.top-4]:hidden"
+        className="w-full max-w-lg rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scroll-hidden [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"
         onClick={e => e.stopPropagation()}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >

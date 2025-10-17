@@ -23,6 +23,7 @@ import { isAdmin } from '@/lib/auth'
 import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
 import { getInfo } from '@/lib/users'
 import { Challenge, Attachment } from '@/types'
+import APP from '@/config'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -52,7 +53,7 @@ export default function AdminPage() {
   const emptyForm = {
     title: '',
     description: '',
-    category: 'Web',
+    category: APP.challengeCategories?.[0] || 'Web',
     points: 100,
     max_points: 100,
     flag: '',
@@ -138,7 +139,7 @@ export default function AdminPage() {
     setFormData({
       title: c.title,
       description: c.description || '',
-      category: c.category || 'Web',
+  category: c.category || APP.challengeCategories?.[0] || 'Web',
       points: c.points || 100,
       max_points: c.max_points || c.points || 100,
       flag: c.flag || '',
@@ -362,14 +363,36 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="mb-4">
-                  <ChallengeFilterBar
-                    filters={filters}
-                    categories={Array.from(new Set(challenges.map(c => c.category)))}
-                    difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
-                    onFilterChange={handleFilterChange}
-                    onClear={handleClearFilters}
-                    showStatusFilter={false}
-                  />
+                  {/* Kategori terurut dari config, jika ada */}
+                  {(() => {
+                    const allCategories = Array.from(new Set(challenges.map(c => c.category))).filter(Boolean)
+                    const matchedCategorySet = new Set<string>()
+                    const orderedCategories = [
+                      ...(APP.challengeCategories || []).flatMap(p => {
+                        const pLower = p.toLowerCase()
+                        const found = allCategories.find(c => {
+                          const cLower = c.toLowerCase()
+                          return cLower.includes(pLower) || pLower.includes(cLower)
+                        })
+                        if (found && !matchedCategorySet.has(found)) {
+                          matchedCategorySet.add(found)
+                          return found
+                        }
+                        return [] as string[]
+                      }),
+                      ...allCategories.filter(c => !matchedCategorySet.has(c)).sort()
+                    ]
+                    return (
+                      <ChallengeFilterBar
+                        filters={filters}
+                        categories={orderedCategories}
+                        difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
+                        onFilterChange={handleFilterChange}
+                        onClear={handleClearFilters}
+                        showStatusFilter={false}
+                      />
+                    )
+                  })()}
                 </div>
                 {filteredChallenges.length === 0 ? (
                   <motion.div
@@ -387,22 +410,37 @@ export default function AdminPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
                   >
-                    {filteredChallenges.map(ch => (
-                      <ChallengeListItem
-                        key={ch.id}
-                        challenge={ch}
-                        onEdit={openEdit}
-                        onDelete={askDelete}
-                        onViewFlag={handleViewFlag}
-                        onToggleActive={async (id, checked) => {
-                          const ok = await setChallengeActive(id, checked)
-                          if (ok) {
-                            setChallenges(prev => prev.map(c => c.id === id ? { ...c, is_active: checked } : c))
-                            toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
-                          }
-                        }}
-                      />
-                    ))}
+                    {filteredChallenges
+                      .slice()
+                      .sort((a, b) => {
+                        // Urutkan points descending
+                        if (b.points !== a.points) return b.points - a.points;
+                        // Jika points sama, urutkan berdasarkan urutan kategori di config
+                        const catOrder = APP.challengeCategories || [];
+                        const aIdx = catOrder.findIndex(c => c.toLowerCase() === (a.category || '').toLowerCase());
+                        const bIdx = catOrder.findIndex(c => c.toLowerCase() === (b.category || '').toLowerCase());
+                        if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+                        if (aIdx !== -1) return -1;
+                        if (bIdx !== -1) return 1;
+                        // Fallback: alfabet
+                        return (a.category || '').localeCompare(b.category || '');
+                      })
+                      .map(ch => (
+                        <ChallengeListItem
+                          key={ch.id}
+                          challenge={ch}
+                          onEdit={openEdit}
+                          onDelete={askDelete}
+                          onViewFlag={handleViewFlag}
+                          onToggleActive={async (id, checked) => {
+                            const ok = await setChallengeActive(id, checked)
+                            if (ok) {
+                              setChallenges(prev => prev.map(c => c.id === id ? { ...c, is_active: checked } : c))
+                              toast.success(`Challenge ${checked ? 'activated' : 'deactivated'}`)
+                            }
+                          }}
+                        />
+                      ))}
                   </motion.div>
                 )}
               </CardContent>
@@ -455,6 +493,7 @@ export default function AdminPage() {
             onUpdateAttachment={updateAttachment}
             onRemoveAttachment={removeAttachment}
             setShowPreview={setShowPreview}
+            categories={APP.challengeCategories || []}
           />
         )}
       </AnimatePresence>

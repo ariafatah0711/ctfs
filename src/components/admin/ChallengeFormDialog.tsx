@@ -30,6 +30,7 @@ interface ChallengeFormDialogProps {
   onUpdateAttachment: (i: number, field: keyof Attachment, v: string) => void
   onRemoveAttachment: (i: number) => void
   setShowPreview: (v: boolean) => void
+  categories: string[]
 }
 
 const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
@@ -48,12 +49,8 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   onUpdateAttachment,
   onRemoveAttachment,
   setShowPreview,
+  categories,
 }) => {
-
-  // ✅ Pindahkan useState ke sini
-  const [categories, setCategories] = useState<string[]>([
-    "Web", "Reverse", "Crypto", "Forensics", "Pwn", "Misc", "Osint"
-  ]);
 
   // small modal for viewing flag in the form
   const [flagPreviewOpen, setFlagPreviewOpen] = useState(false)
@@ -366,7 +363,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
         }
       }}
     >
-      <DialogContent className="bg-[#232344] dark:bg-gray-900 rounded-md shadow-2xl max-w-xl min-w-[320px] w-full border border-[#35355e] dark:border-gray-700 p-6 font-mono [&_button.absolute.right-4.top-4]:hidden" style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}>
+      <DialogContent className="bg-[#232344] dark:bg-gray-900 rounded-md shadow-2xl max-w-xl min-w-[320px] w-full border border-[#35355e] dark:border-gray-700 p-6 font-mono [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white" style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}>
         <div className="flex justify-between items-center mb-2">
           <div className="font-medium text-sm text-gray-700 dark:text-gray-200">Flag:</div>
           <Button

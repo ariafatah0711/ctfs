@@ -3,15 +3,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { ChallengeWithSolve, User, Attachment } from '@/types'
-
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
-
 import { Solver } from '@/components/challenges/SolversList';
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
+import APP from '@/config'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
@@ -176,9 +175,8 @@ export default function ChallengesPage() {
     return true
   })
 
-  // Preferred order for categories (customize as needed)
-  const preferredOrder = ['intro', 'misc', 'osint', 'crypto', 'forensic', 'web', 'reverse']
-  // const preferredOrder = ['misc', 'osint', 'crypto']
+  // Preferred order for categories (ambil dari config)
+  const preferredOrder = APP.challengeCategories || []
 
   // Get unique categories and difficulties for filter options
   const allCategories = Array.from(new Set(challenges.map(c => c.category))).filter(Boolean)
