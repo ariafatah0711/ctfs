@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
-
 import Navbar from '@/components/Navbar'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -15,6 +14,28 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: `${APP.shortName} - ${APP.fullName}`,
   description: APP.description,
+  openGraph: {
+    title: `${APP.shortName} - ${APP.fullName}`,
+    description: APP.description,
+    url: APP.baseUrl,
+    siteName: APP.fullName,
+    images: [
+      {
+        url: `${APP.baseUrl}/${APP.image_icon}`,
+        width: 1200,
+        height: 630,
+        alt: `${APP.shortName} - ${APP.fullName}`,
+      },
+    ],
+    locale: 'id_ID',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${APP.shortName} - ${APP.fullName}`,
+    description: APP.description,
+    images: [`${APP.baseUrl}/${APP.image_icon}`],
+  },
 }
 
 export default function RootLayout({
@@ -24,19 +45,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <title>{APP.fullName}</title>
-      </head>
       <body className={inter.className}>
         <ThemeProvider>
           <AuthProvider>
             <NotificationsProvider>
               <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 <Navbar />
-                <div className="pt-14">
-                  {children}
-                </div>
+                <div className="pt-14">{children}</div>
                 <Toaster position="top-right" reverseOrder={false} />
               </div>
             </NotificationsProvider>

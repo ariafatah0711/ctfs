@@ -15,13 +15,19 @@ export const APP = {
   ],
   links: {
     github: 'https://github.com/ariafatah0711/ctfs',
-    discord: 'https://discord.com/invite/A5rgMZBHPr', // Ganti dengan link Discord yang valid
+    discord: 'https://discord.com/invite/A5rgMZBHPr',
     nextjs: 'https://nextjs.org/',
     tailwind: 'https://tailwindcss.com/',
     framer: 'https://www.framer.com/motion/',
     supabase: 'https://supabase.com/',
     vercel: 'https://vercel.com/',
   },
+
+  // 🌐 Base URL (otomatis ambil dari env kalau ada)
+  baseUrl:
+    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', // opsional fallback
+  image_icon:
+    process.env.NEXT_PUBLIC_SITE_IMAGE || 'favicon.ico', // opsional fallback
 }
 
 export default APP
