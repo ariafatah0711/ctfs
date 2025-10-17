@@ -61,14 +61,25 @@ BEGIN
 END $$;
 
 
--- 1. DROP EXISTING OBJECTS (reset)
+-- DROP EXISTING OBJECTS (reset)
 DROP VIEW IF EXISTS public.challenges_with_masked_flag CASCADE;
 DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
 
--- 2. CREATE TABLES Users table (tanpa email, score, rank)
+-- ########################################################
+-- #################### Extensions ########################
+-- ########################################################
+-- --------------------------------------------------------
+
+-- ########################################################
+-- ####################### Tables #########################
+-- ########################################################
+-- --------------------------------------------------------
+-- ########################################################
+-- Table: users
+-- ########################################################
 CREATE TABLE public.users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
@@ -77,7 +88,9 @@ CREATE TABLE public.users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Challenges table (metadata only)
+-- ########################################################
+-- Table: challenges
+-- ########################################################
 CREATE TABLE public.challenges (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
@@ -96,20 +109,24 @@ CREATE TABLE public.challenges (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-ALTER TABLE public.challenges
-ADD COLUMN IF NOT EXISTS is_dynamic BOOLEAN DEFAULT false,
-ADD COLUMN IF NOT EXISTS max_points INTEGER DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS min_points INTEGER DEFAULT 0,
-ADD COLUMN IF NOT EXISTS decay_per_solve INTEGER DEFAULT 0;
+-- ALTER TABLE public.challenges
+-- ADD COLUMN IF NOT EXISTS is_dynamic BOOLEAN DEFAULT false,
+-- ADD COLUMN IF NOT EXISTS max_points INTEGER DEFAULT NULL,
+-- ADD COLUMN IF NOT EXISTS min_points INTEGER DEFAULT 0,
+-- ADD COLUMN IF NOT EXISTS decay_per_solve INTEGER DEFAULT 0;
 
--- Challenge flags table (separate, admin-only)
+-- ########################################################
+-- Table: challenges_flags
+-- ########################################################
 CREATE TABLE public.challenge_flags (
   challenge_id UUID PRIMARY KEY REFERENCES public.challenges(id) ON DELETE CASCADE,
   flag TEXT NOT NULL,
   flag_hash TEXT UNIQUE NOT NULL
 );
 
--- Solves table
+-- ########################################################
+-- Table: solves
+-- ########################################################
 CREATE TABLE public.solves (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
@@ -118,7 +135,9 @@ CREATE TABLE public.solves (
   UNIQUE(user_id, challenge_id)
 );
 
--- Table untuk menampung solve chall nonaktif
+-- ########################################################
+-- Table: solves_nonactive
+-- ########################################################
 CREATE TABLE IF NOT EXISTS public.solves_nonactive (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
@@ -127,12 +146,13 @@ CREATE TABLE IF NOT EXISTS public.solves_nonactive (
   moved_at TIMESTAMP WITH TIME ZONE DEFAULT now()  -- waktu dipindahin
 );
 
--- -- Enable RLS
--- ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.challenge_flags ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
-
+-- ########################################################
+-- #################### Functions ########################
+-- ########################################################
+-- --------------------------------------------------------
+-- ########################################################
+-- Function: generate_flag_hash(flag_text TEXT)
+-- ########################################################
 CREATE OR REPLACE FUNCTION generate_flag_hash(flag_text TEXT)
 RETURNS TEXT AS $$
 BEGIN
@@ -140,6 +160,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
+-- ########################################################
+-- Function: is_admin()
+-- ########################################################
 CREATE OR REPLACE FUNCTION is_admin()
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -149,9 +172,14 @@ BEGIN
   SELECT is_admin INTO v_is_admin FROM public.users WHERE id = v_user_id;
   RETURN COALESCE(v_is_admin, FALSE);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
--- Create profile function (RPC)
+GRANT EXECUTE ON FUNCTION is_admin() TO authenticated;
+
+-- ########################################################
+-- Function: create_profile(p_id UUID, p_username TEXT)
+-- ########################################################
 CREATE OR REPLACE FUNCTION create_profile(p_id uuid, p_username text)
 RETURNS void AS $$
 DECLARE
@@ -182,8 +210,14 @@ BEGIN
   LEFT JOIN public.users pu ON pu.id = au.id
   WHERE pu.id IS NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
+GRANT EXECUTE ON FUNCTION create_profile(UUID, TEXT) TO authenticated;
+
+-- ########################################################
+-- Function: auto_update_flag_hash()
+-- ########################################################
 CREATE OR REPLACE FUNCTION auto_update_flag_hash()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -198,6 +232,9 @@ CREATE TRIGGER trigger_auto_flag_hash
   FOR EACH ROW
   EXECUTE FUNCTION auto_update_flag_hash();
 
+-- ########################################################
+-- Function: get_email_by_username(p_username TEXT) - ANON
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_email_by_username(p_username TEXT)
 RETURNS TEXT AS $$
 DECLARE v_email TEXT;
@@ -210,8 +247,14 @@ BEGIN
 
   RETURN v_email;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
+GRANT EXECUTE ON FUNCTION get_email_by_username(text) TO anon, authenticated;
+
+-- ########################################################
+-- Function: get_user_profile(p_id UUID)
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_user_profile(p_id UUID)
 RETURNS TABLE (
   id UUID,
@@ -228,11 +271,14 @@ BEGIN
   LEFT JOIN auth.users au ON au.id = u.id
   WHERE u.id = p_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
 GRANT EXECUTE ON FUNCTION get_user_profile(UUID) TO authenticated;
 
+-- ########################################################
 -- Function: detail_user(p_id UUID)
--- Mengembalikan: id, username, rank, solved challenges (id, title, category, points, difficulty, solved_at)
+-- ########################################################
 CREATE OR REPLACE FUNCTION detail_user(p_id UUID)
 RETURNS JSON AS $$
 DECLARE
@@ -299,9 +345,14 @@ BEGIN
     'solved_challenges', COALESCE(v_solves, '[]'::json)
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
--- Update username function (RPC)
+GRANT EXECUTE ON FUNCTION detail_user(p_id UUID) TO authenticated;
+
+-- ########################################################
+-- Function: update_username(p_id UUID, p_username TEXT)
+-- ########################################################
 CREATE OR REPLACE FUNCTION update_username(p_id uuid, p_username text)
 RETURNS json AS $$
 DECLARE
@@ -331,33 +382,14 @@ BEGIN
   UPDATE public.users SET username = v_username, updated_at = now() WHERE id = p_id;
   RETURN json_build_object('success', true, 'username', v_username);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_username(uuid, text) TO authenticated;
 
--- Leaderboard: urutkan berdasarkan jumlah solve
--- CREATE OR REPLACE FUNCTION get_leaderboard()
--- RETURNS TABLE (
---   id UUID,
---   username TEXT,
---   solves BIGINT,
---   rank BIGINT
--- ) AS $$
--- BEGIN
---   RETURN QUERY
---   SELECT
---     u.id,
---     u.username,
---     COUNT(s.id) as solves,
---     ROW_NUMBER() OVER (ORDER BY COUNT(s.id) DESC, MIN(s.created_at) ASC) as rank
---   FROM public.users u
---   LEFT JOIN public.solves s ON u.id = s.user_id
---   GROUP BY u.id, u.username
---   ORDER BY solves DESC, MIN(s.created_at) ASC;
--- END;
--- $$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Leaderboard by total points (score)
+-- ########################################################
+-- Function: get_leaderboard()
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_leaderboard()
 RETURNS TABLE (
   id UUID,
@@ -380,9 +412,14 @@ BEGIN
   GROUP BY u.id, u.username
   ORDER BY score DESC, MAX(s.created_at) ASC;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
--- Submit flag function
+GRANT EXECUTE ON FUNCTION get_leaderboard() TO authenticated;
+
+-- ########################################################
+-- Function: submit_flag(p_challenge_id UUID, p_flag TEXT)
+-- ########################################################
 CREATE OR REPLACE FUNCTION submit_flag(
   p_challenge_id uuid,
   p_flag text
@@ -447,8 +484,14 @@ BEGIN
 
   RETURN json_build_object('success', true, 'message', format('Correct! +%s points.', v_awarded_points));
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
+GRANT EXECUTE ON FUNCTION submit_flag(uuid, text) TO authenticated;
+
+-- ########################################################
+-- Function: add_challenge(...)
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_flag(p_challenge_id uuid)
 RETURNS text AS $$
 DECLARE
@@ -464,11 +507,14 @@ BEGIN
 
   RETURN v_flag;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_flag(p_challenge_id uuid) TO authenticated;
 
--- Add challenge function (RPC)
+-- ########################################################
+-- Function: add_challenge(...)
+-- ########################################################
 CREATE OR REPLACE FUNCTION add_challenge(
   p_title TEXT,
   p_description TEXT,
@@ -501,10 +547,14 @@ BEGIN
 
   RETURN v_challenge_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION add_challenge TO authenticated;
 
+-- ########################################################
+-- Function: delete_challenge(p_challenge_id UUID)
+-- ########################################################
 CREATE OR REPLACE FUNCTION delete_challenge(
   p_challenge_id UUID
 )
@@ -519,11 +569,14 @@ BEGIN
   DELETE FROM public.challenges WHERE id = p_challenge_id;
   RETURN TRUE;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION delete_challenge(UUID) TO authenticated;
 
--- Update challenge function (RPC)
+-- ########################################################
+-- Function: update_challenge(...)
+-- ########################################################
 CREATE OR REPLACE FUNCTION update_challenge(
   p_challenge_id UUID,
   p_title TEXT,
@@ -588,7 +641,8 @@ BEGIN
 
   RETURN TRUE;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_challenge(
   uuid, text, text, text, integer, text, jsonb, jsonb, boolean, text, boolean, integer, integer, integer
@@ -643,7 +697,9 @@ AFTER UPDATE OF is_active ON public.challenges
 FOR EACH ROW
 EXECUTE FUNCTION handle_challenge_activation();
 
--- Function untuk aktif/nonaktifkan challenge
+-- ########################################################
+-- Function: set_challenge_active(p_challenge_id UUID, p_active BOOLEAN)
+-- ########################################################
 CREATE OR REPLACE FUNCTION set_challenge_active(
   p_challenge_id UUID,
   p_active BOOLEAN
@@ -670,10 +726,14 @@ BEGIN
     'is_active', p_active
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION set_challenge_active(UUID, BOOLEAN) TO authenticated;
 
+-- ########################################################
+-- Function: get_category_totals()
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_category_totals()
 RETURNS TABLE (
   category TEXT,
@@ -687,12 +747,14 @@ BEGIN
   GROUP BY c.category
   ORDER BY c.category;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
 
--- RPC: get_user_first_bloods
--- Mengembalikan daftar challenge_id di mana user adalah first solver (deterministik)
+-- ########################################################
+-- Function: get_user_first_bloods(p_user_id UUID)
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_user_first_bloods(p_user_id UUID)
 RETURNS TABLE(challenge_id UUID)
 AS $$
@@ -712,10 +774,9 @@ $$ LANGUAGE plpgsql;
 
 GRANT EXECUTE ON FUNCTION get_user_first_bloods(UUID) TO authenticated;
 
--- Function: get_notifications
--- Mengambil notifikasi chall baru & first blood
-DROP FUNCTION IF EXISTS get_notifications(integer, integer);
-
+-- ########################################################
+-- Function: get_notifications(p_limit INT, p_offset INT)
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_notifications(
   p_limit INT DEFAULT 50,
   p_offset INT DEFAULT 0
@@ -776,10 +837,14 @@ BEGIN
   ORDER BY t.created_at DESC
   LIMIT p_limit OFFSET p_offset;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_notifications(INT, INT) TO authenticated;
 
+-- ########################################################
+-- Function: get_solvers_all(p_limit INT, p_offset INT)
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_solvers_all(
   p_limit INT DEFAULT 250,
   p_offset INT DEFAULT 0
@@ -811,11 +876,14 @@ BEGIN
   ORDER BY s.created_at DESC
   LIMIT p_limit OFFSET p_offset;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_solvers_all(INT, INT) TO authenticated;
 
--- delete solver function
+-- ########################################################
+-- Function: delete_solver(p_solve_id UUID)
+-- ########################################################
 CREATE OR REPLACE FUNCTION delete_solver(
   p_solve_id UUID
 )
@@ -832,14 +900,14 @@ BEGIN
 
   RETURN TRUE;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
--- kasih akses ke authenticated (biar dipanggil lewat supabase rpc)
 GRANT EXECUTE ON FUNCTION delete_solver(UUID) TO authenticated;
 
 -- ########################################################
-
--- Admin / site info function: return counts (users, admins, solves, unique solvers, challenges)
+-- Function: get_info()
+-- ########################################################
 CREATE OR REPLACE FUNCTION get_info()
 RETURNS JSON AS $$
 DECLARE
@@ -867,18 +935,27 @@ BEGIN
     'success', true
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_info() TO authenticated;
 
-
+-- ########################################################
+-- ################# Security Polices #####################
+-- ########################################################
+-- --------------------------------------------------------
+-- ########################################################
 -- Enable RLS
+-- ########################################################
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenge_flags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.solves_nonactive ENABLE ROW LEVEL SECURITY;
 
--- POLICY: semua user boleh SELECT users, solves, challenges
+-- ########################################################
+-- Policies
+-- ########################################################
 DROP POLICY IF EXISTS "Users can select all" ON public.users;
 CREATE POLICY "Users can select all"
   ON public.users
@@ -897,61 +974,21 @@ CREATE POLICY "Challenges can select all"
   FOR SELECT
   USING (true);
 
--- POLICY: blokir SELECT tabel lain (tidak dibuat policy SELECT, otomatis ditolak)
-
--- POLICY: blokir INSERT/UPDATE/DELETE langsung, hanya boleh lewat function
-DROP POLICY IF EXISTS "No direct insert users" ON public.users;
-CREATE POLICY "No direct insert users" ON public.users FOR INSERT WITH CHECK (false);
-DROP POLICY IF EXISTS "No direct delete users" ON public.users;
-CREATE POLICY "No direct delete users" ON public.users FOR DELETE USING (false);
-
-DROP POLICY IF EXISTS "No direct insert challenges" ON public.challenges;
-CREATE POLICY "No direct insert challenges" ON public.challenges FOR INSERT WITH CHECK (false);
-DROP POLICY IF EXISTS "No direct update challenges" ON public.challenges;
-CREATE POLICY "No direct update challenges" ON public.challenges FOR UPDATE USING (false);
-DROP POLICY IF EXISTS "No direct delete challenges" ON public.challenges;
-CREATE POLICY "No direct delete challenges" ON public.challenges FOR DELETE USING (false);
-
-DROP POLICY IF EXISTS "No direct insert challenge_flags" ON public.challenge_flags;
-CREATE POLICY "No direct insert challenge_flags" ON public.challenge_flags FOR INSERT WITH CHECK (false);
-DROP POLICY IF EXISTS "No direct update challenge_flags" ON public.challenge_flags;
-CREATE POLICY "No direct update challenge_flags" ON public.challenge_flags FOR UPDATE USING (false);
-DROP POLICY IF EXISTS "No direct delete challenge_flags" ON public.challenge_flags;
-CREATE POLICY "No direct delete challenge_flags" ON public.challenge_flags FOR DELETE USING (false);
-
-DROP POLICY IF EXISTS "No direct insert solves" ON public.solves;
-CREATE POLICY "No direct insert solves" ON public.solves FOR INSERT WITH CHECK (false);
-DROP POLICY IF EXISTS "No direct update solves" ON public.solves;
-CREATE POLICY "No direct update solves" ON public.solves FOR UPDATE USING (false);
-DROP POLICY IF EXISTS "No direct delete solves" ON public.solves;
-CREATE POLICY "No direct delete solves" ON public.solves FOR DELETE USING (false);
-
--- GRANTS
+-- ########################################################
+-- Grant/Revoke Permissions
+-- ########################################################
 REVOKE ALL ON SCHEMA public FROM anon;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon;
-
 GRANT USAGE ON SCHEMA public TO authenticated;
 
--- Hanya boleh update kolom username, bukan is_admin
 REVOKE UPDATE ON public.users FROM authenticated;
-
 GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
 
-GRANT EXECUTE ON FUNCTION is_admin() TO authenticated;
-GRANT EXECUTE ON FUNCTION get_email_by_username(text) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION detail_user(p_id UUID) TO authenticated;
-GRANT EXECUTE ON FUNCTION create_profile(UUID, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_leaderboard() TO authenticated;
-GRANT EXECUTE ON FUNCTION submit_flag(uuid, text) TO authenticated;
-
--- Admin set manually:
--- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
-
-
 -- ########################################################
 -- Keep Alive Table
+-- ########################################################
 DROP TABLE IF EXISTS public."keep-alive" CASCADE;
 CREATE TABLE public."keep-alive" (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -963,3 +1000,9 @@ ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
   FOR ALL
   USING (true);
+
+-- ########################################################
+-- Initial Admin User Setup
+-- ########################################################
+-- Admin set manually:
+-- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
