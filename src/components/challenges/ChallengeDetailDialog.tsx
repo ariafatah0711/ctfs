@@ -93,9 +93,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 {/* Difficulty badge */}
                 <span>
                   <React.Suspense fallback={<span className="inline-block min-w-[64px] text-center text-xs font-semibold">{challenge.difficulty}</span>}>
-                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                    {/* @ts-ignore */}
-                    <DifficultyBadge class="min-w-[62px]" difficulty={challenge.difficulty} />
+                    <DifficultyBadge className="min-w-[62px]" difficulty={challenge.difficulty} />
                   </React.Suspense>
                 </span>
               </div>

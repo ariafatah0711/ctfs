@@ -71,3 +71,6 @@ export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRende
     </div>
   )
 }
+
+// Backwards-compatible default export for existing imports
+export default MarkdownRenderer
