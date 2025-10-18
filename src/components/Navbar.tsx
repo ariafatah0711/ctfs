@@ -49,31 +49,44 @@ export default function Navbar() {
               <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
             </Link>
 
-            {/* Menu shown only when logged in */}
-            {user && (
-              <div className="hidden md:flex space-x-2">
+            {/* Desktop menu (show some items only when logged in) */}
+            <div className="hidden md:flex space-x-2">
+              {user && (
                 <Link
                   href="/challenges"
                   className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
                   Challenges
                 </Link>
+              )}
+
+              {user && (
                 <Link
                   href="/scoreboard"
                   className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
                   Scoreboard
                 </Link>
-                {adminStatus && (
-                  <Link
-                    href="/admin"
-                    className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                  >
-                    Admin
-                  </Link>
-                )}
-              </div>
-            )}
+              )}
+
+              {!user && (
+              <Link
+                href="/rules"
+                className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800 focus:ring-2 focus:ring-orange-700' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50 focus:ring-2 focus:ring-orange-400'}`}
+              >
+                Rules
+              </Link>
+              )}
+
+              {adminStatus && user && (
+                <Link
+                  href="/admin"
+                  className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                >
+                  Admin
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Right section */}
@@ -245,6 +258,13 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Scoreboard
+                  </Link>
+                  <Link
+                    href="/rules"
+                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Rules
                   </Link>
                   {adminStatus && (
                     <Link

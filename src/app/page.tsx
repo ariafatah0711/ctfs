@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import Loader from "@/components/custom/loading"
+import Footer from "@/components/custom/Footer"
 import { Button } from "@/components/ui/button"
 import APP from '@/config'
 
@@ -78,12 +79,21 @@ export default function Home() {
         {/* CTA Buttons */}
         <div className="flex gap-4 z-10">
           {user ? (
-            <Button
-              asChild
-              className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl shadow-lg"
-            >
-              <a href="/challenges">Start Challenges</a>
-            </Button>
+            <>
+              <Button
+                asChild
+                className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl shadow-lg"
+              >
+                <a href="/challenges">Start Challenges</a>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="px-4 py-3 rounded-xl border-orange-600 text-orange-600 hover:bg-orange-50 shadow-lg"
+              >
+                <a href="/rules">Rules</a>
+              </Button>
+            </>
           ) : (
             <>
               <Button
@@ -105,7 +115,8 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8 relative z-10">
+      <Footer></Footer>
+      {/* <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-8 relative z-10">
         <div className="border-t border-gray-200 dark:border-gray-700 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
           <p>
             Built with{" "}
@@ -168,7 +179,7 @@ export default function Home() {
             , ©{APP.year} {APP.shortName}. All rights reserved.
           </p>
         </div>
-      </footer>
+      </footer> */}
     </div>
   )
 }

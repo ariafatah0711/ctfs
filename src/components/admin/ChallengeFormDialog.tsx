@@ -10,9 +10,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import MarkdownRenderer from '@/components/MarkdownRenderer'
+import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { Attachment, Challenge } from '@/types'
 import { getFlag } from '@/lib/challenges'
+import APP from '@/config'
 
 interface ChallengeFormDialogProps {
   open: boolean
@@ -144,12 +145,15 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 <div>
                   <Label className="mb-1">Difficulty</Label>
                   <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
-                    <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
-                    </SelectContent>
+                      <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                        {/* Generate difficulty options from config to keep consistent */}
+                        {Object.keys((APP as any).difficultyStyles || {}).map(key => {
+                          const label = key.charAt(0).toUpperCase() + key.slice(1)
+                          const value = label
+                          return (<SelectItem key={key} value={value}>{label}</SelectItem>)
+                        })}
+                      </SelectContent>
                   </Select>
                 </div>
               </>
@@ -180,12 +184,14 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 <div>
                   <Label className="mb-1">Difficulty</Label>
                   <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
-                    <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
-                    </SelectContent>
+                      <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                        {Object.keys((APP as any).difficultyStyles || {}).map(key => {
+                          const label = key.charAt(0).toUpperCase() + key.slice(1)
+                          const value = label
+                          return (<SelectItem key={key} value={value}>{label}</SelectItem>)
+                        })}
+                      </SelectContent>
                   </Select>
                 </div>
                 <div>
@@ -331,7 +337,8 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
               </div>
             </div>
           </div>
-          <DialogFooter className="flex flex-row items-center justify-end gap-2 sticky bottom-0 bg-white dark:bg-gray-900 z-10 pt-2">
+          {/* <DialogFooter className="flex flex-row items-center justify-end gap-2 sticky bottom-0 bg-white dark:bg-gray-900 z-10 pt-2"> */}
+          <DialogFooter className="flex flex-row items-center justify-end gap-2 sticky bottom-0 z-10 pt-2">
             <Button
               type="button"
               variant="ghost"

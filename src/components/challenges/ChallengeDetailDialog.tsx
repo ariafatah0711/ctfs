@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import CustomBadge from '@/components/ui/CustomBadge';
+import DifficultyBadge from '@/components/custom/DifficultyBadge';
 import toast from 'react-hot-toast';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import SolversList, { Solver } from './SolversList';
 import HintDialog from './HintDialog';
 import { Attachment, ChallengeWithSolve } from '@/types';
@@ -87,14 +89,15 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             {/* Badge bar */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-sm font-semibold bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                  {challenge.category}
+                <CustomBadge label={challenge.category} color="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200" />
+                {/* Difficulty badge */}
+                <span>
+                  <React.Suspense fallback={<span className="inline-block min-w-[64px] text-center text-xs font-semibold">{challenge.difficulty}</span>}>
+                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                    {/* @ts-ignore */}
+                    <DifficultyBadge class="min-w-[62px]" difficulty={challenge.difficulty} />
+                  </React.Suspense>
                 </span>
-                <span className={`px-2 py-0.5 rounded text-sm font-semibold
-                  ${challenge.difficulty === 'Easy' ? 'bg-green-200 text-green-800 dark:bg-green-600 dark:text-white' : ''}
-                  ${challenge.difficulty === 'Medium' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-600 dark:text-white' : ''}
-                  ${challenge.difficulty === 'Hard' ? 'bg-red-200 text-red-800 dark:bg-red-600 dark:text-white' : ''}
-                `}><span className="inline-block min-w-[64px] text-center">{challenge.difficulty}</span></span>
               </div>
               <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300 dark:text-white' : 'text-yellow-300 dark:text-white'}`}>
                 🪙 {challenge.points}

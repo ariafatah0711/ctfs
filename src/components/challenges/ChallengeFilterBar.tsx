@@ -1,4 +1,5 @@
 import React from 'react';
+import APP from '@/config';
 import { motion } from 'framer-motion';
 
 type Props = {
@@ -23,6 +24,24 @@ export default function ChallengeFilterBar({
   onClear,
   showStatusFilter = true,
 }: Props) {
+  // Ambil urutan dari config
+  const categoryOrder = APP.challengeCategories || [];
+  const difficultyOrder = Object.keys(APP.difficultyStyles || {});
+
+  // Sort categories sesuai order di config
+  const sortedCategories = [
+    ...categoryOrder.filter(cat => categories.includes(cat)),
+    ...categories.filter(cat => !categoryOrder.includes(cat))
+  ];
+
+  // Normalize difficulties ke format config (capitalize)
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  const normalizedDifficulties = Array.from(new Set(difficulties.map(capitalize)));
+  const sortedDifficulties = [
+    ...difficultyOrder.filter(diff => normalizedDifficulties.includes(diff)),
+    ...normalizedDifficulties.filter(diff => !difficultyOrder.includes(diff))
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -68,7 +87,7 @@ export default function ChallengeFilterBar({
             className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900"
           >
             <option value="all">All Categories</option>
-            {categories.map(category => (
+            {sortedCategories.map(category => (
               <option key={category} value={category}>{category}</option>
             ))}
           </select>
@@ -83,15 +102,8 @@ export default function ChallengeFilterBar({
             className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900"
           >
             <option value="all">All Difficulties</option>
-            {[...difficulties]
-              .sort((a, b) => {
-                const order = ["Easy", "Medium", "Hard"];
-                const idxA = order.indexOf(a);
-                const idxB = order.indexOf(b);
-                return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
-              })
-              .map(difficulty => (
-                <option key={difficulty} value={difficulty}>{difficulty}</option>
+            {sortedDifficulties.map(difficulty => (
+              <option key={difficulty} value={difficulty}>{difficulty}</option>
             ))}
           </select>
         </div>

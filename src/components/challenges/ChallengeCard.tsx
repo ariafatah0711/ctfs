@@ -2,6 +2,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { ChallengeWithSolve } from "@/types";
 import React from "react";
+import APP from '@/config';
 
 interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {
@@ -15,10 +16,22 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
   const isRecentlyCreated = challenge.is_new;
   const noFirstBlood = !challenge.has_first_blood;
 
-  // 🔹 Tentukan label sesuai kondisi
   let ribbonLabel: string | null = null;
   if (noFirstBlood) ribbonLabel = "🩸NEW CHALL🩸";
   else if (isRecentlyCreated) ribbonLabel = "NEW CHALL";
+
+  // Difficulty color mapping (same as DifficultyBadge)
+  const rawDiff = (challenge.difficulty || '').toString().trim();
+  const normalizedDiff = rawDiff === 'imposible' ? 'Impossible' : rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase();
+  const colorName = (APP as any).difficultyStyles?.[normalizedDiff];
+  const colorMap: Record<string, string> = {
+    cyan: 'bg-cyan-500',
+    green: 'bg-green-500',
+    yellow: 'bg-yellow-400',
+    red: 'bg-red-500',
+    purple: 'bg-purple-500',
+  };
+  const diffCircleColor = colorMap[colorName] || 'bg-gray-300';
 
   return (
     <motion.div
@@ -27,7 +40,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
       key={challenge.id}
       className="relative overflow-hidden"
     >
-      {/* 🟩 Ribbon pojok kanan atas */}
+      {/* Ribbon pojok kanan atas */}
       {ribbonLabel && (
         <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px]">
           <div className="bg-green-500 text-white text-[10px] font-bold px-8 py-1 shadow-md">
@@ -35,6 +48,11 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
           </div>
         </div>
       )}
+
+      {/* Difficulty circle kanan atas */}
+      <div className="absolute top-2 right-2 z-10">
+        <span className={`block w-2 h-2 rounded-full shadow ${diffCircleColor}`}></span>
+      </div>
 
       <Card
         onClick={onClick}

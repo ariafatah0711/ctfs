@@ -1,5 +1,6 @@
 import React from 'react'
 import { Badge } from '@/components/ui/badge'
+import DifficultyBadge from '@/components/custom/DifficultyBadge'
 import { Button } from '@/components/ui/button'
 import { Pencil, Trash2, Flag, CheckCircle2, CircleOff } from 'lucide-react'
 import { Challenge } from '@/types'
@@ -10,13 +11,6 @@ interface ChallengeListItemProps {
   onDelete: (id: string) => void
   onViewFlag: (id: string) => void
   onToggleActive: (id: string, checked: boolean) => Promise<void>
-}
-
-const DifficultyBadge: React.FC<{ difficulty?: string }> = ({ difficulty }) => {
-  const base = 'inline-block min-w-[64px] text-center text-xs font-semibold'
-  if (difficulty === 'Easy') return <Badge className={'bg-green-100 text-green-800 dark:bg-green-600 dark:text-white ' + base}>{difficulty}</Badge>
-  if (difficulty === 'Medium') return <Badge className={'bg-yellow-100 text-yellow-800 dark:bg-yellow-600 dark:text-white ' + base}>{difficulty}</Badge>
-  return <Badge className={'bg-red-100 text-red-800 dark:bg-red-600 dark:text-white ' + base}>{difficulty ?? 'N/A'}</Badge>
 }
 
 const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
@@ -34,7 +28,7 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
   <div className="w-full px-4 py-3 border-b border-gray-200 dark:border-gray-700">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 order-2 sm:order-1">
-          <DifficultyBadge difficulty={challenge.difficulty} />
+          <DifficultyBadge difficulty={challenge.difficulty} width={92} />
 
           <div className="min-w-0">
             <div className="font-medium truncate text-gray-900 dark:text-white">{challenge.title}</div>

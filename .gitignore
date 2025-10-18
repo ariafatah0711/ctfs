@@ -39,6 +39,7 @@ next-env.d.ts
 
 _tmp
 
+.vscode
 .vercel
 
 state.json

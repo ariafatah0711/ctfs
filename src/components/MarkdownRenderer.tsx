@@ -9,7 +9,7 @@ interface MarkdownRendererProps {
   className?: string
 }
 
-export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
   return (
     <div className={`prose prose-invert max-w-none text-gray-200 text-sm ${className}`}>
       <ReactMarkdown
@@ -35,6 +35,35 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
               {...props}
             />
           ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  )
+}
+
+export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  return (
+    <div className={`max-w-none text-gray-800 dark:text-gray-200 text-sm ${className}`}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm, remarkBreaks]}
+        components={{
+          p: ({...props}) => <p className="mb-1" {...props} />,
+          li: ({...props}) => <li className="ml-5 list-disc" {...props} />,
+          strong: ({...props}) => <strong className="font-semibold text-gray-900 dark:text-gray-100" {...props} />,
+          em: ({...props}) => <em className="italic" {...props} />,
+          a: ({...props}) => <a className="text-orange-600 dark:text-orange-400 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+          code: ({inline, children, ...props}: any) =>
+            inline ? (
+              <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono text-gray-800 dark:text-gray-100" {...props}>
+                {children}
+              </code>
+            ) : (
+              <pre className="bg-gray-100 dark:bg-gray-900 p-3 rounded-md overflow-x-auto text-sm font-mono whitespace-pre-wrap break-all">
+                <code className="break-all" {...props}>{children}</code>
+              </pre>
+            ),
         }}
       >
         {content}

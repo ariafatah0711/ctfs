@@ -23,7 +23,16 @@ export const APP = {
     vercel: 'https://vercel.com/',
   },
 
-  // 🌐 Base URL (otomatis ambil dari env kalau ada)
+  // Difficulty style mapping (use lowercase keys). Only color name, badge will map to classes.
+  difficultyStyles: {
+    Baby: 'cyan',
+    Easy: 'green',
+    Medium: 'yellow',
+    Hard: 'red',
+    Impossible: 'purple',
+  },
+
+  // Base URL (otomatis ambil dari env kalau ada)
   baseUrl:
     process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', // opsional fallback
   image_icon:
