@@ -114,6 +114,8 @@ CREATE TABLE public.challenges (
 -- ADD COLUMN IF NOT EXISTS max_points INTEGER DEFAULT NULL,
 -- ADD COLUMN IF NOT EXISTS min_points INTEGER DEFAULT 0,
 -- ADD COLUMN IF NOT EXISTS decay_per_solve INTEGER DEFAULT 0;
+ALTER TABLE public.challenges
+ADD COLUMN IF NOT EXISTS total_solves INTEGER DEFAULT 0;
 
 -- ########################################################
 -- Table: challenges_flags
@@ -144,6 +146,14 @@ CREATE TABLE IF NOT EXISTS public.solves_nonactive (
   challenge_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   moved_at TIMESTAMP WITH TIME ZONE DEFAULT now()  -- waktu dipindahin
+);
+
+-- ########################################################
+-- #################### Update ########################
+-- ########################################################
+UPDATE challenges
+SET total_solves = (
+  SELECT COUNT(*) FROM solves WHERE challenge_id = challenges.id
 );
 
 -- ########################################################
@@ -231,6 +241,35 @@ CREATE TRIGGER trigger_auto_flag_hash
   BEFORE INSERT OR UPDATE ON public.challenge_flags
   FOR EACH ROW
   EXECUTE FUNCTION auto_update_flag_hash();
+
+-- ########################################################
+-- Function: update_challenge_solve_count()
+-- ########################################################
+CREATE OR REPLACE FUNCTION update_challenge_solve_count()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_challenge_id UUID;
+BEGIN
+  -- Tentuin challenge_id mana yang harus dihitung
+  v_challenge_id := COALESCE(NEW.challenge_id, OLD.challenge_id);
+
+  -- Update total_solves berdasarkan jumlah solve terkini
+  UPDATE public.challenges c
+  SET total_solves = (
+    SELECT COUNT(*) FROM public.solves s WHERE s.challenge_id = v_challenge_id
+  )
+  WHERE c.id = v_challenge_id;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Pasang trigger ke tabel solves
+DROP TRIGGER IF EXISTS trg_solve_update_count ON public.solves;
+CREATE TRIGGER trg_solve_update_count
+AFTER INSERT OR DELETE ON public.solves
+FOR EACH ROW
+EXECUTE FUNCTION update_challenge_solve_count();
 
 -- ########################################################
 -- Function: get_email_by_username(p_username TEXT) - ANON

@@ -24,7 +24,8 @@ export async function getChallenges(
     let query = supabase
       .from('challenges')
       .select('*')
-      .order('points', { ascending: true });
+      .order('points', { ascending: true })        // poin terendah dulu
+      .order('total_solves', { ascending: false }) // jika poin sama, paling banyak solves dulu
 
     if (!showAll) query = query.eq('is_active', true);
 
@@ -55,7 +56,7 @@ export async function getChallenges(
 
     return challenges.map(ch => {
       const createdAt = new Date(ch.created_at);
-      const isRecentlyCreated = (Date.now() - createdAt.getTime()) < 24 * 60 * 60 * 1000; // < 1 hari
+      const isRecentlyCreated = (Date.now() - createdAt.getTime()) < 24 * 60 * 60 * 1000;
       const hasFirstBlood = fbIds.has(ch.id);
 
       return {
@@ -63,7 +64,8 @@ export async function getChallenges(
         is_solved: solvedIds.has(ch.id),
         has_first_blood: hasFirstBlood,
         is_recently_created: isRecentlyCreated,
-        is_new: isRecentlyCreated || !hasFirstBlood, // ✅ ini logika yang kamu mau
+        is_new: isRecentlyCreated || !hasFirstBlood,
+        total_solves: ch.total_solves || 0,
       };
     });
   } catch (err) {
