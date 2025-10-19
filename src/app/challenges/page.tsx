@@ -121,6 +121,29 @@ export default function ChallengesPage() {
         audio.volume = 0.3
         audio.play().catch(() => {})
 
+        // 🎉 tampilkan confetti
+        import('canvas-confetti').then((confetti) => {
+          const duration = 0.8 * 1000
+          const end = Date.now() + duration
+
+          const frame = () => {
+            confetti.default({
+              particleCount: 3, // lebih sedikit
+              startVelocity: 20, // gak terlalu cepat
+              spread: 360, // gak terlalu lebar
+              ticks: 80, // agak lama
+              gravity: 0.8, // jatuh pelan
+              scalar: 0.8, // kecil dikit
+              colors: ['#00e0ff', '#ffffff', '#ff7b00'], // warna sesuai tema
+              origin: { x: Math.random(), y: Math.random() - 0.2 },
+            })
+
+            if (Date.now() < end) requestAnimationFrame(frame)
+          }
+
+          frame()
+        })
+
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
       }
     } catch (error) {

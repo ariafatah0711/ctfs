@@ -15,6 +15,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@supabase/supabase-js": "^2.38.4",
+    "canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.1",
     "chartjs-adapter-date-fns": "^3.0.0",
     "class-variance-authority": "^0.7.1",
@@ -37,6 +38,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/crypto-js": "^4.2.1",
     "@types/node": "^20",
     "@types/react": "^18",
