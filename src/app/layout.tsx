@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     siteName: APP.fullName,
     images: [
       {
-        url: `${APP.baseUrl}/${APP.image_icon}`,
+        url: `${APP.baseUrl}/${APP.image_preview}`,
         width: 1200,
         height: 630,
         alt: `${APP.shortName} - ${APP.fullName}`,

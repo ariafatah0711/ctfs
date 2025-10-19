@@ -11,31 +11,35 @@ import { Button } from '@/components/ui/button';
 const RULES = [
   {
     title: "Fokus ke Challenge",
-    description: "Mainkan challenge untuk mencari solusi/flag. Fokus pada permainan — jangan ganggu atau eksploitasi layanan lain."
+    description: "Mainkan challenge untuk mencari flag. Fokus pada permainan — jangan ganggu atau eksploitasi layanan lain."
   },
   {
     title: "Kolaborasi & Bantuan",
-    description: "Boleh bekerja sama, pakai AI, atau tanya ke author/admin. Tapi **jangan pernah** membagikan flag ke publik atau pihak ketiga."
+    description: "Boleh kerja sama, pakai AI, atau tanya admin/author. Tapi **jangan pernah** membagikan flag ke publik."
   },
   {
-    title: "Membuat Writeup",
-    description: "Writeup boleh dipublikasikan **setelah 30 hari** sejak challenge dipublikasikan dan hanya jika challenge sudah disolve **minimal 10 orang**. Semua flag harus dibuat **{REDACTED}**. Agar tidak mengurangi keseruan peserta lain."
+    title: "Point",
+    description: "Poin tergantung tingkat kesulitan. Sistem dynamic (turun tiap solve) dan static (tetap). Baby: 200–50–5, Easy: 300–100–10, Medium: 500–250–20, Hard: 750–450–50, Impossible: 1000–3000 (tetap)."
   },
   {
-    title: "Akun & Identitas",
-    description: "Gunakan satu akun per peserta. Dilarang membuat akun ganda untuk keuntungan apa pun (misalnya farming poin atau hadiah)."
+    title: "Writeup",
+    description: "Boleh dipublikasikan **30 hari setelah rilis** dan jika sudah disolve **≥10 orang**. Semua flag wajib **{REDACTED}**."
+  },
+  {
+    title: "Akun",
+    description: "Gunakan satu akun per peserta. Dilarang membuat akun ganda untuk keuntungan apa pun."
   },
   {
     title: "Etika & Privasi",
-    description: "Hormati privasi peserta lain. Jangan mengambil, menyebarkan, atau menyalahgunakan data pribadi."
+    description: "Hormati peserta lain. Dilarang mengambil atau menyebarkan data pribadi."
   },
   {
-    title: "Larangan Serangan & Bruteforce",
-    description: "Jangan menyerang host atau website platform ini. Dilarang melakukan bruteforce terhadap website utama CTF atau layanan pendukungnya."
+    title: "Larangan Serangan",
+    description: "Jangan serang host, platform, atau lakukan bruteforce pada layanan apa pun."
   },
   {
     title: "Pelaporan Bug",
-    description: "Jika menemukan celah keamanan, atau Bug pada platform, segera laporkan ke admin!"
+    description: "Laporkan bug atau celah keamanan ke admin secepatnya."
   },
 ];
 
@@ -63,7 +67,7 @@ export default function RulesPage() {
           transition={{ duration: 0.7 }}
           className="text-3xl md:text-4xl font-extrabold text-orange-600 dark:text-orange-400 mb-2 drop-shadow"
         >
-          Platform Rules 🚩
+          Platform {APP.shortName} Rules 🚩
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}

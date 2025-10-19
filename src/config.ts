@@ -36,7 +36,9 @@ export const APP = {
   baseUrl:
     process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', // opsional fallback
   image_icon:
-    process.env.NEXT_PUBLIC_SITE_IMAGE || 'favicon.ico', // opsional fallback
+    process.env.NEXT_PUBLIC_SITE_ICON || 'favicon.ico',
+  image_preview:
+    process.env.NEXT_PUBLIC_SITE_PREVIEW || 'og-image.png',
 }
 
 export default APP

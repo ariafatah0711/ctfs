@@ -117,6 +117,10 @@ export default function ChallengesPage() {
       }))
 
       if (result.success) {
+        const audio = new Audio('/sounds/succes.wav')
+        audio.volume = 0.3
+        audio.play().catch(() => {})
+
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
       }
     } catch (error) {

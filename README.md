@@ -10,6 +10,7 @@
 [https://ctf.ariaf.my.id](https://ctf.ariaf.my.id)
 
 ### Page Screenshot
+<!-- ![Root Page](images/README/image-18.png) -->
 ![Home Page](images/README/image-9.png)
 ![Scoreboard](images/README/image-10.png)
 ![Admin Dashboard](images/README/image-11.png)
