@@ -19,7 +19,7 @@ const RULES = [
   },
   {
     title: "Point",
-    description: "Poin tergantung tingkat kesulitan. Sistem dynamic (turun tiap solve) dan static (tetap). Baby: 200–50–5, Easy: 300–100–10, Medium: 500–250–20, Hard: 750–450–50, Impossible: 1000–3000 (tetap)."
+    description: "Poin tergantung tingkat kesulitan. Sistem dynamic (turun tiap solve) dan static (tetap). Baby: 200–50–5, Easy: 300–100–10, Medium: 500–300–20, Hard: 750–500–50, Impossible: 1000–3000 (tetap)."
   },
   {
     title: "Writeup",
