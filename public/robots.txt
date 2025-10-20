@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Sitemap: https://ctf.ariaf.my.id/sitemap.xml
 
 # HINT: rahasia ada di subdomain berikut
 # flag.ctf.ariaf.my.id
