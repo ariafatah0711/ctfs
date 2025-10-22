@@ -1,24 +1,26 @@
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from '../ui/button'
 import { LeaderboardEntry } from '@/types'
-
 interface ScoreboardTableProps {
   leaderboard: LeaderboardEntry[]
   currentUsername?: string
 }
 
 const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername }) => {
-  function truncateUsername(username: string, maxLength = 16) {
-    return username.length > maxLength
-      ? username.slice(0, maxLength - 3) + '...'
-      : username
-  }
+  const pathname = usePathname()
 
   return (
     <Card className="bg-white dark:bg-gray-800">
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
+        {pathname === '/scoreboard' && (
+          <Link href="/scoreboard/all">
+            <Button variant="default" size="sm">Show All</Button>
+          </Link>
+        )}
       </CardHeader>
       <CardContent>
         <Table>
@@ -30,7 +32,7 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leaderboard.slice(0, 100).map((entry, i) => {
+            {leaderboard.map((entry, i) => {
               const isCurrentUser = entry.username === currentUsername
               return (
                 <TableRow

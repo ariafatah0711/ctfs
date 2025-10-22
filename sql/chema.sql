@@ -429,7 +429,10 @@ GRANT EXECUTE ON FUNCTION update_username(uuid, text) TO authenticated;
 -- ########################################################
 -- Function: get_leaderboard()
 -- ########################################################
-CREATE OR REPLACE FUNCTION get_leaderboard()
+CREATE OR REPLACE FUNCTION get_leaderboard(
+  limit_rows integer DEFAULT 100,
+  offset_rows integer DEFAULT 0
+)
 RETURNS TABLE (
   id UUID,
   username TEXT,
@@ -449,12 +452,14 @@ BEGIN
   LEFT JOIN public.solves s ON u.id = s.user_id
   LEFT JOIN public.challenges c ON s.challenge_id = c.id
   GROUP BY u.id, u.username
-  ORDER BY score DESC, MAX(s.created_at) ASC;
+  ORDER BY score DESC, MAX(s.created_at) ASC
+  LIMIT limit_rows OFFSET offset_rows;
 END;
 $$ LANGUAGE plpgsql
-SECURITY DEFINER;
+SECURITY DEFINER
+SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_leaderboard() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_leaderboard(integer, integer) TO authenticated;
 
 -- ########################################################
 -- Function: submit_flag(p_challenge_id UUID, p_flag TEXT)

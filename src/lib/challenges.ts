@@ -231,9 +231,11 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
 /**
  * Get leaderboard with progress
  */
-export async function getLeaderboard() {
-  const { data, error } = await supabase.rpc('get_leaderboard')
-  // console.log("getLeaderboard", data, error)
+export async function getLeaderboard(limit = 100, offset = 0) {
+  const { data, error } = await supabase.rpc('get_leaderboard', {
+    limit_rows: limit,
+    offset_rows: offset,
+  })
   if (error) throw error
   return data
 }
@@ -241,14 +243,11 @@ export async function getLeaderboard() {
 /**
  * Get lightweight leaderboard summary: username and final score (no progress history)
  */
-export async function getLeaderboardSummary() {
-  // Reuse the RPC but strip progress to a lightweight shape
-  const data = await getLeaderboard()
-  // data is expected to be array of { username, progress }
+export async function getLeaderboardSummary(limit = 100, offset = 0) {
+  const data = await getLeaderboard(limit, offset)
   return (data || []).map((d: any) => ({
     id: d.id,
     username: d.username,
-    // prefer explicit score field from RPC; otherwise fall back to progress array
     score: typeof d.score === 'number' ? d.score : (d.progress?.at(-1)?.score ?? 0),
     rank: d.rank,
     last_solve: d.last_solve,
