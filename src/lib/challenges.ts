@@ -492,6 +492,24 @@ export async function getSolversAll(limit = 250, offset = 0) {
   return data || [];
 }
 
+/**
+ * Get solvers for a specific username
+ */
+export async function getSolversByUsername(username: string) {
+  const { data, error } = await supabase.rpc('get_solves_by_name', {
+    p_username: username,
+  });
+
+  if (error) {
+    console.error(`Error fetching solvers for ${username}:`, error);
+    return [];
+  }
+
+  return data || [];
+}
+
+/** Delete a solver entry by solve ID (Admin only)
+ */
 export async function deleteSolver(solveId: string) {
   const { data, error } = await supabase.rpc("delete_solver", {
     p_solve_id: solveId,

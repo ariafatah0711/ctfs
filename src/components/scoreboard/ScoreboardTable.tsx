@@ -35,12 +35,17 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
             {leaderboard.map((entry, i) => {
               const isCurrentUser = entry.username === currentUsername
               return (
-                <TableRow
-                  key={entry.username}
-                  className={`transition-colors hover:bg-blue-50 dark:hover:bg-blue-900 ${
-                    isCurrentUser ? 'bg-blue-50 dark:bg-blue-900 font-semibold' : ''
-                  }`}
-                >
+                  <TableRow
+                    key={entry.username}
+                    className={`
+                      transition-colors hover:bg-gray-100 dark:hover:bg-gray-600
+                      ${
+                        isCurrentUser
+                          ? 'bg-gray-100 dark:bg-gray-700 font-semibold'
+                          : ''
+                      }
+                    `}
+                  >
                   <TableCell className="text-center font-mono text-gray-600 dark:text-gray-300">{i + 1}</TableCell>
                   <TableCell>
                     <Link

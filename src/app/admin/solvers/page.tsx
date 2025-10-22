@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { isAdmin } from "@/lib/auth"
-import { getSolversAll, deleteSolver } from "@/lib/challenges"
+import { getSolversAll, getSolversByUsername, deleteSolver } from "@/lib/challenges"
 import ConfirmDialog from "@/components/custom/ConfirmDialog"
 import Loader from "@/components/custom/loading"
 import BackButton from "@/components/custom/BackButton"
@@ -27,6 +27,8 @@ export default function AdminSolversPage() {
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [searchUser, setSearchUser] = useState("")
+  const [searching, setSearching] = useState(false)
 
   // delete state
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -61,10 +63,10 @@ export default function AdminSolversPage() {
 
   const fetchSolvers = async (startOffset = 0) => {
     try {
-      const data = await getSolversAll(50, startOffset)
+      const data = await getSolversAll(100, startOffset)
       setSolvers((prev) => (startOffset === 0 ? data : [...prev, ...data]))
-      setOffset(startOffset + 50)
-      setHasMore(data.length === 50)
+      setOffset(startOffset + 100)
+      setHasMore(data.length === 100)
     } catch (err) {
       console.error(err)
       toast.error("Failed to fetch solvers")
@@ -105,12 +107,53 @@ export default function AdminSolversPage() {
         </div>
 
         <Card className="bg-white dark:bg-gray-800">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>All Solvers</CardTitle>
-            <Button variant="outline" size="sm" onClick={() => fetchSolvers(0)}>
-              Refresh
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <CardTitle>All Solvers</CardTitle>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Search by username..."
+              value={searchUser}
+              onChange={(e) => setSearchUser(e.target.value)}
+              className="px-3 py-1 text-sm rounded border dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                if (!searchUser.trim()) {
+                  fetchSolvers(0)
+                  return
+                }
+                setSearching(true)
+                try {
+                  const data = await getSolversByUsername(searchUser.trim())
+                  setSolvers(data)
+                  setHasMore(false)
+                } catch (err) {
+                  toast.error("Failed to fetch by username")
+                  console.error(err)
+                } finally {
+                  setSearching(false)
+                }
+              }}
+            >
+              {searching ? "Searching..." : "Search"}
             </Button>
-          </CardHeader>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchUser("")
+                fetchSolvers(0)
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </CardHeader>
           <CardContent>
             {solvers.length === 0 ? (
               <div className="text-center py-8 text-gray-500 dark:text-gray-300">No solvers found</div>

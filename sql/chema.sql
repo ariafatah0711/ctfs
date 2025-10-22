@@ -926,6 +926,48 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_solvers_all(INT, INT) TO authenticated;
 
 -- ########################################################
+-- Function: get_solves_by_name(p_username TEXT)
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_solves_by_name(
+  p_username TEXT
+)
+RETURNS TABLE (
+  solve_id UUID,
+  user_id UUID,
+  username TEXT,
+  challenge_id UUID,
+  challenge_title TEXT,
+  challenge_category TEXT,
+  points INTEGER,
+  solved_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can view solves by username';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    s.id AS solve_id,
+    u.id AS user_id,
+    u.username,
+    c.id AS challenge_id,
+    c.title AS challenge_title,
+    c.category AS challenge_category,
+    c.points,
+    s.created_at AS solved_at
+  FROM public.solves s
+  JOIN public.users u ON u.id = s.user_id
+  JOIN public.challenges c ON c.id = s.challenge_id
+  WHERE lower(u.username) = lower(p_username)
+  ORDER BY s.created_at DESC;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_solves_by_name(TEXT) TO authenticated;
+
+-- ########################################################
 -- Function: delete_solver(p_solve_id UUID)
 -- ########################################################
 CREATE OR REPLACE FUNCTION delete_solver(
