@@ -12,6 +12,7 @@ import { getStatsByRange } from '@/lib/activityStats'
 import { getInfo } from '@/lib/users'
 import { Challenge } from '@/types'
 import StatsGraph from '@/components/admin/StatsGraph'
+import AuditLogList from '@/components/admin/AuditLogList'
 
 export default function AdminOverviewPage() {
   const router = useRouter()
@@ -42,7 +43,7 @@ export default function AdminOverviewPage() {
       const [data, info, stats] = await Promise.all([
         getChallenges(undefined, true),
         getInfo(),
-        getStatsByRange(timeRange)
+        getStatsByRange(timeRange),
       ])
 
       if (!mounted) return
@@ -100,6 +101,9 @@ export default function AdminOverviewPage() {
               />
             </CardContent>
           </Card>
+
+          {/* Audit Logs */}
+          <AuditLogList />
         </div>
       </main>
     </div>

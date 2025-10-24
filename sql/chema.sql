@@ -1092,3 +1092,33 @@ CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
 -- ########################################################
 -- Admin set manually:
 -- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
+
+
+-- ########################################################
+-- Function: get_auth_audit_logs(p_limit INT, p_offset INT)
+-- ########################################################
+create or replace function public.get_auth_audit_logs(
+  p_limit int default 50,
+  p_offset int default 0
+)
+returns table (
+  id uuid,
+  created_at timestamptz,
+  ip_address text,
+  payload jsonb
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    id,
+    created_at,
+    ip_address::text,
+    payload
+  from auth.audit_log_entries
+  order by created_at desc
+  limit p_limit offset p_offset;
+$$;
+
+grant execute on function public.get_auth_audit_logs(int, int) to authenticated;
