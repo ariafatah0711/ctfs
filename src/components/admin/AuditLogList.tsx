@@ -73,7 +73,7 @@ const AuditLogList: React.FC<AuditLogListProps> = ({ logs, isLoading }) => {
       if (logs) return // parent provided logs; don't fetch
       try {
         setInternalLoading(true)
-        const data = await getAuditLogs(limit, 0)
+        const data = await getAuditLogs(limit)
         if (!mounted) return
         setInternalLogs(data || [])
       } catch (err) {
@@ -142,6 +142,8 @@ const filteredLogs = React.useMemo(() => {
               <option value={250}>Last 250</option>
               <option value={500}>Last 500</option>
               <option value={1000}>Last 1000</option>
+              <option value={2500}>Last 2500</option>
+              <option value={5000}>Last 5000</option>
             </select>
           </div>
         </div>
