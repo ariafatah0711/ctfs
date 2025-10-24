@@ -13,15 +13,14 @@ interface AuditLogListProps {
   isLoading?: boolean
 }
 
-type ActionType = 'login' | 'logout' | 'user_signedup' | 'user_deleted' | 'token_refreshed' | 'token_revoked'
+type ActionType = 'login' | 'logout' | 'user_signedup' | 'user_deleted' | 'token_refreshed'
 
 const ACTION_OPTIONS: { value: ActionType, label: string }[] = [
   { value: 'login', label: 'Login' },
   { value: 'logout', label: 'Logout' },
   { value: 'user_signedup', label: 'Sign Up' },
   { value: 'user_deleted', label: 'Deleted' },
-  { value: 'token_refreshed', label: 'Token Refresh' },
-  { value: 'token_revoked', label: 'Token Revoke' },
+  { value: 'token_refreshed', label: 'Session Renewed' },
 ]
 
 const getActionStyle = (action: string): { color: string, icon: string } => {
@@ -31,13 +30,17 @@ const getActionStyle = (action: string): { color: string, icon: string } => {
     case 'user_signedup': return { color: 'text-blue-600 dark:text-blue-400', icon: '+' }
     case 'user_deleted': return { color: 'text-red-600 dark:text-red-400', icon: '×' }
     case 'token_refreshed': return { color: 'text-purple-600 dark:text-purple-400', icon: '⟲' }
-    case 'token_revoked': return { color: 'text-orange-600 dark:text-orange-400', icon: '⊘' }
     default: return { color: 'text-gray-600 dark:text-gray-400', icon: '•' }
   }
 }
 
-const formatAction = (action: string) =>
-  action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('')
+const formatAction = (action: string) => {
+  // Jika action adalah token_refreshed, tampilkan sebagai "Session Renewed"
+  if (action === 'token_refreshed') {
+    return 'Session Renewed'
+  }
+  return action.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('')
+}
 
 const AuditLogList: React.FC<AuditLogListProps> = ({ logs, isLoading }) => {
   const [selectedActions, setSelectedActions] = React.useState<ActionType[]>([])
@@ -88,6 +91,11 @@ const AuditLogList: React.FC<AuditLogListProps> = ({ logs, isLoading }) => {
 
 const filteredLogs = React.useMemo(() => {
   return sourceLogs.filter(log => {
+    // Skip token_revoked entries entirely
+    if (log.payload.action === 'token_revoked') {
+      return false
+    }
+
     const matchesAction =
       selectedActions.length === 0 || selectedActions.includes(log.payload.action as ActionType)
 
