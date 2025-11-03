@@ -5,6 +5,7 @@ import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challeng
 import { ChallengeWithSolve, User, Attachment } from '@/types'
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
+import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
@@ -13,6 +14,33 @@ import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 import APP from '@/config'
 
 export default function ChallengesPage() {
+  const SOLVE_THRESHOLD = 5
+
+  // Tutorial State (localStorage dipindah ke sini)
+  const TUTORIAL_STORAGE_KEY = 'ctf_tutorialState';
+  const [tutorialState, setTutorialState] = useState<{ minimized: boolean; dismissed: boolean }>({ minimized: false, dismissed: false });
+  const [isTutorialStateReady, setIsTutorialStateReady] = useState(false);
+
+  // Ambil dari localStorage hanya di client
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(TUTORIAL_STORAGE_KEY);
+      if (saved) {
+        setTutorialState(JSON.parse(saved));
+      }
+    } catch {}
+    setIsTutorialStateReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isTutorialStateReady) return;
+    try {
+      localStorage.setItem(TUTORIAL_STORAGE_KEY, JSON.stringify(tutorialState));
+    } catch {
+      // ignore
+    }
+  }, [tutorialState, isTutorialStateReady]);
+
   // Saat tab solvers dibuka, fetch solvers
   const handleTabChange = async (tab: 'challenge' | 'solvers', challengeId: string) => {
     setChallengeTab(tab);
@@ -289,6 +317,16 @@ export default function ChallengesPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         <TitlePage>🚩 challenges</TitlePage>
+
+        {/* Render ChallengeTutorial hanya jika localStorage sudah ready dan belum dismissed atau belum mencapai threshold */}
+        {isTutorialStateReady && !(tutorialState.dismissed && challenges.filter(c => c.is_solved).length >= SOLVE_THRESHOLD) && (
+          <ChallengeTutorial
+            solvedCount={challenges.filter(c => c.is_solved).length}
+            solveThreshold={SOLVE_THRESHOLD}
+            tutorialState={tutorialState}
+            setTutorialState={setTutorialState}
+          />
+        )}
 
         <ChallengeFilterBar
           filters={filters}

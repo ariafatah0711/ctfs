@@ -34,6 +34,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   async function refresh() {
     try {
+      if (!user) {
+        setUnreadCount(0)
+        return
+      }
       const notifs = await getNotifications(100, 0) as NotifShape[]
       const ids = notifs.map(notifId)
       const seenJson = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
@@ -47,6 +51,10 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   function markAllRead() {
     try {
+      if (!user) {
+        setUnreadCount(0)
+        return
+      }
       // fetch current notifications to know ids
       getNotifications(100, 0).then((notifs: any) => {
         const ids = (notifs || []).map((n: NotifShape) => notifId(n))
