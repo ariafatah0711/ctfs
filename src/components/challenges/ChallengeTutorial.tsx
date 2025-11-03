@@ -146,7 +146,7 @@ export default function ChallengeTutorial({ solvedCount, solveThreshold, tutoria
         {solvedCount >= solveThreshold && !tutorialState.minimized && (
           <button
             onClick={() => setShowConfirm(true)}
-            className="fixed sm:absolute bottom-3 right-3 z-10 bg-orange-600 text-white dark:bg-orange-500 dark:text-gray-900 px-4 py-1.5 rounded-lg shadow hover:bg-orange-700 dark:hover:bg-orange-400 transition-colors text-xs sm:text-sm font-semibold"
+            className="absolute bottom-3 right-3 z-10 bg-orange-600 text-white dark:bg-orange-500 dark:text-gray-900 px-4 py-1.5 rounded-lg shadow hover:bg-orange-700 dark:hover:bg-orange-400 transition-colors text-xs sm:text-sm font-semibold"
             style={{ minWidth: 70 }}
           >
             Close
