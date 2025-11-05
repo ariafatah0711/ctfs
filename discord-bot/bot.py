@@ -2,18 +2,21 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime, timezone, timedelta
+import hashlib
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 from dateutil import parser
-import hashlib
 
 import aiohttp
 import discord
 from discord import Intents
 from dotenv import load_dotenv
 
-# Load environment
+# --------------------------
+# Environment & Config
+# --------------------------
 load_dotenv()
+
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID", "0"))
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -23,40 +26,48 @@ SOLVES_FILE = os.getenv("SOLVES_FILE", "solves.json")
 STATE_FILE = os.getenv("STATE_FILE", "state.json")
 MENTION_ROLE_ID = os.getenv("MENTION_ROLE_ID", "0")
 
-# Logging
-logging.basicConfig(level=logging.INFO)
+# --------------------------
+# Logging setup
+# --------------------------
+logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s: %(message)s")
 logger = logging.getLogger("ctf-bot")
 
+# --------------------------
 # Discord client
+# --------------------------
 intents = Intents.default()
 client = discord.Client(intents=intents)
 
 
 # --------------------------
-# Helpers: state & storage
+# Helpers: File State & Storage
 # --------------------------
-def load_state() -> Dict[str, Any]:
-    if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
+def load_json(path: str, default: Any):
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
-    return {"latest_ids": [], "table_id": None}
+    return default
+
+
+def save_json(path: str, data: Any):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+
+def load_state() -> Dict[str, Any]:
+    return load_json(STATE_FILE, {"latest_ids": [], "table_id": None})
 
 
 def save_state(state: Dict[str, Any]):
-    with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2)
+    save_json(STATE_FILE, state)
 
 
 def load_solves() -> List[Dict[str, Any]]:
-    if os.path.exists(SOLVES_FILE):
-        with open(SOLVES_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+    return load_json(SOLVES_FILE, [])
 
 
 def save_solves(solves: List[Dict[str, Any]]):
-    with open(SOLVES_FILE, "w", encoding="utf-8") as f:
-        json.dump(solves, f, indent=2)
+    save_json(SOLVES_FILE, solves)
 
 
 def resolve_mention(channel, identifier: str) -> str:
@@ -82,37 +93,19 @@ def resolve_mention(channel, identifier: str) -> str:
 
     return f"@{identifier}"
 
-def format_relative_date(iso_date: str) -> str:
+
+def format_normal_date(iso_date: str) -> str:
+    """Format date ke format normal YYYY-MM-DD HH:MM:SS"""
     try:
         then = datetime.fromisoformat(iso_date.replace("Z", "+00:00"))
+        local_time = then.astimezone(timezone.utc)
+        return local_time.strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
         return iso_date
 
-    now = datetime.now(timezone.utc)
-    diff = now - then
-    diff_seconds = int(diff.total_seconds())
-
-    if diff_seconds < 60:
-        return f"{diff_seconds} {'second' if diff_seconds == 1 else 'seconds'} ago"
-
-    diff_minutes = diff_seconds // 60
-    if diff_minutes < 60:
-        return f"{diff_minutes} {'minute' if diff_minutes == 1 else 'minutes'} ago"
-
-    diff_hours = diff_minutes // 60
-    if diff_hours < 24:
-        return f"{diff_hours} {'hour' if diff_hours == 1 else 'hours'} ago"
-
-    diff_days = diff_hours // 24
-    if diff_days < 30:
-        time_str = then.strftime("%H:%M")
-        return f"{diff_days} {'day' if diff_days == 1 else 'days'} ago • {time_str}"
-
-    return then.strftime("%Y-%m-%d %H:%M:%S")
-
 
 # --------------------------
-# Fetching from Supabase
+# Fetch from Supabase
 # --------------------------
 async def fetch_firstbloods(session: aiohttp.ClientSession) -> List[Dict[str, Any]]:
     try:
@@ -135,12 +128,13 @@ async def fetch_firstbloods(session: aiohttp.ClientSession) -> List[Dict[str, An
                 continue
 
             try:
-                t = datetime.fromisoformat(time_str.replace("Z", "+00:00"))
+                _ = datetime.fromisoformat(time_str.replace("Z", "+00:00"))
             except Exception:
                 continue
 
             raw_key = f"{item.get('notif_username')}|{item.get('notif_challenge_title')}|{time_str}"
             sid = hashlib.sha256(raw_key.encode()).hexdigest()
+
             results.append({
                 "id": sid,
                 "user": str(item.get("notif_username") or "<unknown>"),
@@ -148,50 +142,28 @@ async def fetch_firstbloods(session: aiohttp.ClientSession) -> List[Dict[str, An
                 "category": str(item.get("notif_category") or "<unknown>"),
                 "time": time_str,
             })
+
         return results
+
     except Exception:
         logger.exception("Error fetching notifications")
         return []
 
 
 # --------------------------
-# Render messages
+# Discord Message Rendering
 # --------------------------
 async def update_table(channel, solves: List[Dict[str, Any]], state: Dict[str, Any]):
-    """Update atau create table message (20 terakhir)"""
-
-    # embed = discord.Embed(
-    #     title="🏆 First Blood Table (20 latest)",
-    #     description="Showing the latest 20 first blood solves.",
-    #     color=0xff0000
-    # )
-
-    # for s in solves[-20:]:
-    #     # Use relative time formatting when possible
-    #     rel_time = format_relative_date(s.get("time", ""))
-    #     # Gabungkan user, challenge, category, dan time jadi satu baris
-    #     line = f"{s['user']} → {s['challenge']} ({s['category']}) \n| {rel_time}"
-    #     embed.add_field(
-    #         name=line,
-    #         value="\u200b",  # empty value supaya field tetap valid
-    #         inline=False
-    #     )
-
+    """Update atau create table message (10 terakhir)"""
     lines = []
     for s in solves[-10:]:
-        rel_time = format_relative_date(s.get("time", ""))
-        lines.append(f"{s['user']} → {s['challenge']} ({s['category']}) \n| {rel_time}")
+        t = format_normal_date(s.get("time", ""))
+        lines.append(f"🩸 **{s['user']}** → **{s['challenge']}** ({s['category']})\n🕒 {t}")
 
     embed = discord.Embed(
-        title="🏆 First Blood Table (10 latest)",
-        description="Showing the latest 10 first blood solves.",
+        title="🏆 First Blood Table (10 Latest)",
+        description="\n\n".join(lines),
         color=0xff0000
-    )
-
-    embed.add_field(
-        name="\u200b",  # kosong biar nggak muncul nama field
-        value="\n".join(lines),
-        inline=False
     )
 
     table_id = state.get("table_id")
@@ -207,122 +179,155 @@ async def update_table(channel, solves: List[Dict[str, Any]], state: Dict[str, A
         state["table_id"] = str(msg.id)
 
 async def post_latest(channel, solves: List[Dict[str, Any]], state: Dict[str, Any]):
-    """Maintain up to 3 latest solves (hapus yang lama, simpan message.id asli)"""
-
-    latest_solves = solves[-3:]
-    current_ids = state.get("latest_ids", [])
-
+    """
+    Menampilkan 3 notifikasi solve terbaru (di luar tabel embed).
+    Kalau ada solve baru -> kirim notif baru.
+    Kalau notif > 3 -> hapus yang paling lama.
+    """
     MAX_LATEST = 3
-    # Hapus pesan lama kalau sudah lebih dari max
-    while len(current_ids) >= MAX_LATEST:
+    current_ids: list[str] = state.get("latest_ids", [])
+
+    # Ambil pesan lama (kalau masih ada)
+    existing_msgs = []
+    for mid in current_ids:
+        try:
+            msg = await channel.fetch_message(int(mid))
+            existing_msgs.append(msg)
+        except:
+            pass
+
+    # Kumpulkan sid dari pesan lama (disimpan di dalam ||sid||)
+    existing_sids = set()
+    for msg in existing_msgs:
+        if "||" in msg.content:
+            parts = msg.content.split("||")
+            if len(parts) >= 2:
+                existing_sids.add(parts[1].strip())
+
+    # Ambil solve terbaru (3 terakhir)
+    latest_solves = solves[-MAX_LATEST:]
+
+    # Kirim notif baru kalau belum pernah dipost
+    for s in latest_solves:
+        sid = s["id"]
+        if sid in existing_sids:
+            continue  # sudah pernah dikirim
+
+        solved_str = format_normal_date(s.get("time", ""))
+        mention = (
+            resolve_mention(channel, MENTION_ROLE_ID)
+            if MENTION_ROLE_ID and MENTION_ROLE_ID != "0"
+            else ""
+        )
+
+        content = (
+            f"🩸 **{s['user']}** just claimed first blood on "
+            f"**{s['challenge']}** ({s['category']})\n🕒 {solved_str} {mention} ||{sid}||"
+        )
+
+        msg = await channel.send(content)
+        current_ids.append(str(msg.id))
+        logger.info(f"Posted new first blood: {s['user']} - {s['challenge']}")
+
+    # Hapus pesan lama kalau sudah lebih dari 3
+    while len(current_ids) > MAX_LATEST:
         try:
             old_id = current_ids.pop(0)
             old_msg = await channel.fetch_message(int(old_id))
             await old_msg.delete()
+            logger.info(f"Deleted old message {old_id}")
         except:
             pass
 
-    # Kirim solve baru kalau belum ada
-    for s in latest_solves:
-        raw_key = f"{s['user']}|{s['challenge']}|{s['time']}"
-        sid = hashlib.sha256(raw_key.encode()).hexdigest()
-
-        # cek apakah solve ini sudah dipost (by konten)
-        already_posted = False
-        for mid in current_ids:
-            try:
-                msg = await channel.fetch_message(int(mid))
-                if sid in msg.content:  # embed sid ke content biar bisa dicek
-                    already_posted = True
-                    break
-            except:
-                pass
-
-        if not already_posted:
-            # Prefer relative time display
-            try:
-                solved_str = format_relative_date(s.get("time", ""))
-            except Exception:
-                solved_str = s.get("time", "")
-
-            mention = ""
-            if MENTION_ROLE_ID and MENTION_ROLE_ID != "0":
-                mention = resolve_mention(channel, MENTION_ROLE_ID)
-
-            # sisipkan sid biar bisa dicocokkan nanti
-            # content = f"🩸 **{s['user']}** claimed first blood on **{s['challenge']}** ({s['category']}) at {solved_str} {mention}\n`{sid}`"
-            content = f"🩸 **{s['user']}** claimed first blood on **{s['challenge']}** ({s['category']}) at {solved_str} {mention} ||{sid}||"
-
-            msg = await channel.send(content)
-            current_ids.append(str(msg.id))
-
-    # Simpan hanya message.id terbaru (max 3)
-    state["latest_ids"] = current_ids[-3:]
+    # Simpan state terbaru
+    state["latest_ids"] = current_ids
 
 # --------------------------
-# Main loop
+# Main Loop
 # --------------------------
+from datetime import timezone
+def parse_time_safe(t):
+    dt = parser.isoparse(t)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt
+
 async def poll_loop():
     await client.wait_until_ready()
     channel = client.get_channel(CHANNEL_ID)
     if not channel:
-        logger.error("Channel not found")
+        logger.error("Channel not found, exiting.")
         await client.close()
         return
 
     state = load_state()
-    seen = {s["id"] for s in load_solves()}
+    last_post_time_str = state.get("last_post_time")
+    last_post_time = (
+        parse_time_safe(last_post_time_str)
+        if last_post_time_str else datetime.min.replace(tzinfo=timezone.utc)
+    )
 
     async with aiohttp.ClientSession() as session:
         while not client.is_closed():
             try:
-                solves = await fetch_firstbloods(session)
+                solves_new = await fetch_firstbloods(session)
+                solves_old = load_solves()
 
-                old_solves = load_solves()
-                old_ids = {s["id"] for s in old_solves}
+                new_ids = {s["id"] for s in solves_new}
+                old_ids = {s["id"] for s in solves_old}
 
-                combined = {s["id"]: s for s in (old_solves + solves)}
-                solves = sorted(combined.values(), key=lambda x: parser.isoparse(x["time"]))[-100:]
+                # Bersihkan data lama dari chall yang udah di-hide
+                cleaned_solves = [s for s in solves_old if s["id"] in new_ids]
+                if len(cleaned_solves) != len(solves_old):
+                    logger.info("Removed stale solves for main table.")
+
+                # Gabungkan dan simpan 100 terbaru
+                combined = {s["id"]: s for s in (cleaned_solves + solves_new)}
+                solves = sorted(combined.values(), key=lambda x: parse_time_safe(x["time"]))[-100:]
                 save_solves(solves)
 
-                new_solves = [s for s in solves if s["id"] not in old_ids]
+                # Ambil solve baru berdasarkan ID + waktu > last_post_time
+                new_solves_detected = [
+                    s for s in solves
+                    if s["id"] not in old_ids and parse_time_safe(s["time"]) > last_post_time
+                ]
 
-                if new_solves:
-                    await update_table(channel, solves, state)
-                    await post_latest(channel, new_solves, state)
+                # Update embed utama
+                await update_table(channel, solves, state)
+
+                # Kirim notif realtime hanya kalau solve lebih baru dari terakhir post
+                if new_solves_detected:
+                    new_solves_detected = sorted(
+                        new_solves_detected,
+                        key=lambda x: parse_time_safe(x["time"])
+                    )
+                    await post_latest(channel, new_solves_detected, state)
+
+                    # Update last_post_time ke solve terbaru
+                    last_post_time = parse_time_safe(new_solves_detected[-1]["time"])
+                    state["last_post_time"] = last_post_time.isoformat()
 
                 save_state(state)
+
             except Exception:
                 logger.exception("Error in poll loop")
 
             await asyncio.sleep(POLL_INTERVAL)
 
-
 @client.event
 async def on_ready():
-    user = client.user
-    user_name = getattr(user, "name", "<unknown>")
-    user_disc = getattr(user, "discriminator", "????")
-    logger.info("Logged in as %s#%s", user_name, user_disc)
-
+    logger.info("Logged in as %s#%s", client.user.name, client.user.discriminator)
     channel = client.get_channel(CHANNEL_ID)
 
-    # Cek apakah file state.json atau solves.json belum ada
-    state_exists = os.path.exists(STATE_FILE)
-    solves_exists = os.path.exists(SOLVES_FILE)
-
-    if channel and (not state_exists or not solves_exists):
+    if channel and (not os.path.exists(STATE_FILE) or not os.path.exists(SOLVES_FILE)):
         try:
-            def is_me(m):
-                return m.author == client.user
-            purge_fn = getattr(channel, "purge", None)
-            if callable(purge_fn):
-                await channel.purge(limit=None, check=is_me)
-            logger.info("Purged messages because state or solves file not found")
+            await channel.purge(limit=None, check=lambda m: m.author == client.user)
+            logger.info("Channel purged (first run / missing state).")
         except Exception as e:
             logger.error("Failed to clear channel: %s", e)
 
     asyncio.create_task(poll_loop())
+
 
 def main():
     if not DISCORD_TOKEN:
