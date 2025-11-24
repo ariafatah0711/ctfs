@@ -34,7 +34,7 @@ export async function loginGoogle(): Promise<AuthResponse> {
 export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/challenges` // redirect to forgot-password for new password input
+      redirectTo: `${window.location.origin}/profile/password` // redirect to forgot-password for new password input
     })
     if (error) {
       return { error: error.message }
