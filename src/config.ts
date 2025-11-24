@@ -4,6 +4,18 @@ export const APP = {
   description: 'Aplikasi CTF minimalis dengan Next.js dan Supabase',
   flagFormat: 'FGTE{your_flag_here}',
   year: new Date().getFullYear(),
+  // Maintenance configuration
+  // mode: 'no' | 'yes' | 'auto'
+  // 'no'   -> normal operation
+  // 'yes'  -> forced maintenance (harus ubah ke 'no' untuk kembali normal)
+  // 'auto' -> otomatis masuk maintenance jika Supabase error (koneksi / query gagal)
+  maintenance: {
+    mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || 'no',
+    message:
+      process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE ||
+      'Platform sedang maintenance. Silakan kembali beberapa saat lagi.'
+  },
+
   challengeCategories: [
     'Intro',
     'Misc',

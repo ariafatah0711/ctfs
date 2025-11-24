@@ -103,7 +103,7 @@ export default function NotificationList() {
                 <span className="font-semibold text-green-600 dark:text-green-300">First Blood</span>
                 <span className="inline-flex items-center gap-1">
                   <Link
-                    href={notif.notif_username ? `/user/${notif.notif_username}` : "#"}
+                    href={notif.notif_username ? `/user/${encodeURIComponent(notif.notif_username)}` : "#"}
                     className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
                   >
                     <span className="inline-flex items-center gap-1">

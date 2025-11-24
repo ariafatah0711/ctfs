@@ -174,7 +174,7 @@ export default function AdminSolversPage() {
                   >
                     <div className="truncate">
                       <Link
-                        href={`/user/${s.username}`}
+                        href={`/user/${encodeURIComponent(s.username)}`}
                         className="font-medium text-blue-600 dark:text-blue-300 hover:underline"
                         title={s.username}
                       >
