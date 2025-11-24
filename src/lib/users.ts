@@ -141,6 +141,28 @@ export async function getCategoryTotals(): Promise<CategoryTotal[]> {
   }
 }
 
+// Get difficulty totals (total challenge per difficulty)
+export type DifficultyTotal = {
+  difficulty: string
+  total_challenges: number
+}
+
+export async function getDifficultyTotals(): Promise<DifficultyTotal[]> {
+  try {
+    const { data, error } = await supabase.rpc('get_difficulty_totals')
+
+    if (error) {
+      console.error('Error fetching difficulty totals:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Error fetching difficulty totals:', error)
+    return []
+  }
+}
+
 export type SiteInfo = {
   total_users: number
   total_admins: number

@@ -797,6 +797,27 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
 
 -- ########################################################
+-- Function: get_difficulty_totals()
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_difficulty_totals()
+RETURNS TABLE (
+  difficulty TEXT,
+  total_challenges INT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT c.difficulty, COUNT(*)::int
+  FROM public.challenges c
+  WHERE c.is_active = true
+  GROUP BY c.difficulty
+  ORDER BY c.difficulty;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_difficulty_totals() TO authenticated;--
+
+########################################################
 -- Function: get_user_first_bloods(p_user_id UUID)
 -- ########################################################
 CREATE OR REPLACE FUNCTION get_user_first_bloods(p_user_id UUID)
