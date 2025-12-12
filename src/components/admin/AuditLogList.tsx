@@ -1,10 +1,12 @@
 import React from 'react'
+import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { AuditLogEntry } from '@/lib/log'
 import { getAuditLogs } from '@/lib/log'
 import { formatRelativeDate } from '@/lib/utils'
 import Loader from '@/components/custom/loading'
+import { getUsernameByEmail } from '@/lib/users'
 
 interface AuditLogListProps {
   // If `logs` is provided by the parent, the component will display them.
@@ -34,6 +36,156 @@ const getActionStyle = (action: string): { color: string, icon: string } => {
   }
 }
 
+const EmailWithUsernameTooltip: React.FC<{
+  email: string
+  cachedUsername: string | null | undefined
+  onUsernameLoaded: (email: string, username: string | null) => void
+}> = ({ email, cachedUsername, onUsernameLoaded }) => {
+  // undefined = belum fetch, null = sudah cek tapi tidak ada, string = ada
+  const [username, setUsername] = React.useState<string | null | undefined>(cachedUsername)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [showTooltip, setShowTooltip] = React.useState(false)
+  const [tooltipPos, setTooltipPos] = React.useState({ x: 0, y: 0 })
+  const emailRef = React.useRef<HTMLSpanElement>(null)
+  const abortControllerRef = React.useRef<AbortController | null>(null)
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Sync local state dengan cachedUsername dari parent
+  React.useEffect(() => {
+    setUsername(cachedUsername)
+  }, [cachedUsername])
+
+  const handleMouseEnter = React.useCallback((e: React.MouseEvent) => {
+    // Clear previous timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+
+    // Set timeout untuk debounce (300ms)
+    timeoutRef.current = setTimeout(async () => {
+      const rect = emailRef.current?.getBoundingClientRect()
+      if (rect) {
+        setTooltipPos({
+          x: rect.left + rect.width / 2,
+          y: rect.top
+        })
+      }
+
+      // Jika sudah ada di cache (baik ada username atau sudah cek tapi tidak ada), langsung tampilkan
+      if (username !== undefined || isLoading) {
+        setShowTooltip(true)
+        return
+      }
+
+      // Fetch username dengan AbortController (hanya jika belum pernah fetch)
+      setIsLoading(true)
+      abortControllerRef.current = new AbortController()
+
+      try {
+        const result = await getUsernameByEmail(email)
+        // Cek apakah request masih valid (tidak di-cancel)
+        if (!abortControllerRef.current?.signal.aborted) {
+          setUsername(result)
+          onUsernameLoaded(email, result) // Update parent cache
+          setShowTooltip(true)
+        }
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'AbortError') {
+          console.error('Error fetching username:', err)
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }, 300) // Debounce 300ms
+  }, [email, username, isLoading, onUsernameLoaded])
+
+  const handleMouseLeave = () => {
+    // Clear timeout saat mouse leave
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+
+    // Cancel fetch jika masih berjalan
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+
+    setShowTooltip(false)
+  }
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
+
+  return (
+    <div className="relative inline-block">
+      {username ? (
+        <Link
+          ref={emailRef as any}
+          href={`/user/${encodeURIComponent(username)}`}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className="truncate text-sm text-blue-600 dark:text-blue-400 font-medium flex-1 cursor-pointer border-b border-dotted border-blue-400 dark:border-blue-500 hover:border-solid hover:text-blue-700 dark:hover:text-blue-300 transition-all"
+        >
+          {email}
+        </Link>
+      ) : (
+        <span
+          ref={emailRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className="truncate text-sm text-gray-700 dark:text-gray-300 font-medium flex-1 cursor-help border-b border-dotted border-gray-400 dark:border-gray-600 hover:border-solid transition-all"
+        >
+          {email}
+        </span>
+      )}
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: -4 }}
+          exit={{ opacity: 0, y: -8 }}
+          className="fixed z-50 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-md whitespace-nowrap pointer-events-none"
+          style={{
+            left: `${tooltipPos.x}px`,
+            top: `${tooltipPos.y - 40}px`,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <div className="font-semibold">
+            {isLoading ? (
+              <span className="inline-block animate-pulse">Loading...</span>
+            ) : username ? (
+              <>
+                <span className="text-gray-400 dark:text-gray-600">Username: </span>
+                <span className="text-blue-300 dark:text-blue-600 cursor-pointer hover:underline">{username}</span>
+              </>
+            ) : (
+              <span className="text-gray-400 dark:text-gray-600">No username found</span>
+            )}
+          </div>
+          {/* Tooltip arrow */}
+          <div
+            className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-100"
+            style={{ width: 0, height: 0 }}
+          />
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
 const formatAction = (action: string) => {
   // Jika action adalah token_refreshed, tampilkan sebagai "Session Renewed"
   if (action === 'token_refreshed') {
@@ -45,6 +197,7 @@ const formatAction = (action: string) => {
 const AuditLogList: React.FC<AuditLogListProps> = ({ logs, isLoading }) => {
   const [selectedActions, setSelectedActions] = React.useState<ActionType[]>([])
   const [searchQuery, setSearchQuery] = React.useState('')
+  const [usernameCache, setUsernameCache] = React.useState<Map<string, string | null>>(new Map())
 
   // Internal state used when parent didn't pass `logs`.
   const [internalLogs, setInternalLogs] = React.useState<AuditLogEntry[]>([])
@@ -58,6 +211,14 @@ const AuditLogList: React.FC<AuditLogListProps> = ({ logs, isLoading }) => {
         : [...prev, action]
     )
   }
+
+  const handleUsernameLoaded = React.useCallback((email: string, username: string | null) => {
+    setUsernameCache(prev => {
+      const newCache = new Map(prev)
+      newCache.set(email, username)
+      return newCache
+    })
+  }, [])
 
   // Determine source of logs and loading state: prefer props passed from parent,
   // otherwise use our internal fetch state.
@@ -212,7 +373,15 @@ const filteredLogs = React.useMemo(() => {
                     <span className={`${style.color} text-xs font-medium`}>{formatAction(log.payload.action)}</span>
                   </div>
 
-                  <span className="truncate text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">{userEmail}</span>
+                  {userEmail ? (
+                    <EmailWithUsernameTooltip
+                      email={userEmail}
+                      cachedUsername={usernameCache.get(userEmail)}
+                      onUsernameLoaded={handleUsernameLoaded}
+                    />
+                  ) : (
+                    <span className="truncate text-sm text-gray-500 dark:text-gray-400">Unknown</span>
+                  )}
 
                   {log.payload.traits?.provider && (
                     <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">

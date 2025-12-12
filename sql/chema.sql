@@ -292,6 +292,26 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_email_by_username(text) TO anon, authenticated;
 
 -- ########################################################
+-- Function: get_username_by_email(p_email TEXT) - REVERSE LOOKUP
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_username_by_email(p_email TEXT)
+RETURNS TEXT AS $$
+DECLARE v_username TEXT;
+BEGIN
+  SELECT u.username
+  INTO v_username
+  FROM public.users u
+  JOIN auth.users au ON au.id = u.id
+  WHERE LOWER(au.email) = LOWER(p_email);
+
+  RETURN v_username;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_username_by_email(text) TO anon, authenticated;
+
+-- ########################################################
 -- Function: get_user_profile(p_id UUID)
 -- ########################################################
 CREATE OR REPLACE FUNCTION get_user_profile(p_id UUID)
@@ -1103,10 +1123,10 @@ CREATE TABLE public."keep-alive" (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
-ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
-  FOR ALL
-  USING (true);
+-- ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
+--   FOR ALL
+--   USING (true);
 
 -- ########################################################
 -- Initial Admin User Setup
