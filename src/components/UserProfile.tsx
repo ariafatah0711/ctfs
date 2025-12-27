@@ -4,6 +4,7 @@ import { ChallengeWithSolve, Challenge } from '@/types'
 import { getFirstBloodChallengeIds, getChallenges } from '@/lib/challenges'
 import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
 import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
 import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
@@ -475,7 +476,7 @@ export default function UserProfile({
 
             {/* Modal Show All Solved Challenges (Compact Clean Version) */}
             <Dialog open={showAllModal} onOpenChange={setShowAllModal}>
-              <DialogContent className="w-[calc(100vw-16px)] sm:w-full max-w-3xl p-0 border-0 shadow-2xl bg-white dark:bg-gray-900 rounded-2xl overflow-hidden fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <DialogContent className={DIALOG_CONTENT_CLASS_3XL + " fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"}>
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
@@ -536,7 +537,7 @@ export default function UserProfile({
 
             {/* Modal Show Unsolved Challenges (Grouped by Category) */}
             <Dialog open={showUnsolvedModal} onOpenChange={setShowUnsolvedModal}>
-              <DialogContent className="w-[calc(100vw-16px)] sm:w-full max-w-3xl p-0 border-0 shadow-2xl bg-white dark:bg-gray-900 rounded-2xl overflow-hidden fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <DialogContent className={DIALOG_CONTENT_CLASS_3XL + " fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"}>
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">

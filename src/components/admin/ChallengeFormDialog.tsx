@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import { Flag } from 'lucide-react'
 import { Check } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { DIALOG_CONTENT_CLASS, DIALOG_CONTENT_CLASS_XL } from "@/styles/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -63,7 +64,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[calc(100vw-16px)] sm:w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className={DIALOG_CONTENT_CLASS + " max-w-3xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden"}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
         <DialogHeader>
@@ -370,7 +371,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
         }
       }}
     >
-      <DialogContent className="w-[calc(100vw-16px)] sm:w-full max-w-xl min-w-[320px] bg-[#232344] dark:bg-gray-900 rounded-md shadow-2xl border border-[#35355e] dark:border-gray-700 p-4 sm:p-6 font-mono fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white" style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}>
+      <DialogContent className={DIALOG_CONTENT_CLASS_XL} style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}>
         <div className="flex justify-between items-center mb-2">
           <div className="font-medium text-sm text-gray-700 dark:text-gray-200">Flag:</div>
           <Button

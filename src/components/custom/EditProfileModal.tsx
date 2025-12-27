@@ -12,6 +12,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -61,7 +62,7 @@ export default function EditProfileModal({
       <DialogTrigger asChild>
         <Button className={triggerButtonClass}>Edit Profile</Button>
       </DialogTrigger>
-      <DialogContent className="w-[calc(100vw-16px)] sm:w-full max-w-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 rounded-lg shadow-xl fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white">
+      <DialogContent className={DIALOG_CONTENT_CLASS + " [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"}>
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">Edit Profile</DialogTitle>
           <DialogDescription className="text-gray-500 dark:text-gray-300">Update your username below.</DialogDescription>
