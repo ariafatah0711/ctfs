@@ -37,7 +37,7 @@ export default function ConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white dark:bg-gray-900 [&_button.absolute]:scale-125 [&_button.absolute]:text-red-500 [&_button.absolute]:hover:text-red-700">
+      <DialogContent className="w-[calc(100vw-16px)] sm:w-full max-w-lg bg-white dark:bg-gray-900 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 [&_button.absolute]:scale-125 [&_button.absolute]:text-red-500 [&_button.absolute]:hover:text-red-700">
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">{title}</DialogTitle>
         </DialogHeader>

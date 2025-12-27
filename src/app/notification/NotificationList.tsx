@@ -22,7 +22,7 @@ export default function NotificationList() {
 
   useEffect(() => {
     (async () => {
-      const notifs = await getNotifications();
+      const notifs = await getNotifications(10000, 0); // Ambil semua notifikasi
       setNotifications(notifs);
       setLoading(false);
     })();
@@ -67,7 +67,7 @@ export default function NotificationList() {
           className="border rounded-lg px-4 py-3 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex items-center gap-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: idx * 0.03 }}
+          transition={{ duration: 0.4, delay: idx * 0.0003 }}
         >
           {/* Icon */}
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 mr-2">

@@ -4,6 +4,7 @@ import './globals.css'
 
 import { Toaster } from "react-hot-toast"
 import Navbar from '@/components/Navbar'
+import ScrollToggle from '@/components/custom/ScrollToggle'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { NotificationsProvider } from '@/contexts/NotificationsContext'
@@ -100,6 +101,7 @@ export default async function RootLayout({
             </AuthProvider>
           </ThemeProvider>
         )}
+       <ScrollToggle />
       </body>
     </html>
   )

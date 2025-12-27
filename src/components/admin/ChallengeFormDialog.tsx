@@ -63,7 +63,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-3xl w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl [&_button.absolute.right-4.top-4] p-4 md:p-8 max-h-[90vh] overflow-y-auto scroll-hidden"
+        className="w-[calc(100vw-16px)] sm:w-full max-w-3xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 shadow-xl rounded-xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
         <DialogHeader>
@@ -370,7 +370,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
         }
       }}
     >
-      <DialogContent className="bg-[#232344] dark:bg-gray-900 rounded-md shadow-2xl max-w-xl min-w-[320px] w-full border border-[#35355e] dark:border-gray-700 p-6 font-mono [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white" style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}>
+      <DialogContent className="w-[calc(100vw-16px)] sm:w-full max-w-xl min-w-[320px] bg-[#232344] dark:bg-gray-900 rounded-md shadow-2xl border border-[#35355e] dark:border-gray-700 p-4 sm:p-6 font-mono fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white" style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}>
         <div className="flex justify-between items-center mb-2">
           <div className="font-medium text-sm text-gray-700 dark:text-gray-200">Flag:</div>
           <Button
