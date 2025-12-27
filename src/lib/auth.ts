@@ -276,3 +276,72 @@ export async function isAdmin(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Get current auth info: returns array of { provider, email } for each identity
+ */
+export async function getCurrentAuthInfo(): Promise<Array<{ provider: string; email: string }>> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    // Prefer identities if available
+    if (user.identities && user.identities.length > 0) {
+      return user.identities.map((id: any) => ({
+        provider: id.provider,
+        email: id.identity_data?.email || id.email || '',
+      }));
+    }
+    // Fallback: single provider from app_metadata
+    if (user.app_metadata?.provider) {
+      return [{ provider: user.app_metadata.provider, email: user.email || '' }];
+    }
+    // Fallback: just email
+    return [{ provider: 'email', email: user.email || '' }];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Bind Google account to existing user
+ */
+export async function bindGoogleManual(): Promise<{ error: string | null }> {
+  try {
+    const { error } = await supabase.auth.linkIdentity({
+      provider: 'google',
+    })
+
+    if (error) return { error: error.message }
+    return { error: null }
+  } catch {
+    return { error: 'Failed to link Google account' }
+  }
+}
+
+/**
+ * Unbind Google identity from current user (if possible)
+ */
+export async function unbindGoogleManual(): Promise<{ error: string | null }> {
+  try {
+    const { data: identities, error: identitiesError } = await supabase.auth.getUserIdentities();
+    if (identitiesError) {
+      return { error: identitiesError.message };
+    }
+    if (!identities || !identities.identities) {
+      return { error: 'No identities found.' };
+    }
+    // Find Google identity
+    const googleIdentity = identities.identities.find((identity: any) => identity.provider === 'google');
+    if (!googleIdentity) {
+      return { error: 'Google identity not linked.' };
+    }
+    // Unlink Google identity
+    const { error } = await supabase.auth.unlinkIdentity(googleIdentity);
+    if (error) {
+      return { error: error.message };
+    }
+    return { error: null };
+  } catch (e: any) {
+    return { error: 'Failed to unlink Google account.' };
+  }
+}

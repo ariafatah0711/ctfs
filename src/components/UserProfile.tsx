@@ -12,6 +12,7 @@ import ImageWithFallback from './ImageWithFallback'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import EditProfileModal from './custom/EditProfileModal'
+import { getCurrentAuthInfo } from '@/lib/auth'
 import SocialIcon from './custom/SocialIcon'
 import Loader from '@/components/custom/loading'
 import BackButton from './custom/BackButton'
@@ -99,6 +100,13 @@ export default function UserProfile({
   const [showUnsolvedModal, setShowUnsolvedModal] = useState(false)
   const [unsolvedChallenges, setUnsolvedChallenges] = useState<any[]>([])
   const [loadingUnsolved, setLoadingUnsolved] = useState(false)
+  const [authInfo, setAuthInfo] = useState<Array<{ provider: string; email: string }>>([])
+
+  useEffect(() => {
+    if (isCurrentUser) {
+      getCurrentAuthInfo().then(setAuthInfo)
+    }
+  }, [isCurrentUser])
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -223,6 +231,7 @@ export default function UserProfile({
                       ))}
                     </div>
                   </div>
+                  {/* Email & Providers info moved to EditProfileModal */}
                   {isCurrentUser && userDetail && (
                     <EditProfileModal
                       userId={userDetail.id}
@@ -232,6 +241,7 @@ export default function UserProfile({
                       onUsernameChange={username => setUserDetail({ ...userDetail, username })}
                       onProfileChange={({ username, bio, sosmed }) => setUserDetail({ ...userDetail, username, bio, sosmed })}
                       triggerButtonClass="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
+                      authInfo={authInfo}
                     />
                   )}
                 </CardContent>

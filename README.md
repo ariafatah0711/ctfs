@@ -47,9 +47,13 @@ cd ctfs
 2. **Import Schema**
    Upload `sql/schema.sql` into the **Supabase SQL editor** and run it to set up the database schema.
 
-3. **Disable Email Confirmation**
+3. **Disable Email Confirmation (Opsional)**
    Go to **Authentication** in Supabase and disable email confirmation.
    ![Disable Email Confirmation](images/README/image-3.png)
+
+4. **Enable Allow manual linking (Opsional)**
+   Go to **Authentication → Settings → External OAuth Providers** and enable the option. (jika ingin ingin bisa bind google ketika sudah login manual)
+   ![1766862561984](image/README/1766862561984.png)
 
 #### Optional
 
