@@ -57,7 +57,7 @@ export default function ScrollToggle() {
     <button
       onClick={scroll}
       aria-label={atBottom ? "Scroll to top" : "Scroll to bottom"}
-      className={`fixed bottom-6 right-6 z-50 rounded-full border shadow-lg transition-all duration-200 p-3 group ${base}
+      className={`fixed bottom-6 right-6 z-10 rounded-full border shadow-lg transition-all duration-200 p-3 group ${base}
         hover:scale-105 hover:shadow-2xl
         ${isDark ? 'hover:bg-blue-700 hover:border-blue-500' : 'hover:bg-blue-500 hover:text-white hover:border-blue-500'}`}
       style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)' }}

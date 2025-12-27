@@ -164,13 +164,10 @@ export default function AdminSolversPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                {solvers.map((s, idx) => (
-                  <motion.div
+                {solvers.map((s) => (
+                  <div
                     key={s.solve_id}
                     className="flex items-center justify-between px-4 py-3 transition-colors border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: idx * 0.03 }}
                   >
                     <div className="truncate">
                       <Link
@@ -197,7 +194,7 @@ export default function AdminSolversPage() {
                     >
                       <Trash2 size={16} />
                     </Button>
-                  </motion.div>
+                  </div>
                 ))}
               </motion.div>
             )}
