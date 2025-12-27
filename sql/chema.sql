@@ -84,9 +84,15 @@ CREATE TABLE public.users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   username TEXT UNIQUE NOT NULL,
   is_admin BOOLEAN DEFAULT false,
+  bio TEXT DEFAULT '',
+  sosmed JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- ALTER TABLE public.users
+--   ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '',
+--   ADD COLUMN IF NOT EXISTS sosmed JSONB DEFAULT '{}'::jsonb;
 
 -- ########################################################
 -- Table: challenges
@@ -339,7 +345,8 @@ GRANT EXECUTE ON FUNCTION get_user_profile(UUID) TO authenticated;
 -- Function: detail_user(p_id UUID)
 -- ########################################################
 CREATE OR REPLACE FUNCTION detail_user(p_id UUID)
-RETURNS JSON AS $$
+RETURNS JSON
+AS $$
 DECLARE
   v_user RECORD;
   v_rank BIGINT;
@@ -348,49 +355,67 @@ DECLARE
   v_picture TEXT;
 BEGIN
   -- Ambil user
-  SELECT id, username INTO v_user FROM public.users WHERE id = p_id;
+  SELECT id, username, bio, sosmed
+  INTO v_user
+  FROM public.users
+  WHERE id = p_id;
+
   IF NOT FOUND THEN
-    RETURN json_build_object('success', false, 'message', 'User not found');
+    RETURN json_build_object(
+      'success', false,
+      'message', 'User not found'
+    );
   END IF;
 
-  -- Ambil picture dari auth.users.raw_user_meta_data.picture (jika ada)
-  SELECT au.raw_user_meta_data->>'picture' INTO v_picture
+  -- Ambil picture
+  SELECT au.raw_user_meta_data->>'picture'
+  INTO v_picture
   FROM auth.users au
   WHERE au.id = v_user.id;
 
-  -- Hitung rank (sinkron dengan get_leaderboard, tie-break pakai waktu solve terakhir)
-  SELECT rank INTO v_rank
+  -- Rank
+  SELECT r.rank
+  INTO v_rank
   FROM (
     SELECT
       u.id,
-      RANK() OVER (ORDER BY COALESCE(SUM(c.points), 0) DESC, MAX(s.created_at) ASC) AS rank
+      RANK() OVER (
+        ORDER BY COALESCE(SUM(c.points), 0) DESC,
+                 MAX(s.created_at) ASC
+      ) AS rank
     FROM public.users u
     LEFT JOIN public.solves s ON u.id = s.user_id
     LEFT JOIN public.challenges c ON s.challenge_id = c.id
     GROUP BY u.id
-  ) ranked
-  WHERE ranked.id = p_id;
+  ) r
+  WHERE r.id = p_id;
 
-  -- Hitung total score user
+  -- Score
   SELECT COALESCE(SUM(c.points), 0)
   INTO v_score
   FROM public.solves s
   JOIN public.challenges c ON s.challenge_id = c.id
   WHERE s.user_id = p_id;
 
-  -- Register solved challenges
-  SELECT json_agg(json_build_object(
-    'challenge_id', c.id,
-    'title', c.title,
-    'category', c.category,
-    'points', c.points,
-    'difficulty', c.difficulty,
-    'solved_at', s.created_at
-  ) ORDER BY s.created_at DESC)
+  -- Solves
+  SELECT COALESCE(
+    json_agg(
+      json_build_object(
+        'challenge_id', c.id,
+        'title', c.title,
+        'category', c.category,
+        'points', c.points,
+        'difficulty', c.difficulty,
+        'solved_at', s.created_at
+      )
+      ORDER BY s.created_at DESC
+    ),
+    '[]'::json
+  )
+  INTO v_solves
   FROM public.solves s
   JOIN public.challenges c ON s.challenge_id = c.id
-  WHERE s.user_id = p_id
-  INTO v_solves;
+  WHERE s.user_id = p_id;
 
   RETURN json_build_object(
     'success', true,
@@ -399,15 +424,17 @@ BEGIN
       'username', v_user.username,
       'rank', COALESCE(v_rank, 0),
       'score', COALESCE(v_score, 0),
-      'picture', v_picture
+      'picture', v_picture,
+      'bio', COALESCE(v_user.bio, ''),
+      'sosmed', COALESCE(v_user.sosmed, '{}'::jsonb)
     ),
-    'solved_challenges', COALESCE(v_solves, '[]'::json)
+    'solved_challenges', v_solves
   );
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION detail_user(p_id UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION detail_user(UUID) TO authenticated;
 
 -- ########################################################
 -- Function: update_username(p_id UUID, p_username TEXT)
@@ -445,6 +472,60 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_username(uuid, text) TO authenticated;
+
+-- ########################################################
+-- Function: update_bio(p_id UUID, p_bio TEXT)
+-- ########################################################
+CREATE OR REPLACE FUNCTION update_bio(p_id uuid, p_bio text)
+RETURNS json AS $$
+DECLARE
+  v_user_id uuid := auth.uid()::uuid;
+BEGIN
+  -- Cek user hanya bisa ubah bio sendiri
+  IF p_id IS DISTINCT FROM v_user_id THEN
+    RETURN json_build_object('success', false, 'message', 'Cannot change other user''s bio');
+  END IF;
+
+  -- Cek user ada
+  IF NOT EXISTS (SELECT 1 FROM public.users WHERE id = p_id) THEN
+    RETURN json_build_object('success', false, 'message', 'User not found');
+  END IF;
+
+  -- Update bio
+  UPDATE public.users SET bio = p_bio, updated_at = now() WHERE id = p_id;
+  RETURN json_build_object('success', true, 'bio', p_bio);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION update_bio(uuid, text) TO authenticated;
+
+-- ########################################################
+-- Function: update_sosmed(p_id UUID, p_sosmed JSONB)
+-- ########################################################
+CREATE OR REPLACE FUNCTION update_sosmed(p_id uuid, p_sosmed jsonb)
+RETURNS json AS $$
+DECLARE
+  v_user_id uuid := auth.uid()::uuid;
+BEGIN
+  -- Cek user hanya bisa ubah sosmed sendiri
+  IF p_id IS DISTINCT FROM v_user_id THEN
+    RETURN json_build_object('success', false, 'message', 'Cannot change other user''s sosmed');
+  END IF;
+
+  -- Cek user ada
+  IF NOT EXISTS (SELECT 1 FROM public.users WHERE id = p_id) THEN
+    RETURN json_build_object('success', false, 'message', 'User not found');
+  END IF;
+
+  -- Update sosmed
+  UPDATE public.users SET sosmed = p_sosmed, updated_at = now() WHERE id = p_id;
+  RETURN json_build_object('success', true, 'sosmed', p_sosmed);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION update_sosmed(uuid, jsonb) TO authenticated;
 
 -- ########################################################
 -- Function: get_leaderboard()
@@ -1114,28 +1195,6 @@ GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
 
 -- ########################################################
--- Keep Alive Table
--- ########################################################
-DROP TABLE IF EXISTS public."keep-alive" CASCADE;
-CREATE TABLE public."keep-alive" (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
-);
-
--- ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
--- CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
---   FOR ALL
---   USING (true);
-
--- ########################################################
--- Initial Admin User Setup
--- ########################################################
--- Admin set manually:
--- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
-
-
--- ########################################################
 -- Function: get_auth_audit_logs(p_limit INT, p_offset INT)
 -- ########################################################
 create or replace function public.get_auth_audit_logs(
@@ -1163,3 +1222,35 @@ as $$
 $$;
 
 grant execute on function public.get_auth_audit_logs(int, int) to authenticated;
+
+-- ########################################################
+-- Keep Alive Table
+-- ########################################################
+DROP TABLE IF EXISTS public."keep-alive" CASCADE;
+CREATE TABLE public."keep-alive" (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Aktifkan RLS
+ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
+
+-- Policy: izinkan semua user (anon & authenticated) akses penuh
+CREATE POLICY "Allow all users full access"
+  ON public."keep-alive"
+  FOR ALL
+  USING (true);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO authenticated;
+
+-- ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
+-- CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"
+--   FOR ALL
+--   USING (true);
+
+-- ########################################################
+-- Initial Admin User Setup
+-- ########################################################
+-- Admin set manually:
+-- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';

@@ -50,7 +50,6 @@ export const retrieveEntries = async (supabase: SupabaseClient): Promise<QueryRe
   }
 }
 
-
 export const insertRandom = async (supabase: SupabaseClient, randomString: string): Promise<QueryResponse> => {
 
   const upsertData = {

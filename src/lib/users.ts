@@ -9,6 +9,8 @@ export type UserDetail = {
   rank: number | null
   score: number
   picture?: string | null
+  bio?: string
+  sosmed?: Record<string, string>
   solved_challenges: ChallengeWithSolve[]
 }
 
@@ -25,6 +27,8 @@ export async function getUserDetail(userId: string): Promise<UserDetail | null> 
       rank: data.user.rank ?? null,
       score: data.user.score ?? 0,
       picture: data.user.picture ?? null,
+      bio: data.user.bio ?? '',
+      sosmed: data.user.sosmed ?? {},
       solved_challenges: (data.solved_challenges || []).map((c: any) => ({
         id: c.challenge_id,
         title: c.title,
@@ -228,5 +232,43 @@ export async function updateUsername(userId: string, newUsername: string): Promi
     return { error: null, username: data.username };
   } catch (error) {
     return { error: 'Failed to update username' };
+  }
+}
+
+// Update current user's bio via RPC
+export async function updateBio(userId: string, newBio: string): Promise<{ error: string | null, bio?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('update_bio', {
+      p_id: userId,
+      p_bio: newBio
+    });
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update bio' };
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update bio' };
+    }
+    return { error: null, bio: data.bio };
+  } catch (error) {
+    return { error: 'Failed to update bio' };
+  }
+}
+
+// Update current user's sosmed via RPC
+export async function updateSosmed(userId: string, newSosmed: Record<string, string>): Promise<{ error: string | null, sosmed?: Record<string, string> }> {
+  try {
+    const { data, error } = await supabase.rpc('update_sosmed', {
+      p_id: userId,
+      p_sosmed: newSosmed
+    });
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update sosmed' };
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update sosmed' };
+    }
+    return { error: null, sosmed: data.sosmed };
+  } catch (error) {
+    return { error: 'Failed to update sosmed' };
   }
 }

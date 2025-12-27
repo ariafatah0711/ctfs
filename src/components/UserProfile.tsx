@@ -12,6 +12,7 @@ import ImageWithFallback from './ImageWithFallback'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import EditProfileModal from './custom/EditProfileModal'
+import SocialIcon from './custom/SocialIcon'
 import Loader from '@/components/custom/loading'
 import BackButton from './custom/BackButton'
 import DifficultyBadge from './custom/DifficultyBadge'
@@ -23,6 +24,14 @@ type UserDetail = {
   rank: number | null
   score: number
   picture?: string | null
+  bio?: string | null
+  sosmed?: {
+    linkedin?: string
+    instagram?: string
+    discord?: string
+    web?: string
+    [key: string]: string | undefined
+  } | null
   solved_challenges: ChallengeWithSolve[]
 }
 
@@ -98,6 +107,7 @@ export default function UserProfile({
       try {
         const detail = await getUserDetail(userId)
         setUserDetail(detail)
+        // console.log('Fetched user detail:', detail)
 
         if (detail) {
           const firstBlood = await getFirstBloodChallengeIds(detail.id)
@@ -217,11 +227,70 @@ export default function UserProfile({
                     <EditProfileModal
                       userId={userDetail.id}
                       currentUsername={userDetail.username}
+                      currentBio={userDetail.bio || ''}
+                      currentSosmed={userDetail.sosmed || {}}
                       onUsernameChange={username => setUserDetail({ ...userDetail, username })}
                       triggerButtonClass="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
                     />
                   )}
                 </CardContent>
+                {/* Bio and Sosmed below header - new style */}
+                {(userDetail.bio?.trim() || userDetail.sosmed) && (
+                  <CardContent className="pt-0 pb-4 px-8">
+                    {/* Bio */}
+                    {userDetail.bio?.trim() && (
+                      <p className="text-sm text-gray-700 dark:text-gray-200 mb-2 break-words border-b border-gray-200 dark:border-gray-700 pb-2">
+                        {userDetail.bio}
+                      </p>
+                    )}
+                    {/* Sosmed */}
+                    {userDetail.sosmed && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {/* LinkedIn */}
+                        {userDetail.sosmed.linkedin?.trim() && (
+                          <SocialIcon
+                            type="linkedin"
+                            href={userDetail.sosmed.linkedin.startsWith('http')
+                              ? userDetail.sosmed.linkedin
+                              : `https://linkedin.com/in/${userDetail.sosmed.linkedin}`}
+                            label="LinkedIn"
+                            hideLabelOnMobile
+                          />
+                        )}
+                        {/* Instagram */}
+                        {userDetail.sosmed.instagram?.trim() && (
+                          <SocialIcon
+                            type="instagram"
+                            href={userDetail.sosmed.instagram.startsWith('http')
+                              ? userDetail.sosmed.instagram
+                              : `https://instagram.com/${userDetail.sosmed.instagram}`}
+                            label="Instagram"
+                            hideLabelOnMobile
+                          />
+                        )}
+                        {/* Web */}
+                        {userDetail.sosmed.web?.trim() && (
+                          <SocialIcon
+                            type="web"
+                            href={userDetail.sosmed.web.startsWith('http')
+                              ? userDetail.sosmed.web
+                              : `https://${userDetail.sosmed.web}`}
+                            label="Website"
+                            hideLabelOnMobile
+                          />
+                        )}
+                        {/* Discord (always show label) */}
+                        {userDetail.sosmed.discord?.trim() && (
+                          <SocialIcon
+                            type="discord"
+                            label={userDetail.sosmed.discord}
+                            alwaysShowLabel
+                          />
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                )}
               </Card>
             </motion.div>
 
