@@ -230,6 +230,7 @@ export default function UserProfile({
                       currentBio={userDetail.bio || ''}
                       currentSosmed={userDetail.sosmed || {}}
                       onUsernameChange={username => setUserDetail({ ...userDetail, username })}
+                      onProfileChange={({ username, bio, sosmed }) => setUserDetail({ ...userDetail, username, bio, sosmed })}
                       triggerButtonClass="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
                     />
                   )}

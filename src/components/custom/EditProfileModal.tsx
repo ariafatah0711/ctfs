@@ -24,6 +24,7 @@ export default function EditProfileModal({
   currentBio = "",
   currentSosmed = {},
   onUsernameChange,
+  onProfileChange,
   triggerButtonClass = '',
 }: {
   userId: string
@@ -31,6 +32,7 @@ export default function EditProfileModal({
   currentBio?: string
   currentSosmed?: {linkedin?: string, instagram?: string, discord?: string, web?: string}
   onUsernameChange?: (username: string) => void
+  onProfileChange?: (profile: { username: string, bio: string, sosmed: {linkedin?: string, instagram?: string, discord?: string, web?: string} }) => void
   triggerButtonClass?: string
 }) {
   const [open, setOpen] = useState(false)
@@ -61,8 +63,16 @@ export default function EditProfileModal({
       setLoading(false)
       return
     }
+
     setUsername(newUsername || username)
     onUsernameChange?.(newUsername || username)
+
+    // Call onProfileChange with all updated data
+    onProfileChange?.({
+      username: newUsername || username,
+      bio,
+      sosmed,
+    })
 
     // Update bio
     if (bio.trim() !== "") {
