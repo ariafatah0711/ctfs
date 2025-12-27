@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import Loader from "@/components/custom/loading"
 import Footer from "@/components/custom/Footer"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import APP from '@/config'
 
 export default function Home() {
@@ -84,14 +85,14 @@ export default function Home() {
                 asChild
                 className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl shadow-lg"
               >
-                <a href="/challenges">Start Challenges</a>
+                <Link href="/challenges">Start Challenges</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 className="px-4 py-3 rounded-xl border-orange-600 text-orange-600 hover:bg-orange-50 shadow-lg"
               >
-                <a href="/rules">Rules</a>
+                <Link href="/rules">Rules</Link>
               </Button>
             </>
           ) : (
@@ -100,14 +101,14 @@ export default function Home() {
                 asChild
                 className="bg-orange-600 text-white hover:bg-orange-700 px-6 py-3 rounded-xl shadow-lg"
               >
-                <a href="/login">Login</a>
+                <Link href="/login">Login</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
                 className="px-6 py-3 rounded-xl border-orange-600 text-orange-600 hover:bg-orange-50 shadow-lg"
               >
-                <a href="/register">Register</a>
+                <Link href="/register">Register</Link>
               </Button>
             </>
           )}

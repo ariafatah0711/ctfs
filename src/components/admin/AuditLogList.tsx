@@ -365,37 +365,39 @@ const filteredLogs = React.useMemo(() => {
                 key={log.id || idx}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="px-6 py-2 hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors"
+                className="px-4 py-3 sm:px-6 sm:py-2 hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors border-b last:border-b-0 border-gray-100 dark:border-gray-800"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-3 w-full">
                   <div className="flex items-center gap-2 min-w-[120px]">
                     <span className={`${style.color} font-bold text-base`}>{style.icon}</span>
                     <span className={`${style.color} text-xs font-medium`}>{formatAction(log.payload.action)}</span>
                   </div>
 
-                  {userEmail ? (
-                    <EmailWithUsernameTooltip
-                      email={userEmail}
-                      cachedUsername={usernameCache.get(userEmail)}
-                      onUsernameLoaded={handleUsernameLoaded}
-                    />
-                  ) : (
-                    <span className="truncate text-sm text-gray-500 dark:text-gray-400">Unknown</span>
-                  )}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 flex-1">
+                    {userEmail ? (
+                      <EmailWithUsernameTooltip
+                        email={userEmail}
+                        cachedUsername={usernameCache.get(userEmail)}
+                        onUsernameLoaded={handleUsernameLoaded}
+                      />
+                    ) : (
+                      <span className="truncate text-sm text-gray-500 dark:text-gray-400">Unknown</span>
+                    )}
 
-                  {log.payload.traits?.provider && (
-                    <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
-                      {log.payload.traits.provider}
-                    </span>
-                  )}
+                    {log.payload.traits?.provider && (
+                      <span className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded mt-0.5 sm:mt-0">
+                        {log.payload.traits.provider}
+                      </span>
+                    )}
+                  </div>
 
-                  <span className="text-xs text-gray-400 tabular-nums whitespace-nowrap">
+                  <span className="text-xs text-gray-400 tabular-nums whitespace-nowrap mt-0.5 sm:mt-0">
                     {formatRelativeDate(log.created_at)}
                   </span>
                 </div>
 
                 {isUserDeleted && log.payload.traits?.user_id && (
-                  <div className="pl-8 mt-1 text-xs font-mono text-gray-400">
+                  <div className="pl-7 sm:pl-8 mt-1 text-xs font-mono text-gray-400">
                     ID: {log.payload.traits.user_id.slice(0,8)}
                   </div>
                 )}

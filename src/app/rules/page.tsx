@@ -44,16 +44,6 @@ const RULES = [
 ];
 
 export default function RulesPage() {
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600); // 600ms for smoothness
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return <Loader fullscreen color="text-orange-500" />;
-  }
-
   return (
     <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
       {/* Decorative background shapes */}
