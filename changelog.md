@@ -1,6 +1,28 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [V.1.9.1]
+### Changed
+- Minor updates and maintenance fixes
+- navbar ui improvements
+- add info page
+
+---
+
+## [v1.9.0]
+### Added
+- AuthProviders component for managing authentication methods
+
+---
+
+## [v1.8.6]
+### Changed
+- Refactor AdminSolversPage to simplify solver rendering
+- Improve ScrollToggle visibility by adjusting z-index
+- Enhance scrollbar styles for better UI aesthetics
+
+---
+
 ## [v1.8.5]
 ### Changed
 - Refactor navigation links to use Next.js `Link` component for better routing and performance

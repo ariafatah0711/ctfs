@@ -1,7 +1,7 @@
 "use client";
 
 import APP from "@/config";
-import { Users, Github, BookOpen, Send, ScrollText, Info } from 'lucide-react';
+import { Users, Github, BookOpen, ScrollText, Info, ListOrdered } from 'lucide-react';
 import Loader from "@/components/custom/loading";
 import Footer from "@/components/custom/Footer";
 import { VERSION, BUILD_TIME } from "@/version";
@@ -195,6 +195,12 @@ export default function InfoPage() {
           <div className="text-xs font-mono text-gray-500 flex items-center gap-1 mt-1">
             <ScrollText size={15} className="mr-1" />
             <span>Licensed under <a href={`${APP.links.github}/blob/main/LICENSE` || "https://www.apache.org/licenses/LICENSE-2.0"} target="_blank" rel="noopener" className="underline hover:text-orange-500">Apache 2.0</a></span>
+          </div>
+
+          {/* Change Log */}
+          <div className="text-xs font-mono text-gray-500 flex items-center gap-1 mt-1">
+            <ListOrdered size={15} className="mr-1" />
+            <span>See the <a href={`${APP.links.github}/blob/main/CHANGELOG.md` || '#'} target="_blank" rel="noopener" className="underline hover:text-orange-500">Change Log</a></span>
           </div>
         </div>
       </main>
