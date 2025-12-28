@@ -53,7 +53,7 @@ cd ctfs
 
 4. **Enable Allow manual linking (Opsional)**
    Go to **Authentication → Settings → External OAuth Providers** and enable the option. (jika ingin ingin bisa bind google ketika sudah login manual)
-   ![1766862561984](image/README/1766862561984.png)
+   ![1766862561984](images/README/1766862561984.png)
 
 #### Optional
 
