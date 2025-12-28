@@ -3,13 +3,14 @@
 import Link from 'next/link'
 import { Info, BookOpen, Flag, Trophy, Shield } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
 import { useNotifications } from '@/contexts/NotificationsContext'
 import APP from '@/config'
+import { subscribeToSolves } from '@/lib/challenges'
 
 export default function Navbar() {
   const router = useRouter()
@@ -18,6 +19,9 @@ export default function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
+  // State for real-time solve notification
+  const [solveNotif, setSolveNotif] = useState<{ username: string; challenge: string } | null>(null)
+  const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
@@ -25,6 +29,29 @@ export default function Navbar() {
       isAdmin().then(setAdminStatus)
     } else {
       setAdminStatus(false)
+    }
+  }, [user])
+
+  // Real-time solves subscription (pakai helper dari challenges.ts)
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = subscribeToSolves(({ username, challenge }) => {
+      // Hide notification if the solve is by the current user
+      if (username === user.username) return;
+      setSolveNotif({ username, challenge })
+      // Play sound
+      try {
+        const audio = new Audio('/sounds/notify.mp3')
+        audio.volume = 0.5
+        audio.play()
+      } catch {}
+      // Auto-hide after 6s
+      if (notifTimeout.current) clearTimeout(notifTimeout.current)
+      notifTimeout.current = setTimeout(() => setSolveNotif(null), 6000)
+    })
+    return () => {
+      unsubscribe()
+      if (notifTimeout.current) clearTimeout(notifTimeout.current)
     }
   }, [user])
 
@@ -37,7 +64,21 @@ export default function Navbar() {
   }
 
   if (loading) return null
+
+  // Marquee/Toast notification style
+  const notifVisible = !!solveNotif
+
   return (
+    <>
+      {/* Real-time solve notification (marquee style) */}
+      {notifVisible && (
+        <div className="fixed top-2 right-2 z-[9999] flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
+          <svg className="mr-2" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span className="truncate">
+            <b>{solveNotif.username}</b> just solved <b>{solveNotif.challenge}</b>!
+          </span>
+        </div>
+      )}
     <nav className={`shadow-sm border-b fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950 border-gray-800' : 'bg-white border-gray-300'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14 items-center">
@@ -327,5 +368,6 @@ export default function Navbar() {
         )}
       </div>
     </nav>
+  </>
   )
 }

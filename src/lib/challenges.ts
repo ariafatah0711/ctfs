@@ -1,3 +1,7 @@
+import { layouts } from 'chart.js';
+import { supabase } from './supabase'
+import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/types'
+
 // Get user rank only (by username)
 export async function getUserRank(username: string): Promise<number | null> {
   const leaderboard = await getLeaderboard();
@@ -9,8 +13,6 @@ export async function getUserRank(username: string): Promise<number | null> {
   const idx = leaderboard.findIndex((entry: any) => entry.username === username);
   return idx !== -1 ? idx + 1 : null;
 }
-import { supabase } from './supabase'
-import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/types'
 
 /**
  * Get all challenges
@@ -533,4 +535,71 @@ export async function getNotifications(limit = 100, offset = 0) {
   }
   // console.log(data)
   return data || [];
+}
+
+/**
+ * Subscribe to real-time solves (challenge solved events)
+ * @param onSolve callback({ username, challenge }) dipanggil setiap ada solve baru
+ * @returns unsubscribe function
+ */
+export function subscribeToSolves(onSolve: (payload: { username: string, challenge: string }) => void) {
+  console.log('[subscribeToSolves] Subscribing to solves-insert channel...')
+  const channel = supabase
+    .channel('solves-insert')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'solves' }, async (payload) => {
+      try {
+        if (!payload || !payload.new) {
+          console.warn('[subscribeToSolves] Invalid payload:', payload)
+          return;
+        }
+        let solve = payload.new;
+        console.log('[subscribeToSolves] Payload.new:', solve)
+        // Fallback: fetch latest solve if missing user_id or challenge_id
+        if (!solve.user_id || !solve.challenge_id) {
+          console.warn('[subscribeToSolves] Missing user_id or challenge_id:', solve)
+          const { data: latestSolve, error: latestError } = await supabase
+            .from('solves')
+            .select('user_id, challenge_id')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          if (latestError || !latestSolve || !latestSolve.user_id || !latestSolve.challenge_id) {
+            console.warn('[subscribeToSolves] Still cannot get user_id or challenge_id from latest solve:', latestError, latestSolve)
+            onSolve({ username: 'Unknown', challenge: 'Unknown' });
+            return;
+          }
+          solve = latestSolve;
+        }
+
+        const { data, error } = await supabase
+          .rpc('get_solve_info', {
+            p_user_id: solve.user_id,
+            p_challenge_id: solve.challenge_id
+          });
+
+        if (error) {
+          console.warn('[subscribeToSolves] Error fetching solve info via RPC:', error);
+          onSolve({ username: 'Unknown', challenge: 'Unknown' });
+          return;
+        }
+
+        if (data && data.length > 0) {
+          // Pastikan type string dan fallback jika null/undefined
+          const username = typeof data[0].username === 'string' && data[0].username ? data[0].username : 'Unknown';
+          const challenge = typeof data[0].challenge === 'string' && data[0].challenge ? data[0].challenge : 'Unknown';
+          onSolve({ username, challenge });
+          console.log(`[subscribeToSolves] Real-time solve: ${username} solved ${challenge}`);
+        } else {
+          onSolve({ username: 'Unknown', challenge: 'Unknown' });
+        }
+      } catch (err) {
+        console.error('[subscribeToSolves] Error handling solve event:', err)
+      }
+    })
+    .subscribe()
+  // Return unsubscribe function
+  return () => {
+    console.log('[subscribeToSolves] Unsubscribing from solves-insert channel...')
+    supabase.removeChannel(channel)
+  }
 }

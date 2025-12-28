@@ -1224,6 +1224,31 @@ $$;
 grant execute on function public.get_auth_audit_logs(int, int) to authenticated;
 
 -- ########################################################
+-- Function: get_solve_info(p_user_id UUID, p_challenge_id UUID)`
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_solve_info(
+  p_user_id UUID,
+  p_challenge_id UUID
+)
+RETURNS TABLE (
+  username TEXT,
+  challenge TEXT
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    u.username,
+    c.title
+  FROM public.users u
+  JOIN public.challenges c ON c.id = p_challenge_id
+  WHERE u.id = p_user_id;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_solve_info(UUID, UUID) TO authenticated
+
+-- ########################################################
 -- Keep Alive Table
 -- ########################################################
 DROP TABLE IF EXISTS public."keep-alive" CASCADE;
