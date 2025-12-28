@@ -55,6 +55,10 @@ cd ctfs
    Go to **Authentication → Settings → External OAuth Providers** and enable the option. (jika ingin ingin bisa bind google ketika sudah login manual)
    ![1766862561984](images/README/1766862561984.png)
 
+5. **Enable Realtime public.solves**
+   Go to **Database → Table** and enable Realtime for the `public.solves` table.
+  ![1766920400738](images/README/1766920400738.png)
+
 #### Optional
 
 4. **Optional Testing Data**

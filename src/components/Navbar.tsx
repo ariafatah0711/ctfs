@@ -32,9 +32,9 @@ export default function Navbar() {
     }
   }, [user])
 
-  // Real-time solves subscription (pakai helper dari challenges.ts)
+  // Real-time solves subscription (aktif hanya jika APP.notifSolves true)
   useEffect(() => {
-    if (!user) return;
+    if (!user || !APP.notifSolves) return;
     const unsubscribe = subscribeToSolves(({ username, challenge }) => {
       // Hide notification if the solve is by the current user
       if (username === user.username) return;

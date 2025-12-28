@@ -44,6 +44,7 @@ export const APP = {
     Hard: 'red',
     Impossible: 'purple',
   },
+  notifSolves: true, // notifikasi global saat ada yang solve challenge
 
   // Base URL (otomatis ambil dari env kalau ada)
   baseUrl:
