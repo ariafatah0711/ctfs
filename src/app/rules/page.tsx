@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Loader from '@/components/custom/loading';
 import Footer from "@/components/custom/Footer"
 import { motion } from "framer-motion";
+import { BookOpen } from 'lucide-react';
 import APP from '@/config';
 import { RulesMarkdownRenderer } from '@/components/MarkdownRenderer'
 import { Button } from '@/components/ui/button';
@@ -58,9 +59,9 @@ export default function RulesPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="text-3xl md:text-4xl font-extrabold text-orange-600 dark:text-orange-400 mb-2 drop-shadow"
+          className="text-3xl md:text-4xl font-extrabold text-orange-600 dark:text-orange-400 mb-2 drop-shadow flex items-center justify-center gap-2"
         >
-          Platform {APP.shortName} Rules 🚩
+          <BookOpen size={32} className="text-orange-500 dark:text-orange-300 drop-shadow mr-1" /> Rules {APP.shortName}
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}

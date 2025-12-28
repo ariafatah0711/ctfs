@@ -3,6 +3,7 @@
 import ScoreboardChart from '@/components/scoreboard/ScoreboardChart'
 import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import ScoreboardEmptyState from '@/components/scoreboard/ScoreboardEmptyState'
+import { Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -86,7 +87,7 @@ export default function ScoreboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        <TitlePage>🏆 Scoreboard</TitlePage>
+        <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300 drop-shadow" />}>Scoreboard</TitlePage>
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader fullscreen color="text-orange-500" />

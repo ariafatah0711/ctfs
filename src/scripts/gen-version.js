@@ -1,5 +1,5 @@
 // This file is auto-generated. Do not edit manually.
-const { version } = require("../package.json");
+const { version } = require("../../package.json");
 const fs = require("fs");
 
 const buildTime = new Date().toISOString();
@@ -9,5 +9,5 @@ export const VERSION = "${version}";
 export const BUILD_TIME = "${buildTime}";
 `;
 
-fs.writeFileSync(__dirname + "/../src/version.ts", content);
+fs.writeFileSync(__dirname + "/../version.ts", content);
 console.log("src/version.ts generated:", content);

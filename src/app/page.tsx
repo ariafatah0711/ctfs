@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import Loader from "@/components/custom/loading"
 import Footer from "@/components/custom/Footer"
 import { Button } from "@/components/ui/button"
+import { Flag } from 'lucide-react'
 import Link from "next/link"
 import APP from '@/config'
 
@@ -32,7 +33,8 @@ export default function Home() {
           <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
             {APP.fullName}
           </span>{" "}
-          🚩
+          <Flag size={50} className="inline-block text-orange-500 dark:text-orange-300 drop-shadow" />
+
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
