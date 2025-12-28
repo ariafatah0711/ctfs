@@ -36,15 +36,15 @@ export default function Navbar() {
   useEffect(() => {
     if (!user || !APP.notifSolves) return;
     const unsubscribe = subscribeToSolves(({ username, challenge }) => {
-      // Hide notification if the solve is by the current user
-      if (username === user.username) return;
       setSolveNotif({ username, challenge })
-      // Play sound
-      try {
-        const audio = new Audio('/sounds/notify.mp3')
-        audio.volume = 0.5
-        audio.play()
-      } catch {}
+      // Play sound only if the solve is NOT by the current user
+      if (username !== user.username) {
+        try {
+          const audio = new Audio('/sounds/notify.mp3')
+          audio.volume = 0.5
+          audio.play()
+        } catch {}
+      }
       // Auto-hide after 6s
       if (notifTimeout.current) clearTimeout(notifTimeout.current)
       notifTimeout.current = setTimeout(() => setSolveNotif(null), 6000)
