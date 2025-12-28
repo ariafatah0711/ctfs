@@ -1254,3 +1254,36 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO authenticated;
 -- ########################################################
 -- Admin set manually:
 -- UPDATE public.users SET is_admin = true WHERE id = 'your-user-id';
+
+
+
+
+
+
+
+
+
+
+
+
+-- ########################################################
+-- Function: cleanup_orphaned_users_and_solves()
+-- ########################################################
+CREATE OR REPLACE FUNCTION cleanup_orphaned_users_and_solves()
+RETURNS void AS $$
+BEGIN
+  -- Hapus solves orphaned (solves tanpa user di auth.users)
+  DELETE FROM public.solves
+  WHERE user_id NOT IN (SELECT id FROM auth.users);
+
+  -- Hapus users orphaned (users tanpa id di auth.users)
+  DELETE FROM public.users
+  WHERE id NOT IN (SELECT id FROM auth.users);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+-- Beri hak eksekusi ke role authenticated
+GRANT EXECUTE ON FUNCTION cleanup_orphaned_users_and_solves() TO authenticated;
+
+SELECT cleanup_orphaned_users_and_solves();

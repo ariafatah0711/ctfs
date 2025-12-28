@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Info, BookOpen, Flag, Trophy, Shield } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import ImageWithFallback from './ImageWithFallback'
@@ -51,39 +52,49 @@ export default function Navbar() {
 
             {/* Desktop menu (show some items only when logged in) */}
             <div className="hidden md:flex space-x-2">
+
               {user && (
                 <Link
                   href="/challenges"
-                  className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
-                  Challenges
+                  <Flag size={18} className="mr-1" /> Challenges
                 </Link>
               )}
 
               {user && (
                 <Link
                   href="/scoreboard"
-                  className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
-                  Scoreboard
+                  <Trophy size={18} className="mr-1" /> Scoreboard
                 </Link>
               )}
 
-              {!user && (
               <Link
                 href="/rules"
-                className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800 focus:ring-2 focus:ring-orange-700' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50 focus:ring-2 focus:ring-orange-400'}`}
+                className={`px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800 focus:ring-2 focus:ring-orange-700' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50 focus:ring-2 focus:ring-orange-400'}`}
+                title="Rules"
+                aria-label="Rules"
               >
-                Rules
+                <BookOpen size={18} className="mr-1" /> Rules
               </Link>
-              )}
+
+              <Link
+                href="/info"
+                className={`px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                title="Info"
+                aria-label="Info"
+              >
+                <Info size={18} className="mr-1" /> Info
+              </Link>
 
               {adminStatus && user && (
                 <Link
                   href="/admin"
-                  className={`px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
-                  Admin
+                  <Shield size={18} className="mr-1" /> Admin
                 </Link>
               )}
             </div>
@@ -247,32 +258,43 @@ export default function Navbar() {
                   </Link>
                   <Link
                     href="/challenges"
-                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Challenges
+                    <Flag size={18} className="mr-1" /> Challenges
                   </Link>
                   <Link
                     href="/scoreboard"
-                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Scoreboard
+                    <Trophy size={18} className="mr-1" /> Scoreboard
                   </Link>
                   <Link
                     href="/rules"
-                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'}`}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'}`}
                     onClick={() => setMobileMenuOpen(false)}
+                    title="Rules"
+                    aria-label="Rules"
                   >
-                    Rules
+                    <BookOpen size={18} className="mr-1" /> Rules
+                  </Link>
+                  <Link
+                    href="/info"
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    title="Info"
+                    aria-label="Info"
+                  >
+                    <Info size={18} className="mr-1" /> Info
                   </Link>
                   {adminStatus && (
                     <Link
                       href="/admin"
-                      className={`block px-3 py-2 rounded-lg text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Admin
+                      <Shield size={18} className="mr-1" /> Admin
                     </Link>
                   )}
                   <button
@@ -286,14 +308,14 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                    className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     href="/register"
-                    className={`block px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
+                    className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Register

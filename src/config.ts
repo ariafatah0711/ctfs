@@ -33,6 +33,7 @@ export const APP = {
     framer: 'https://www.framer.com/motion/',
     supabase: 'https://supabase.com/',
     vercel: 'https://vercel.com/',
+    docs: '#',
   },
 
   // Difficulty style mapping (use lowercase keys). Only color name, badge will map to classes.

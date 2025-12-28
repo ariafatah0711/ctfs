@@ -105,21 +105,35 @@ NEXT_PUBLIC_SITE_URL=https://ctf.ariaf.my.id
 
 Get these values from your Supabase project dashboard.
 
+
 ### 4. Deployment
 
-#### 1. Local Development & Testing
+#### 1. Generate Version Otomatis (Wajib sebelum build)
+
+```bash
+# Generate file src/version.ts dari package.json & waktu build
+node scripts/gen-version.js
+```
+
+#### 2. Local Development & Testing
 
 ```bash
 # Install dependencies (requires Node.js 18+ and npm 9+)
 npm install
 
+# Generate version info (WAJIB sebelum build)
+node scripts/gen-version.js
+
 # Start development server
 npm run dev
 ```
 
-To test your production build:
+Untuk test production build:
 
 ```bash
+# Generate version info (WAJIB sebelum build)
+node scripts/gen-version.js
+
 # Build for production
 npm run build
 

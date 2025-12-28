@@ -51,7 +51,7 @@ export default function ScrollToggle() {
     : 'bg-white border-gray-300 text-gray-900';
 
   // Sembunyikan tombol di halaman Root ("/") setelah semua hooks
-  if (pathname === "/") return null;
+  if (pathname === "/" || pathname === "/info" || pathname === "/rules") return null;
 
   return (
     <button

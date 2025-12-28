@@ -1,8 +1,11 @@
 {
   "name": "ctfs",
-  "version": "0.1.0",
+  "version": "1.9.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/gen-version.js",
+    "prebuild": "node scripts/gen-version.js",
+    "prestart": "node scripts/gen-version.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
