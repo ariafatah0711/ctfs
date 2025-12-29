@@ -122,7 +122,7 @@ export default function InfoPage() {
         {/* CONTRIBUTORS */}
         <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2"><Users size={20} className="mr-1" /> Contributors</h2>
 
-        <div className="relative w-full max-w-4xl overflow-hidden space-y-4">
+        <div className="marquee-group relative w-full max-w-4xl overflow-hidden space-y-4">
           {/* ROW 1 */}
           <div className="marquee marquee-left">
             <div className="marquee-track">

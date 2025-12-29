@@ -247,9 +247,15 @@ select {
   animation: marquee-left 40s linear infinite;
 }
 
-.marquee:hover .marquee-track {
+
+/* Pause semua marquee-track saat hover parent group */
+/* .marquee:hover .marquee-track {
   animation-play-state: paused;
 }
+
+.marquee-group:hover .marquee-track {
+  animation-play-state: paused;
+} */
 
 /* arah kiri */
 .marquee-left .marquee-track {

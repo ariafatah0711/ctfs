@@ -282,7 +282,8 @@ export default function Navbar() {
             </div>
 
             <div className="px-4 pt-4 pb-6 space-y-2 animate-fade-in">
-              {user ? (
+              {/* Profile */}
+              {user && (
                 <>
                   <Link
                     href="/profile"
@@ -297,6 +298,30 @@ export default function Navbar() {
                       {user.username}
                     </span>
                   </Link>
+                </>
+              )}
+              {/* Selalu tampil: Info & Rules */}
+              <Link
+                href="/rules"
+                className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'}`}
+                onClick={() => setMobileMenuOpen(false)}
+                title="Rules"
+                aria-label="Rules"
+              >
+                <BookOpen size={18} className="mr-1" /> Rules
+              </Link>
+              <Link
+                href="/info"
+                className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                onClick={() => setMobileMenuOpen(false)}
+                title="Info"
+                aria-label="Info"
+              >
+                <Info size={18} className="mr-1" /> Info
+              </Link>
+              {/* Tampil jika sudah login */}
+              {user && (
+                <>
                   <Link
                     href="/challenges"
                     className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
@@ -310,24 +335,6 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Trophy size={18} className="mr-1" /> Scoreboard
-                  </Link>
-                  <Link
-                    href="/rules"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    title="Rules"
-                    aria-label="Rules"
-                  >
-                    <BookOpen size={18} className="mr-1" /> Rules
-                  </Link>
-                  <Link
-                    href="/info"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    title="Info"
-                    aria-label="Info"
-                  >
-                    <Info size={18} className="mr-1" /> Info
                   </Link>
                   {adminStatus && (
                     <Link
@@ -345,7 +352,9 @@ export default function Navbar() {
                     Logout
                   </button>
                 </>
-              ) : (
+              )}
+              {/* Tampil jika belum login */}
+              {!user && (
                 <>
                   <Link
                     href="/login"
