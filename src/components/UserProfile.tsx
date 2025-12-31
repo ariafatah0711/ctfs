@@ -165,6 +165,28 @@ export default function UserProfile({
     return acc
   }, {} as Record<string, any[]>)
 
+  // Get preferred order from config
+  const preferredOrder = (typeof APP !== 'undefined' && APP.challengeCategories) ? APP.challengeCategories : [];
+  // Get all categories from unsolvedByCategory
+  const unsolvedCategories = Object.keys(unsolvedByCategory);
+  // Build ordered categories: preferred first, then the rest
+  const matchedCategorySet = new Set<string>();
+  const orderedUnsolvedCategories = [
+    ...preferredOrder.flatMap(p => {
+      const pLower = p.toLowerCase();
+      const found = unsolvedCategories.find(c => {
+        const cLower = c.toLowerCase();
+        return cLower.includes(pLower) || pLower.includes(cLower);
+      });
+      if (found && !matchedCategorySet.has(found)) {
+        matchedCategorySet.add(found);
+        return found;
+      }
+      return [] as string[];
+    }),
+    ...unsolvedCategories.filter(c => !matchedCategorySet.has(c)).sort()
+  ];
+
   // Username truncation handled by Tailwind utility classes below
 
   return (
@@ -646,43 +668,43 @@ export default function UserProfile({
                     </div>
                   ) : (
                     <div className="overflow-y-auto max-h-[70vh] divide-y divide-gray-200 dark:divide-gray-700 scroll-hidden">
-                      {Object.entries(unsolvedByCategory).map(([category, challenges]) => {
-                        const challengeList = challenges as any[]
+                      {orderedUnsolvedCategories.map(category => {
+                        const challengeList = unsolvedByCategory[category] as any[];
                         return (
-                        <div key={category} className="px-6 py-4">
-                          {/* Category Header */}
-                          <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                            <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-md">
-                              {category}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              ({challengeList.length} {challengeList.length === 1 ? 'challenge' : 'challenges'})
-                            </span>
-                          </h3>
+                          <div key={category} className="px-6 py-4">
+                            {/* Category Header */}
+                            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                              <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-md">
+                                {category}
+                              </span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                ({challengeList.length} {challengeList.length === 1 ? 'challenge' : 'challenges'})
+                              </span>
+                            </h3>
 
-                          {/* Challenge List */}
-                          <div className="space-y-2">
-                            {challengeList.map((challenge: any) => (
-                              <div
-                                key={challenge.id}
-                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-gray-900 dark:text-white">
-                                      {challenge.title}
-                                    </span>
-                                    <DifficultyBadge difficulty={challenge.difficulty} />
+                            {/* Challenge List */}
+                            <div className="space-y-2">
+                              {challengeList.map((challenge: any) => (
+                                <div
+                                  key={challenge.id}
+                                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-gray-900 dark:text-white">
+                                        {challenge.title}
+                                      </span>
+                                      <DifficultyBadge difficulty={challenge.difficulty} />
+                                    </div>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                      {challenge.points} pts • {challenge.total_solves || 0} solves
+                                    </p>
                                   </div>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    {challenge.points} pts • {challenge.total_solves || 0} solves
-                                  </p>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                        )
+                        );
                       })}
                     </div>
                   )}

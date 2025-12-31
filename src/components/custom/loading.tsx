@@ -8,7 +8,7 @@ export default function Loader({
   fullscreen = false,
 }) {
   const containerClass = fullscreen
-    ? "fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-gray-900/70" // overlay transparan
+    ? "fixed inset-0 z-[9999] flex items-center justify-center bg-white/50 dark:bg-gray-900/70" // overlay transparan
     : "flex items-center justify-center"
 
   return (

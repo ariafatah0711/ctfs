@@ -5,7 +5,6 @@ import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challeng
 import { ChallengeWithSolve, User, Attachment } from '@/types'
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
-import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
 import { Flag } from 'lucide-react'
 import Loader from '@/components/custom/loading'
@@ -15,33 +14,6 @@ import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 import APP from '@/config'
 
 export default function ChallengesPage() {
-  const SOLVE_THRESHOLD = 5
-
-  // Tutorial State (localStorage dipindah ke sini)
-  const TUTORIAL_STORAGE_KEY = 'ctf_tutorialState';
-  const [tutorialState, setTutorialState] = useState<{ minimized: boolean; dismissed: boolean }>({ minimized: false, dismissed: false });
-  const [isTutorialStateReady, setIsTutorialStateReady] = useState(false);
-
-  // Ambil dari localStorage hanya di client
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(TUTORIAL_STORAGE_KEY);
-      if (saved) {
-        setTutorialState(JSON.parse(saved));
-      }
-    } catch {}
-    setIsTutorialStateReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isTutorialStateReady) return;
-    try {
-      localStorage.setItem(TUTORIAL_STORAGE_KEY, JSON.stringify(tutorialState));
-    } catch {
-      // ignore
-    }
-  }, [tutorialState, isTutorialStateReady]);
-
   // Saat tab solvers dibuka, fetch solvers
   const handleTabChange = async (tab: 'challenge' | 'solvers', challengeId: string) => {
     setChallengeTab(tab);
@@ -61,7 +33,6 @@ export default function ChallengesPage() {
   const [flagInputs, setFlagInputs] = useState<{[key: string]: string}>({})
   const [flagFeedback, setFlagFeedback] = useState<{[key: string]: { success: boolean, message: string } | null}>({})
   const [submitting, setSubmitting] = useState<{[key: string]: boolean}>({})
-  const [expandedChallenges, setExpandedChallenges] = useState<{[key: string]: boolean}>({})
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
@@ -190,24 +161,6 @@ export default function ChallengesPage() {
     setFlagInputs(prev => ({ ...prev, [challengeId]: value }))
   }
 
-  const toggleChallengeExpansion = (challengeId: string) => {
-    setExpandedChallenges(prev => {
-      const isCurrentlyOpen = prev[challengeId]
-
-      if (isCurrentlyOpen) {
-        // If clicking on currently open challenge, close it
-        return { [challengeId]: false }
-      } else {
-        // If clicking on closed challenge, close all others and open this one
-        return { [challengeId]: true }
-      }
-    })
-  }
-
-  const showHint = (challenge: ChallengeWithSolve) => {
-    setShowHintModal({ challenge })
-  }
-
   // Filter challenges based on current filters
   const filteredChallenges = challenges.filter(challenge => {
     // Status filter
@@ -318,16 +271,6 @@ export default function ChallengesPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         <TitlePage icon={<Flag size={30} className="text-orange-500 dark:text-orange-300 drop-shadow" />}>challenges</TitlePage>
-
-        {/* Render ChallengeTutorial hanya jika localStorage sudah ready dan belum dismissed atau belum mencapai threshold */}
-        {isTutorialStateReady && !(tutorialState.dismissed && challenges.filter(c => c.is_solved).length >= SOLVE_THRESHOLD) && (
-          <ChallengeTutorial
-            solvedCount={challenges.filter(c => c.is_solved).length}
-            solveThreshold={SOLVE_THRESHOLD}
-            tutorialState={tutorialState}
-            setTutorialState={setTutorialState}
-          />
-        )}
 
         <ChallengeFilterBar
           filters={filters}
