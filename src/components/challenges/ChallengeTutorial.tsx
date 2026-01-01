@@ -1,8 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { MessageCircleQuestionMark } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { useRouter } from 'next/navigation'
+import { MessageCircleQuestionMark, FileText, Play } from 'lucide-react';
+import { Dialog, DialogContent} from '@/components/ui/dialog'
 import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
+import { useAuth } from '@/contexts/AuthContext'
 import APP from '@/config'
 
 interface ChallengeTutorialProps {}
@@ -10,7 +12,20 @@ interface ChallengeTutorialProps {}
 export default function ChallengeTutorial(_: ChallengeTutorialProps) {
   // start closed; user opens with floating button
   const [show, setShow] = useState(false)
-  const [toggleCount, setToggleCount] = useState(0)
+  const router = useRouter()
+  const { user } = useAuth()
+
+  const handleStartJoyride = () => {
+    if (user) {
+      // Hapus localStorage flag
+      localStorage.removeItem(`ctf_tutorial_guide_seen_${user.id}`)
+      // Close tutorial dialog
+      setShow(false)
+      // Navigate ke challenges page (joyride akan auto-start)
+      router.push('/challenges')
+      window.location.reload()
+    }
+  }
 
   // Use centralized dialog class for consistent width/positioning
   // No positioning logic here — toolbar container handles stacking.
@@ -24,6 +39,7 @@ export default function ChallengeTutorial(_: ChallengeTutorialProps) {
         <button
           aria-label="Open tutorial"
           onClick={() => setShow(s => !s)}
+          data-tour="challenge-tutorial"
             className="h-12 w-12 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
           title={show ? 'Close tutorial' : 'Open tutorial'}
         >
@@ -83,7 +99,7 @@ export default function ChallengeTutorial(_: ChallengeTutorialProps) {
               <p className="text-xs sm:text-sm leading-relaxed"><strong>Tips:</strong> Mulai dari challenge <strong>Baby/Easy</strong>, gunakan <strong>hint</strong> jika tersedia, dan jangan ragu bertanya jika mentok!</p>
             </div>
 
-            <div className="mt-3 sm:mt-4">
+            <div className="mt-3 sm:mt-4 flex gap-2">
               <a
                 href="/tutorial.pdf"
                 target="_blank"
@@ -92,9 +108,18 @@ export default function ChallengeTutorial(_: ChallengeTutorialProps) {
                 title="Download full tutorial (PDF)"
                 aria-label="Download full tutorial PDF"
               >
-                <span className="text-base flex-shrink-0">📄</span>
+                <span className="text-base flex-shrink-0"><FileText /></span>
                 <span>Full tutorial (PDF)</span>
               </a>
+              <button
+                onClick={handleStartJoyride}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm text-white bg-indigo-600 dark:bg-indigo-500 px-3 py-2 rounded-md hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
+                title="Restart the guided tour"
+                aria-label="Start joyride tour"
+              >
+                <span className="text-base flex-shrink-0"><Play /></span>
+                <span>Start Tour</span>
+              </button>
             </div>
 
           </div>

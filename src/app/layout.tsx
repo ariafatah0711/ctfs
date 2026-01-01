@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Snippet } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
@@ -15,6 +15,7 @@ import APP from '@/config'
 import FloatingToolbar from '@/components/custom/FloatingToolbar'
 import ChatBotAI from '@/components/custom/ChatBotAI'
 import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
+import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import ChatToggle from '@/components/custom/ChatToggle'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -103,6 +104,7 @@ export default async function RootLayout({
                     <Navbar />
                     <div className="pt-14">{children}</div>
                     <Toaster position="top-right" reverseOrder={false} />
+                    <ChallengeJoyride />
                     <FloatingToolbar>
                       {APP.ChallengeTutorial && <ChallengeTutorial />}
                       {APP.ChatBotAI && <ChatToggle />}
