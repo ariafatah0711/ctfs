@@ -42,8 +42,8 @@ export default function ChallengeTutorial(_: ChallengeTutorialProps) {
         <DialogContent className={`${DIALOG_CONTENT_CLASS} z-50 p-4 sm:p-5 overflow-y-auto shadow-xl`}>
           <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
             <div className="flex items-start gap-2 min-w-0 flex-1">
-              <span className="text-2xl flex-shrink-0">🎯</span>
-              <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <MessageCircleQuestionMark size={20} />
                 <h3 className="font-bold text-indigo-800 dark:text-indigo-300 text-lg sm:text-xl" title="New to CTF? Start Here!">New to CTF?</h3>
               </div>
             </div>

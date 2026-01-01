@@ -114,7 +114,7 @@ export default function Navbar() {
 
               <Link
                 href="/rules"
-                className={`px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800 focus:ring-2 focus:ring-orange-700' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50 focus:ring-2 focus:ring-orange-400'}`}
+                className={`px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 title="Rules"
                 aria-label="Rules"
               >
@@ -321,7 +321,7 @@ export default function Navbar() {
               )}
               <Link
                 href="/rules"
-                className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'}`}
+                className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
                 onClick={() => setMobileMenuOpen(false)}
                 title="Rules"
                 aria-label="Rules"

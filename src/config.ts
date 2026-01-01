@@ -4,17 +4,6 @@ export const APP = {
   description: 'Aplikasi CTF minimalis dengan Next.js dan Supabase',
   flagFormat: 'FGTE{your_flag_here}',
   year: new Date().getFullYear(),
-  // Maintenance configuration
-  // mode: 'no' | 'yes' | 'auto'
-  // 'no'   -> normal operation
-  // 'yes'  -> forced maintenance (harus ubah ke 'no' untuk kembali normal)
-  // 'auto' -> otomatis masuk maintenance jika Supabase error (koneksi / query gagal)
-  maintenance: {
-    mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || 'no',
-    message:
-      process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE ||
-      'Platform sedang maintenance. Silakan kembali beberapa saat lagi.'
-  },
 
   challengeCategories: [
     'Intro',
@@ -44,7 +33,6 @@ export const APP = {
     Hard: 'red',
     Impossible: 'purple',
   },
-  notifSolves: true, // notifikasi global saat ada yang solve challenge
 
   // Base URL (otomatis ambil dari env kalau ada)
   baseUrl:
@@ -53,6 +41,23 @@ export const APP = {
     process.env.NEXT_PUBLIC_SITE_ICON || 'favicon.ico',
   image_preview:
     process.env.NEXT_PUBLIC_SITE_PREVIEW || 'og-image.png',
+
+  /* Setting Config */
+  notifSolves: true, // notifikasi global saat ada yang solve challenge
+  ChallengeTutorial: true, // enable / disable Challenge Tutorial component
+  ChatBotAI: false, // enable / disable ChatBot AI component
+
+  /* Maintenance configuration */
+  // mode: 'no' | 'yes' | 'auto'
+  // 'no'   -> normal operation
+  // 'yes'  -> forced maintenance (harus ubah ke 'no' untuk kembali normal)
+  // 'auto' -> otomatis masuk maintenance jika Supabase error (koneksi / query gagal)
+  maintenance: {
+    mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || 'no',
+    message:
+      process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE ||
+      'Platform sedang maintenance. Silakan kembali beberapa saat lagi.'
+  },
 }
 
 export default APP

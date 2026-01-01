@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getNotifications } from "@/lib/challenges";
+import { getNotifications, getRecentSolves } from "@/lib/challenges";
 import Link from "next/link";
 import Loader from "@/components/custom/loading";
 import { formatRelativeDate } from '@/lib/utils'
 
 export type Notification = {
-  notif_type: "new_challenge" | "first_blood";
+  notif_type: "new_challenge" | "first_blood" | "solve";
   notif_challenge_id: string;
   notif_challenge_title: string;
   notif_category: string;
@@ -16,21 +16,33 @@ export type Notification = {
   notif_created_at: string;
 };
 
-export default function NotificationList() {
+export default function NotificationList({ tabType = 'challenges' }: { tabType?: 'challenges' | 'solves' }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       const notifs = await getNotifications(10000, 0); // Ambil semua notifikasi
-      setNotifications(notifs);
+      const solves = await getRecentSolves(100, 0); // Ambil 100 recent solves
+
+      // Merge dan sort by created_at (newest first)
+      const merged = [...notifs, ...solves].sort((a, b) => {
+        return new Date(b.notif_created_at).getTime() - new Date(a.notif_created_at).getTime();
+      });
+
+      setNotifications(merged);
       setLoading(false);
     })();
   }, []);
 
+  // Filter based on tab type
+  const filteredNotifications = tabType === 'challenges'
+    ? notifications.filter(n => n.notif_type === 'first_blood' || n.notif_type === 'new_challenge')
+    : notifications.filter(n => n.notif_type === 'solve');
+
   if (loading) return <Loader fullscreen color="text-orange-500" />;
 
-  if (notifications.length === 0)
+  if (filteredNotifications.length === 0)
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -61,7 +73,7 @@ export default function NotificationList() {
 
   return (
     <ul className="space-y-2">
-      {notifications.map((notif, idx) => (
+      {filteredNotifications.map((notif, idx) => (
         <motion.li
           key={idx}
           className="border rounded-lg px-4 py-3 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex items-center gap-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150"
@@ -85,8 +97,21 @@ export default function NotificationList() {
                 <path d="M12 19V6" />
                 <path d="M5 12l7-7 7 7" />
               </svg>
-            ) : (
+            ) : notif.notif_type === "first_blood" ? (
               <span className="text-lg">🩸</span>
+            ) : (
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             )}
           </span>
 
@@ -98,9 +123,27 @@ export default function NotificationList() {
                 <span className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</span>
                 <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
               </>
-            ) : (
+            ) : notif.notif_type === "first_blood" ? (
               <>
                 <span className="font-semibold text-green-600 dark:text-green-300">First Blood</span>
+                <span className="inline-flex items-center gap-1">
+                  <Link
+                    href={notif.notif_username ? `/user/${encodeURIComponent(notif.notif_username)}` : "#"}
+                    className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {notif.notif_username && notif.notif_username.length > 20
+                        ? `${notif.notif_username.slice(0, 20)}...`
+                        : notif.notif_username}
+                    </span>
+                  </Link>
+                </span>
+                <span className="text-gray-700 dark:text-gray-300">solved</span>
+                <b className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</b>
+                <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
+              </>
+            ) : (
+              <>
                 <span className="inline-flex items-center gap-1">
                   <Link
                     href={notif.notif_username ? `/user/${encodeURIComponent(notif.notif_username)}` : "#"}

@@ -8,10 +8,14 @@ import ScrollToggle from '@/components/custom/ScrollToggle'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { NotificationsProvider } from '@/contexts/NotificationsContext'
+import { ChatProvider } from '@/contexts/ChatContext'
 import { headers } from 'next/headers'
 import APP from '@/config'
 
 import FloatingToolbar from '@/components/custom/FloatingToolbar'
+import ChatBotAI from '@/components/custom/ChatBotAI'
+import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
+import ChatToggle from '@/components/custom/ChatToggle'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -92,17 +96,23 @@ export default async function RootLayout({
         ) : (
           // Normal mode: with navbar and providers
           <ThemeProvider>
-            <AuthProvider>
-              <NotificationsProvider>
-                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                  <Navbar />
-                  <div className="pt-14">{children}</div>
-                  <Toaster position="top-right" reverseOrder={false} />
-                  <FloatingToolbar />
-                  <ScrollToggle />
-                </div>
-              </NotificationsProvider>
-            </AuthProvider>
+            <ChatProvider>
+              <AuthProvider>
+                <NotificationsProvider>
+                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                    <Navbar />
+                    <div className="pt-14">{children}</div>
+                    <Toaster position="top-right" reverseOrder={false} />
+                    <FloatingToolbar>
+                      {APP.ChallengeTutorial && <ChallengeTutorial />}
+                      {APP.ChatBotAI && <ChatToggle />}
+                    </FloatingToolbar>
+                    {APP.ChatBotAI && <ChatBotAI />}
+                    <ScrollToggle />
+                  </div>
+                </NotificationsProvider>
+              </AuthProvider>
+            </ChatProvider>
           </ThemeProvider>
         )}
       </body>

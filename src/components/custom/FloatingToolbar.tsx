@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
-import ChatToggle from '@/components/custom/ChatToggle'
 
-export default function FloatingToolbar() {
+export default function FloatingToolbar({ children }: { children?: React.ReactNode }) {
+  // Accept children from parent (layout) so layout can decide what to render
+  // based on config. FloatingToolbar only handles positioning and visibility.
   const [isVisible, setIsVisible] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
@@ -87,8 +87,7 @@ export default function FloatingToolbar() {
           : 'opacity-0 -translate-x-6 translate-y-4 scale-95 blur-sm pointer-events-none'
       }`}
     >
-      <ChallengeTutorial />
-      <ChatToggle />
+      {children}
     </div>
   )
 }

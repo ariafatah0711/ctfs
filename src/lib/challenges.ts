@@ -601,6 +601,41 @@ export async function getNotifications(limit = 100, offset = 0) {
 }
 
 /**
+ * Get recent solves formatted as notifications
+ */
+export async function getRecentSolves(limit = 100, offset = 0) {
+  try {
+    const { data, error } = await supabase
+      .from('solves')
+      .select(`
+        id,
+        created_at,
+        user_id,
+        challenge_id,
+        users(username),
+        challenges(title, category)
+      `)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return ((data as any[]) || []).map(row => ({
+      notif_type: 'solve' as const,
+      notif_challenge_id: row.challenge_id,
+      notif_challenge_title: row.challenges?.title || 'Unknown Challenge',
+      notif_category: row.challenges?.category || 'Misc',
+      notif_user_id: row.user_id,
+      notif_username: row.users?.username || 'Unknown',
+      notif_created_at: row.created_at,
+    }));
+  } catch (error) {
+    console.error('Error fetching recent solves:', error);
+    return [];
+  }
+}
+
+/**
  * Subscribe to real-time solves (challenge solved events)
  * @param onSolve callback({ username, challenge }) dipanggil setiap ada solve baru
  * @returns unsubscribe function

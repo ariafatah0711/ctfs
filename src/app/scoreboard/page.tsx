@@ -102,16 +102,16 @@ export default function ScoreboardPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300 drop-shadow" />}>Scoreboard</TitlePage>
-        <div className="flex items-center gap-2">
+        <div className="w-full grid grid-cols-2 gap-2">
           <button
             onClick={() => setFirstBloodMode(false)}
-            className={`px-3 py-1 text-sm rounded-md ${firstBloodMode ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' : 'bg-indigo-600 text-white'}`}
+            className={`w-full px-3 py-1 text-sm rounded-md ${firstBloodMode ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' : 'bg-indigo-600 text-white'}`}
           >
             Points
           </button>
           <button
             onClick={() => setFirstBloodMode(true)}
-            className={`px-3 py-1 text-sm rounded-md ${firstBloodMode ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            className={`w-full px-3 py-1 text-sm rounded-md ${firstBloodMode ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
           >
             First Blood
           </button>
