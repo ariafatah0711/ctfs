@@ -35,7 +35,7 @@ export async function getAuditLogs(limit = 1000): Promise<AuditLogEntry[]> {
       return []
     }
 
-    console.log(`Fetched ${data?.length || 0} audit logs (single batch).`)
+    // console.log(`Fetched ${data?.length || 0} audit logs (single batch).`)
     return data ?? []
   }
 
@@ -51,6 +51,6 @@ export async function getAuditLogs(limit = 1000): Promise<AuditLogEntry[]> {
   const results = await Promise.all(promises)
   const logs = results.flatMap(({ data }) => data ?? [])
 
-  console.log(`Fetched ${logs.length} audit logs in ${batchCount} batches.`)
+  // console.log(`Fetched ${logs.length} audit logs in ${batchCount} batches.`)
   return logs.slice(0, limit)
 }

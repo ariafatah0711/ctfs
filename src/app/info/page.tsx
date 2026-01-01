@@ -2,9 +2,12 @@
 
 import APP from "@/config";
 import { Users, Github, BookOpen, ScrollText, Info, ListOrdered } from 'lucide-react';
+import { motion } from "framer-motion";
+import { useEffect, useState } from 'react'
 import Loader from "@/components/custom/loading";
 import Footer from "@/components/custom/Footer";
 import { VERSION, BUILD_TIME } from "@/version";
+import { Star, GitBranch } from 'lucide-react'
 
 function DiscordIcon({
   size = 16,
@@ -74,6 +77,30 @@ export default function InfoPage() {
   const { loading } = require("@/contexts/AuthContext").useAuth();
   if (loading) return <Loader fullscreen color="text-orange-500" />;
 
+  const [repoStats, setRepoStats] = useState<{ stars: number; forks: number } | null>(null)
+
+  useEffect(() => {
+    const repoUrl = APP.links?.github
+    if (!repoUrl) return
+    try {
+      // extract owner/repo from URL like https://github.com/owner/repo
+      const m = repoUrl.match(/github\.com\/(.+?)\/(.+?)(?:\.git|\/|$)/i)
+      if (!m) return
+      const owner = m[1]
+      const repo = m[2]
+      const api = `https://api.github.com/repos/${owner}/${repo}`
+      fetch(api)
+        .then(r => r.ok ? r.json() : null)
+        .then((data) => {
+          if (!data) return
+          setRepoStats({ stars: data.stargazers_count || 0, forks: data.forks_count || 0 })
+        })
+        .catch(() => {})
+    } catch (e) {
+      // ignore
+    }
+  }, [])
+
   return (
     <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-gray-50/100 dark:bg-gray-900/100 relative overflow-hidden">
       <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
@@ -82,15 +109,17 @@ export default function InfoPage() {
         <div className="absolute -bottom-32 -left-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
 
         {/* HERO */}
-        <h1 className="text-5xl font-extrabold tracking-tight">
-          <span className="text-orange-600 dark:text-orange-400 drop-shadow-lg">CTF</span><span className="text-orange-500">:S</span>
-        </h1>
+        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} layout>
+          <h1 className="text-5xl font-extrabold tracking-tight">
+            <span className="text-orange-600 dark:text-orange-400 drop-shadow-lg">CTF</span><span className="text-orange-500">:S</span>
+          </h1>
 
-        <p className="mt-2 text-gray-400">Community-driven Capture The Flag platform</p>
+          <p className="mt-2 text-gray-400">Community-driven Capture The Flag platform</p>
 
-        <p className="mt-4 font-mono text-sm text-gray-300">
-          &gt; {APP.description || "Ngehack untuk senang-senang, bukan buat nyari profit"}
-        </p>
+          <p className="mt-4 font-mono text-sm text-gray-300">
+            &gt; {APP.description || "Ngehack untuk senang-senang, bukan buat nyari profit"}
+          </p>
+        </motion.div>
 
         {/* LINKS */}
         <div className="mt-6 flex gap-4">
@@ -125,7 +154,7 @@ export default function InfoPage() {
         <div className="marquee-group relative w-full max-w-4xl overflow-hidden space-y-4">
           {/* ROW 1 */}
           <div className="marquee marquee-left">
-            <div className="marquee-track">
+            <div className="marquee-track" style={{ willChange: 'transform' }}>
               {[...filledContributors, ...filledContributors].map((name, i) => {
                 const username = name.replace("@", "");
                 return (
@@ -136,11 +165,7 @@ export default function InfoPage() {
                     rel="noopener"
                     className="flex items-center gap-2 shrink-0 group px-2"
                   >
-                    <img
-                      src={`https://github.com/${username}.png`}
-                      className="w-9 h-9 rounded-full grayscale
-                         group-hover:grayscale-0 transition"
-                    />
+                    <ProfileAvatar username={username} />
                     <span
                       className="text-xs font-mono text-gray-300
                              group-hover:text-orange-400 transition"
@@ -155,7 +180,7 @@ export default function InfoPage() {
 
           {/* ROW 2 */}
           <div className="marquee marquee-right">
-            <div className="marquee-track">
+            <div className="marquee-track" style={{ willChange: 'transform' }}>
               {[...filledContributors, ...filledContributors].map((name, i) => {
                 const username = name.replace("@", "");
                 return (
@@ -166,11 +191,7 @@ export default function InfoPage() {
                     rel="noopener"
                     className="flex items-center gap-2 shrink-0 group px-2"
                   >
-                    <img
-                      src={`https://github.com/${username}.png`}
-                      className="w-9 h-9 rounded-full grayscale
-                         group-hover:grayscale-0 transition"
-                    />
+                    <ProfileAvatar username={username} />
                     <span
                       className="text-xs font-mono text-gray-300
                              group-hover:text-orange-400 transition"
@@ -188,9 +209,21 @@ export default function InfoPage() {
         <div className="my-10 w-24 border-t border-gray-700" />
 
         {/* VERSION & LICENSE */}
-        <div className="flex flex-col items-center gap-1 mt-2">
-          <div className="text-xs font-mono text-gray-500 flex items-center gap-1">
-            <Info size={15} className="mr-1" /> v{VERSION} · build {BUILD_TIME}
+          <div className="flex flex-col items-center gap-1 mt-2">
+          <div className="flex items-center gap-3">
+            <div className="text-xs font-mono text-gray-500 flex items-center gap-1">
+              <Info size={15} className="mr-1" /> v{VERSION} · build {BUILD_TIME}
+            </div>
+            {repoStats && (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <a href={APP.links.github} target="_blank" rel="noopener" className="inline-flex items-center gap-1 hover:text-orange-500">
+                  <Star size={14} className="text-yellow-500" /> {repoStats.stars}
+                </a>
+                <a href={APP.links.github} target="_blank" rel="noopener" className="inline-flex items-center gap-1 hover:text-orange-500">
+                  <GitBranch size={14} className="text-gray-500" /> {repoStats.forks}
+                </a>
+              </div>
+            )}
           </div>
           <div className="text-xs font-mono text-gray-500 flex items-center gap-1 mt-1">
             <ScrollText size={15} className="mr-1" />
@@ -208,4 +241,38 @@ export default function InfoPage() {
       <Footer />
     </div>
   );
+}
+
+function ProfileAvatar({ username, size = 36 }: { username: string; size?: number }) {
+  const [loaded, setLoaded] = useState(false)
+  const [errored, setErrored] = useState(false)
+  const url = `https://github.com/${username}.png`
+
+  useEffect(() => {
+    let cancelled = false
+    setLoaded(false)
+    setErrored(false)
+    const img = new Image()
+    img.src = url
+    img.onload = () => { if (!cancelled) setLoaded(true) }
+    img.onerror = () => { if (!cancelled) setErrored(true) }
+    return () => { cancelled = true }
+  }, [url])
+
+  const sizeClass = size === 36 ? 'w-9 h-9' : `w-[${size}px] h-[${size}px]`
+
+  if (!loaded) {
+    return (
+      <div className={`${sizeClass} rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse`} aria-hidden />
+    )
+  }
+
+  return (
+    <img
+      src={url}
+      alt={`${username} avatar`}
+      className={`${sizeClass} rounded-full grayscale group-hover:grayscale-0 transition-opacity duration-200`}
+      style={{ opacity: loaded && !errored ? 1 : 0 }}
+    />
+  )
 }

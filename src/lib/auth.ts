@@ -252,7 +252,7 @@ export async function getCurrentUser(): Promise<User | null> {
         return null;
       }
     }
-    console.log("Current user data:", userData);
+    // console.log("Current user data:", userData);
     return userData;
   } catch (error) {
     return null;

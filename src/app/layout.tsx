@@ -11,8 +11,7 @@ import { NotificationsProvider } from '@/contexts/NotificationsContext'
 import { headers } from 'next/headers'
 import APP from '@/config'
 
-import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
-import ChatToggle from '@/components/custom/ChatToggle'
+import FloatingToolbar from '@/components/custom/FloatingToolbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -99,12 +98,8 @@ export default async function RootLayout({
                   <Navbar />
                   <div className="pt-14">{children}</div>
                   <Toaster position="top-right" reverseOrder={false} />
-                  {/* Floating toolbar container (bottom-left) — add toolbar items here */}
-                  <div id="floating-toolbar" className="fixed left-6 bottom-6 z-10 flex flex-col items-end gap-3">
-                    <ChallengeTutorial />
-                    <ChatToggle />
-                  </div>
-                 <ScrollToggle />
+                  <FloatingToolbar />
+                  <ScrollToggle />
                 </div>
               </NotificationsProvider>
             </AuthProvider>

@@ -10,7 +10,7 @@ import { motion } from 'framer-motion'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 
-import { getLeaderboardSummary, getTopProgressByUsernames } from '@/lib/challenges'
+import { getLeaderboardSummary, getTopProgressByUsernames, getFirstBloodLeaderboard } from '@/lib/challenges'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LeaderboardEntry } from '@/types'
@@ -21,6 +21,7 @@ export default function ScoreboardPage() {
   const router = useRouter()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [firstBloodMode, setFirstBloodMode] = useState(false)
 
   // 🔒 redirect if not logged in
   useEffect(() => {
@@ -31,10 +32,19 @@ export default function ScoreboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
       if (!user) {
         setLoading(false)
         return
       }
+      // If firstBloodMode, fetch aggregated first-blood leaderboard
+      if (firstBloodMode) {
+        const fb = await getFirstBloodLeaderboard(100, 0)
+        setLeaderboard(fb)
+        setLoading(false)
+        return
+      }
+
       // 1) Fetch lightweight summary (username + score)
       const summary = await getLeaderboardSummary()
 
@@ -70,16 +80,20 @@ export default function ScoreboardPage() {
       setLoading(false)
     }
     fetchData()
-  }, [user])
+  }, [user, firstBloodMode])
 
   // tunggu authContext
   if (authLoading) return <Loader fullscreen color="text-orange-500" />
   // do not render if not logged in (so redirect can happen)
   if (!user) return null
 
-  const isEmpty =
-    leaderboard.length === 0 ||
-    leaderboard.every(e => (e.progress?.length ?? 0) === 0 || (e.score ?? 0) === 0)
+  const isEmpty = (() => {
+    if (leaderboard.length === 0) return true
+    // Consider non-empty when any entry has progress or a score
+    const hasProgress = leaderboard.some(e => (e.progress?.length ?? 0) > 0)
+    const hasScore = leaderboard.some(e => (e.score ?? 0) > 0)
+    return !(hasProgress || hasScore)
+  })()
 
   // detect dark mode from context to re-render when theme changes
   const isDark = theme === 'dark'
@@ -88,6 +102,20 @@ export default function ScoreboardPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300 drop-shadow" />}>Scoreboard</TitlePage>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFirstBloodMode(false)}
+            className={`px-3 py-1 text-sm rounded-md ${firstBloodMode ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200' : 'bg-indigo-600 text-white'}`}
+          >
+            Points
+          </button>
+          <button
+            onClick={() => setFirstBloodMode(true)}
+            className={`px-3 py-1 text-sm rounded-md ${firstBloodMode ? 'bg-indigo-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+          >
+            First Blood
+          </button>
+        </div>
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader fullscreen color="text-orange-500" />
@@ -108,7 +136,14 @@ export default function ScoreboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <ScoreboardTable leaderboard={leaderboard} currentUsername={user?.username} />
+              <ScoreboardTable
+                leaderboard={leaderboard}
+                currentUsername={user?.username}
+                // When in First Blood mode we reuse `score` as the FB count and relabel the column
+                scoreColumnLabel={firstBloodMode ? 'First Blood' : undefined}
+                scoreColumnRenderer={entry => entry.score}
+                showAllLink={!firstBloodMode}
+              />
             </motion.div>
           </>
         )}

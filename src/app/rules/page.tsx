@@ -73,23 +73,30 @@ export default function RulesPage() {
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.35 }}
-          className="mb-6 flex flex-col items-center justify-center gap-3 w-full cursor-pointer"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0, scale: 0.985, y: 8 },
+            show: { opacity: 1, scale: 1, y: 0, transition: { staggerChildren: 0.06, delayChildren: 0.04 } }
+          }}
+          transition={{ delay: 0.35, duration: 0.36 }}
+          style={{ willChange: 'transform, opacity' }}
+          className="mb-6 flex flex-col items-center justify-center gap-3 w-full"
         >
           <div className="w-full max-w-3xl">
            {RULES.map((rule, idx) => (
             <motion.div
               key={idx}
+              variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.32 } } }}
               whileHover={{ scale: 1.01, y: -1 }}
-              transition={{ type: "spring", stiffness: 250, damping: 15 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+              layout
               className={`group flex gap-3 items-start bg-white/90 dark:bg-gray-800/90
                           border border-transparent dark:border-transparent rounded-md
                           px-4 py-3 shadow-sm text-sm md:text-base text-left w-full
                           hover:shadow-lg hover:border-orange-400 dark:hover:border-orange-700
                           hover:bg-orange-100 dark:hover:bg-gray-800/70
-                          transition-all duration-300 ease-out
+                          transition-all duration-200 ease-out
                           ${idx < RULES.length - 1 ? 'mb-2' : ''}`}
             >
               <div className="flex-shrink-0 mt-1">

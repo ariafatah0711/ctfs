@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '../ui/button'
@@ -7,28 +8,35 @@ import { LeaderboardEntry } from '@/types'
 interface ScoreboardTableProps {
   leaderboard: LeaderboardEntry[]
   currentUsername?: string
+  /** Optional label to show for the score column (defaults to "Score") */
+  scoreColumnLabel?: string
+  /** Optional renderer for the score column; receives the entry and should return a node */
+  scoreColumnRenderer?: (entry: LeaderboardEntry) => React.ReactNode
+  /** Whether to show the "Show All" link when on the main scoreboard page (defaults to true) */
+  showAllLink?: boolean
 }
 
-const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername }) => {
+const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername, scoreColumnLabel, scoreColumnRenderer, showAllLink = true }) => {
   const pathname = usePathname()
 
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
-        {pathname === '/scoreboard' && (
+        {pathname === '/scoreboard' && showAllLink && (
           <Link href="/scoreboard/all">
             <Button variant="default" size="sm">Show All</Button>
           </Link>
         )}
       </CardHeader>
       <CardContent>
-        <Table>
+        <motion.div key={`table-${scoreColumnLabel ?? 'score'}-${leaderboard.length}-${leaderboard[0]?.username ?? ''}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20 text-center text-gray-700 dark:text-gray-200">Rank</TableHead>
+              <TableHead className="w-16 text-center text-gray-700 dark:text-gray-200">Rank</TableHead>
               <TableHead className="text-gray-700 dark:text-gray-200">User</TableHead>
-              <TableHead className="text-center text-gray-700 dark:text-gray-200">Score</TableHead>
+              <TableHead className="w-24 text-center text-gray-700 dark:text-gray-200">{scoreColumnLabel ?? 'Score'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -38,7 +46,7 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
                   <TableRow
                     key={entry.username}
                     className={`
-                      transition-colors hover:bg-gray-100 dark:hover:bg-gray-600
+                      transition-colors duration-150 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-600
                       ${
                         isCurrentUser
                           ? 'bg-gray-100 dark:bg-gray-700 font-semibold'
@@ -58,12 +66,17 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
                       {entry.username}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-center font-medium text-gray-900 dark:text-white">{entry.score}</TableCell>
+                  <TableCell className="w-24 text-center font-medium text-gray-900 dark:text-white">
+                    <motion.span key={`score-${entry.username}-${entry.score}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+                      {scoreColumnRenderer ? scoreColumnRenderer(entry) : entry.score}
+                    </motion.span>
+                  </TableCell>
                 </TableRow>
               )
             })}
           </TableBody>
-        </Table>
+          </Table>
+        </motion.div>
       </CardContent>
     </Card>
   )

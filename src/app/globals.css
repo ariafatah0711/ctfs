@@ -35,6 +35,15 @@ body {
       #1a1a2e 4px);
 }
 
+/* markdown */
+blockquote {
+  p {
+    margin: 0 !important;
+  }
+}
+
+/* gak tau lupa */
+
 code {
   background: #2d2a3a !important;
   /* warna gelap */

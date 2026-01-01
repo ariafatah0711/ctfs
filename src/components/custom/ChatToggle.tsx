@@ -10,28 +10,34 @@ export default function ChatToggle() {
   return (
     <>
       {/* panel placed above the button in toolbar stack */}
-      {open && (
-        <div className="fixed bottom-6 left-24 z-10 w-[360px] max-h-[80vh] bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
-          <div className="flex items-center justify-between p-2 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-2 pl-2">
-              <span className="font-semibold">Chat</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">AI assistant</span>
-            </div>
-            <div className="pr-2">
-              <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-red-500">✕</button>
-            </div>
+      {/* panel is always mounted to avoid iframe reload on toggle; visibility controlled by classes */}
+      <div
+        role="dialog"
+        aria-hidden={!open}
+        className={`fixed z-10 bottom-0 left-0 w-full h-[50vh] bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 rounded-t-2xl shadow-xl overflow-hidden transition-transform duration-200 ease-in-out
+          sm:bottom-6 sm:left-24 sm:w-[360px] sm:h-auto sm:rounded-2xl
+          ${open ? 'translate-y-0 opacity-100 pointer-events-auto' : 'translate-y-4 opacity-0 pointer-events-none'}`}
+      >
+        <div className="flex items-center justify-between p-2 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-2 pl-2">
+            <span className="font-semibold">Chat</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">AI assistant</span>
           </div>
+          <div className="pr-2">
+            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-red-500">✕</button>
+          </div>
+        </div>
 
+        <div className="h-[calc(100%-48px)] sm:h-auto">
           <iframe
             src={`https://app.livechatai.com/aibot-iframe/${dataId}`}
             width="100%"
-            height={520}
             allow="microphone"
             title="AI Chat"
-            className="block"
+            className="block w-full h-full sm:h-[520px]"
           />
         </div>
-      )}
+      </div>
 
       {/* button placed inside toolbar stack */}
       <div>

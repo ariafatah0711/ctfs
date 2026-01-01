@@ -330,6 +330,69 @@ export async function getTopProgressByUsernames(usernames: string[]) {
   return result
 }
 
+/**
+ * Build a leaderboard based on first-bloods.
+ * For each challenge that has a `first_blood` notification, find the earliest solve
+ * and award that user the challenge's points. Aggregate per-user and return
+ * a sorted leaderboard similar to `getLeaderboardSummary`.
+ */
+export async function getFirstBloodLeaderboard(limit = 100, offset = 0) {
+  try {
+    // Simpler approach: use notification payloads only (assumes notifications include username and points)
+    const notifications = await getNotifications(2000, 0)
+    if (!notifications || notifications.length === 0) return []
+
+    // Filter only first_blood notifications
+    const fbNotifs = notifications.filter((n: any) => n.notif_type === 'first_blood')
+    if (fbNotifs.length === 0) return []
+
+    // Aggregate directly from notifications. We do NOT use numeric "score" here;
+    // instead build a cumulative first-blood timeline per user for the chart.
+    const countMap: Record<string, number> = {}
+    const perUserDates: Record<string, string[]> = {}
+
+    for (const n of fbNotifs) {
+      const username = n.notif_username || n.notif_user || null
+      const created = n.notif_created_at || n.created_at || null
+      if (!username) continue
+      countMap[username] = (countMap[username] || 0) + 1
+      perUserDates[username] = perUserDates[username] || []
+      if (created) perUserDates[username].push(created)
+    }
+
+    const result = Object.keys(countMap)
+      .map((username) => ({ username, firstBloodCount: countMap[username] || 0 }))
+      // Sort primarily by firstBloodCount (desc)
+      .sort((a, b) => (b.firstBloodCount || 0) - (a.firstBloodCount || 0))
+
+    // Build cumulative progress timeline per user from their notification timestamps
+    const progressMap: Record<string, { username: string; history: { date: string; score: number }[] }> = {}
+    for (const username of Object.keys(perUserDates)) {
+      const dates = perUserDates[username].slice().sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+      let cum = 0
+      progressMap[username] = { username, history: [] }
+      for (const d of dates) {
+        cum += 1
+        progressMap[username].history.push({ date: d, score: cum })
+      }
+    }
+
+    const leaderboard = result.slice(offset, offset + limit).map((r, i) => ({
+      id: String(i + 1 + offset),
+      username: r.username,
+      rank: i + 1 + offset,
+      score: r.firstBloodCount,
+      // progress: cumulative first-blood count over time
+      progress: progressMap[r.username]?.history || [],
+    }))
+
+    return leaderboard
+  } catch (err) {
+    console.error('Error building first-blood leaderboard:', err)
+    return []
+  }
+}
+
 // export async function getLeaderboard() {
 //   const batchSize = 1000
 //   let allSolves: any[] = []
@@ -423,7 +486,7 @@ export async function getSolversByChallenge(challengeId: string) {
 export async function getFirstBloodChallengeIds(userId: string): Promise<string[]> {
   try {
     const { data, error } = await supabase.rpc('get_user_first_bloods', { p_user_id: userId })
-    console.log(data, error)
+    // console.log(data, error)
     if (error) throw error
     // data is expected to be array of { challenge_id }
     return (data || []).map((r: any) => r.challenge_id)
