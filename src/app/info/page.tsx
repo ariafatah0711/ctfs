@@ -74,10 +74,8 @@ const LINKS = [
 ];
 
 export default function InfoPage() {
-  const { loading } = require("@/contexts/AuthContext").useAuth();
-  if (loading) return <Loader fullscreen color="text-orange-500" />;
-
   const [repoStats, setRepoStats] = useState<{ stars: number; forks: number } | null>(null)
+  const { loading } = require("@/contexts/AuthContext").useAuth();
 
   useEffect(() => {
     const repoUrl = APP.links?.github
@@ -100,6 +98,8 @@ export default function InfoPage() {
       // ignore
     }
   }, [])
+
+  if (loading) return <Loader fullscreen color="text-orange-500" />;
 
   return (
     <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-gray-50/100 dark:bg-gray-900/100 relative overflow-hidden">
