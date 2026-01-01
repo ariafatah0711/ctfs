@@ -138,7 +138,7 @@ export default function ChallengeJoyride() {
       continuous
       showProgress={false}
       showSkipButton={false}
-      hideBackButton={true}
+      hideBackButton={false}
       disableCloseOnEsc={true}
       disableOverlayClose={true}
       scrollDuration={500}
