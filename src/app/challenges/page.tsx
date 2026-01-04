@@ -145,6 +145,10 @@ export default function ChallengesPage() {
         })
 
         setFlagInputs(prev => ({ ...prev, [challengeId]: '' }))
+      } else {
+        const audio = new Audio('/sounds/incorect.mp3')
+        audio.volume = 0.3
+        audio.play().catch(() => {})
       }
     } catch (error) {
       console.error('Error submitting flag:', error)
