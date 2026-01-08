@@ -13,6 +13,7 @@ export const APP = {
     'Forensics',
     'Web',
     'Reverse',
+    'Pwn',
   ],
   links: {
     github: 'https://github.com/ariafatah0711/ctfs',
