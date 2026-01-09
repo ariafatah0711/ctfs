@@ -14,6 +14,7 @@ export const APP = {
     'Web',
     'Reverse',
     'Pwn',
+    'Boot To Root',
   ],
   links: {
     github: 'https://github.com/ariafatah0711/ctfs',
