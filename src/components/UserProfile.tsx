@@ -14,6 +14,10 @@ import {
   Droplet,
   Flame,
   CheckCircle2,
+  LayoutGrid,
+  Grid2X2,
+  Grid3X3,
+  Layers,
   Medal,
   ShieldCheck,
   Swords,
@@ -66,7 +70,7 @@ type Badge = {
   icon: JSX.Element;
 };
 
-function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount: number): Badge[] {
+function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount: number, completedCategoryCount: number): Badge[] {
   const badges: Badge[] = [];
   // Rank (push, don't return early)
   if (rank === 1) {
@@ -95,6 +99,17 @@ function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount
   else if (solvedCount >= 50) badges.push({ label: '50+ Solves', color: 'bg-green-600 text-white border-green-700', icon: <Trophy className="h-3.5 w-3.5" /> });
   else if (solvedCount >= 25) badges.push({ label: '25+ Solves', color: 'bg-green-500 text-white border-green-600', icon: <Target className="h-3.5 w-3.5" /> });
   else if (solvedCount >= 10) badges.push({ label: '10+ Solves', color: 'bg-green-400 text-white border-green-500', icon: <Flame className="h-3.5 w-3.5" /> });
+
+  // Category completion (show only the highest tier)
+  if (completedCategoryCount >= 10) {
+    badges.push({ label: '10+ Categories', color: 'bg-blue-700 text-white border-blue-800', icon: <LayoutGrid className="h-3.5 w-3.5" /> });
+  } else if (completedCategoryCount >= 5) {
+    badges.push({ label: '5+ Categories', color: 'bg-blue-600 text-white border-blue-700', icon: <Grid3X3 className="h-3.5 w-3.5" /> });
+  } else if (completedCategoryCount >= 3) {
+    badges.push({ label: '3+ Categories', color: 'bg-blue-500 text-white border-blue-600', icon: <Grid2X2 className="h-3.5 w-3.5" /> });
+  } else if (completedCategoryCount >= 1) {
+    badges.push({ label: 'Category Finisher', color: 'bg-blue-400 text-white border-blue-500', icon: <Layers className="h-3.5 w-3.5" /> });
+  }
 
   return badges;
 }
@@ -170,6 +185,11 @@ export default function UserProfile({
   const hasError = error || !userDetail
   const solvedChallenges = userDetail?.solved_challenges || []
   const avatarSrc = userDetail?.profile_picture_url || userDetail?.picture || null
+  const completedCategoryCount = categoryTotals.reduce((count, { category, total_challenges }) => {
+    if (!total_challenges) return count
+    const solvedInCategory = solvedChallenges.filter(c => c.category === category).length
+    return solvedInCategory >= total_challenges ? count + 1 : count
+  }, 0)
 
   // Fetch unsolved challenges when modal is opened
   const handleShowUnsolved = async () => {
@@ -272,7 +292,7 @@ export default function UserProfile({
                     <p className="text-lg text-gray-500 dark:text-gray-300 mt-1">Score: <span className="font-semibold text-orange-600 dark:text-orange-400">{userDetail.score}</span></p>
                     {/* BADGES */}
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {getUserBadges(userDetail.rank, firstBloodIds.length, solvedChallenges.length).map((badge, idx) => (
+                      {getUserBadges(userDetail.rank, firstBloodIds.length, solvedChallenges.length, completedCategoryCount).map((badge, idx) => (
                         <span
                           key={badge.label + idx}
                           className={`inline-flex items-center border border-gray-300 dark:border-gray-600 px-1.5 py-0.5 rounded-md text-xs font-medium shadow-sm ${badge.color} transition-all duration-150 hover:scale-105`}

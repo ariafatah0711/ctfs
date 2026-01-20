@@ -29,6 +29,7 @@ export interface Challenge {
   attachments?: Attachment[]
   difficulty: string
   is_active: boolean
+  is_maintenance: boolean
   is_dynamic: boolean
   min_points: number
   decay_per_solve: number

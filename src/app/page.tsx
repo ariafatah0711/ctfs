@@ -29,7 +29,7 @@ export default function Home() {
           <ImageWithFallback
             src={APP.image_icon}
             alt={`${APP.shortName} watermark`}
-            size={720}
+            size={820}
             className="rounded-[3rem]"
           />
         </div>

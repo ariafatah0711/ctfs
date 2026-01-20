@@ -110,11 +110,13 @@ CREATE TABLE public.challenges (
   difficulty TEXT,
   attachments JSONB DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT true,
+  is_maintenance BOOLEAN DEFAULT false,
   is_dynamic BOOLEAN DEFAULT false,
   min_points INTEGER DEFAULT 0,
   decay_per_solve INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  total_solves INTEGER DEFAULT 0
 );
 
 -- ALTER TABLE public.challenges
@@ -122,8 +124,10 @@ CREATE TABLE public.challenges (
 -- ADD COLUMN IF NOT EXISTS max_points INTEGER DEFAULT NULL,
 -- ADD COLUMN IF NOT EXISTS min_points INTEGER DEFAULT 0,
 -- ADD COLUMN IF NOT EXISTS decay_per_solve INTEGER DEFAULT 0;
+
 ALTER TABLE public.challenges
-ADD COLUMN IF NOT EXISTS total_solves INTEGER DEFAULT 0;
+-- ADD COLUMN IF NOT EXISTS total_solves INTEGER DEFAULT 0;
+ADD COLUMN IF NOT EXISTS is_maintenance BOOLEAN DEFAULT false;
 
 -- ########################################################
 -- Table: challenges_flags
@@ -609,6 +613,7 @@ DECLARE
   v_points INTEGER;
   v_max_points INTEGER;
   v_is_dynamic BOOLEAN;
+  v_is_maintenance BOOLEAN;
   v_min_points INTEGER;
   v_decay_per_solve INTEGER;
   v_solver_count INTEGER;
@@ -620,14 +625,18 @@ BEGIN
     RETURN json_build_object('success', false, 'message', 'Not authenticated');
   END IF;
 
-  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.min_points, c.decay_per_solve
-    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_min_points, v_decay_per_solve
+  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_maintenance, c.min_points, c.decay_per_solve
+    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_maintenance, v_min_points, v_decay_per_solve
     FROM challenge_flags cf
     JOIN challenges c ON c.id = cf.challenge_id
     WHERE cf.challenge_id = p_challenge_id;
 
   IF v_flag_hash IS NULL THEN
     RETURN json_build_object('success', false, 'message', 'Challenge not found');
+  END IF;
+
+  IF COALESCE(v_is_maintenance, false) THEN
+    RETURN json_build_object('success', false, 'message', 'Challenge is under maintenance');
   END IF;
 
   v_is_correct := encode(digest(p_flag, 'sha256'), 'hex') = v_flag_hash;
@@ -691,7 +700,7 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_flag(p_challenge_id uuid) TO authenticated;
 
 -- ########################################################
--- Function: add_challenge(...)
+-- Function: add_challenge
 -- ########################################################
 CREATE OR REPLACE FUNCTION add_challenge(
   p_title TEXT,
@@ -703,6 +712,7 @@ CREATE OR REPLACE FUNCTION add_challenge(
   p_hint JSONB DEFAULT NULL,
   p_attachments JSONB DEFAULT '[]',
   p_is_dynamic BOOLEAN DEFAULT false,
+  p_is_maintenance BOOLEAN DEFAULT false,
   p_min_points INTEGER DEFAULT 0,
   p_decay_per_solve INTEGER DEFAULT 0,
   p_max_points INTEGER DEFAULT NULL
@@ -716,8 +726,8 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add challenge';
   END IF;
 
-  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_dynamic, min_points, decay_per_solve)
-  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_dynamic, p_min_points, p_decay_per_solve)
+  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve)
+  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve)
   RETURNING id INTO v_challenge_id;
 
   INSERT INTO public.challenge_flags(challenge_id, flag)
@@ -728,7 +738,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_challenge TO authenticated;
+GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB, BOOLEAN, BOOLEAN, INTEGER, INTEGER, INTEGER) TO authenticated;
 
 -- ########################################################
 -- Function: delete_challenge(p_challenge_id UUID)
@@ -765,6 +775,7 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_hint JSONB DEFAULT NULL,
   p_attachments JSONB DEFAULT '[]',
   p_is_active BOOLEAN DEFAULT NULL,
+  p_is_maintenance BOOLEAN DEFAULT NULL,
   p_flag TEXT DEFAULT NULL,
   p_is_dynamic BOOLEAN DEFAULT false,
   p_min_points INTEGER DEFAULT 0,
@@ -790,6 +801,7 @@ BEGIN
       hint = p_hint,
       attachments = p_attachments,
       is_active = COALESCE(p_is_active, is_active), -- hanya update jika p_is_active tidak NULL
+      is_maintenance = COALESCE(p_is_maintenance, is_maintenance),
       is_dynamic = p_is_dynamic,
       min_points = p_min_points,
       decay_per_solve = p_decay_per_solve,
@@ -823,7 +835,7 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_challenge(
-  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, text, boolean, integer, integer, integer
+  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, boolean, text, boolean, integer, integer, integer
 ) TO authenticated;
 
 -- ########################################################
@@ -908,6 +920,40 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION set_challenge_active(UUID, BOOLEAN) TO authenticated;
+
+-- ########################################################
+-- Function: set_challenge_maintenance(p_challenge_id UUID, p_maintenance BOOLEAN)
+-- ########################################################
+CREATE OR REPLACE FUNCTION set_challenge_maintenance(
+  p_challenge_id UUID,
+  p_maintenance BOOLEAN
+)
+RETURNS JSON AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+BEGIN
+  -- cek admin
+  IF NOT is_admin() THEN
+    RETURN json_build_object('success', false, 'message', 'Only admin can change maintenance status');
+  END IF;
+
+  -- update status maintenance
+  UPDATE public.challenges
+  SET is_maintenance = p_maintenance,
+      updated_at = now()
+  WHERE id = p_challenge_id;
+
+  -- response
+  RETURN json_build_object(
+    'success', true,
+    'challenge_id', p_challenge_id,
+    'is_maintenance', p_maintenance
+  );
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION set_challenge_maintenance(UUID, BOOLEAN) TO authenticated;
 
 -- ########################################################
 -- Function: get_category_totals()

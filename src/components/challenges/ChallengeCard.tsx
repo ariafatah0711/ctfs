@@ -15,9 +15,11 @@ interface ChallengeCardProps {
 const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => {
   const isRecentlyCreated = challenge.is_new;
   const noFirstBlood = !challenge.has_first_blood;
+  const isMaintenance = !!challenge.is_maintenance;
 
   let ribbonLabel: string | null = null;
-  if (noFirstBlood) ribbonLabel = "🩸NEW CHALL🩸";
+  if (isMaintenance) ribbonLabel = "MAINTENANCE";
+  else if (noFirstBlood) ribbonLabel = "🩸NEW CHALL🩸";
   else if (isRecentlyCreated) ribbonLabel = "NEW CHALL";
 
   // Difficulty color mapping (same as DifficultyBadge)
@@ -38,12 +40,12 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.97 }}
       key={challenge.id}
-      className="relative overflow-hidden"
+      className="relative overflow-hidden group"
     >
       {/* Ribbon pojok kanan atas */}
       {ribbonLabel && (
         <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px]">
-          <div className="bg-green-500 text-white text-[10px] font-bold px-8 py-1 shadow-md">
+          <div className={`text-white text-[10px] font-bold px-8 py-1 shadow-md ${isMaintenance ? 'bg-amber-800' : 'bg-green-500'}`}>
             {ribbonLabel}
           </div>
         </div>
@@ -55,11 +57,13 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
       </div>
 
       <Card
-        onClick={onClick}
-        className={`cursor-pointer shadow-md rounded-md transition-colors
-          ${challenge.is_solved
-            ? 'bg-green-600 dark:bg-green-700'
-            : 'bg-blue-600 dark:bg-blue-700'}
+        onClick={isMaintenance ? undefined : onClick}
+        className={`shadow-md rounded-md transition-colors
+          ${isMaintenance
+            ? 'bg-amber-800 dark:bg-amber-900 cursor-not-allowed opacity-95'
+            : (challenge.is_solved
+                ? 'bg-green-600 dark:bg-green-700 cursor-pointer'
+                : 'bg-blue-600 dark:bg-blue-700 cursor-pointer')}
         `}
       >
         <CardHeader className="flex items-center justify-center">
@@ -78,10 +82,22 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
           </h3>
         </CardHeader>
 
-        <CardContent className="flex items-center justify-center gap-2 text-yellow-300 dark:text-yellow-200 font-bold">
-          🪙 {challenge.points}
+        <CardContent className={`flex items-center justify-center gap-2 font-bold ${isMaintenance ? 'text-white' : 'text-yellow-300 dark:text-yellow-200'}`}>
+          {challenge.points}
         </CardContent>
       </Card>
+
+      {/* Maintenance hover info */}
+      {isMaintenance && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="max-w-[260px] bg-amber-900/95 text-white text-[11px] leading-relaxed px-3 py-2 rounded-lg border border-amber-700 shadow-xl justify-center text-justify">
+            <div className="font-semibold mb-1">⚠️ Informasi</div>
+            <div>Saat ini service tidak dapat diakses karena VPS sudah tidak aktif.</div>
+            <div>Peserta yang sudah mengerjakan tetap mendapatkan poin.</div>
+            <div>Akses akan dibuka kembali jika VPS sudah tersedia dan akan diumumkan.</div>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 };

@@ -72,7 +72,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="md:col-span-2 flex items-center gap-4">
+            <div className="md:col-span-2 flex flex-wrap items-center gap-4">
               <Label className="flex items-center gap-2">
                 <Switch
                   checked={!!formData.is_dynamic}
@@ -97,6 +97,32 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   className="mr-2 data-[state=checked]:bg-primary-500 data-[state=checked]:border-primary-500 bg-gray-200 border-gray-300 dark:bg-gray-700 dark:border-gray-500 transition-colors"
                 />
                 Dynamic Scoring
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_active !== false}
+                  onCheckedChange={v => {
+                    onChange({
+                      ...formData,
+                      is_active: v,
+                    });
+                  }}
+                  className="mr-2 data-[state=checked]:bg-emerald-500 data-[state=checked]:border-emerald-500 bg-gray-200 border-gray-300 dark:bg-gray-700 dark:border-gray-500 transition-colors"
+                />
+                Active
+              </Label>
+              <Label className="flex items-center gap-2">
+                <Switch
+                  checked={!!formData.is_maintenance}
+                  onCheckedChange={v => {
+                    onChange({
+                      ...formData,
+                      is_maintenance: v,
+                    });
+                  }}
+                  className="mr-2 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 bg-gray-200 border-gray-300 dark:bg-gray-700 dark:border-gray-500 transition-colors"
+                />
+                Maintenance
               </Label>
             </div>
             <div>

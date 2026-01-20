@@ -20,7 +20,7 @@ import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { isAdmin } from '@/lib/auth'
-import { getChallenges, addChallenge, updateChallenge, setChallengeActive, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
+import { getChallenges, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
 import { getInfo } from '@/lib/users'
 import { Challenge, Attachment } from '@/types'
 import APP from '@/config'
@@ -61,6 +61,8 @@ export default function AdminPage() {
     difficulty: 'Easy',
     attachments: [] as Attachment[],
     is_dynamic: false,
+    is_active: true,
+    is_maintenance: false,
     min_points: 0,
     decay_per_solve: 0,
   }
@@ -147,6 +149,8 @@ export default function AdminPage() {
       difficulty: c.difficulty || 'Easy',
       attachments: c.attachments || [],
       is_dynamic: c.is_dynamic ?? false,
+      is_active: c.is_active ?? true,
+      is_maintenance: c.is_maintenance ?? false,
       min_points: c.min_points ?? 0,
       decay_per_solve: c.decay_per_solve ?? 0,
     })
@@ -273,7 +277,9 @@ export default function AdminPage() {
         hint: (formData.hint && formData.hint.length > 0) ? formData.hint.filter(h => h.trim() !== '') : null,
         difficulty: (formData.difficulty || '').trim(),
         attachments: (formData.attachments || []).filter((a) => (a.url || '').trim() !== ''),
+        is_maintenance: !!formData.is_maintenance,
   }
+    if (editing && typeof formData.is_active !== 'undefined') payload.is_active = !!formData.is_active;
   if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;
   if (typeof formData.min_points !== 'undefined') payload.min_points = Number(formData.min_points) || 0;
   if (typeof formData.decay_per_solve !== 'undefined') payload.decay_per_solve = Number(formData.decay_per_solve) || 0;
@@ -432,6 +438,13 @@ export default function AdminPage() {
                           onEdit={openEdit}
                           onDelete={askDelete}
                           onViewFlag={handleViewFlag}
+                          onToggleMaintenance={async (id, checked) => {
+                            const ok = await setChallengeMaintenance(id, checked)
+                            if (ok) {
+                              setChallenges(prev => prev.map(c => c.id === id ? { ...c, is_maintenance: checked } : c))
+                              toast.success(`Challenge maintenance ${checked ? 'enabled' : 'disabled'}`)
+                            }
+                          }}
                           onToggleActive={async (id, checked) => {
                             const ok = await setChallengeActive(id, checked)
                             if (ok) {

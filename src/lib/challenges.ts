@@ -68,6 +68,7 @@ export async function getChallenges(
         is_recently_created: isRecentlyCreated,
         is_new: isRecentlyCreated || !hasFirstBlood,
         total_solves: ch.total_solves || 0,
+        is_maintenance: ch.is_maintenance ?? false,
       };
     });
   } catch (err) {
@@ -108,6 +109,7 @@ export async function addChallenge(challengeData: {
   attachments?: Attachment[]
   difficulty: string
   is_dynamic?: boolean
+  is_maintenance?: boolean
   min_points?: number
   decay_per_solve?: number
 }): Promise<void> {
@@ -129,6 +131,7 @@ export async function addChallenge(challengeData: {
       p_hint: hintValue,
       p_attachments: challengeData.attachments || [],
       p_is_dynamic: challengeData.is_dynamic ?? false,
+      p_is_maintenance: challengeData.is_maintenance ?? false,
       p_min_points: challengeData.min_points ?? 0,
       p_decay_per_solve: challengeData.decay_per_solve ?? 0
     });
@@ -155,6 +158,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
   attachments?: Attachment[]
   difficulty: string
   is_active?: boolean
+  is_maintenance?: boolean
   is_dynamic?: boolean
   min_points?: number
   decay_per_solve?: number
@@ -177,6 +181,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_hint: hintValue,
       p_attachments: challengeData.attachments || [],
       p_is_active: challengeData.is_active, // kirim undefined jika tidak ada perubahan
+      p_is_maintenance: challengeData.is_maintenance,
       p_flag: challengeData.flag || null,
       p_is_dynamic: challengeData.is_dynamic ?? false,
       p_min_points: challengeData.min_points ?? 0,
@@ -536,6 +541,28 @@ export async function setChallengeActive(challengeId: string, isActive: boolean)
     return data?.success === true;
   } catch (err) {
     console.error('Unexpected error setting challenge active state:', err);
+    return false;
+  }
+}
+
+/**
+ * Set challenge maintenance state (Admin only)
+ */
+export async function setChallengeMaintenance(challengeId: string, isMaintenance: boolean): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc('set_challenge_maintenance', {
+      p_challenge_id: challengeId,
+      p_maintenance: isMaintenance,
+    });
+
+    if (error) {
+      console.error('Error setting challenge maintenance state:', error);
+      return false;
+    }
+
+    return data?.success === true;
+  } catch (err) {
+    console.error('Unexpected error setting challenge maintenance state:', err);
     return false;
   }
 }

@@ -2,7 +2,7 @@ import React from 'react'
 import { Badge } from '@/components/ui/badge'
 import DifficultyBadge from '@/components/custom/DifficultyBadge'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Flag, CheckCircle2, CircleOff } from 'lucide-react'
+import { Pencil, Trash2, Flag, CheckCircle2, CircleOff, Wrench } from 'lucide-react'
 import { Challenge } from '@/types'
 
 interface ChallengeListItemProps {
@@ -11,6 +11,7 @@ interface ChallengeListItemProps {
   onDelete: (id: string) => void
   onViewFlag: (id: string) => void
   onToggleActive: (id: string, checked: boolean) => Promise<void>
+  onToggleMaintenance: (id: string, checked: boolean) => Promise<void>
 }
 
 const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
@@ -19,6 +20,7 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
   onDelete,
   onViewFlag,
   onToggleActive,
+  onToggleMaintenance,
 }) => {
   const handleToggleActive = async (id: string, checked: boolean) => {
     await onToggleActive(id, checked); // update ke backend
@@ -49,6 +51,16 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
         </div>
 
         <div className="flex items-center gap-1 justify-start sm:justify-end order-1 sm:order-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`${challenge.is_maintenance ? 'text-amber-500 dark:text-amber-400' : 'text-gray-400 dark:text-gray-600'}`}
+            onClick={async () => onToggleMaintenance(challenge.id, !challenge.is_maintenance)}
+            aria-label={challenge.is_maintenance ? "Disable Maintenance" : "Enable Maintenance"}
+            title={challenge.is_maintenance ? "Disable Maintenance" : "Enable Maintenance"}
+          >
+            <Wrench size={16} />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
