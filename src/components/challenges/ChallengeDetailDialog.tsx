@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FileText, Link as LinkIcon, Lightbulb } from 'lucide-react';
 import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
 import CustomBadge from '@/components/ui/CustomBadge';
 import DifficultyBadge from '@/components/custom/DifficultyBadge';
@@ -114,7 +115,9 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 {/* File Attachments */}
                 {challenge.attachments.some(att => att.type === 'file') && (
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">📂 Files</p>
+                    <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1">
+                      <FileText className="h-3.5 w-3.5" /> Files
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {/* Copy wget commands for all files (compact icon/text) */}
                       <button
@@ -182,7 +185,9 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 {/* URL Attachments */}
                 {challenge.attachments.some(att => att.type !== 'file') && (
                   <div>
-                    <p className="text-xs text-gray-400 mb-1">🔗 Links</p>
+                    <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1">
+                      <LinkIcon className="h-3.5 w-3.5" /> Links
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {challenge.attachments.filter(att => att.type !== 'file').map((attachment, idx) => {
                         const displayName = attachment.name?.length > 40 ? attachment.name.slice(0, 37) + "..." : attachment.name || (attachment.url ? attachment.url.slice(0, 40) + "..." : 'link');
@@ -218,7 +223,9 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                       setShowHintModal({ challenge, hintIdx: idx });
                     }}
                   >
-                    💡 Hint {(challenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
+                    <span className="inline-flex items-center gap-1">
+                      <Lightbulb className="h-3.5 w-3.5" /> Hint {(challenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
+                    </span>
                   </button>
                 ))}
               </div>

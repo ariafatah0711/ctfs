@@ -8,11 +8,25 @@ import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
 import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
 import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
+import {
+  Award,
+  Crown,
+  Droplet,
+  Flame,
+  CheckCircle2,
+  Medal,
+  ShieldCheck,
+  Swords,
+  Target,
+  Trophy,
+  Zap,
+} from 'lucide-react'
 import ImageWithFallback from './ImageWithFallback'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import EditProfileModal from './custom/EditProfileModal'
-import { getCurrentAuthInfo } from '@/lib/auth'
+import { getCurrentAuthInfo, getCurrentUser } from '@/lib/auth'
+import { useAuth } from '@/contexts/AuthContext'
 import SocialIcon from './custom/SocialIcon'
 import Loader from '@/components/custom/loading'
 import BackButton from './custom/BackButton'
@@ -25,6 +39,7 @@ type UserDetail = {
   rank: number | null
   score: number
   picture?: string | null
+  profile_picture_url?: string | null
   bio?: string | null
   sosmed?: {
     linkedin?: string
@@ -48,38 +63,38 @@ type Props = {
 type Badge = {
   label: string;
   color: string;
-  icon: string;
+  icon: JSX.Element;
 };
 
 function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount: number): Badge[] {
   const badges: Badge[] = [];
   // Rank (push, don't return early)
   if (rank === 1) {
-    badges.push({ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: '🥇' });
+    badges.push({ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: <Crown className="h-3.5 w-3.5" /> });
   } else if (rank && rank <= 3) {
-    badges.push({ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: '🥈' });
+    badges.push({ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: <Trophy className="h-3.5 w-3.5" /> });
   } else if (rank && rank <= 10) {
-    badges.push({ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: '🥉' });
+    badges.push({ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: <Medal className="h-3.5 w-3.5" /> });
   } else if (rank && rank <= 25) {
-    badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: '🏅' });
+    badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: <Award className="h-3.5 w-3.5" /> });
   } else if (rank && rank <= 50) {
-    badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: '🎖️' });
+    badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: <ShieldCheck className="h-3.5 w-3.5" /> });
   }
 
   // First Blood (show only the highest tier)
   if (firstBloodCount >= 10) {
-    badges.push({ label: 'King of First Bloods', color: 'bg-pink-200 text-pink-900 border-pink-400', icon: '👑' });
+    badges.push({ label: 'King of First Bloods', color: 'bg-pink-200 text-pink-900 border-pink-400', icon: <Crown className="h-3.5 w-3.5" /> });
   } else if (firstBloodCount >= 5) {
-    badges.push({ label: '5+ First Bloods', color: 'bg-red-200 text-red-800 border-red-400', icon: '🩸' });
+    badges.push({ label: '5+ First Bloods', color: 'bg-red-200 text-red-800 border-red-400', icon: <Droplet className="h-3.5 w-3.5" /> });
   } else if (firstBloodCount >= 1) {
-    badges.push({ label: 'First Blood', color: 'bg-red-100 text-red-700 border-red-200', icon: '⚡' });
+    badges.push({ label: 'First Blood', color: 'bg-red-100 text-red-700 border-red-200', icon: <Zap className="h-3.5 w-3.5" /> });
   }
 
   // Solved
-  if (solvedCount >= 100) badges.push({ label: '100+ Solves', color: 'bg-green-700 text-white border-green-800', icon: '💯' });
-  else if (solvedCount >= 50) badges.push({ label: '50+ Solves', color: 'bg-green-600 text-white border-green-700', icon: '🏆' });
-  else if (solvedCount >= 25) badges.push({ label: '25+ Solves', color: 'bg-green-500 text-white border-green-600', icon: '🎯' });
-  else if (solvedCount >= 10) badges.push({ label: '10+ Solves', color: 'bg-green-400 text-white border-green-500', icon: '🔥' });
+  if (solvedCount >= 100) badges.push({ label: '100+ Solves', color: 'bg-green-700 text-white border-green-800', icon: <Swords className="h-3.5 w-3.5" /> });
+  else if (solvedCount >= 50) badges.push({ label: '50+ Solves', color: 'bg-green-600 text-white border-green-700', icon: <Trophy className="h-3.5 w-3.5" /> });
+  else if (solvedCount >= 25) badges.push({ label: '25+ Solves', color: 'bg-green-500 text-white border-green-600', icon: <Target className="h-3.5 w-3.5" /> });
+  else if (solvedCount >= 10) badges.push({ label: '10+ Solves', color: 'bg-green-400 text-white border-green-500', icon: <Flame className="h-3.5 w-3.5" /> });
 
   return badges;
 }
@@ -91,6 +106,7 @@ export default function UserProfile({
   onBack,
   isCurrentUser = false,
 }: Props) {
+  const { setUser } = useAuth()
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null)
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
@@ -101,6 +117,20 @@ export default function UserProfile({
   const [unsolvedChallenges, setUnsolvedChallenges] = useState<any[]>([])
   const [loadingUnsolved, setLoadingUnsolved] = useState(false)
   const [authInfo, setAuthInfo] = useState<Array<{ provider: string; email: string }>>([])
+
+  const refreshUserDetail = async () => {
+    if (!userId) return
+    try {
+      const detail = await getUserDetail(userId)
+      setUserDetail(detail)
+      if (isCurrentUser) {
+        const freshUser = await getCurrentUser()
+        if (freshUser) setUser(freshUser)
+      }
+    } catch (err) {
+      console.error('Error refreshing user detail:', err)
+    }
+  }
 
   useEffect(() => {
     if (isCurrentUser) {
@@ -139,6 +169,7 @@ export default function UserProfile({
   const isLoading = loading || loadingDetail
   const hasError = error || !userDetail
   const solvedChallenges = userDetail?.solved_challenges || []
+  const avatarSrc = userDetail?.profile_picture_url || userDetail?.picture || null
 
   // Fetch unsolved challenges when modal is opened
   const handleShowUnsolved = async () => {
@@ -232,7 +263,7 @@ export default function UserProfile({
               <Card className="bg-white dark:bg-gray-800">
                 <CardContent className="flex items-center space-x-6 py-6">
                   <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center overflow-hidden">
-                    <ImageWithFallback src={userDetail.picture} alt={userDetail.username} size={80} className="rounded-full border border-gray-200 dark:border-gray-700" fallbackBg="bg-blue-100 dark:bg-blue-900" />
+                    <ImageWithFallback src={avatarSrc} alt={userDetail.username} size={80} className="rounded-full border border-gray-200 dark:border-gray-700" fallbackBg="bg-blue-100 dark:bg-blue-900" />
                   </div>
                   <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate whitespace-nowrap max-w-[160px] sm:max-w-xs block" title={userDetail.username}>
@@ -259,9 +290,25 @@ export default function UserProfile({
                       userId={userDetail.id}
                       currentUsername={userDetail.username}
                       currentBio={userDetail.bio || ''}
+                      currentProfilePictureUrl={userDetail.profile_picture_url || ''}
                       currentSosmed={userDetail.sosmed || {}}
                       onUsernameChange={username => setUserDetail({ ...userDetail, username })}
-                      onProfileChange={({ username, bio, sosmed }) => setUserDetail({ ...userDetail, username, bio, sosmed })}
+                      onProfileChange={({ username, bio, sosmed, profile_picture_url }) => {
+                        const nextProfileUrl = profile_picture_url ?? userDetail.profile_picture_url ?? null
+                        const isGooglePicture = !!userDetail.picture && userDetail.picture !== userDetail.profile_picture_url
+                        const nextPicture = isGooglePicture
+                          ? userDetail.picture
+                          : (nextProfileUrl || null)
+                        setUserDetail({
+                          ...userDetail,
+                          username,
+                          bio,
+                          sosmed,
+                          profile_picture_url: nextProfileUrl,
+                          picture: nextPicture,
+                        })
+                      }}
+                      onSaved={refreshUserDetail}
                       triggerButtonClass="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
                       authInfo={authInfo}
                     />
@@ -339,7 +386,9 @@ export default function UserProfile({
                   <CardTitle className="text-gray-900 dark:text-white">Rank</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">🏅</div>
+                  <div className="w-11 h-11 bg-gradient-to-br from-yellow-200 to-yellow-400 dark:from-yellow-900 dark:to-yellow-700 rounded-xl flex items-center justify-center shadow-sm ring-1 ring-yellow-300/60 dark:ring-yellow-800/60">
+                    <Crown className="h-5 w-5 text-yellow-800 dark:text-yellow-200" />
+                  </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {userDetail.rank === 0 ? '0' : `#${userDetail.rank}`}
                   </p>
@@ -351,7 +400,9 @@ export default function UserProfile({
                   <CardTitle className="text-gray-900 dark:text-white">Solved</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">✓</div>
+                  <div className="w-11 h-11 bg-gradient-to-br from-green-200 to-green-400 dark:from-green-900 dark:to-green-700 rounded-xl flex items-center justify-center shadow-sm ring-1 ring-green-300/60 dark:ring-green-800/60">
+                    <CheckCircle2 className="h-5 w-5 text-green-800 dark:text-green-200" />
+                  </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{solvedChallenges.length}</p>
                 </CardContent>
               </Card>
@@ -361,7 +412,9 @@ export default function UserProfile({
                   <CardTitle className="text-gray-900 dark:text-white">First Bloods</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center">🩸</div>
+                  <div className="w-11 h-11 bg-gradient-to-br from-red-200 to-red-400 dark:from-red-900 dark:to-red-700 rounded-xl flex items-center justify-center shadow-sm ring-1 ring-red-300/60 dark:ring-red-800/60">
+                    <Droplet className="h-5 w-5 text-red-800 dark:text-red-200" />
+                  </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{firstBloodIds.length}</p>
                 </CardContent>
               </Card>

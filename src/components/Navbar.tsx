@@ -23,6 +23,7 @@ export default function Navbar() {
   const [solveNotif, setSolveNotif] = useState<{ username: string; challenge: string } | null>(null)
   const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { theme, toggleTheme } = useTheme()
+  const avatarSrc =  user?.profile_picture_url || user?.picture || null
 
   useEffect(() => {
     if (user) {
@@ -79,15 +80,18 @@ export default function Navbar() {
           </span>
         </div>
       )}
-    <nav className={`shadow-sm border-b fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950 border-gray-800' : 'bg-white border-gray-300'}`}>
+    <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-14 items-center">
           {/* Logo */}
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center gap-2 group" data-tour="navbar-logo">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'} transition-all duration-200`}>
-                <span className="text-white font-extrabold text-lg tracking-wide">{APP.shortName.charAt(0)}</span>
-              </div>
+              <ImageWithFallback
+                src={APP.image_icon}
+                alt={`${APP.shortName} logo`}
+                size={42}
+                className="rounded-full"
+              />
               <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
             </Link>
 
@@ -151,7 +155,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link href="/profile" className="flex items-center gap-2 group" data-tour="navbar-profile">
-                    <ImageWithFallback src={user.picture} alt={user.username} size={36} className="rounded-full" />
+                    <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
                     <span
                       className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[100px] md:max-w-[160px] block`}
                       title={user.username}
@@ -294,7 +298,7 @@ export default function Navbar() {
                     className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <ImageWithFallback src={user.picture} alt={user.username} size={36} className="rounded-full" />
+                    <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
                     <span
                       className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[120px] block`}
                       title={user.username}

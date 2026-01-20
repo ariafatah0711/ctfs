@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateUsername, updateBio, updateSosmed } from "@/lib/users";
+import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/lib/users";
 import { bindGoogleManual, unbindGoogleManual } from '@/lib/auth'
 import { isValidUsername } from "@/lib/utils";
 import {
@@ -23,28 +23,34 @@ export default function EditProfileModal({
   userId,
   currentUsername,
   currentBio = "",
+  currentProfilePictureUrl = "",
   currentSosmed = {},
   onUsernameChange,
   onProfileChange,
+  onSaved,
   triggerButtonClass = "",
   authInfo = []
 }: {
   userId: string;
   currentUsername: string;
   currentBio?: string;
+  currentProfilePictureUrl?: string;
   currentSosmed?: { linkedin?: string; instagram?: string; discord?: string; web?: string };
   onUsernameChange?: (username: string) => void;
   onProfileChange?: (profile: {
     username: string;
     bio: string;
+    profile_picture_url?: string | null;
     sosmed: { linkedin?: string; instagram?: string; discord?: string; web?: string };
   }) => void;
+  onSaved?: () => void;
   triggerButtonClass?: string;
   authInfo?: Array<{ provider: string; email: string }>;
 }) {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState(currentUsername);
   const [bio, setBio] = useState(currentBio);
+  const [profilePictureUrl, setProfilePictureUrl] = useState(currentProfilePictureUrl || "");
   const [sosmed, setSosmed] = useState<{ linkedin?: string; instagram?: string; discord?: string; web?: string }>(
     currentSosmed || {}
   );
@@ -80,8 +86,19 @@ export default function EditProfileModal({
     onProfileChange?.({
       username: newUsername || username,
       bio,
+      profile_picture_url: profilePictureUrl.trim() || null,
       sosmed,
     });
+
+    // Update profile picture URL (allow clearing)
+    if (profilePictureUrl.trim() !== (currentProfilePictureUrl || '').trim()) {
+      const { error: errPicture } = await updateProfilePicture(userId, profilePictureUrl);
+      if (errPicture) {
+        setError(errPicture);
+        setLoading(false);
+        return;
+      }
+    }
 
     // Update bio
     if (bio.trim() !== "") {
@@ -104,6 +121,7 @@ export default function EditProfileModal({
     }
 
     setSuccess("Profile updated!");
+    onSaved?.();
     setLoading(false);
   };
 
@@ -113,6 +131,7 @@ export default function EditProfileModal({
     if (val) {
       setUsername(currentUsername);
       setBio(currentBio || "");
+      setProfilePictureUrl(currentProfilePictureUrl || "");
       setSosmed(currentSosmed || {});
     }
   };
@@ -130,7 +149,7 @@ export default function EditProfileModal({
       >
         <DialogHeader>
           <DialogTitle className="text-gray-900 dark:text-white">Edit Profile</DialogTitle>
-          <DialogDescription className="text-gray-500 dark:text-gray-300">Update your username below.</DialogDescription>
+          <DialogDescription className="text-gray-500 dark:text-gray-300">Update your profile info below.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -161,6 +180,20 @@ export default function EditProfileModal({
               disabled={loading}
               className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100"
               maxLength={200}
+            />
+          </div>
+          <div className="space-y-1">
+            <label htmlFor="edit-profile-picture" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              Profile Picture URL (optional)
+            </label>
+            <Input
+              id="edit-profile-picture"
+              value={profilePictureUrl}
+              onChange={(e) => setProfilePictureUrl(e.target.value)}
+              placeholder="https://..."
+              disabled={loading}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100"
+              maxLength={512}
             />
           </div>
           <div className="space-y-2">

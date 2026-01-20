@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { isAdmin } from "@/lib/auth"
-import { getSolversAll, getSolversByUsername, deleteSolver } from "@/lib/challenges"
+import { getSolversAll, getSolversByUsername, getSolversByChallengeTitle, deleteSolver } from "@/lib/challenges"
 import ConfirmDialog from "@/components/custom/ConfirmDialog"
 import Loader from "@/components/custom/loading"
 import BackButton from "@/components/custom/BackButton"
@@ -27,7 +27,7 @@ export default function AdminSolversPage() {
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [searchUser, setSearchUser] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
   const [searching, setSearching] = useState(false)
 
   // delete state
@@ -113,26 +113,44 @@ export default function AdminSolversPage() {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Search by username..."
-              value={searchUser}
-              onChange={(e) => setSearchUser(e.target.value)}
+              placeholder="Search by username or challenge..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  document.getElementById("search-btn")?.click()
+                }
+              }}
               className="px-3 py-1 text-sm rounded border dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+
             <Button
+              id="search-btn"
               variant="outline"
               size="sm"
               onClick={async () => {
-                if (!searchUser.trim()) {
+                if (!searchQuery.trim()) {
                   fetchSolvers(0)
                   return
                 }
                 setSearching(true)
                 try {
-                  const data = await getSolversByUsername(searchUser.trim())
-                  setSolvers(data)
+                  // Nyari di username dan challenge sekaligus
+                  const [userResults, challengeResults] = await Promise.all([
+                    getSolversByUsername(searchQuery.trim()),
+                    getSolversByChallengeTitle(searchQuery.trim())
+                  ])
+
+                  // Gabungin hasil dan remove duplicates berdasarkan solve_id
+                  const combined = [...userResults, ...challengeResults]
+                  const unique = combined.filter((item, index, self) =>
+                    index === self.findIndex((t) => t.solve_id === item.solve_id)
+                  )
+
+                  setSolvers(unique)
                   setHasMore(false)
                 } catch (err) {
-                  toast.error("Failed to fetch by username")
+                  toast.error("Failed to search solvers")
                   console.error(err)
                 } finally {
                   setSearching(false)
@@ -146,7 +164,7 @@ export default function AdminSolversPage() {
               variant="outline"
               size="sm"
               onClick={() => {
-                setSearchUser("")
+                setSearchQuery("")
                 fetchSolvers(0)
               }}
             >

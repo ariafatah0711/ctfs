@@ -5,6 +5,7 @@ import Loader from "@/components/custom/loading"
 import Footer from "@/components/custom/Footer"
 import { Button } from "@/components/ui/button"
 import { Flag } from 'lucide-react'
+import ImageWithFallback from "@/components/ImageWithFallback"
 import Link from "next/link"
 import APP from '@/config'
 
@@ -23,13 +24,22 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center flex-1 text-center px-6 relative z-10">
+        {/* Subtle background logo watermark */}
+        <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.08] dark:opacity-[0.06] z-0">
+          <ImageWithFallback
+            src={APP.image_icon}
+            alt={`${APP.shortName} watermark`}
+            size={720}
+            className="rounded-[3rem]"
+          />
+        </div>
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           className="text-5xl md:text-6xl font-extrabold text-orange-600 dark:text-orange-400 mb-4 drop-shadow-lg"
         >
-          Welcome to{" "}
+          <span>Welcome to</span>{" "}
           <span className="bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
             {APP.fullName}
           </span>{" "}

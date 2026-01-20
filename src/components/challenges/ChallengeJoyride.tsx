@@ -33,7 +33,7 @@ export default function ChallengeJoyride() {
         const desktopSteps: Step[] = [
           {
             target: 'body',
-            content: '👋 Welcome to CTF Challenges! Let me show you around.',
+            content: '👋 Welcome to the CTF Challenges! Let me show you around.',
             placement: 'center',
             disableBeacon: true,
           },
@@ -44,37 +44,37 @@ export default function ChallengeJoyride() {
           },
           {
             target: '[data-tour="navbar-challenges"]',
-            content: '💡 Click here to see all CTF challenges!',
+            content: '💡 Browse all available challenges here.',
             placement: 'bottom',
           },
           {
             target: '[data-tour="navbar-scoreboard"]',
-            content: '🏆 Click here to check the rankings!',
+            content: '🏆 Check the rankings here.',
             placement: 'bottom',
           },
           {
             target: '[data-tour="navbar-rules"]',
-            content: '📖 Click here to read the competition rules!',
+            content: '📖 Read the competition rules here.',
             placement: 'bottom',
           },
           {
             target: '[data-tour="navbar-info"]',
-            content: '📢 Click here for important information!',
+            content: '📢 Find important info and announcements here.',
             placement: 'bottom',
           },
           {
             target: '[data-tour="navbar-profile"]',
-            content: '👤 Click here to access your profile!',
+            content: '👤 Open your profile to update your picture, bio, sosmed, and more.',
             placement: 'bottom',
           },
           {
             target: '[data-tour="navbar-notifications"]',
-            content: '🔔 Click here to check your notifications!',
+            content: '🔔 View notifications for recent solves and new challenges.',
             placement: 'bottom',
           },
           {
             target: '[data-tour="challenge-tutorial"]',
-            content: '📚 Click this button to open the interactive tutorial!',
+            content: '📚 Open the CTF tutorial PDF here.',
             placement: 'bottom',
           },
         ]

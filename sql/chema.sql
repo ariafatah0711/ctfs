@@ -86,13 +86,15 @@ CREATE TABLE public.users (
   is_admin BOOLEAN DEFAULT false,
   bio TEXT DEFAULT '',
   sosmed JSONB DEFAULT '{}'::jsonb,
+  profile_picture_url TEXT DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- ALTER TABLE public.users
 --   ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '',
---   ADD COLUMN IF NOT EXISTS sosmed JSONB DEFAULT '{}'::jsonb;
+--   ADD COLUMN IF NOT EXISTS sosmed JSONB DEFAULT '{}'::jsonb,
+--   ADD COLUMN IF NOT EXISTS profile_picture_url TEXT DEFAULT NULL;
 
 -- ########################################################
 -- Table: challenges
@@ -324,14 +326,16 @@ CREATE OR REPLACE FUNCTION get_user_profile(p_id UUID)
 RETURNS TABLE (
   id UUID,
   username TEXT,
-  picture TEXT
+  picture TEXT,
+  profile_picture_url TEXT
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT
     u.id,
     u.username,
-    au.raw_user_meta_data->>'picture' AS picture
+    COALESCE(au.raw_user_meta_data->>'picture', u.profile_picture_url) AS picture,
+    u.profile_picture_url
   FROM public.users u
   LEFT JOIN auth.users au ON au.id = u.id
   WHERE u.id = p_id;
@@ -355,7 +359,7 @@ DECLARE
   v_picture TEXT;
 BEGIN
   -- Ambil user
-  SELECT id, username, bio, sosmed
+  SELECT id, username, bio, sosmed, profile_picture_url
   INTO v_user
   FROM public.users
   WHERE id = p_id;
@@ -368,7 +372,7 @@ BEGIN
   END IF;
 
   -- Ambil picture
-  SELECT au.raw_user_meta_data->>'picture'
+  SELECT COALESCE(au.raw_user_meta_data->>'picture', v_user.profile_picture_url)
   INTO v_picture
   FROM auth.users au
   WHERE au.id = v_user.id;
@@ -426,7 +430,8 @@ BEGIN
       'score', COALESCE(v_score, 0),
       'picture', v_picture,
       'bio', COALESCE(v_user.bio, ''),
-      'sosmed', COALESCE(v_user.sosmed, '{}'::jsonb)
+      'sosmed', COALESCE(v_user.sosmed, '{}'::jsonb),
+      'profile_picture_url', v_user.profile_picture_url
     ),
     'solved_challenges', v_solves
   );
@@ -526,6 +531,34 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_sosmed(uuid, jsonb) TO authenticated;
+
+-- ########################################################
+-- Function: update_profile_picture(p_id UUID, p_profile_picture_url TEXT)
+-- ########################################################
+CREATE OR REPLACE FUNCTION update_profile_picture(p_id uuid, p_profile_picture_url text)
+RETURNS json AS $$
+DECLARE
+  v_user_id uuid := auth.uid()::uuid;
+  v_url text := NULLIF(TRIM(p_profile_picture_url), '');
+BEGIN
+  -- Cek user hanya bisa ubah foto sendiri
+  IF p_id IS DISTINCT FROM v_user_id THEN
+    RETURN json_build_object('success', false, 'message', 'Cannot change other user''s profile picture');
+  END IF;
+
+  -- Cek user ada
+  IF NOT EXISTS (SELECT 1 FROM public.users WHERE id = p_id) THEN
+    RETURN json_build_object('success', false, 'message', 'User not found');
+  END IF;
+
+  -- Update profile picture URL (null if empty)
+  UPDATE public.users SET profile_picture_url = v_url, updated_at = now() WHERE id = p_id;
+  RETURN json_build_object('success', true, 'profile_picture_url', v_url);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION update_profile_picture(uuid, text) TO authenticated;
 
 -- ########################################################
 -- Function: get_leaderboard()
@@ -1088,6 +1121,48 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_solves_by_name(TEXT) TO authenticated;
+
+-- ########################################################
+-- Function: get_solves_by_challenge(p_challenge_title TEXT)
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_solves_by_challenge(
+  p_challenge_title TEXT
+)
+RETURNS TABLE (
+  solve_id UUID,
+  user_id UUID,
+  username TEXT,
+  challenge_id UUID,
+  challenge_title TEXT,
+  challenge_category TEXT,
+  points INTEGER,
+  solved_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can view solves by challenge';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    s.id AS solve_id,
+    u.id AS user_id,
+    u.username,
+    c.id AS challenge_id,
+    c.title AS challenge_title,
+    c.category AS challenge_category,
+    c.points,
+    s.created_at AS solved_at
+  FROM public.solves s
+  JOIN public.users u ON u.id = s.user_id
+  JOIN public.challenges c ON c.id = s.challenge_id
+  WHERE lower(c.title) = lower(p_challenge_title)
+  ORDER BY s.created_at DESC;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_solves_by_challenge(TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: delete_solver(p_solve_id UUID)

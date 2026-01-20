@@ -12,6 +12,7 @@ import TitlePage from '@/components/custom/TitlePage'
 import { Solver } from '@/components/challenges/SolversList';
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 import APP from '@/config'
+import ImageWithFallback from '@/components/ImageWithFallback'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
@@ -275,6 +276,16 @@ export default function ChallengesPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         <TitlePage icon={<Flag size={30} className="text-orange-500 dark:text-orange-300 drop-shadow" />}>challenges</TitlePage>
+
+        {/* Subtle background logo watermark */}
+        <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.08] dark:opacity-[0.06] z-0">
+        <ImageWithFallback
+            src={APP.image_icon}
+            alt={`${APP.shortName} watermark`}
+            size={720}
+            className="rounded-[3rem]"
+          />
+        </div>
 
         <ChallengeFilterBar
           filters={filters}

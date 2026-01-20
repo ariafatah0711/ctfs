@@ -2,6 +2,7 @@ export interface User {
   id: string
   username: string
   picture?: string
+  profile_picture_url?: string | null
   score: number
   rank?: number
   is_admin?: boolean

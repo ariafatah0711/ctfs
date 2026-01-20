@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
 import { ChallengeWithSolve } from "@/types";
 import React from "react";
+import { Lightbulb } from 'lucide-react';
 
 interface HintDialogProps {
   challenge: ChallengeWithSolve | null;
@@ -21,7 +22,9 @@ const HintDialog: React.FC<HintDialogProps> = ({ challenge, hintIdx = 0, open, o
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-pink-300 dark:text-pink-200">
-            <span className="w-8 h-8 bg-blue-200 dark:bg-blue-900 rounded-full flex items-center justify-center">💡</span>
+            <span className="w-8 h-8 bg-blue-200 dark:bg-blue-900 rounded-full flex items-center justify-center">
+              <Lightbulb className="h-4 w-4 text-blue-800 dark:text-blue-200" />
+            </span>
             Hint for: {challenge.title}
           </DialogTitle>
         </DialogHeader>

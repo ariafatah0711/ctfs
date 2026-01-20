@@ -9,6 +9,7 @@ export type UserDetail = {
   rank: number | null
   score: number
   picture?: string | null
+  profile_picture_url?: string | null
   bio?: string
   sosmed?: Record<string, string>
   solved_challenges: ChallengeWithSolve[]
@@ -27,6 +28,7 @@ export async function getUserDetail(userId: string): Promise<UserDetail | null> 
       rank: data.user.rank ?? null,
       score: data.user.score ?? 0,
       picture: data.user.picture ?? null,
+      profile_picture_url: data.user.profile_picture_url ?? null,
       bio: data.user.bio ?? '',
       sosmed: data.user.sosmed ?? {},
       solved_challenges: (data.solved_challenges || []).map((c: any) => ({
@@ -270,5 +272,24 @@ export async function updateSosmed(userId: string, newSosmed: Record<string, str
     return { error: null, sosmed: data.sosmed };
   } catch (error) {
     return { error: 'Failed to update sosmed' };
+  }
+}
+
+// Update current user's profile picture URL via RPC
+export async function updateProfilePicture(userId: string, profilePictureUrl: string): Promise<{ error: string | null, profile_picture_url?: string | null }> {
+  try {
+    const { data, error } = await supabase.rpc('update_profile_picture', {
+      p_id: userId,
+      p_profile_picture_url: profilePictureUrl
+    });
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update profile picture' };
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update profile picture' };
+    }
+    return { error: null, profile_picture_url: data.profile_picture_url ?? null };
+  } catch (error) {
+    return { error: 'Failed to update profile picture' };
   }
 }

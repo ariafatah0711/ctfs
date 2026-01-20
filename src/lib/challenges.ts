@@ -573,6 +573,22 @@ export async function getSolversByUsername(username: string) {
   return data || [];
 }
 
+/**
+ * Get solvers for a specific challenge title (exact match)
+ */
+export async function getSolversByChallengeTitle(challengeTitle: string) {
+  const { data, error } = await supabase.rpc('get_solves_by_challenge', {
+    p_challenge_title: challengeTitle,
+  });
+
+  if (error) {
+    console.error(`Error fetching solvers for challenge "${challengeTitle}":`, error);
+    return [];
+  }
+
+  return data || [];
+}
+
 /** Delete a solver entry by solve ID (Admin only)
  */
 export async function deleteSolver(solveId: string) {
