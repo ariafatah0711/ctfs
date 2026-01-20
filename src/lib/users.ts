@@ -12,7 +12,23 @@ export type UserDetail = {
   profile_picture_url?: string | null
   bio?: string
   sosmed?: Record<string, string>
+  created_at?: string | null
+  last_login_at?: string | null
   solved_challenges: ChallengeWithSolve[]
+}
+
+const normalizeTimestamp = (value?: string | null): string | null => {
+  if (!value) return null
+  let normalized = value.trim()
+  if (normalized.includes(' ') && !normalized.includes('T')) {
+    normalized = normalized.replace(' ', 'T')
+  }
+  if (/([+-]\d{2})$/.test(normalized)) {
+    normalized = normalized.replace(/([+-]\d{2})$/, '$1:00')
+  } else if (/([+-]\d{2})(\d{2})$/.test(normalized)) {
+    normalized = normalized.replace(/([+-]\d{2})(\d{2})$/, '$1:$2')
+  }
+  return normalized
 }
 
 export async function getUserDetail(userId: string): Promise<UserDetail | null> {
@@ -31,6 +47,8 @@ export async function getUserDetail(userId: string): Promise<UserDetail | null> 
       profile_picture_url: data.user.profile_picture_url ?? null,
       bio: data.user.bio ?? '',
       sosmed: data.user.sosmed ?? {},
+      created_at: normalizeTimestamp(data.user.created_at),
+      last_login_at: normalizeTimestamp(data.user.last_login_at),
       solved_challenges: (data.solved_challenges || []).map((c: any) => ({
         id: c.challenge_id,
         title: c.title,

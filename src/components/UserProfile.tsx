@@ -52,6 +52,8 @@ type UserDetail = {
     web?: string
     [key: string]: string | undefined
   } | null
+  created_at?: string | null
+  last_login_at?: string | null
   solved_challenges: ChallengeWithSolve[]
 }
 
@@ -333,6 +335,12 @@ export default function UserProfile({
                       authInfo={authInfo}
                     />
                   )}
+                </CardContent>
+                <CardContent className="pt-0 pb-1 px-8">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Joined: {userDetail.created_at ? formatRelativeDate(userDetail.created_at) : '-'} |
+                    Last login: {userDetail.last_login_at ? formatRelativeDate(userDetail.last_login_at) : 'Never'}
+                  </p>
                 </CardContent>
                 {/* Bio and Sosmed below header - new style */}
                 {(userDetail.bio?.trim() || userDetail.sosmed) && (

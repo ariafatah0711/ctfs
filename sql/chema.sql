@@ -361,9 +361,10 @@ DECLARE
   v_score INT;
   v_solves JSON;
   v_picture TEXT;
+  v_last_login TIMESTAMPTZ;
 BEGIN
   -- Ambil user
-  SELECT id, username, bio, sosmed, profile_picture_url
+  SELECT id, username, bio, sosmed, profile_picture_url, created_at
   INTO v_user
   FROM public.users
   WHERE id = p_id;
@@ -376,8 +377,16 @@ BEGIN
   END IF;
 
   -- Ambil picture
-  SELECT COALESCE(au.raw_user_meta_data->>'picture', v_user.profile_picture_url)
-  INTO v_picture
+  SELECT
+    COALESCE(au.raw_user_meta_data->>'picture', v_user.profile_picture_url),
+    NULLIF(
+      GREATEST(
+        COALESCE(au.last_sign_in_at, 'epoch'::timestamptz),
+        COALESCE(au.updated_at, 'epoch'::timestamptz)
+      ),
+      'epoch'::timestamptz
+    )
+  INTO v_picture, v_last_login
   FROM auth.users au
   WHERE au.id = v_user.id;
 
@@ -435,7 +444,9 @@ BEGIN
       'picture', v_picture,
       'bio', COALESCE(v_user.bio, ''),
       'sosmed', COALESCE(v_user.sosmed, '{}'::jsonb),
-      'profile_picture_url', v_user.profile_picture_url
+      'profile_picture_url', v_user.profile_picture_url,
+      'created_at', v_user.created_at,
+      'last_login_at', v_last_login
     ),
     'solved_challenges', v_solves
   );
