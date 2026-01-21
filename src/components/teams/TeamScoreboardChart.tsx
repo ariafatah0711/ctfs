@@ -11,9 +11,10 @@ const Plot = dynamic(() => import('react-plotly.js'), {
 interface TeamScoreboardChartProps {
   series: TeamProgressSeries[]
   isDark: boolean
+  scoreLabel?: string
 }
 
-const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDark }) => {
+const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDark, scoreLabel = 'Score' }) => {
   const truncate = (str: string, n: number) => (str.length > n ? `${str.slice(0, n)}...` : str)
 
   const chartData = series.slice(0, 10).map((entry) => {
@@ -26,7 +27,7 @@ const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDar
     return {
       x,
       y: entry.history.map((p) => p.score),
-      text: entry.history.map((p) => `${shortName} - ${p.score}`),
+      text: entry.history.map((p) => `${shortName} - ${p.score} ${scoreLabel}`),
       hovertemplate: '%{x}<br>%{text}<extra></extra>',
       mode: 'lines+markers',
       name: shortName,
@@ -60,7 +61,7 @@ const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDar
               autorange: true,
               rangemode: 'tozero',
               automargin: true,
-              title: { text: 'Score', font: { size: 12, color: isDark ? '#e5e7eb' : '#111' } },
+              title: { text: scoreLabel, font: { size: 12, color: isDark ? '#e5e7eb' : '#111' } },
               tickfont: { size: 10, color: isDark ? '#e5e7eb' : '#111' },
               gridcolor: isDark ? '#374151' : '#e5e7eb',
               linecolor: isDark ? '#e5e7eb' : '#111',

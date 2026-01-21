@@ -5,6 +5,9 @@ export type TeamMember = {
 	username: string
 	role: 'captain' | 'member'
 	joined_at: string
+	solo_score?: number
+	first_solve_count?: number
+	first_solve_score?: number
 }
 
 export type TeamInfo = {
@@ -79,6 +82,7 @@ export async function getMyTeam(): Promise<{ team: TeamInfo | null; members: Tea
 }
 
 export type TeamSummary = {
+	unique_score?: number
 	total_score: number
 	unique_challenges: number
 	total_solves: number
@@ -90,6 +94,7 @@ export type TeamScoreboardEntry = {
 	unique_score: number
 	total_score: number
 	total_solves: number
+	member_count: number
 	rank: number
 }
 
@@ -191,6 +196,34 @@ export async function getTopTeamProgressByNames(teamNames: string[]): Promise<Re
 		return progress
 	} catch (err) {
 		console.error('Error fetching team progress:', err)
+		return {}
+	}
+}
+
+export async function getTopTeamUniqueProgressByNames(teamNames: string[]): Promise<Record<string, TeamProgressSeries>> {
+	if (!teamNames || teamNames.length === 0) return {}
+	try {
+		const { data, error } = await supabase.rpc('get_team_unique_solves_by_names', { p_names: teamNames })
+		if (error) throw error
+		const rows: Array<{ team_name: string; created_at: string; points: number }> = (data as any[]) || []
+
+		const progress: Record<string, TeamProgressSeries> = {}
+		for (const row of rows) {
+			const name = row.team_name
+			if (!name) continue
+			if (!progress[name]) {
+				progress[name] = { team_name: name, history: [] }
+			}
+			const prev = progress[name].history.at(-1)?.score || 0
+			progress[name].history.push({
+				date: row.created_at,
+				score: prev + (row.points || 0),
+			})
+		}
+
+		return progress
+	} catch (err) {
+		console.error('Error fetching team unique progress:', err)
 		return {}
 	}
 }

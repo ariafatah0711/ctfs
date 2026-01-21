@@ -49,8 +49,9 @@ export const APP = {
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component
   teams: {
-    enabled: true,
-    hideScoreboardIndividual: false,
+    enabled: true, // enable / disable teams feature
+    hideScoreboardIndividual: false, // enable / disable individual scoreboard when teams are enabled
+    hidescoreboardTotal: false, // enable / disable Total Score tab in team scoreboard
   },
 
   /* Maintenance configuration */

@@ -246,7 +246,7 @@ export default function Navbar() {
     <>
       {/* Real-time solve notification (marquee style) */}
       {notifVisible && (
-        <div className="fixed top-2 right-2 z-[9999] flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
+        <div className="fixed top-2 right-2 z-[50] flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
           <svg className="mr-2" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span className="truncate flex-1">
             <b>{solveNotif.username}</b> just solved <b>{solveNotif.challenge}</b>!
@@ -266,7 +266,7 @@ export default function Navbar() {
       )}
       {/* Real-time notification toast */}
       {notifToastVisible && (
-        <div className="fixed top-16 right-2 z-[9998] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left" style={{ minWidth: 240, maxWidth: 380 }}>
+        <div className="fixed top-16 right-2 z-[50] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left" style={{ minWidth: 240, maxWidth: 380 }}>
           <div className="mt-0.5">
             <Bell size={18} className="text-blue-400" />
           </div>

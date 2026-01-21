@@ -1,7 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.3.2]
+### Update
+- improve team management UI and UX
+- improve team scoreboard UI and UX
+
 ## [V.2.3.1]
+- update team management features, including team renaming and user team details
 
 ## [v2.3.0]
 ### Added

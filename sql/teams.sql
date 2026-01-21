@@ -249,13 +249,45 @@ BEGIN
 	FROM public.teams t
 	WHERE t.id = v_team_id;
 
+	WITH team_users AS (
+		SELECT tm.user_id, tm.joined_at
+		FROM public.team_members tm
+		WHERE tm.team_id = v_team_id
+	), team_first AS (
+		SELECT DISTINCT ON (s.challenge_id)
+			s.challenge_id,
+			s.user_id,
+			s.created_at
+		FROM public.solves s
+		JOIN team_users tu ON tu.user_id = s.user_id
+		ORDER BY s.challenge_id, s.created_at ASC, s.id ASC
+	), user_stats AS (
+		SELECT
+			tu.user_id,
+			COALESCE(SUM(c.points), 0) AS solo_score
+		FROM team_users tu
+		LEFT JOIN public.solves s ON s.user_id = tu.user_id
+		LEFT JOIN public.challenges c ON c.id = s.challenge_id
+		GROUP BY tu.user_id
+	), first_stats AS (
+		SELECT
+			tf.user_id,
+			COALESCE(COUNT(*), 0) AS first_solves,
+			COALESCE(SUM(c.points), 0) AS first_solve_score
+		FROM team_first tf
+		JOIN public.challenges c ON c.id = tf.challenge_id
+		GROUP BY tf.user_id
+	)
 	SELECT COALESCE(
 		json_agg(
 			json_build_object(
 				'user_id', u.id,
 				'username', u.username,
 				'role', CASE WHEN u.id = t.captain_user_id THEN 'captain' ELSE 'member' END,
-				'joined_at', tm.joined_at
+				'joined_at', tm.joined_at,
+				'solo_score', COALESCE(us.solo_score, 0),
+				'first_solve_count', COALESCE(fs.first_solves, 0),
+				'first_solve_score', COALESCE(fs.first_solve_score, 0)
 			)
 			ORDER BY (u.id = t.captain_user_id) DESC, tm.joined_at ASC
 		),
@@ -265,6 +297,8 @@ BEGIN
 	FROM public.team_members tm
 	JOIN public.users u ON u.id = tm.user_id
 	JOIN public.teams t ON t.id = tm.team_id
+	LEFT JOIN user_stats us ON us.user_id = tm.user_id
+	LEFT JOIN first_stats fs ON fs.user_id = tm.user_id
 	WHERE tm.team_id = v_team_id;
 
 	RETURN json_build_object('success', true, 'team', v_team, 'members', v_members);
@@ -282,6 +316,7 @@ DECLARE
 	v_user_id UUID := auth.uid()::uuid;
 	v_team_id UUID;
 	v_team JSON;
+	v_unique_score BIGINT := 0;
 	v_total_score BIGINT := 0;
 	v_unique_challenges INT := 0;
 	v_total_solves BIGINT := 0;
@@ -296,6 +331,7 @@ BEGIN
 
 	IF v_team_id IS NULL THEN
 		RETURN json_build_object('success', true, 'team', NULL, 'stats', json_build_object(
+			'unique_score', 0,
 			'total_score', 0,
 			'unique_challenges', 0,
 			'total_solves', 0
@@ -323,7 +359,7 @@ BEGIN
 	SELECT
 		COALESCE(SUM(c.points), 0),
 		COALESCE(COUNT(*), 0)
-	INTO v_total_score, v_unique_challenges
+	INTO v_unique_score, v_unique_challenges
 	FROM team_solves ts
 	JOIN public.challenges c ON c.id = ts.challenge_id;
 
@@ -333,7 +369,15 @@ BEGIN
 	JOIN public.team_members tm ON tm.user_id = s.user_id
 	WHERE tm.team_id = v_team_id;
 
+	SELECT COALESCE(SUM(c.points), 0)
+	INTO v_total_score
+	FROM public.solves s
+	JOIN public.team_members tm ON tm.user_id = s.user_id
+	JOIN public.challenges c ON c.id = s.challenge_id
+	WHERE tm.team_id = v_team_id;
+
 	RETURN json_build_object('success', true, 'team', v_team, 'stats', json_build_object(
+		'unique_score', v_unique_score,
 		'total_score', v_total_score,
 		'unique_challenges', v_unique_challenges,
 		'total_solves', v_total_solves
@@ -408,6 +452,7 @@ DECLARE
 	v_team_id UUID;
 	v_team JSON;
 	v_members JSON;
+	v_unique_score BIGINT := 0;
 	v_total_score BIGINT := 0;
 	v_unique_challenges INT := 0;
 	v_total_solves BIGINT := 0;
@@ -439,13 +484,45 @@ BEGIN
 	FROM public.teams t
 	WHERE t.id = v_team_id;
 
+	WITH team_users AS (
+		SELECT tm.user_id, tm.joined_at
+		FROM public.team_members tm
+		WHERE tm.team_id = v_team_id
+	), team_first AS (
+		SELECT DISTINCT ON (s.challenge_id)
+			s.challenge_id,
+			s.user_id,
+			s.created_at
+		FROM public.solves s
+		JOIN team_users tu ON tu.user_id = s.user_id
+		ORDER BY s.challenge_id, s.created_at ASC, s.id ASC
+	), user_stats AS (
+		SELECT
+			tu.user_id,
+			COALESCE(SUM(c.points), 0) AS solo_score
+		FROM team_users tu
+		LEFT JOIN public.solves s ON s.user_id = tu.user_id
+		LEFT JOIN public.challenges c ON c.id = s.challenge_id
+		GROUP BY tu.user_id
+	), first_stats AS (
+		SELECT
+			tf.user_id,
+			COALESCE(COUNT(*), 0) AS first_solves,
+			COALESCE(SUM(c.points), 0) AS first_solve_score
+		FROM team_first tf
+		JOIN public.challenges c ON c.id = tf.challenge_id
+		GROUP BY tf.user_id
+	)
 	SELECT COALESCE(
 		json_agg(
 			json_build_object(
 				'user_id', u.id,
 				'username', u.username,
 				'role', CASE WHEN u.id = t.captain_user_id THEN 'captain' ELSE 'member' END,
-				'joined_at', tm.joined_at
+				'joined_at', tm.joined_at,
+				'solo_score', COALESCE(us.solo_score, 0),
+				'first_solve_count', COALESCE(fs.first_solves, 0),
+				'first_solve_score', COALESCE(fs.first_solve_score, 0)
 			)
 			ORDER BY (u.id = t.captain_user_id) DESC, tm.joined_at ASC
 		),
@@ -455,6 +532,8 @@ BEGIN
 	FROM public.team_members tm
 	JOIN public.users u ON u.id = tm.user_id
 	JOIN public.teams t ON t.id = tm.team_id
+	LEFT JOIN user_stats us ON us.user_id = tm.user_id
+	LEFT JOIN first_stats fs ON fs.user_id = tm.user_id
 	WHERE tm.team_id = v_team_id;
 
 	WITH team_users AS (
@@ -468,7 +547,7 @@ BEGIN
 	SELECT
 		COALESCE(SUM(c.points), 0),
 		COALESCE(COUNT(*), 0)
-	INTO v_total_score, v_unique_challenges
+	INTO v_unique_score, v_unique_challenges
 	FROM team_solves ts
 	JOIN public.challenges c ON c.id = ts.challenge_id;
 
@@ -478,11 +557,19 @@ BEGIN
 	JOIN public.team_members tm ON tm.user_id = s.user_id
 	WHERE tm.team_id = v_team_id;
 
+	SELECT COALESCE(SUM(c.points), 0)
+	INTO v_total_score
+	FROM public.solves s
+	JOIN public.team_members tm ON tm.user_id = s.user_id
+	JOIN public.challenges c ON c.id = s.challenge_id
+	WHERE tm.team_id = v_team_id;
+
 	RETURN json_build_object(
 		'success', true,
 		'team', v_team,
 		'members', v_members,
 		'stats', json_build_object(
+			'unique_score', v_unique_score,
 			'total_score', v_total_score,
 			'unique_challenges', v_unique_challenges,
 			'total_solves', v_total_solves
@@ -557,6 +644,7 @@ RETURNS TABLE (
 	unique_score BIGINT,
 	total_score BIGINT,
 	total_solves BIGINT,
+	member_count BIGINT,
 	rank BIGINT
 ) AS $$
 BEGIN
@@ -582,6 +670,10 @@ BEGIN
 		JOIN team_users tu ON tu.user_id = s.user_id
 		JOIN public.challenges c ON c.id = s.challenge_id
 		GROUP BY tu.team_id
+	), team_member_counts AS (
+		SELECT tm.team_id, COUNT(*)::bigint AS member_count
+		FROM public.team_members tm
+		GROUP BY tm.team_id
 	)
 	SELECT
 		t.id AS team_id,
@@ -589,10 +681,12 @@ BEGIN
 		COALESCE(ts.unique_score, 0) AS unique_score,
 		COALESCE(tts.total_score, 0) AS total_score,
 		COALESCE(tts.total_solves, 0) AS total_solves,
+		COALESCE(tmc.member_count, 0) AS member_count,
 		ROW_NUMBER() OVER (ORDER BY COALESCE(ts.unique_score, 0) DESC, t.name ASC) AS rank
 	FROM public.teams t
 	LEFT JOIN team_scores ts ON ts.team_id = t.id
 	LEFT JOIN team_total_scores tts ON tts.team_id = t.id
+	LEFT JOIN team_member_counts tmc ON tmc.team_id = t.id
 	ORDER BY COALESCE(ts.unique_score, 0) DESC, t.name ASC
 	LIMIT limit_rows OFFSET offset_rows;
 END;
@@ -629,6 +723,42 @@ SECURITY DEFINER
 SET search_path = public, auth;
 
 GRANT EXECUTE ON FUNCTION get_team_solves_by_names(TEXT[]) TO authenticated;
+
+-- Get unique solves for specific team names (for progress chart)
+CREATE OR REPLACE FUNCTION get_team_unique_solves_by_names(p_names TEXT[])
+RETURNS TABLE (
+	team_name TEXT,
+	created_at TIMESTAMPTZ,
+	points INTEGER
+) AS $$
+BEGIN
+	RETURN QUERY
+	WITH team_solves AS (
+		SELECT
+			t.name AS team_name,
+			s.challenge_id,
+			MIN(s.created_at) AS created_at
+		FROM public.teams t
+		JOIN public.team_members tm ON tm.team_id = t.id
+		JOIN public.solves s ON s.user_id = tm.user_id
+		WHERE lower(t.name) = ANY (
+			SELECT lower(x) FROM unnest(p_names) AS x
+		)
+		GROUP BY t.name, s.challenge_id
+	)
+	SELECT
+		ts.team_name,
+		ts.created_at,
+		c.points
+	FROM team_solves ts
+	JOIN public.challenges c ON c.id = ts.challenge_id
+	ORDER BY ts.team_name ASC, ts.created_at ASC;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION get_team_unique_solves_by_names(TEXT[]) TO authenticated;
 
 -- Kick member from team (captain/admin)
 CREATE OR REPLACE FUNCTION kick_team_member(p_team_id UUID, p_user_id UUID)

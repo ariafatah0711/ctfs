@@ -2,15 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Users, UserPlus, LogOut, RefreshCw, Trash2, Crown, Shield, Copy } from 'lucide-react'
+import { Users, UserPlus } from 'lucide-react'
 import TitlePage from '@/components/custom/TitlePage'
 import Loader from '@/components/custom/loading'
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
+import TeamPageContent from '@/components/teams/TeamPageContent'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAuth } from '@/contexts/AuthContext'
 import { isAdmin } from '@/lib/admin'
 import {
@@ -42,7 +41,6 @@ export default function TeamsPage() {
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
   const [teamName, setTeamName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
-  const [newTeamName, setNewTeamName] = useState('')
   const [status, setStatus] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
   const [adminStatus, setAdminStatus] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -93,13 +91,6 @@ export default function TeamsPage() {
   const currentMember = useMemo(() => members.find(m => m.user_id === user?.id), [members, user])
   const isCaptain = currentMember?.role === 'captain'
   const canManage = isCaptain || adminStatus
-
-  const formatDate = (value?: string | null) => {
-    if (!value) return '-'
-    const dt = new Date(value)
-    if (Number.isNaN(dt.getTime())) return String(value)
-    return dt.toLocaleString()
-  }
 
   const handleCreateTeam = async () => {
     if (!teamName.trim()) return
@@ -248,19 +239,15 @@ export default function TeamsPage() {
     setConfirmOpen(true)
   }
 
-  const handleRenameTeam = async () => {
-    if (!team || !newTeamName.trim()) return
-    setBusy(true)
-    setStatus(null)
-    const { success, error } = await renameTeam(team.id, newTeamName.trim())
-    if (!success) {
-      setStatus({ type: 'error', message: error || 'Failed to rename team.' })
-    } else {
+  const handleRenameTeam = async (newName: string) => {
+    if (!team) return { success: false, error: 'No team found' }
+
+    const { success, error } = await renameTeam(team.id, newName)
+    if (success) {
       setStatus({ type: 'success', message: 'Team renamed.' })
-      setNewTeamName('')
       await loadTeamData()
     }
-    setBusy(false)
+    return { success, error }
   }
 
   if (authLoading) {
@@ -332,154 +319,23 @@ export default function TeamsPage() {
             </Card>
           </div>
         ) : (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-white dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Users size={18} /> Team Info
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-sm text-gray-500 dark:text-gray-300">Name</div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white">{team.name}</div>
-
-                  {canManage && (
-                    <>
-                      <div className="text-sm text-gray-500 dark:text-gray-300 pt-2">Rename Team</div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={newTeamName}
-                          onChange={(e) => setNewTeamName(e.target.value)}
-                          placeholder="New team name"
-                          disabled={busy}
-                          className="flex-1"
-                        />
-                        <Button variant="outline" size="sm" onClick={handleRenameTeam} disabled={busy || !newTeamName.trim()}>
-                          Rename
-                        </Button>
-                      </div>
-                    </>
-                  )}
-
-                  <div className="text-sm text-gray-500 dark:text-gray-300 pt-2">Invite Code</div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded">{team.invite_code}</span>
-                    <Button variant="outline" size="sm" onClick={handleCopyInvite} disabled={busy}>
-                      <Copy size={14} /> Copy
-                    </Button>
-                    {canManage && (
-                      <Button variant="outline" size="sm" onClick={handleRegenerateInvite} disabled={busy}>
-                        <RefreshCw size={14} /> Regenerate
-                      </Button>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 pt-2">
-                    <Button variant="secondary" size="sm" onClick={handleLeaveTeam} disabled={busy}>
-                      <LogOut size={14} /> Leave
-                    </Button>
-                    {canManage && (
-                      <Button variant="destructive" size="sm" onClick={handleDeleteTeam} disabled={busy}>
-                        <Trash2 size={14} /> Delete
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white dark:bg-gray-800">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Team Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.total_score ?? 0}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-300">Score</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.unique_challenges ?? 0}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-300">Challenges</div>
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.total_solves ?? 0}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-300">Solves</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Members</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {members.length === 0 ? (
-                  <div className="text-sm text-gray-500 dark:text-gray-300">No members found.</div>
-                ) : (
-                  members.map((m) => (
-                    <div key={m.user_id} className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-700 py-2">
-                      <div className="flex items-center gap-2">
-                        {m.role === 'captain' ? <Crown size={16} className="text-yellow-500" /> : <Users size={16} className="text-gray-400" />}
-                        <Link
-                          href={`/user/${encodeURIComponent(m.username)}`}
-                          className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
-                        >
-                          {m.username}
-                        </Link>
-                        <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300">
-                          {m.role}
-                        </span>
-                      </div>
-                      {canManage && m.user_id !== user.id && (
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleTransferCaptain(m)} disabled={busy}>
-                            <Shield size={14} /> Make Captain
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={() => handleKickMember(m)} disabled={busy}>
-                            Kick
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Team Solves</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {challenges.length === 0 ? (
-                  <div className="text-sm text-gray-500 dark:text-gray-300">No solves yet.</div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Challenge</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead className="text-center">Points</TableHead>
-                        <TableHead>First Solve</TableHead>
-                        <TableHead>First Solver</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {challenges.map((c) => (
-                        <TableRow key={c.challenge_id}>
-                          <TableCell className="font-medium text-gray-900 dark:text-white">{c.title}</TableCell>
-                          <TableCell className="text-gray-600 dark:text-gray-300">{c.category}</TableCell>
-                          <TableCell className="text-center">{c.points}</TableCell>
-                          <TableCell className="text-gray-600 dark:text-gray-300">{formatDate(c.first_solved_at)}</TableCell>
-                          <TableCell className="text-gray-900 dark:text-white">{c.first_solver_username}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <TeamPageContent
+            team={team}
+            members={members}
+            summary={summary}
+            challenges={challenges}
+            currentUserId={user.id}
+            canManage={canManage}
+            busy={busy}
+            showManageActions
+            onRenameTeam={handleRenameTeam}
+            onCopyInvite={handleCopyInvite}
+            onRegenerateInvite={handleRegenerateInvite}
+            onLeaveTeam={handleLeaveTeam}
+            onDeleteTeam={handleDeleteTeam}
+            onKickMember={handleKickMember}
+            onTransferCaptain={handleTransferCaptain}
+          />
         )}
       </div>
 
