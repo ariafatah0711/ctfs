@@ -29,7 +29,9 @@ export default function Navbar() {
   const [notifLevel, setNotifLevel] = useState<'info' | 'info_platform' | 'info_challenges'>('info')
   // State for real-time solve notification
   const [solveNotif, setSolveNotif] = useState<{ username: string; challenge: string } | null>(null)
+  const [notifToast, setNotifToast] = useState<{ title: string; message: string } | null>(null)
   const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const notifToastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { theme, toggleTheme } = useTheme()
   const avatarSrc =  user?.profile_picture_url || user?.picture || null
 
@@ -84,8 +86,12 @@ export default function Navbar() {
         ...prev,
       ]))
 
+      setNotifToast({ title: payload.title, message: payload.message })
+      if (notifToastTimeout.current) clearTimeout(notifToastTimeout.current)
+      notifToastTimeout.current = setTimeout(() => setNotifToast(null), 8000)
+
       try {
-        const audio = new Audio('/sounds/notify.mp3')
+        const audio = new Audio('/sounds/notif.mp3')
         audio.volume = 0.5
         audio.play()
       } catch {}
@@ -121,7 +127,7 @@ export default function Navbar() {
       // Play sound only if the solve is NOT by the current user
       if (username !== user.username) {
         try {
-          const audio = new Audio('/sounds/notify.mp3')
+          const audio = new Audio('/sounds/notif_solves.mp3')
           audio.volume = 0.5
           audio.play()
         } catch {}
@@ -154,8 +160,17 @@ export default function Navbar() {
     }
   }
 
+  const dismissNotifToast = () => {
+    setNotifToast(null)
+    if (notifToastTimeout.current) {
+      clearTimeout(notifToastTimeout.current)
+      notifToastTimeout.current = null
+    }
+  }
+
   // Marquee/Toast notification style
   const notifVisible = !!solveNotif
+  const notifToastVisible = !!notifToast
 
   const openNotifPanel = async () => {
     setNotifOpen((v) => !v)
@@ -219,6 +234,29 @@ export default function Navbar() {
           <button
             onClick={dismissSolveNotif}
             className="ml-1 rounded-full p-1 hover:bg-blue-500/60 transition-colors"
+            aria-label="Dismiss notification"
+            title="Dismiss"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+      {/* Real-time notification toast */}
+      {notifToastVisible && (
+        <div className="fixed top-16 right-2 z-[9998] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left" style={{ minWidth: 240, maxWidth: 380 }}>
+          <div className="mt-0.5">
+            <Bell size={18} className="text-blue-400" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm font-semibold truncate">{notifToast.title}</div>
+            <div className="text-xs text-gray-300 line-clamp-2">{notifToast.message}</div>
+          </div>
+          <button
+            onClick={dismissNotifToast}
+            className="ml-1 rounded-full p-1 hover:bg-white/10 transition-colors"
             aria-label="Dismiss notification"
             title="Dismiss"
           >

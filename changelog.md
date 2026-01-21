@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2.2.1]
+### Changed
+- added toast for real-time notification
+- added sound for real-time notification
+
 ## [v2.2.0]
 ### Changed
 - Refactor notifications to logs:
