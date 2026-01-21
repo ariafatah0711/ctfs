@@ -1,34 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getNotifications, getRecentSolves } from "@/lib/challenges";
+import { getLogs, getRecentSolves } from "@/lib/challenges";
 import Link from "next/link";
 import Loader from "@/components/custom/loading";
 import { formatRelativeDate } from '@/lib/utils'
 
-export type Notification = {
-  notif_type: "new_challenge" | "first_blood" | "solve";
-  notif_challenge_id: string;
-  notif_challenge_title: string;
-  notif_category: string;
-  notif_user_id?: string;
-  notif_username?: string;
-  notif_created_at: string;
+export type LogEntry = {
+  log_type: "new_challenge" | "first_blood" | "solve";
+  log_challenge_id: string;
+  log_challenge_title: string;
+  log_category: string;
+  log_user_id?: string;
+  log_username?: string;
+  log_created_at: string;
 };
 
-export default function NotificationList({ tabType = 'challenges' }: { tabType?: 'challenges' | 'solves' }) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+export default function LogsList({ tabType = 'challenges' }: { tabType?: 'challenges' | 'solves' }) {
+  const [notifications, setNotifications] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const notifs = await getNotifications(10000, 0); // Ambil semua notifikasi
+      const notifs = await getLogs(10000, 0); // Ambil semua logs
       const solves = await getRecentSolves(100, 0); // Ambil 100 recent solves
 
       // Merge dan sort by created_at (newest first)
-      const merged = [...notifs, ...solves].sort((a, b) => {
-        return new Date(b.notif_created_at).getTime() - new Date(a.notif_created_at).getTime();
-      });
+      const merged = [...notifs, ...solves]
+        .sort((a, b) => {
+          return new Date(b.log_created_at).getTime() - new Date(a.log_created_at).getTime();
+        });
 
       setNotifications(merged);
       setLoading(false);
@@ -37,8 +38,8 @@ export default function NotificationList({ tabType = 'challenges' }: { tabType?:
 
   // Filter based on tab type
   const filteredNotifications = tabType === 'challenges'
-    ? notifications.filter(n => n.notif_type === 'first_blood' || n.notif_type === 'new_challenge')
-    : notifications.filter(n => n.notif_type === 'solve');
+    ? notifications.filter(n => n.log_type === 'first_blood' || n.log_type === 'new_challenge')
+    : notifications.filter(n => n.log_type === 'solve');
 
   if (loading) return <Loader fullscreen color="text-orange-500" />;
 
@@ -66,7 +67,7 @@ export default function NotificationList({ tabType = 'challenges' }: { tabType?:
             <circle cx="12" cy="16" r="1" />
           </svg>
         </div>
-        <p className="font-medium text-gray-700 dark:text-gray-200">No notifications found</p>
+        <p className="font-medium text-gray-700 dark:text-gray-200">No logs found</p>
         <p className="text-gray-500 dark:text-gray-400 text-xs mt-1">You’re all caught up!</p>
       </motion.div>
     );
@@ -83,7 +84,7 @@ export default function NotificationList({ tabType = 'challenges' }: { tabType?:
         >
           {/* Icon */}
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 mr-2">
-            {notif.notif_type === "new_challenge" ? (
+            {notif.log_type === "new_challenge" ? (
               <svg
                 width="20"
                 height="20"
@@ -97,7 +98,7 @@ export default function NotificationList({ tabType = 'challenges' }: { tabType?:
                 <path d="M12 19V6" />
                 <path d="M5 12l7-7 7 7" />
               </svg>
-            ) : notif.notif_type === "first_blood" ? (
+            ) : notif.log_type === "first_blood" ? (
               <span className="text-lg">🩸</span>
             ) : (
               <svg
@@ -117,55 +118,55 @@ export default function NotificationList({ tabType = 'challenges' }: { tabType?:
 
           {/* Content */}
           <div className="flex-1 flex flex-wrap items-center gap-x-2">
-            {notif.notif_type === "new_challenge" ? (
+            {notif.log_type === "new_challenge" ? (
               <>
                 <span className="font-semibold text-blue-600 dark:text-blue-300">New Challenge:</span>
-                <span className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</span>
-                <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
+                <span className="dark:text-gray-100 font-medium">{notif.log_challenge_title}</span>
+                <span className="text-gray-500 dark:text-gray-400">[{notif.log_category}]</span>
               </>
-            ) : notif.notif_type === "first_blood" ? (
+            ) : notif.log_type === "first_blood" ? (
               <>
                 <span className="font-semibold text-green-600 dark:text-green-300">First Blood</span>
                 <span className="inline-flex items-center gap-1">
                   <Link
-                    href={notif.notif_username ? `/user/${encodeURIComponent(notif.notif_username)}` : "#"}
+                    href={notif.log_username ? `/user/${encodeURIComponent(notif.log_username)}` : "#"}
                     className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
                   >
                     <span className="inline-flex items-center gap-1">
-                      {notif.notif_username && notif.notif_username.length > 20
-                        ? `${notif.notif_username.slice(0, 20)}...`
-                        : notif.notif_username}
+                      {notif.log_username && notif.log_username.length > 20
+                        ? `${notif.log_username.slice(0, 20)}...`
+                        : notif.log_username}
                     </span>
                   </Link>
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">solved</span>
-                <b className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</b>
-                <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
+                <b className="dark:text-gray-100 font-medium">{notif.log_challenge_title}</b>
+                <span className="text-gray-500 dark:text-gray-400">[{notif.log_category}]</span>
               </>
             ) : (
               <>
                 <span className="inline-flex items-center gap-1">
                   <Link
-                    href={notif.notif_username ? `/user/${encodeURIComponent(notif.notif_username)}` : "#"}
+                    href={notif.log_username ? `/user/${encodeURIComponent(notif.log_username)}` : "#"}
                     className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
                   >
                     <span className="inline-flex items-center gap-1">
-                      {notif.notif_username && notif.notif_username.length > 20
-                        ? `${notif.notif_username.slice(0, 20)}...`
-                        : notif.notif_username}
+                      {notif.log_username && notif.log_username.length > 20
+                        ? `${notif.log_username.slice(0, 20)}...`
+                        : notif.log_username}
                     </span>
                   </Link>
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">solved</span>
-                <b className="dark:text-gray-100 font-medium">{notif.notif_challenge_title}</b>
-                <span className="text-gray-500 dark:text-gray-400">[{notif.notif_category}]</span>
+                <b className="dark:text-gray-100 font-medium">{notif.log_challenge_title}</b>
+                <span className="text-gray-500 dark:text-gray-400">[{notif.log_category}]</span>
               </>
             )}
           </div>
 
           {/* Date */}
           <span className="text-xs text-gray-400 dark:text-gray-500 ml-2 whitespace-nowrap">
-            {notif.notif_created_at ? formatRelativeDate(notif.notif_created_at) : ""}
+            {notif.log_created_at ? formatRelativeDate(notif.log_created_at) : ""}
           </span>
         </motion.li>
       ))}

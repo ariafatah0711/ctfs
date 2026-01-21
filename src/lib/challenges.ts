@@ -35,14 +35,14 @@ export async function getChallenges(
     if (error) throw new Error(error.message);
     if (!challenges) return [];
 
-    // 🔹 Ambil notif first blood dari RPC
-    const notifications = (await getNotifications(500, 0)) as any[];
+    // 🔹 Ambil logs first blood dari RPC
+    const notifications = (await getLogs(500, 0)) as any[];
 
-    // Cuma ambil yang notif_type = first_blood
+    // Cuma ambil yang log_type = first_blood
     const fbIds = new Set(
       notifications
-        .filter((n) => n.notif_type === 'first_blood')
-        .map((n) => n.notif_challenge_id)
+        .filter((n) => n.log_type === 'first_blood')
+        .map((n) => n.log_challenge_id)
     );
 
     // 🔹 Cek solved user (optional)
@@ -344,11 +344,11 @@ export async function getTopProgressByUsernames(usernames: string[]) {
 export async function getFirstBloodLeaderboard(limit = 100, offset = 0) {
   try {
     // Simpler approach: use notification payloads only (assumes notifications include username and points)
-    const notifications = await getNotifications(2000, 0)
+    const notifications = await getLogs(2000, 0)
     if (!notifications || notifications.length === 0) return []
 
     // Filter only first_blood notifications
-    const fbNotifs = notifications.filter((n: any) => n.notif_type === 'first_blood')
+    const fbNotifs = notifications.filter((n: any) => n.log_type === 'first_blood')
     if (fbNotifs.length === 0) return []
 
     // Aggregate directly from notifications. We do NOT use numeric "score" here;
@@ -357,8 +357,8 @@ export async function getFirstBloodLeaderboard(limit = 100, offset = 0) {
     const perUserDates: Record<string, string[]> = {}
 
     for (const n of fbNotifs) {
-      const username = n.notif_username || n.notif_user || null
-      const created = n.notif_created_at || n.created_at || null
+      const username = n.log_username || null
+      const created = n.log_created_at || null
       if (!username) continue
       countMap[username] = (countMap[username] || 0) + 1
       perUserDates[username] = perUserDates[username] || []
@@ -628,15 +628,15 @@ export async function deleteSolver(solveId: string) {
 }
 
 /**
- * Get notifications (new challenges & first blood)
+ * Get logs (new challenges & first blood)
  */
-export async function getNotifications(limit = 100, offset = 0) {
-  const { data, error } = await supabase.rpc('get_notifications', {
+export async function getLogs(limit = 100, offset = 0) {
+  const { data, error } = await supabase.rpc('get_logs', {
     p_limit: limit,
     p_offset: offset,
   });
   if (error) {
-    console.error('Error fetching notifications:', error);
+    console.error('Error fetching logs:', error);
     return [];
   }
   // console.log(data)
@@ -664,18 +664,71 @@ export async function getRecentSolves(limit = 100, offset = 0) {
     if (error) throw error;
 
     return ((data as any[]) || []).map(row => ({
-      notif_type: 'solve' as const,
-      notif_challenge_id: row.challenge_id,
-      notif_challenge_title: row.challenges?.title || 'Unknown Challenge',
-      notif_category: row.challenges?.category || 'Misc',
-      notif_user_id: row.user_id,
-      notif_username: row.users?.username || 'Unknown',
-      notif_created_at: row.created_at,
+      log_type: 'solve' as const,
+      log_challenge_id: row.challenge_id,
+      log_challenge_title: row.challenges?.title || 'Unknown Challenge',
+      log_category: row.challenges?.category || 'Misc',
+      log_user_id: row.user_id,
+      log_username: row.users?.username || 'Unknown',
+      log_created_at: row.created_at,
     }));
   } catch (error) {
     console.error('Error fetching recent solves:', error);
     return [];
   }
+}
+
+/**
+ * Notifications (manual broadcast)
+ */
+export async function getNotifications(limit = 50, offset = 0) {
+  const { data, error } = await supabase.rpc('get_notifications', {
+    p_limit: limit,
+    p_offset: offset,
+  });
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function createNotification(title: string, message: string, level: 'info' | 'info_platform' | 'info_challenges' = 'info') {
+  const { data, error } = await supabase.rpc('create_notification', {
+    p_title: title,
+    p_message: message,
+    p_level: level,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteNotification(id: string) {
+  const { data, error } = await supabase.rpc('delete_notification', {
+    p_id: id,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export function subscribeToNotifications(onNotif: (payload: { id: string; title: string; message: string; level: string; created_at: string }) => void) {
+  const channel = supabase
+    .channel('admin-notifications-insert')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, (payload) => {
+      const row: any = payload.new || {};
+      onNotif({
+        id: row.id || `realtime-${row.created_at || ''}-${row.title || ''}`,
+        title: row.title || 'Notification',
+        message: row.message || '',
+        level: row.level || 'info',
+        created_at: row.created_at || new Date().toISOString(),
+      });
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 }
 
 /**

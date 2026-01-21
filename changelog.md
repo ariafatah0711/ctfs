@@ -1,6 +1,63 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2.2.0]
+### Changed
+- Refactor notifications to logs:
+	- Removed NotificationPage and NotificationsContext, replacing with LogsPage and LogsContext.
+	- Updated Navbar to handle logs instead of notifications, including real-time updates and unread counts.
+	- Created LogsList component to display logs with filtering options for challenges and solves.
+	- Adjusted API calls in challenges.ts to fetch logs instead of notifications.
+	- Updated sitemap to reflect changes from notifications to logs.
+
+---
+
+## [v2.1.2]
+### Changed
+- Menampilkan tanggal pembuatan akun dan login terakhir di profile
+
+---
+
+## [v2.1.1]
+### Added
+- New FGTE icon
+- Fitur edit foto profil
+- Toggle maintenance untuk challenge
+- Fitur search solve berdasarkan challenge
+### Changed
+- UI icon lebih clean
+- Icon badge diperbarui
+- Improvement dan bug fixes lainnya
+
+---
+
+## [v2.0.3]
+### Added
+- Challenge tour
+- Notification solves
+### Changed
+- Layout Scoreboard tab
+
+---
+
+## [v2.0.1]
+### Added
+- First blood leaderboard
+- Notification solves
+### Changed
+- Enhances UI/UX
+- Improves markdown rendering, dialog consistency, and code block usability
+- Refactors floating toolbar and chat panel for better layout and responsiveness
+- Updates contributor avatars, scoreboard table animation, and disables verbose logging
+
+---
+
+## [v1.9.4]
+### Changed
+- Refactor ChallengeTutorial component
+### Added
+- ChatToggle for AI Bot
+
 ## [V.1.9.1]
 ### Changed
 - Minor updates and maintenance fixes

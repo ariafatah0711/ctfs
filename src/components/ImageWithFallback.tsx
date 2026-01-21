@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type Props = {
   src?: string | null
@@ -13,6 +13,10 @@ type Props = {
 
 export default function ImageWithFallback({ src, alt = '', size = 36, className = '', rounded = true, fallbackBg = 'bg-gray-200 dark:bg-gray-800' }: Props) {
   const [error, setError] = useState(false)
+
+  useEffect(() => {
+    setError(false)
+  }, [src])
 
   const showImg = !!src && !error
 
@@ -28,6 +32,7 @@ export default function ImageWithFallback({ src, alt = '', size = 36, className 
           src={src as string}
           alt={alt}
           onError={() => setError(true)}
+          onLoad={() => setError(false)}
           style={{ width: size, height: size, borderRadius: rounded ? '9999px' : undefined, objectFit: 'cover' }}
           className="shadow"
           referrerPolicy="no-referrer"

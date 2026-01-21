@@ -67,6 +67,7 @@ DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
+DROP TABLE IF EXISTS public.notifications CASCADE;
 
 -- ########################################################
 -- #################### Extensions ########################
@@ -158,6 +159,18 @@ CREATE TABLE IF NOT EXISTS public.solves_nonactive (
   challenge_id UUID NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   moved_at TIMESTAMP WITH TIME ZONE DEFAULT now()  -- waktu dipindahin
+);
+
+-- ########################################################
+-- Table: notifications
+-- ########################################################
+CREATE TABLE public.notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  level TEXT DEFAULT 'info',
+  created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- ########################################################
@@ -1031,31 +1044,31 @@ $$ LANGUAGE plpgsql;
 GRANT EXECUTE ON FUNCTION get_user_first_bloods(UUID) TO authenticated;
 
 -- ########################################################
--- Function: get_notifications(p_limit INT, p_offset INT)
+-- Function: get_logs(p_limit INT, p_offset INT)
 -- ########################################################
-CREATE OR REPLACE FUNCTION get_notifications(
+CREATE OR REPLACE FUNCTION get_logs(
   p_limit INT DEFAULT 50,
   p_offset INT DEFAULT 0
 )
 RETURNS TABLE (
-  notif_type TEXT,
-  notif_challenge_id UUID,
-  notif_challenge_title TEXT,
-  notif_category TEXT,
-  notif_user_id UUID,
-  notif_username TEXT,
-  notif_created_at TIMESTAMPTZ
+  log_type TEXT,
+  log_challenge_id UUID,
+  log_challenge_title TEXT,
+  log_category TEXT,
+  log_user_id UUID,
+  log_username TEXT,
+  log_created_at TIMESTAMPTZ
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    t.type,
-    t.challenge_id,
-    t.challenge_title,
-    t.category,
-    t.user_id,
-    t.username,
-    t.created_at
+    t.type AS log_type,
+    t.challenge_id AS log_challenge_id,
+    t.challenge_title AS log_challenge_title,
+    t.category AS log_category,
+    t.user_id AS log_user_id,
+    t.username AS log_username,
+    t.created_at AS log_created_at
   FROM (
     -- Notifikasi chall baru
     SELECT
@@ -1096,7 +1109,82 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
+GRANT EXECUTE ON FUNCTION get_logs(INT, INT) TO authenticated;
+
+-- ########################################################
+-- Function: get_notifications(p_limit INT, p_offset INT)
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_notifications(
+  p_limit INT DEFAULT 50,
+  p_offset INT DEFAULT 0
+)
+RETURNS TABLE (
+  id UUID,
+  title TEXT,
+  message TEXT,
+  level TEXT,
+  created_by UUID,
+  created_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT n.id, n.title, n.message, n.level, n.created_by, n.created_at
+  FROM public.notifications n
+  ORDER BY n.created_at DESC
+  LIMIT p_limit OFFSET p_offset;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
 GRANT EXECUTE ON FUNCTION get_notifications(INT, INT) TO authenticated;
+
+-- ########################################################
+-- Function: create_notification(p_title TEXT, p_message TEXT, p_level TEXT)
+-- ########################################################
+CREATE OR REPLACE FUNCTION create_notification(
+  p_title TEXT,
+  p_message TEXT,
+  p_level TEXT DEFAULT 'info'
+)
+RETURNS UUID AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+  v_new_id UUID;
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can create notifications';
+  END IF;
+
+  INSERT INTO public.notifications(title, message, level, created_by)
+  VALUES (p_title, p_message, COALESCE(NULLIF(p_level, ''), 'info'), v_user_id)
+  RETURNING id INTO v_new_id;
+
+  RETURN v_new_id;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION create_notification(TEXT, TEXT, TEXT) TO authenticated;
+
+-- ########################################################
+-- Function: delete_notification(p_id UUID)
+-- ########################################################
+CREATE OR REPLACE FUNCTION delete_notification(
+  p_id UUID
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can delete notifications';
+  END IF;
+
+  DELETE FROM public.notifications WHERE id = p_id;
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION delete_notification(UUID) TO authenticated;
 
 -- ########################################################
 -- Function: get_solvers_all(p_limit INT, p_offset INT)
@@ -1292,6 +1380,7 @@ ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenge_flags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.solves_nonactive ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- ########################################################
 -- Policies
@@ -1313,6 +1402,24 @@ CREATE POLICY "Challenges can select all"
   ON public.challenges
   FOR SELECT
   USING (true);
+
+DROP POLICY IF EXISTS "Notifications readable" ON public.notifications;
+CREATE POLICY "Notifications readable"
+  ON public.notifications
+  FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Notifications insert by admin" ON public.notifications;
+CREATE POLICY "Notifications insert by admin"
+  ON public.notifications
+  FOR INSERT
+  WITH CHECK (is_admin());
+
+DROP POLICY IF EXISTS "Notifications delete by admin" ON public.notifications;
+CREATE POLICY "Notifications delete by admin"
+  ON public.notifications
+  FOR DELETE
+  USING (is_admin());
 
 -- ########################################################
 -- Grant/Revoke Permissions

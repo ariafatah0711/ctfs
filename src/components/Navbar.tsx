@@ -1,29 +1,65 @@
 'use client'
 
 import Link from 'next/link'
-import { Info, BookOpen, Flag, Trophy, Shield } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
-import { useNotifications } from '@/contexts/NotificationsContext'
+import { useLogs } from '@/contexts/LogsContext'
 import APP from '@/config'
-import { subscribeToSolves } from '@/lib/challenges'
+import { subscribeToSolves, getNotifications, createNotification, deleteNotification, subscribeToNotifications } from '@/lib/challenges'
+import { formatRelativeDate } from '@/lib/utils'
 
 export default function Navbar() {
   const router = useRouter()
   const { user, setUser, loading } = useAuth()
-  const { unreadCount } = useNotifications()
+  const { unreadCount: logsUnreadCount } = useLogs()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [notifLoading, setNotifLoading] = useState(false)
+  const [notifUnreadCount, setNotifUnreadCount] = useState(0)
+  const [notifItems, setNotifItems] = useState<Array<{ id: string; title: string; message: string; level: string; created_at: string }>>([])
+  const [notifTitle, setNotifTitle] = useState('')
+  const [notifMessage, setNotifMessage] = useState('')
+  const [notifLevel, setNotifLevel] = useState<'info' | 'info_platform' | 'info_challenges'>('info')
   // State for real-time solve notification
   const [solveNotif, setSolveNotif] = useState<{ username: string; challenge: string } | null>(null)
   const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { theme, toggleTheme } = useTheme()
   const avatarSrc =  user?.profile_picture_url || user?.picture || null
+
+  const notifSeenKey = user ? `ctfs_seen_notifications_v1:${user.id}` : `ctfs_seen_notifications_v1:anon`
+
+  const getSeenNotifIds = () => {
+    if (typeof window === 'undefined') return new Set<string>()
+    try {
+      const seenJson = localStorage.getItem(notifSeenKey)
+      const seen: string[] = seenJson ? JSON.parse(seenJson) : []
+      return new Set(seen)
+    } catch {
+      return new Set<string>()
+    }
+  }
+
+  const markNotificationsSeen = (ids: string[]) => {
+    if (typeof window === 'undefined') return
+    const seen = getSeenNotifIds()
+    ids.forEach(id => seen.add(id))
+    localStorage.setItem(notifSeenKey, JSON.stringify(Array.from(seen)))
+  }
+
+  const markAllNotificationsRead = async () => {
+    const items = await getNotifications(50, 0)
+    if (items && items.length > 0) {
+      markNotificationsSeen(items.map((n: any) => n.id))
+    }
+    setNotifUnreadCount(0)
+  }
 
   useEffect(() => {
     if (user) {
@@ -31,6 +67,50 @@ export default function Navbar() {
     } else {
       setAdminStatus(false)
     }
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    const unsubscribe = subscribeToNotifications((payload) => {
+      const id = payload.id || `realtime-${payload.created_at}-${payload.title}`
+      setNotifItems(prev => ([
+        {
+          id,
+          title: payload.title,
+          message: payload.message,
+          level: payload.level,
+          created_at: payload.created_at,
+        },
+        ...prev,
+      ]))
+
+      try {
+        const audio = new Audio('/sounds/notify.mp3')
+        audio.volume = 0.5
+        audio.play()
+      } catch {}
+
+      const seen = getSeenNotifIds()
+      if (!seen.has(id)) {
+        setNotifUnreadCount(prev => prev + 1)
+      }
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (!user) {
+      setNotifUnreadCount(0)
+      return
+    }
+    ;(async () => {
+      const items = await getNotifications(50, 0)
+      const seen = getSeenNotifIds()
+      const unread = (items || []).filter((n: any) => !seen.has(n.id)).length
+      setNotifUnreadCount(unread)
+    })()
   }, [user])
 
   // Real-time solves subscription (aktif hanya jika APP.notifSolves true)
@@ -48,7 +128,7 @@ export default function Navbar() {
       }
       // Auto-hide after 6s
       if (notifTimeout.current) clearTimeout(notifTimeout.current)
-      notifTimeout.current = setTimeout(() => setSolveNotif(null), 6000)
+      notifTimeout.current = setTimeout(() => setSolveNotif(null), 12000)
     })
     return () => {
       unsubscribe()
@@ -66,18 +146,87 @@ export default function Navbar() {
 
   if (loading) return null
 
+  const dismissSolveNotif = () => {
+    setSolveNotif(null)
+    if (notifTimeout.current) {
+      clearTimeout(notifTimeout.current)
+      notifTimeout.current = null
+    }
+  }
+
   // Marquee/Toast notification style
   const notifVisible = !!solveNotif
+
+  const openNotifPanel = async () => {
+    setNotifOpen((v) => !v)
+    if (!notifOpen && user) {
+      setNotifLoading(true)
+      const items = await getNotifications(30, 0)
+      setNotifItems(items || [])
+      setNotifLoading(false)
+    }
+  }
+
+  const handleSendNotif = async () => {
+    if (!notifTitle.trim() || !notifMessage.trim()) return
+    try {
+      await createNotification(notifTitle.trim(), notifMessage.trim(), notifLevel)
+      setNotifTitle('')
+      setNotifMessage('')
+    } catch (err) {
+      console.warn('Failed to create notification', err)
+    }
+  }
+
+  const handleDeleteNotif = async (id: string) => {
+    try {
+      await deleteNotification(id)
+      setNotifItems(prev => prev.filter(n => n.id !== id))
+      const seen = getSeenNotifIds()
+      if (!seen.has(id)) {
+        setNotifUnreadCount(prev => Math.max(0, prev - 1))
+      }
+    } catch (err) {
+      console.warn('Failed to delete notification', err)
+    }
+  }
+
+  const getLevelBadgeClass = (level: string) => {
+    switch (level) {
+      case 'info_platform':
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+      case 'info_challenges':
+        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+      default:
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+    }
+  }
+
+  const isNotifRead = (id: string) => {
+    const seen = getSeenNotifIds()
+    return seen.has(id)
+  }
 
   return (
     <>
       {/* Real-time solve notification (marquee style) */}
       {notifVisible && (
-        <div className="fixed top-2 right-2 z-[9999] flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
+        <div className="fixed top-2 right-2 z-[9999] flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
           <svg className="mr-2" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          <span className="truncate">
+          <span className="truncate flex-1">
             <b>{solveNotif.username}</b> just solved <b>{solveNotif.challenge}</b>!
           </span>
+          <button
+            onClick={dismissSolveNotif}
+            className="ml-1 rounded-full p-1 hover:bg-blue-500/60 transition-colors"
+            aria-label="Dismiss notification"
+            title="Dismiss"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
         </div>
       )}
     <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
@@ -187,49 +336,149 @@ export default function Navbar() {
                 </>
               )}
             </div>
-            {/* Notification Icon (toggle to /notification or back) */}
+            {/* Notifications Icon (realtime + history) */}
             <div className="relative mr-2" data-tour="navbar-notifications">
               <button
-                className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/notification' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
+                className={`rounded-full p-1 transition-colors duration-150 ${notifOpen ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
                 title="Notifications"
                 aria-label="Notifications"
+                onClick={openNotifPanel}
+              >
+                <Bell size={22} className="text-blue-500" />
+              </button>
+
+              {notifUnreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
+                  {notifUnreadCount > 99 ? '99+' : String(notifUnreadCount)}
+                </span>
+              )}
+
+              {notifOpen && (
+                <div className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 rounded-xl shadow-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-50`}>
+                  <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
+                    <span>Notifications</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={markAllNotificationsRead}
+                        className="text-xs text-blue-500 hover:underline"
+                      >
+                        Mark all read
+                      </button>
+                      <button
+                        onClick={() => setNotifOpen(false)}
+                        className="text-xs text-gray-500 hover:underline sm:hidden"
+                        aria-label="Close notifications"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                  {adminStatus && (
+                    <div className="p-3 border-b border-gray-200 dark:border-gray-800">
+                      <input
+                        value={notifTitle}
+                        onChange={(e) => setNotifTitle(e.target.value)}
+                        placeholder="Title"
+                        className={`w-full mb-2 px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                      />
+                      <textarea
+                        value={notifMessage}
+                        onChange={(e) => setNotifMessage(e.target.value)}
+                        placeholder="Message"
+                        className={`w-full mb-2 px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                        rows={2}
+                      />
+                      <div className="flex items-center justify-between gap-2">
+                        <select
+                          value={notifLevel}
+                          onChange={(e) => setNotifLevel(e.target.value as any)}
+                          className={`px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                        >
+                          <option value="info">Info</option>
+                          <option value="info_platform">Info Platform</option>
+                          <option value="info_challenges">Info Challenges</option>
+                        </select>
+                        <button
+                          onClick={handleSendNotif}
+                          className="px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700"
+                        >
+                          Send
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="max-h-[70vh] sm:max-h-72 overflow-auto">
+                    {notifLoading ? (
+                      <div className="p-3 text-sm text-gray-500">Loading...</div>
+                    ) : notifItems.length === 0 ? (
+                      <div className="p-3 text-sm text-gray-500">No notifications</div>
+                    ) : (
+                      notifItems.map((n) => (
+                        <div
+                          key={n.id}
+                          className={`px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex items-start justify-between gap-2 ${isNotifRead(n.id) ? 'opacity-70' : ''}`}
+                        >
+                          <div>
+                            <div className="text-sm font-semibold flex items-center gap-2">
+                              <span>{n.title}</span>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${getLevelBadgeClass(n.level)}`}>
+                                {n.level === 'info_platform'
+                                  ? 'Info Platform'
+                                  : n.level === 'info_challenges'
+                                  ? 'Info Challenges'
+                                  : 'Info'}
+                              </span>
+                              {!isNotifRead(n.id) && (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                  New
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">{n.message}</div>
+                            <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                              {n.created_at ? formatRelativeDate(n.created_at) : ''}
+                            </div>
+                          </div>
+                          {adminStatus && (
+                            <button
+                              onClick={() => handleDeleteNotif(n.id)}
+                              className="text-xs text-red-500 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Logs Icon */}
+            <div className="relative mr-2" data-tour="navbar-logs">
+              <button
+                className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/logs' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
+                title="Logs"
+                aria-label="Logs"
                 onClick={() => {
-                  if (pathname === '/notification') {
-                    // Go back or to home if already on /notification
+                  if (pathname === '/logs') {
                     if (window.history.length > 1) {
                       router.back()
                     } else {
                       router.push('/')
                     }
                   } else {
-                    router.push('/notification')
+                    router.push('/logs')
                   }
                 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={pathname === '/notification' ? (theme === 'dark' ? '#60a5fa' : '#2563eb') : '#3b82f6'}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="feather feather-bell transition-all duration-150"
-                >
-                  <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
+                <FileText size={22} className="text-blue-500" />
               </button>
 
-              {unreadCount > 0 && (
-                (() => {
-                  const display = unreadCount > 99 ? '99+' : String(unreadCount)
-                  return (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">{display}</span>
-                  )
-                })()
+              {logsUnreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
+                  {logsUnreadCount > 99 ? '99+' : String(logsUnreadCount)}
+                </span>
               )}
             </div>
             {/* Theme Switcher Icon Only - moved right */}

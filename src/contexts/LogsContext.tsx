@@ -1,36 +1,36 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { getNotifications } from '@/lib/challenges'
+import { getLogs } from '@/lib/challenges'
 import { useAuth } from '@/contexts/AuthContext'
 
-type NotifShape = {
-  notif_type: 'new_challenge' | 'first_blood'
-  notif_challenge_id: string
-  notif_challenge_title: string
-  notif_category: string
-  notif_user_id?: string
-  notif_username?: string
-  notif_created_at: string
+type LogShape = {
+  log_type: 'new_challenge' | 'first_blood'
+  log_challenge_id: string
+  log_challenge_title: string
+  log_category: string
+  log_user_id?: string
+  log_username?: string
+  log_created_at: string
 }
 
-type NotificationsContextType = {
+type LogsContextType = {
   unreadCount: number
   refresh: () => Promise<void>
   markAllRead: () => void
 }
 
-const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined)
+const LogsContext = createContext<LogsContextType | undefined>(undefined)
 
-const SEEN_KEY_PREFIX = 'ctfs_seen_notifications_v1:'
+const SEEN_KEY_PREFIX = 'ctfs_seen_logs_v1:'
 
-export function NotificationsProvider({ children }: { children: React.ReactNode }) {
+export function LogsProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
   const [unreadCount, setUnreadCount] = useState<number>(0)
 
   const storageKey = user ? `${SEEN_KEY_PREFIX}${user.id}` : `${SEEN_KEY_PREFIX}anon`
 
-  const notifId = (n: NotifShape) => `${n.notif_type}|${n.notif_challenge_id}|${n.notif_user_id || ''}|${n.notif_created_at}`
+  const logId = (n: LogShape) => `${n.log_type}|${n.log_challenge_id}|${n.log_user_id || ''}|${n.log_created_at}`
 
   async function refresh() {
     try {
@@ -38,14 +38,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         setUnreadCount(0)
         return
       }
-      const notifs = await getNotifications(100, 0) as NotifShape[]
-      const ids = notifs.map(notifId)
+      const logs = await getLogs(100, 0) as LogShape[]
+      const ids = logs.map(logId)
       const seenJson = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
       const seen: string[] = seenJson ? JSON.parse(seenJson) : []
       const unread = ids.filter(id => !seen.includes(id)).length
       setUnreadCount(unread)
     } catch (err) {
-      console.warn('Failed to refresh notifications', err)
+      console.warn('Failed to refresh logs', err)
     }
   }
 
@@ -55,16 +55,16 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         setUnreadCount(0)
         return
       }
-      // fetch current notifications to know ids
-      getNotifications(100, 0).then((notifs: any) => {
-        const ids = (notifs || []).map((n: NotifShape) => notifId(n))
+      // fetch current logs to know ids
+      getLogs(100, 0).then((logs: any) => {
+        const ids = (logs || []).map((n: LogShape) => logId(n))
         const seenJson = localStorage.getItem(storageKey)
         const seen: string[] = seenJson ? JSON.parse(seenJson) : []
         const merged = Array.from(new Set([...seen, ...ids]))
         localStorage.setItem(storageKey, JSON.stringify(merged))
         setUnreadCount(0)
       }).catch(err => {
-        console.warn('markAllRead failed to fetch notifs', err)
+        console.warn('markAllRead failed to fetch logs', err)
       })
     } catch (err) {
       console.warn('markAllRead error', err)
@@ -78,14 +78,14 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   }, [user])
 
   return (
-    <NotificationsContext.Provider value={{ unreadCount, refresh, markAllRead }}>
+    <LogsContext.Provider value={{ unreadCount, refresh, markAllRead }}>
       {children}
-    </NotificationsContext.Provider>
+    </LogsContext.Provider>
   )
 }
 
-export function useNotifications() {
-  const ctx = useContext(NotificationsContext)
-  if (!ctx) throw new Error('useNotifications must be used inside NotificationsProvider')
+export function useLogs() {
+  const ctx = useContext(LogsContext)
+  if (!ctx) throw new Error('useLogs must be used inside LogsProvider')
   return ctx
 }

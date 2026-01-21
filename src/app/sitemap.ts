@@ -42,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/notification`,
+      url: `${baseUrl}/logs`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.6,

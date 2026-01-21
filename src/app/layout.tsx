@@ -7,7 +7,7 @@ import Navbar from '@/components/Navbar'
 import ScrollToggle from '@/components/custom/ScrollToggle'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
-import { NotificationsProvider } from '@/contexts/NotificationsContext'
+import { LogsProvider } from '@/contexts/LogsContext'
 import { ChatProvider } from '@/contexts/ChatContext'
 import { headers } from 'next/headers'
 import APP from '@/config'
@@ -99,7 +99,7 @@ export default async function RootLayout({
           <ThemeProvider>
             <ChatProvider>
               <AuthProvider>
-                <NotificationsProvider>
+                <LogsProvider>
                   <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                     <Navbar />
                     <div className="pt-14">{children}</div>
@@ -112,7 +112,7 @@ export default async function RootLayout({
                     {APP.ChatBotAI && <ChatBotAI />}
                     <ScrollToggle />
                   </div>
-                </NotificationsProvider>
+                </LogsProvider>
               </AuthProvider>
             </ChatProvider>
           </ThemeProvider>
