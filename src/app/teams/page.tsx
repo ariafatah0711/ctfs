@@ -24,6 +24,7 @@ import {
   getMyTeamChallenges,
   kickTeamMember,
   transferTeamCaptain,
+  renameTeam,
   TeamMember,
   TeamInfo,
   TeamSummary,
@@ -41,6 +42,7 @@ export default function TeamsPage() {
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
   const [teamName, setTeamName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
+  const [newTeamName, setNewTeamName] = useState('')
   const [status, setStatus] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
   const [adminStatus, setAdminStatus] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -221,22 +223,44 @@ export default function TeamsPage() {
 
   const handleTransferCaptain = async (member: TeamMember) => {
     if (!team) return
-    setConfirmMessage(`Transfer captain to ${member.username}?`)
+    setConfirmMessage(`Transfer captain role to ${member.username}? You will become a regular member.`)
     setConfirmExpected('transfer captain')
     setConfirmInput('')
     confirmActionRef.current = async () => {
       setBusy(true)
       setStatus(null)
-      const { success, error } = await transferTeamCaptain(team.id, member.user_id)
-      if (!success) {
-        setStatus({ type: 'error', message: error || 'Failed to transfer captain.' })
-      } else {
-        setStatus({ type: 'success', message: `${member.username} is now captain.` })
-        await loadTeamData()
+      try {
+        const { success, error } = await transferTeamCaptain(team.id, member.user_id)
+        if (!success) {
+          setStatus({ type: 'error', message: error || 'Failed to transfer captain.' })
+          console.error('Transfer captain error:', error)
+        } else {
+          setStatus({ type: 'success', message: `${member.username} is now captain.` })
+          await loadTeamData()
+        }
+      } catch (err: any) {
+        setStatus({ type: 'error', message: err?.message || 'Unexpected error occurred.' })
+        console.error('Transfer captain exception:', err)
+      } finally {
+        setBusy(false)
       }
-      setBusy(false)
     }
     setConfirmOpen(true)
+  }
+
+  const handleRenameTeam = async () => {
+    if (!team || !newTeamName.trim()) return
+    setBusy(true)
+    setStatus(null)
+    const { success, error } = await renameTeam(team.id, newTeamName.trim())
+    if (!success) {
+      setStatus({ type: 'error', message: error || 'Failed to rename team.' })
+    } else {
+      setStatus({ type: 'success', message: 'Team renamed.' })
+      setNewTeamName('')
+      await loadTeamData()
+    }
+    setBusy(false)
   }
 
   if (authLoading) {
@@ -319,14 +343,31 @@ export default function TeamsPage() {
                 <CardContent className="space-y-3">
                   <div className="text-sm text-gray-500 dark:text-gray-300">Name</div>
                   <div className="text-lg font-semibold text-gray-900 dark:text-white">{team.name}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-300">Invite Code</div>
+
+                  {canManage && (
+                    <>
+                      <div className="text-sm text-gray-500 dark:text-gray-300 pt-2">Rename Team</div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={newTeamName}
+                          onChange={(e) => setNewTeamName(e.target.value)}
+                          placeholder="New team name"
+                          disabled={busy}
+                          className="flex-1"
+                        />
+                        <Button variant="outline" size="sm" onClick={handleRenameTeam} disabled={busy || !newTeamName.trim()}>
+                          Rename
+                        </Button>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="text-sm text-gray-500 dark:text-gray-300 pt-2">Invite Code</div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-mono text-sm bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded">{team.invite_code}</span>
-                    {canManage && (
-                      <Button variant="outline" size="sm" onClick={handleCopyInvite} disabled={busy}>
-                        <Copy size={14} /> Copy
-                      </Button>
-                    )}
+                    <Button variant="outline" size="sm" onClick={handleCopyInvite} disabled={busy}>
+                      <Copy size={14} /> Copy
+                    </Button>
                     {canManage && (
                       <Button variant="outline" size="sm" onClick={handleRegenerateInvite} disabled={busy}>
                         <RefreshCw size={14} /> Regenerate
@@ -353,7 +394,7 @@ export default function TeamsPage() {
                 <CardContent className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.total_score ?? 0}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-300">Total Score</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-300">Score</div>
                   </div>
                   <div>
                     <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.unique_challenges ?? 0}</div>
@@ -379,7 +420,12 @@ export default function TeamsPage() {
                     <div key={m.user_id} className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-700 py-2">
                       <div className="flex items-center gap-2">
                         {m.role === 'captain' ? <Crown size={16} className="text-yellow-500" /> : <Users size={16} className="text-gray-400" />}
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{m.username}</span>
+                        <Link
+                          href={`/user/${encodeURIComponent(m.username)}`}
+                          className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
+                        >
+                          {m.username}
+                        </Link>
                         <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300">
                           {m.role}
                         </span>

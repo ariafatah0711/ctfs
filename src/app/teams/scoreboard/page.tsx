@@ -88,7 +88,7 @@ export default function TeamScoreboardPage() {
                     <TableHead className="w-16 text-center">Rank</TableHead>
                     <TableHead>Team</TableHead>
                     <TableHead className="text-center">Score</TableHead>
-                    <TableHead className="text-center">Challenges</TableHead>
+                    <TableHead className="text-center">Total Score</TableHead>
                     <TableHead className="text-center">Solves</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -101,8 +101,8 @@ export default function TeamScoreboardPage() {
                           {entry.team_name}
                         </Link>
                       </TableCell>
-                      <TableCell className="text-center">{entry.score}</TableCell>
-                      <TableCell className="text-center">{entry.unique_challenges}</TableCell>
+                      <TableCell className="text-center">{entry.unique_score}</TableCell>
+                      <TableCell className="text-center">{entry.total_score}</TableCell>
                       <TableCell className="text-center">{entry.total_solves}</TableCell>
                     </TableRow>
                   ))}

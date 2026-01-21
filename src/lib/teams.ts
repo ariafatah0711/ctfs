@@ -87,8 +87,8 @@ export type TeamSummary = {
 export type TeamScoreboardEntry = {
 	team_id: string
 	team_name: string
-	score: number
-	unique_challenges: number
+	unique_score: number
+	total_score: number
 	total_solves: number
 	rank: number
 }
@@ -218,5 +218,42 @@ export async function transferTeamCaptain(teamId: string, newCaptainUserId: stri
 		return { success: Boolean(data) }
 	} catch (err: any) {
 		return { success: false, error: err?.message || 'Failed to transfer captain' }
+	}
+}
+
+export async function renameTeam(teamId: string, newName: string): Promise<{ success: boolean; error?: string }> {
+	try {
+		const { data, error } = await supabase.rpc('rename_team', {
+			p_team_id: teamId,
+			p_new_name: newName,
+		})
+		if (error) return { success: false, error: error.message }
+		return { success: Boolean(data) }
+	} catch (err: any) {
+		return { success: false, error: err?.message || 'Failed to rename team' }
+	}
+}
+
+export async function getTeamByUserId(userId: string): Promise<{ team: TeamInfo | null; members: TeamMember[]; error?: string }> {
+	try {
+		const { data, error } = await supabase.rpc('get_team_by_user_id', { p_user_id: userId })
+
+		if (error) {
+			console.error('RPC error:', error)
+			return { team: null, members: [], error: error.message }
+		}
+
+		if (!data?.success) {
+			return { team: null, members: [], error: data?.message || 'Failed to fetch team' }
+		}
+
+		console.log('getTeamByUserId data:', data)
+		return {
+			team: data?.team ?? null,
+			members: (data?.members ?? []) as TeamMember[],
+		}
+	} catch (err: any) {
+		console.error('getTeamByUserId error:', err)
+		return { team: null, members: [], error: err?.message || 'Failed to fetch team' }
 	}
 }

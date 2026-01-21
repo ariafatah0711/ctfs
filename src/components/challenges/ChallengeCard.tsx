@@ -46,15 +46,15 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
     >
       {/* Ribbon pojok kanan atas */}
       {ribbonLabel && (
-        <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px]">
+        <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px] z-20">
           <div className={`text-white text-[10px] font-bold px-8 py-1 shadow-md ${isMaintenance ? 'bg-amber-800' : 'bg-green-500'}`}>
             {ribbonLabel}
           </div>
         </div>
       )}
 
-      {/* Difficulty circle kanan atas */}
-      <div className="absolute top-2 right-2 z-10">
+      {/* Difficulty circle kiri atas */}
+      <div className="absolute top-2 left-2 z-10">
         <span className={`block w-2 h-2 rounded-full shadow ${diffCircleColor}`}></span>
       </div>
 

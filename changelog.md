@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [V.2.3.1]
+
 ## [v2.3.0]
 ### Added
 - New Feature Teams

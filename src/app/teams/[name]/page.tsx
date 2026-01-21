@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Users, Crown } from 'lucide-react'
 import TitlePage from '@/components/custom/TitlePage'
 import Loader from '@/components/custom/loading'
@@ -116,7 +117,7 @@ export default function TeamDetailPage() {
                 <CardContent className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.total_score ?? 0}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-300">Total Score</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-300">Score</div>
                   </div>
                   <div>
                     <div className="text-xl font-bold text-gray-900 dark:text-white">{summary?.unique_challenges ?? 0}</div>
@@ -141,7 +142,12 @@ export default function TeamDetailPage() {
                   members.map((m) => (
                     <div key={m.user_id} className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700 py-2">
                       {m.role === 'captain' ? <Crown size={16} className="text-yellow-500" /> : <Users size={16} className="text-gray-400" />}
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">{m.username}</span>
+                      <Link
+                        href={`/user/${encodeURIComponent(m.username)}`}
+                        className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
+                      >
+                        {m.username}
+                      </Link>
                       <span className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-300">
                         {m.role}
                       </span>

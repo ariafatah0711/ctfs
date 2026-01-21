@@ -6,8 +6,10 @@ import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
 import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
+import { getTeamByUserId } from '@/lib/teams'
 import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
+import { useRouter } from 'next/navigation'
 import {
   Award,
   Crown,
@@ -24,6 +26,7 @@ import {
   Target,
   Trophy,
   Zap,
+  Users,
 } from 'lucide-react'
 import ImageWithFallback from './ImageWithFallback'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -123,6 +126,7 @@ export default function UserProfile({
   onBack,
   isCurrentUser = false,
 }: Props) {
+  const router = useRouter()
   const { setUser } = useAuth()
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null)
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
@@ -134,6 +138,7 @@ export default function UserProfile({
   const [unsolvedChallenges, setUnsolvedChallenges] = useState<any[]>([])
   const [loadingUnsolved, setLoadingUnsolved] = useState(false)
   const [authInfo, setAuthInfo] = useState<Array<{ provider: string; email: string }>>([])
+  const [teamInfo, setTeamInfo] = useState<{ team: any; members: any[] } | null>(null)
 
   const refreshUserDetail = async () => {
     if (!userId) return
@@ -175,6 +180,16 @@ export default function UserProfile({
 
           const diffTotals = await getDifficultyTotals()
           setDifficultyTotals(diffTotals)
+
+          // Fetch team info if teams enabled
+          if (APP.teams.enabled) {
+            const { team, members } = await getTeamByUserId(detail.id)
+            if (team) {
+              setTeamInfo({ team, members })
+            } else {
+              setTeamInfo(null)
+            }
+          }
         }
       } finally {
         setLoadingDetail(false)
@@ -407,7 +422,7 @@ export default function UserProfile({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className={`grid grid-cols-1 ${APP.teams.enabled && teamInfo ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6`}
             >
               <Card className="bg-white dark:bg-gray-800">
                 <CardHeader>
@@ -446,6 +461,32 @@ export default function UserProfile({
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{firstBloodIds.length}</p>
                 </CardContent>
               </Card>
+
+              {/* Team Info */}
+              {APP.teams.enabled && teamInfo && (
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-gray-900 dark:text-white">Team</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center space-x-3">
+                    <div className="w-11 h-11 bg-gradient-to-br from-purple-200 to-purple-400 dark:from-purple-900 dark:to-purple-700 rounded-xl flex items-center justify-center shadow-sm ring-1 ring-purple-300/60 dark:ring-purple-800/60">
+                      <Users className="h-5 w-5 text-purple-800 dark:text-purple-200" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="text-xl font-bold text-gray-900 dark:text-white truncate cursor-pointer hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                        title={teamInfo.team.name}
+                        onClick={() => router.push(`/teams/${encodeURIComponent(teamInfo.team.name)}`)}
+                      >
+                        {teamInfo.team.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {teamInfo.members.length} member{teamInfo.members.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </motion.div>
 
             {/* Category Progress */}
