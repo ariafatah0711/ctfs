@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2.3.0]
+### Added
+- New Feature Teams
+  - Teams Scoreboard Page
+  - Teams Management Page
+
 ## [v2.2.2]
 ### Fixed Bug
 - fix create profile in supabase

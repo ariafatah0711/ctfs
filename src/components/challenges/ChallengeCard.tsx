@@ -8,6 +8,7 @@ interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {
     has_first_blood?: boolean;
     is_new?: boolean;
+    is_team_solved?: boolean;
   };
   onClick: () => void;
 }
@@ -16,6 +17,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
   const isRecentlyCreated = challenge.is_new;
   const noFirstBlood = !challenge.has_first_blood;
   const isMaintenance = !!challenge.is_maintenance;
+  const isTeamSolved = !!challenge.is_team_solved;
 
   let ribbonLabel: string | null = null;
   if (isMaintenance) ribbonLabel = "MAINTENANCE";
@@ -63,7 +65,9 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => 
             ? 'bg-amber-800 dark:bg-amber-900 cursor-not-allowed opacity-95'
             : (challenge.is_solved
                 ? 'bg-green-600 dark:bg-green-700 cursor-pointer'
-                : 'bg-blue-600 dark:bg-blue-700 cursor-pointer')}
+                : (isTeamSolved
+                    ? 'bg-purple-600 dark:bg-purple-700 cursor-pointer'
+                    : 'bg-blue-600 dark:bg-blue-700 cursor-pointer'))}
         `}
       >
         <CardHeader className="flex items-center justify-center">

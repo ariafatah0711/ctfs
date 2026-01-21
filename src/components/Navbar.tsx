@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
@@ -32,6 +32,8 @@ export default function Navbar() {
   const [notifToast, setNotifToast] = useState<{ title: string; message: string } | null>(null)
   const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const notifToastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [scoreboardOpen, setScoreboardOpen] = useState(false)
+  const scoreboardMenuRef = useRef<HTMLDivElement | null>(null)
   const { theme, toggleTheme } = useTheme()
   const avatarSrc =  user?.profile_picture_url || user?.picture || null
 
@@ -150,8 +152,6 @@ export default function Navbar() {
     router.push('/login')
   }
 
-  if (loading) return null
-
   const dismissSolveNotif = () => {
     setSolveNotif(null)
     if (notifTimeout.current) {
@@ -221,6 +221,26 @@ export default function Navbar() {
     const seen = getSeenNotifIds()
     return seen.has(id)
   }
+
+  const showTeamScoreboard = APP.teams.enabled
+  const showUserScoreboard = !showTeamScoreboard || !APP.teams.hideScoreboardIndividual
+  const scoreboardOptionCount = Number(showUserScoreboard) + Number(showTeamScoreboard)
+
+  useEffect(() => {
+    if (!scoreboardOpen) return
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!scoreboardMenuRef.current) return
+      if (!scoreboardMenuRef.current.contains(event.target as Node)) {
+        setScoreboardOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [scoreboardOpen])
+
+  if (loading) return null
 
   return (
     <>
@@ -295,13 +315,60 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {user && (
+              {user && scoreboardOptionCount > 0 && (
+                scoreboardOptionCount === 1 ? (
+                  <Link
+                    href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    data-tour="navbar-scoreboard"
+                  >
+                    <Trophy size={18} className="mr-1" /> Scoreboard
+                  </Link>
+                ) : (
+                  <div ref={scoreboardMenuRef} className="relative">
+                    <button
+                      type="button"
+                      data-tour="navbar-scoreboard"
+                      onClick={() => setScoreboardOpen((v) => !v)}
+                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    >
+                      <Trophy size={18} className="mr-1" /> Scoreboard
+                      <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${scoreboardOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
+                      </svg>
+                    </button>
+                    {scoreboardOpen && (
+                      <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+                        {showUserScoreboard && (
+                          <Link
+                            href="/scoreboard"
+                            onClick={() => setScoreboardOpen(false)}
+                            className={`block px-3 py-2 text-sm ${showTeamScoreboard ? 'rounded-t-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                          >
+                            User Scoreboard
+                          </Link>
+                        )}
+                        {showTeamScoreboard && (
+                          <Link
+                            href="/teams/scoreboard"
+                            onClick={() => setScoreboardOpen(false)}
+                            className={`block px-3 py-2 text-sm ${showUserScoreboard ? 'rounded-b-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                          >
+                            Team Scoreboard
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
+
+              {user && APP.teams.enabled && (
                 <Link
-                  href="/scoreboard"
+                  href="/teams"
                   className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                  data-tour="navbar-scoreboard"
                 >
-                  <Trophy size={18} className="mr-1" /> Scoreboard
+                  <Users size={18} className="mr-1" /> Teams
                 </Link>
               )}
 
@@ -605,13 +672,52 @@ export default function Navbar() {
                   >
                     <Flag size={18} className="mr-1" /> Challenges
                   </Link>
-                  <Link
-                    href="/scoreboard"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Trophy size={18} className="mr-1" /> Scoreboard
-                  </Link>
+                  {scoreboardOptionCount > 0 && (
+                    scoreboardOptionCount === 1 ? (
+                      <Link
+                        href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
+                        className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Trophy size={18} className="mr-1" /> Scoreboard
+                      </Link>
+                    ) : (
+                      <details className="rounded-lg">
+                        <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
+                          <Trophy size={18} className="mr-1" /> Scoreboard
+                        </summary>
+                        <div className="mt-1 ml-6 flex flex-col gap-1">
+                          {showUserScoreboard && (
+                            <Link
+                              href="/scoreboard"
+                              className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              User Scoreboard
+                            </Link>
+                          )}
+                          {showTeamScoreboard && (
+                            <Link
+                              href="/teams/scoreboard"
+                              className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              Team Scoreboard
+                            </Link>
+                          )}
+                        </div>
+                      </details>
+                    )
+                  )}
+                  {APP.teams.enabled && (
+                    <Link
+                      href="/teams"
+                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Users size={18} className="mr-1" /> Teams
+                    </Link>
+                  )}
                 </>
               )}
               <Link

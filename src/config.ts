@@ -48,6 +48,10 @@ export const APP = {
   notifSolves: true, // notifikasi global saat ada yang solve challenge
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component
+  teams: {
+    enabled: true,
+    hideScoreboardIndividual: false,
+  },
 
   /* Maintenance configuration */
   // mode: 'no' | 'yes' | 'auto'
