@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [v2.2.2]
+### Fixed Bug
+- fix create profile in supabase
+
 ## [v2.2.1]
 ### Changed
 - added toast for real-time notification

@@ -233,17 +233,59 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
 
   -- Insert user lain dari auth.users yang belum ada di public.users
+  WITH base AS (
+    SELECT
+      au.id,
+      COALESCE(
+        au.raw_user_meta_data->>'username',
+        au.raw_user_meta_data->>'display_name',
+        split_part(au.email, '@', 1)
+      ) AS base_username
+    FROM auth.users au
+    LEFT JOIN public.users pu ON pu.id = au.id
+    WHERE pu.id IS NULL
+  ),
+  stats AS (
+    SELECT
+      b.base_username,
+      EXISTS (
+        SELECT 1 FROM public.users u WHERE u.username = b.base_username
+      ) AS base_exists,
+      COALESCE(
+        MAX(
+          (regexp_match(u.username, '^' || b.base_username || '_(\\d+)$'))[1]::int
+        ),
+        0
+      ) AS max_suffix
+    FROM base b
+    LEFT JOIN public.users u
+      ON u.username = b.base_username
+      OR u.username ~ ('^' || b.base_username || '_(\\d+)$')
+    GROUP BY b.base_username
+  ),
+  numbered AS (
+    SELECT
+      b.id,
+      b.base_username,
+      ROW_NUMBER() OVER (PARTITION BY b.base_username ORDER BY b.id) AS rn
+    FROM base b
+  ),
+  resolved AS (
+    SELECT
+      n.id,
+      CASE
+        WHEN n.rn = 1 AND s.base_exists = false THEN n.base_username
+        ELSE n.base_username || '_' || (
+          s.max_suffix + n.rn - (CASE WHEN s.base_exists THEN 0 ELSE 1 END)
+        )
+      END AS username
+    FROM numbered n
+    JOIN stats s ON s.base_username = n.base_username
+  )
   INSERT INTO public.users (id, username)
-  SELECT
-    au.id,
-    COALESCE(
-      au.raw_user_meta_data->>'username',
-      au.raw_user_meta_data->>'display_name',
-      split_part(au.email, '@', 1)
-    )
-  FROM auth.users au
-  LEFT JOIN public.users pu ON pu.id = au.id
-  WHERE pu.id IS NULL;
+  SELECT id, username
+  FROM resolved
+  ON CONFLICT (id) DO NOTHING;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
@@ -1021,7 +1063,7 @@ SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION get_difficulty_totals() TO authenticated;--
 
-########################################################
+-- ########################################################
 -- Function: get_user_first_bloods(p_user_id UUID)
 -- ########################################################
 CREATE OR REPLACE FUNCTION get_user_first_bloods(p_user_id UUID)
@@ -1485,7 +1527,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION get_solve_info(UUID, UUID) TO authenticated
+GRANT EXECUTE ON FUNCTION get_solve_info(UUID, UUID) TO authenticated;
 
 -- ########################################################
 -- Keep Alive Table
