@@ -70,9 +70,12 @@ export default function ScoreboardPage() {
       for (let i = 0; i < topForChart.length; i++) {
         const uname = topForChart[i].username
         const history = progressMap[uname]?.history ?? []
-        const finalScore = history.at(-1)?.score ?? topForChart[i].score ?? 0
         baseLeaderboard[i].progress = history.map((p: any) => ({ date: String(p.date), score: p.score }))
-        baseLeaderboard[i].score = finalScore
+        // Keep summary score as source of truth to avoid mismatches with progress queries
+        if (history.length > 0) {
+          const historyScore = history.at(-1)?.score ?? 0
+          baseLeaderboard[i].score = Math.max(baseLeaderboard[i].score ?? 0, historyScore)
+        }
       }
 
       // 5) Set leaderboard: table will receive top 100, chart will use first entries with progress

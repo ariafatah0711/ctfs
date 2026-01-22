@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.4.1]
+### Fixed
+- fixed scoreboard point.
+
 ## v[2.4.0]
 ### Added
 - add fitur event management

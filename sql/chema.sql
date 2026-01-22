@@ -682,6 +682,41 @@ SET search_path = public, auth;
 GRANT EXECUTE ON FUNCTION get_leaderboard(integer, integer) TO authenticated;
 
 -- ########################################################
+-- Function: get_top_progress(p_user_ids UUID[])
+-- Returns solve timeline for selected users (for scoreboard chart)
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_top_progress(
+  p_user_ids UUID[],
+  p_limit INT DEFAULT 1000,
+  p_offset INT DEFAULT 0
+)
+RETURNS TABLE (
+  user_id UUID,
+  username TEXT,
+  created_at TIMESTAMPTZ,
+  points INTEGER
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    s.user_id,
+    u.username,
+    s.created_at,
+    c.points
+  FROM public.solves s
+  JOIN public.challenges c ON c.id = s.challenge_id
+  JOIN public.users u ON u.id = s.user_id
+  WHERE s.user_id = ANY(p_user_ids)
+  ORDER BY s.created_at ASC
+  LIMIT p_limit OFFSET p_offset;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION get_top_progress(UUID[], INT, INT) TO authenticated;
+
+-- ########################################################
 -- Function: submit_flag(p_challenge_id UUID, p_flag TEXT)
 -- ########################################################
 CREATE OR REPLACE FUNCTION submit_flag(

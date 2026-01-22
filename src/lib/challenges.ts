@@ -298,33 +298,40 @@ export async function getLeaderboardSummary(limit = 100, offset = 0) {
 }
 
 export async function getTopProgress(topUsers: string[]) {
-  const { data, error } = await supabase
-    .from('solves')
-    .select(`
-      created_at,
-      challenges(points),
-      users(id, username)
-    `)
-    .in('user_id', topUsers)
-    .order('created_at', { ascending: true })
-  // console.log('Get Solves User', topUsers, data, error)
+  const batchSize = 1000
+  let offset = 0
+  let rows: any[] = []
 
-  if (error) throw error
+  while (true) {
+    // Use RPC to avoid RLS differences between summary and progress
+    const { data, error } = await supabase.rpc('get_top_progress', {
+      p_user_ids: topUsers,
+      p_limit: batchSize,
+      p_offset: offset,
+    })
+
+    if (error) throw error
+
+    const batch = (data as any[]) || []
+    rows = rows.concat(batch)
+    if (batch.length < batchSize) break
+    offset += batchSize
+  }
 
   // Build progress curve per user
-  const rows: any[] = (data as any[]) || []
   const progress: Record<string, { username: string; history: { date: string; score: number }[] }> = {}
   for (const row of rows) {
-    const user = row.users
-    if (!user) continue
-    if (!progress[user.id]) {
-      progress[user.id] = { username: user.username, history: [] }
+    const userId = row.user_id
+    const username = row.username
+    if (!userId || !username) continue
+    if (!progress[userId]) {
+      progress[userId] = { username, history: [] }
     }
 
-    const prev = progress[user.id].history.at(-1)?.score || 0
-    progress[user.id].history.push({
+    const prev = progress[userId].history.at(-1)?.score || 0
+    progress[userId].history.push({
       date: row.created_at,
-      score: prev + (row.challenges?.points || 0)
+      score: prev + (row.points || 0)
     })
   }
 
@@ -368,6 +375,7 @@ export async function getTopProgressByUsernames(usernames: string[]) {
     }
   }
 
+  console.log(result)
   return result
 }
 
