@@ -26,6 +26,7 @@ interface ChallengeDetailDialogProps {
   downloadFile: (attachment: Attachment, attachmentKey: string) => void;
   showHintModal: { challenge: ChallengeWithSolve | null, hintIdx?: number };
   setShowHintModal: (modal: { challenge: ChallengeWithSolve | null, hintIdx?: number }) => void;
+  events?: { id: string; name: string }[];
 }
 
 const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
@@ -44,9 +45,17 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   downloadFile,
   showHintModal,
   setShowHintModal,
+  events = [],
 }) => {
   const [copiedAll, setCopiedAll] = useState<{ [key: string]: boolean }>({});
   if (!challenge) return null;
+
+  // Get event name from event_id
+  const getEventName = (eventId?: string | null) => {
+    if (!eventId) return 'Main';
+    const event = events.find(e => e.id === eventId);
+    return event?.name || 'Unknown Event';
+  };
 
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
@@ -89,8 +98,8 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
               <div className="sr-only">{challenge.description}</div>
             </DialogDescription>
             {/* Badge bar */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <CustomBadge label={challenge.category} color="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200" />
                 {/* Difficulty badge */}
                 <span>
@@ -98,6 +107,13 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                     <DifficultyBadge className="min-w-[62px]" difficulty={challenge.difficulty} />
                   </React.Suspense>
                 </span>
+                {/* Event badge - only show if not main event */}
+                {challenge.event_id && (
+                  <CustomBadge
+                    label={getEventName(challenge.event_id)}
+                    color="bg-purple-200 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                  />
+                )}
               </div>
               <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300 dark:text-white' : 'text-yellow-300 dark:text-white'}`}>
                 🪙 {challenge.points}

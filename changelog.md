@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.4.3]
+### Added
+- Add tag event in challenge detail.
+
 ## v[2.4.2]
 ### Added
 - improve filter intro challenge only in main event.

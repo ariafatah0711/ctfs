@@ -446,6 +446,7 @@ export default function ChallengesPage() {
           downloadFile={downloadFile}
           showHintModal={showHintModal}
           setShowHintModal={setShowHintModal}
+          events={events}
         />
       )}
     </div>
