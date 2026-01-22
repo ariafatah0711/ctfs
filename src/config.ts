@@ -39,10 +39,8 @@ export const APP = {
   // Base URL (otomatis ambil dari env kalau ada)
   baseUrl:
     process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', // opsional fallback
-  image_icon:
-    process.env.NEXT_PUBLIC_SITE_ICON || 'favicon.ico',
-  image_preview:
-    process.env.NEXT_PUBLIC_SITE_PREVIEW || 'og-image.png',
+  image_icon: 'favicon.ico',
+  image_preview: 'og-image.png',
 
   /* Setting Config */
   notifSolves: true, // notifikasi global saat ada yang solve challenge

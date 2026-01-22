@@ -1,7 +1,8 @@
 "use client"
 
 import React, { useEffect, useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,16 +22,20 @@ import ConfirmDialog from '@/components/custom/ConfirmDialog'
 import { useAuth } from '@/contexts/AuthContext'
 import { isAdmin } from '@/lib/auth'
 import { getChallenges, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
+import { getEvents } from '@/lib/events'
 import { getInfo } from '@/lib/users'
-import { Challenge, Attachment } from '@/types'
+import { Challenge, Attachment, Event } from '@/types'
 import APP from '@/config'
 
 export default function AdminPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, loading } = useAuth()
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [solvers, setSolvers] = useState<any[]>([])
   const [siteInfo, setSiteInfo] = useState<any | null>(null)
+  const [events, setEvents] = useState<Event[]>([])
+  const [eventId, setEventId] = useState<string | null | 'all'>('all')
 
   // Dialog / form state
   const [openForm, setOpenForm] = useState(false)
@@ -65,6 +70,7 @@ export default function AdminPage() {
     is_maintenance: false,
     min_points: 0,
     decay_per_solve: 0,
+    event_id: null as string | null,
   }
 
   const [filters, setFilters] = useState({
@@ -88,6 +94,25 @@ export default function AdminPage() {
   const [formData, setFormData] = useState(() => ({ ...emptyForm }))
 
   useEffect(() => {
+    const eventParam = searchParams.get('event')
+    const addParam = searchParams.get('add')
+
+    if (eventParam === 'all') {
+      setEventId('all')
+    } else if (eventParam) {
+      setEventId(eventParam)
+    }
+
+    if (addParam === '1') {
+      const nextEventId = eventParam && eventParam !== 'all' ? eventParam : null
+      setEditing(null)
+      setFormData({ ...emptyForm, event_id: nextEventId })
+      setOpenForm(true)
+      setShowPreview(false)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
     let mounted = true
     ;(async () => {
       if (loading) return
@@ -105,12 +130,14 @@ export default function AdminPage() {
         return
       }
 
-      const data = await getChallenges(undefined, true)
+      const data = await getChallenges(undefined, true, 'all')
       const info = await getInfo()
+      const eventList = await getEvents()
       fetchSolvers(0)
       if (!mounted) return
       setChallenges(data)
       setSiteInfo(info)
+      setEvents(eventList)
     })()
 
     return () => { mounted = false }
@@ -153,6 +180,7 @@ export default function AdminPage() {
       is_maintenance: c.is_maintenance ?? false,
       min_points: c.min_points ?? 0,
       decay_per_solve: c.decay_per_solve ?? 0,
+      event_id: c.event_id ?? null,
     })
     setOpenForm(true)
     setShowPreview(false)
@@ -278,6 +306,7 @@ export default function AdminPage() {
         difficulty: (formData.difficulty || '').trim(),
         attachments: (formData.attachments || []).filter((a) => (a.url || '').trim() !== ''),
         is_maintenance: !!formData.is_maintenance,
+        event_id: formData.event_id ?? null,
   }
     if (editing && typeof formData.is_active !== 'undefined') payload.is_active = !!formData.is_active;
   if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;
@@ -301,7 +330,7 @@ export default function AdminPage() {
         await addChallenge(payload)
       }
 
-      const data = await getChallenges(undefined, true)
+      const data = await getChallenges(undefined, true, 'all')
       setChallenges(data)
       setOpenForm(false)
       setEditing(null)
@@ -318,7 +347,7 @@ export default function AdminPage() {
   const doDelete = async (id: string) => {
     try {
       await deleteChallenge(id)
-      const data = await getChallenges(undefined, true)
+      const data = await getChallenges(undefined, true, 'all')
       setChallenges(data)
       toast.success('Challenge deleted successfully')
     } catch (err) {
@@ -328,6 +357,11 @@ export default function AdminPage() {
   }
 
   const filteredChallenges = challenges.filter((c) => {
+    if (eventId !== 'all') {
+      const matchMain = eventId === null && (c.event_id === null || typeof c.event_id === 'undefined')
+      const matchEvent = typeof eventId === 'string' && eventId !== null && c.event_id === eventId
+      if (!matchMain && !matchEvent) return false
+    }
     if (filters.search && !c.title.toLowerCase().includes(filters.search.toLowerCase())) return false
     if (filters.category !== "all" && c.category !== filters.category) return false
     if (filters.difficulty !== "all" && c.difficulty !== filters.difficulty) return false
@@ -363,6 +397,9 @@ export default function AdminPage() {
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
                   <div className="flex items-center gap-2">
+                    <Link href="/admin/event">
+                      <Button variant="outline">View Events</Button>
+                    </Link>
                     <Button onClick={openAdd}>+ Add Challenge</Button>
                   </div>
                 </CardTitle>
@@ -396,6 +433,9 @@ export default function AdminPage() {
                         onFilterChange={handleFilterChange}
                         onClear={handleClearFilters}
                         showStatusFilter={false}
+                        events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
+                        selectedEventId={eventId}
+                        onEventChange={setEventId}
                       />
                     )
                   })()}
@@ -507,6 +547,7 @@ export default function AdminPage() {
             onRemoveAttachment={removeAttachment}
             setShowPreview={setShowPreview}
             categories={APP.challengeCategories || []}
+            events={events}
           />
         )}
       </AnimatePresence>

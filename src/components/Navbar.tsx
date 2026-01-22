@@ -335,14 +335,11 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center gap-2 group" data-tour="navbar-logo">
-              <img
+             <ImageWithFallback
                 src={APP.image_icon}
                 alt={`${APP.shortName} logo`}
-                width={42}
-                height={42}
+                size={42}
                 className="rounded-full"
-                loading="eager"
-                decoding="async"
               />
               <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
             </Link>

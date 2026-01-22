@@ -66,6 +66,7 @@ DROP VIEW IF EXISTS public.challenges_with_masked_flag CASCADE;
 DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
+DROP TABLE IF EXISTS public.events CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
 DROP TABLE IF EXISTS public.notifications CASCADE;
 
@@ -92,6 +93,19 @@ CREATE TABLE public.users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
+-- ########################################################
+-- Table: events
+-- ########################################################
+CREATE TABLE public.events (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT DEFAULT '',
+  start_time TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  end_time TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
 -- ALTER TABLE public.users
 --   ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '',
 --   ADD COLUMN IF NOT EXISTS sosmed JSONB DEFAULT '{}'::jsonb,
@@ -102,6 +116,7 @@ CREATE TABLE public.users (
 -- ########################################################
 CREATE TABLE public.challenges (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id UUID REFERENCES public.events(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   category TEXT NOT NULL,
@@ -128,7 +143,8 @@ CREATE TABLE public.challenges (
 
 ALTER TABLE public.challenges
 -- ADD COLUMN IF NOT EXISTS total_solves INTEGER DEFAULT 0;
-ADD COLUMN IF NOT EXISTS is_maintenance BOOLEAN DEFAULT false;
+-- ADD COLUMN IF NOT EXISTS is_maintenance BOOLEAN DEFAULT false;
+ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
 
 -- ########################################################
 -- Table: challenges_flags
@@ -682,6 +698,10 @@ DECLARE
   v_is_maintenance BOOLEAN;
   v_min_points INTEGER;
   v_decay_per_solve INTEGER;
+  v_event_id UUID;
+  v_event_start TIMESTAMPTZ;
+  v_event_end TIMESTAMPTZ;
+  v_event_exists BOOLEAN;
   v_solver_count INTEGER;
   v_awarded_points INTEGER;
   v_existing INT;
@@ -691,10 +711,13 @@ BEGIN
     RETURN json_build_object('success', false, 'message', 'Not authenticated');
   END IF;
 
-  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_maintenance, c.min_points, c.decay_per_solve
-    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_maintenance, v_min_points, v_decay_per_solve
+  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_maintenance, c.min_points, c.decay_per_solve,
+         c.event_id, e.start_time, e.end_time, (e.id IS NOT NULL)
+    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_maintenance, v_min_points, v_decay_per_solve,
+         v_event_id, v_event_start, v_event_end, v_event_exists
     FROM challenge_flags cf
     JOIN challenges c ON c.id = cf.challenge_id
+    LEFT JOIN events e ON e.id = c.event_id
     WHERE cf.challenge_id = p_challenge_id;
 
   IF v_flag_hash IS NULL THEN
@@ -703,6 +726,20 @@ BEGIN
 
   IF COALESCE(v_is_maintenance, false) THEN
     RETURN json_build_object('success', false, 'message', 'Challenge is under maintenance');
+  END IF;
+
+  IF v_event_id IS NOT NULL AND NOT COALESCE(v_event_exists, false) THEN
+    RETURN json_build_object('success', false, 'message', 'Event not found');
+  END IF;
+
+  IF v_event_id IS NOT NULL THEN
+    IF v_event_start IS NOT NULL AND now() < v_event_start THEN
+      RETURN json_build_object('success', false, 'message', 'Event has not started');
+    END IF;
+
+    IF v_event_end IS NOT NULL AND now() > v_event_end THEN
+      RETURN json_build_object('success', false, 'message', 'Event has ended');
+    END IF;
   END IF;
 
   v_is_correct := encode(digest(p_flag, 'sha256'), 'hex') = v_flag_hash;
@@ -781,7 +818,8 @@ CREATE OR REPLACE FUNCTION add_challenge(
   p_is_maintenance BOOLEAN DEFAULT false,
   p_min_points INTEGER DEFAULT 0,
   p_decay_per_solve INTEGER DEFAULT 0,
-  p_max_points INTEGER DEFAULT NULL
+  p_max_points INTEGER DEFAULT NULL,
+  p_event_id UUID DEFAULT NULL
 )
 RETURNS UUID AS $$
 DECLARE
@@ -792,8 +830,8 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add challenge';
   END IF;
 
-  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve)
-  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve)
+  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, event_id)
+  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve, p_event_id)
   RETURNING id INTO v_challenge_id;
 
   INSERT INTO public.challenge_flags(challenge_id, flag)
@@ -804,7 +842,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB, BOOLEAN, BOOLEAN, INTEGER, INTEGER, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB, BOOLEAN, BOOLEAN, INTEGER, INTEGER, INTEGER, UUID) TO authenticated;
 
 -- ########################################################
 -- Function: delete_challenge(p_challenge_id UUID)
@@ -846,7 +884,8 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_is_dynamic BOOLEAN DEFAULT false,
   p_min_points INTEGER DEFAULT 0,
   p_decay_per_solve INTEGER DEFAULT 0,
-  p_max_points INTEGER DEFAULT NULL
+  p_max_points INTEGER DEFAULT NULL,
+  p_event_id UUID DEFAULT NULL
 )
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -871,6 +910,7 @@ BEGIN
       is_dynamic = p_is_dynamic,
       min_points = p_min_points,
       decay_per_solve = p_decay_per_solve,
+        event_id = COALESCE(p_event_id, event_id),
       updated_at = now()
   WHERE id = p_challenge_id;
 
@@ -901,7 +941,7 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_challenge(
-  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, boolean, text, boolean, integer, integer, integer
+  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, boolean, text, boolean, integer, integer, integer, uuid
 ) TO authenticated;
 
 -- ########################################################
@@ -1229,6 +1269,113 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION delete_notification(UUID) TO authenticated;
 
 -- ########################################################
+-- Function: add_event(p_name, p_description, p_start_time, p_end_time)
+-- ########################################################
+CREATE OR REPLACE FUNCTION add_event(
+  p_name TEXT,
+  p_description TEXT DEFAULT '',
+  p_start_time TIMESTAMPTZ DEFAULT NULL,
+  p_end_time TIMESTAMPTZ DEFAULT NULL
+)
+RETURNS UUID AS $$
+DECLARE
+  v_event_id UUID;
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can add event';
+  END IF;
+
+  INSERT INTO public.events(name, description, start_time, end_time)
+  VALUES (p_name, COALESCE(p_description, ''), p_start_time, p_end_time)
+  RETURNING id INTO v_event_id;
+
+  RETURN v_event_id;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION add_event(TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+
+-- ########################################################
+-- Function: update_event(p_event_id, ...)
+-- ########################################################
+CREATE OR REPLACE FUNCTION update_event(
+  p_event_id UUID,
+  p_name TEXT DEFAULT NULL,
+  p_description TEXT DEFAULT NULL,
+  p_start_time TIMESTAMPTZ DEFAULT NULL,
+  p_end_time TIMESTAMPTZ DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can update event';
+  END IF;
+
+  UPDATE public.events
+  SET name = COALESCE(p_name, name),
+      description = COALESCE(p_description, description),
+      start_time = COALESCE(p_start_time, start_time),
+      end_time = COALESCE(p_end_time, end_time),
+      updated_at = now()
+  WHERE id = p_event_id;
+
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION update_event(UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+
+-- ########################################################
+-- Function: delete_event(p_event_id)
+-- ########################################################
+CREATE OR REPLACE FUNCTION delete_event(
+  p_event_id UUID
+)
+RETURNS BOOLEAN AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can delete event';
+  END IF;
+
+  DELETE FROM public.events WHERE id = p_event_id;
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION delete_event(UUID) TO authenticated;
+
+-- ########################################################
+-- Function: set_challenges_event(p_event_id, p_challenge_ids)
+-- ########################################################
+CREATE OR REPLACE FUNCTION set_challenges_event(
+  p_event_id UUID,
+  p_challenge_ids UUID[]
+)
+RETURNS INTEGER AS $$
+DECLARE
+  v_count INTEGER;
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only admin can update challenges event';
+  END IF;
+
+  UPDATE public.challenges
+  SET event_id = p_event_id,
+      updated_at = now()
+  WHERE id = ANY(p_challenge_ids);
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION set_challenges_event(UUID, UUID[]) TO authenticated;
+
+-- ########################################################
 -- Function: get_solvers_all(p_limit INT, p_offset INT)
 -- ########################################################
 CREATE OR REPLACE FUNCTION get_solvers_all(
@@ -1418,6 +1565,7 @@ GRANT EXECUTE ON FUNCTION get_info() TO authenticated;
 -- Enable RLS
 -- ########################################################
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenge_flags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
@@ -1442,6 +1590,12 @@ CREATE POLICY "Solves can select all"
 DROP POLICY IF EXISTS "Challenges can select all" ON public.challenges;
 CREATE POLICY "Challenges can select all"
   ON public.challenges
+  FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Events can select all" ON public.events;
+CREATE POLICY "Events can select all"
+  ON public.events
   FOR SELECT
   USING (true);
 
@@ -1472,6 +1626,7 @@ REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon;
 GRANT USAGE ON SCHEMA public TO authenticated;
 
 REVOKE UPDATE ON public.users FROM authenticated;
+GRANT SELECT ON public.events TO authenticated;
 GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
 
@@ -1548,7 +1703,7 @@ CREATE POLICY "Allow all users full access"
   FOR ALL
   USING (true);
 GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO anon;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO authenticated;
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO authenticated;
 
 -- ALTER TABLE public."keep-alive" ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Allow all actions for keep-alive" ON public."keep-alive"

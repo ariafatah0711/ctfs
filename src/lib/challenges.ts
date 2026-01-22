@@ -19,7 +19,8 @@ export async function getUserRank(username: string): Promise<number | null> {
  */
 export async function getChallenges(
   userId?: string,
-  showAll: boolean = false
+  showAll: boolean = false,
+  eventId?: string | null | 'all'
 ): Promise<(ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]> {
   try {
     // 🔹 Ambil challenge list
@@ -30,6 +31,16 @@ export async function getChallenges(
       .order('total_solves', { ascending: false }) // jika poin sama, paling banyak solves dulu
 
     if (!showAll) query = query.eq('is_active', true);
+
+    // Default: only challenges without event (Main)
+    // If eventId === 'all', do not filter by event
+    if (eventId === 'all') {
+      // no filter
+    } else if (eventId) {
+      query = query.eq('event_id', eventId);
+    } else {
+      query = query.is('event_id', null);
+    }
 
     const { data: challenges, error } = await query;
     if (error) throw new Error(error.message);
@@ -112,6 +123,7 @@ export async function addChallenge(challengeData: {
   is_maintenance?: boolean
   min_points?: number
   decay_per_solve?: number
+  event_id?: string | null
 }): Promise<void> {
   try {
     let hintValue: any = null;
@@ -133,7 +145,8 @@ export async function addChallenge(challengeData: {
       p_is_dynamic: challengeData.is_dynamic ?? false,
       p_is_maintenance: challengeData.is_maintenance ?? false,
       p_min_points: challengeData.min_points ?? 0,
-      p_decay_per_solve: challengeData.decay_per_solve ?? 0
+      p_decay_per_solve: challengeData.decay_per_solve ?? 0,
+      p_event_id: challengeData.event_id ?? null
     });
     if (error) {
       throw new Error(error.message)
@@ -162,6 +175,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
   is_dynamic?: boolean
   min_points?: number
   decay_per_solve?: number
+  event_id?: string | null
 }): Promise<void> {
   try {
     let hintValue: any = null;
@@ -185,7 +199,8 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_flag: challengeData.flag || null,
       p_is_dynamic: challengeData.is_dynamic ?? false,
       p_min_points: challengeData.min_points ?? 0,
-      p_decay_per_solve: challengeData.decay_per_solve ?? 0
+      p_decay_per_solve: challengeData.decay_per_solve ?? 0,
+      p_event_id: challengeData.event_id ?? null
     });
     if (error) {
       throw new Error(error.message)
@@ -232,6 +247,27 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
   } catch (error) {
     console.error('Error fetching challenge:', error)
     return null
+  }
+}
+
+/**
+ * Get lightweight challenge list (admin bulk tools)
+ */
+export async function getChallengesLite(showAll: boolean = true) {
+  try {
+    let query = supabase
+      .from('challenges')
+      .select('id, title, category, difficulty, event_id, is_active')
+      .order('created_at', { ascending: false })
+
+    if (!showAll) query = query.eq('is_active', true)
+
+    const { data, error } = await query
+    if (error) throw error
+    return data || []
+  } catch (err) {
+    console.error('Error fetching challenges (lite):', err)
+    return []
   }
 }
 

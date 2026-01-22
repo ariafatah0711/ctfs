@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.4.0]
+### Added
+- add fitur event management
+- add event admin page
+
 ## v[2.3.3]
 ### Fixed
 - fixed notif kaga tampil.
@@ -333,3 +338,94 @@ All notable changes to this project will be documented in this file.
 - Initial stable release
 - Authentication system
 - Challenge & admin layout
+
+---
+
+🔔 CTFS Initial Release
+
+#### [v1.0.0]
+
+**Added**
+
+* Initial stable release
+* Authentication system
+* Challenge system & admin layout
+* Basic scoreboard & profile
+
+---
+
+🔔 CTFS Core Feature Expansion
+
+#### [v1.5.0]
+
+**Added**
+
+* Enhanced leaderboard with progress & summary
+* First blood tracking
+* Dynamic scoring (SQL-based)
+* New challenge labels & difficulty badges
+
+**Improved**
+
+* Challenge management & admin UI
+* Performance & data handling
+
+---
+
+🔔 CTFS UX & System Improvement
+
+#### [v1.8.0]
+
+**Added**
+
+* Maintenance mode (config + middleware)
+* Audit log system
+* Rules page & challenge tutorial
+* Bio & social media on profile
+
+**Improved**
+
+* Navbar & footer UI
+* Dialog, scrollbar, markdown rendering
+* Admin & scoreboard usability
+
+---
+
+🔔 CTFS Notifications → Logs System
+
+#### [v2.2.0]
+
+**Changed**
+
+* Notifications refactored into Logs system
+* New Logs page with filters
+* Real-time logs updates + unread counter
+* Toast & sound notification support
+
+**Improved**
+
+* Challenge solve visibility
+* Profile info (join date & last login)
+
+---
+
+🔔 CTFS Teams Feature Release
+
+#### [v2.3.0 – v2.3.3]
+
+**Added**
+
+* Teams system
+* Team scoreboard
+* Team management (rename, member detail)
+* Team solves & filters
+
+**Improved**
+
+* Team UI & UX
+* Challenge filter bar (hide maintenance & team solves)
+* Markdown rendering (ul, ol, img)
+
+**Fixed**
+
+* Notification not showing issue

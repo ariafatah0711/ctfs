@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Loader from "@/components/custom/loading";
 import { useLogs } from '@/contexts/LogsContext'
-import { Bell } from "lucide-react";
+import { Logs } from "lucide-react";
 
 export default function LogsPage() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function LogsPage() {
 
   return (
     <main className="max-w-2xl mx-auto py-8 px-4">
-      <TitlePage size="text-2xl" className="mb-6"><Bell className="inline-block mr-2" /> Logs</TitlePage>
+      <TitlePage size="text-2xl" className="mb-6"><Logs className="inline-block mr-2" /> Logs</TitlePage>
 
       {/* Tab buttons */}
       <div className="w-full grid grid-cols-2 gap-2 mb-6">

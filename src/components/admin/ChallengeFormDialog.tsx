@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
-import { Attachment, Challenge } from '@/types'
+import { Attachment, Challenge, Event } from '@/types'
 import { getFlag } from '@/lib/challenges'
 import APP from '@/config'
 
@@ -33,6 +33,7 @@ interface ChallengeFormDialogProps {
   onRemoveAttachment: (i: number) => void
   setShowPreview: (v: boolean) => void
   categories: string[]
+  events?: Event[]
 }
 
 const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
@@ -52,6 +53,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   onRemoveAttachment,
   setShowPreview,
   categories,
+  events,
 }) => {
 
   // small modal for viewing flag in the form
@@ -147,6 +149,24 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
+
+            {events && (
+              <div>
+                <Label>Event</Label>
+                <Select
+                  value={formData.event_id ?? '__main__'}
+                  onValueChange={v => onChange({ ...formData, event_id: v === '__main__' ? null : v })}
+                >
+                  <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                    <SelectItem value="__main__">Main</SelectItem>
+                    {events.map(evt => (
+                      <SelectItem key={evt.id} value={evt.id}>{evt.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* Points & Difficulty (static) */}
             {!formData.is_dynamic && (

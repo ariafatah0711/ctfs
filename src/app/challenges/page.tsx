@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
+import { getEvents } from '@/lib/events'
 import { getMyTeamChallenges } from '@/lib/teams'
-import { ChallengeWithSolve, User, Attachment } from '@/types'
+import { ChallengeWithSolve, User, Attachment, Event } from '@/types'
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
@@ -44,6 +45,8 @@ export default function ChallengesPage() {
     difficulty: 'all',
     search: ''
   })
+  const [eventId, setEventId] = useState<string | null | 'all'>('all')
+  const [events, setEvents] = useState<Event[]>([])
   const [filterSettings, setFilterSettings] = useState({
     hideMaintenance: false,
     highlightTeamSolves: true,
@@ -52,7 +55,7 @@ export default function ChallengesPage() {
   const { user, loading } = require('@/contexts/AuthContext').useAuth();
   const loadChallenges = async () => {
     if (!user) return
-    const challengesData = await getChallenges(user.id)
+    const challengesData = await getChallenges(user.id, false, 'all')
 
     let teamSolvedIds = new Set<string>()
     if (APP.teams.enabled) {
@@ -103,6 +106,10 @@ export default function ChallengesPage() {
   useEffect(() => {
     loadChallenges()
   }, [user])
+
+  useEffect(() => {
+    getEvents().then(setEvents).catch(() => setEvents([]))
+  }, [])
 
   // Tambahkan useEffect ini setelah deklarasi state
   useEffect(() => {
@@ -214,6 +221,11 @@ export default function ChallengesPage() {
 
   // Filter challenges based on current filters
   const filteredChallenges = challenges.filter(challenge => {
+    if (eventId !== 'all') {
+      const matchMain = eventId === null && (challenge.event_id === null || typeof challenge.event_id === 'undefined')
+      const matchEvent = typeof eventId === 'string' && eventId !== null && challenge.event_id === eventId
+      if (!matchMain && !matchEvent) return false
+    }
     if (filterSettings.hideMaintenance && challenge.is_maintenance) return false
     // Status filter
     if (filters.status === 'solved' && !challenge.is_solved) return false
@@ -343,6 +355,9 @@ export default function ChallengesPage() {
           onSettingsChange={setFilterSettings}
           onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
           showStatusFilter={true}
+          events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
+          selectedEventId={eventId}
+          onEventChange={setEventId}
         />
 
         {/* Challenges Grid Grouped by Category */}

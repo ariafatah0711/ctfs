@@ -16,8 +16,19 @@ export interface Attachment {
   type: 'file' | 'link'
 }
 
+export interface Event {
+  id: string
+  name: string
+  description?: string | null
+  start_time?: string | null
+  end_time?: string | null
+  created_at?: string
+  updated_at?: string
+}
+
 export interface Challenge {
   id: string
+  event_id?: string | null
   title: string
   description: string
   category: string

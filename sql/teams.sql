@@ -6,6 +6,9 @@
 -- ####################### Tables #########################
 -- ########################################################
 
+DROP TABLE IF EXISTS public.team_members;
+DROP TABLE IF EXISTS public.teams;
+
 CREATE TABLE IF NOT EXISTS public.teams (
 	id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 	name TEXT UNIQUE NOT NULL,
@@ -634,6 +637,7 @@ SET search_path = public, auth;
 GRANT EXECUTE ON FUNCTION get_team_challenges_by_name(TEXT) TO authenticated;
 
 -- Team scoreboard (rank by unique challenge score)
+DROP FUNCTION IF EXISTS get_team_scoreboard(integer,integer);
 CREATE OR REPLACE FUNCTION get_team_scoreboard(
 	limit_rows integer DEFAULT 100,
 	offset_rows integer DEFAULT 0
