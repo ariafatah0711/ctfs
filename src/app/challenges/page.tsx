@@ -44,6 +44,11 @@ export default function ChallengesPage() {
     difficulty: 'all',
     search: ''
   })
+  const [filterSettings, setFilterSettings] = useState({
+    hideMaintenance: false,
+    highlightTeamSolves: true,
+  })
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const { user, loading } = require('@/contexts/AuthContext').useAuth();
   const loadChallenges = async () => {
     if (!user) return
@@ -108,6 +113,37 @@ export default function ChallengesPage() {
         .catch(() => setSolvers([]));
     }
   }, [selectedChallenge]);
+
+  // Load filter settings from localStorage (once)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = window.localStorage.getItem('ctf.challengeFilterSettings')
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (typeof parsed?.hideMaintenance === 'boolean' && typeof parsed?.highlightTeamSolves === 'boolean') {
+          setFilterSettings({
+            hideMaintenance: parsed.hideMaintenance,
+            highlightTeamSolves: parsed.highlightTeamSolves,
+          })
+        }
+      }
+    } catch {
+      // ignore malformed storage
+    } finally {
+      setSettingsLoaded(true)
+    }
+  }, [])
+
+  // Persist filter settings to localStorage
+  useEffect(() => {
+    if (!settingsLoaded || typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem('ctf.challengeFilterSettings', JSON.stringify(filterSettings))
+    } catch {
+      // ignore storage errors
+    }
+  }, [filterSettings, settingsLoaded])
 
   const handleFlagSubmit = async (challengeId: string) => {
     if (!user || !flagInputs[challengeId]?.trim()) return
@@ -178,6 +214,7 @@ export default function ChallengesPage() {
 
   // Filter challenges based on current filters
   const filteredChallenges = challenges.filter(challenge => {
+    if (filterSettings.hideMaintenance && challenge.is_maintenance) return false
     // Status filter
     if (filters.status === 'solved' && !challenge.is_solved) return false
     if (filters.status === 'unsolved' && challenge.is_solved) return false
@@ -299,9 +336,11 @@ export default function ChallengesPage() {
 
         <ChallengeFilterBar
           filters={filters}
+          settings={filterSettings}
           categories={categories}
           difficulties={difficulties}
           onFilterChange={setFilters}
+          onSettingsChange={setFilterSettings}
           onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
           showStatusFilter={true}
         />
@@ -345,6 +384,7 @@ export default function ChallengesPage() {
                     <ChallengeCard
                       key={challenge.id}
                       challenge={challenge}
+                      highlightTeamSolves={filterSettings.highlightTeamSolves}
                       onClick={() => setSelectedChallenge(challenge)}
                     />
                   ))}

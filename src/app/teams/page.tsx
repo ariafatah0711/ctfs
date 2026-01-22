@@ -11,7 +11,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/contexts/AuthContext'
-import { isAdmin } from '@/lib/admin'
 import {
   createTeam,
   joinTeam,
@@ -42,7 +41,6 @@ export default function TeamsPage() {
   const [teamName, setTeamName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
   const [status, setStatus] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
-  const [adminStatus, setAdminStatus] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [confirmMessage, setConfirmMessage] = useState('Are you sure?')
   const [confirmExpected, setConfirmExpected] = useState<string | null>(null)
@@ -55,13 +53,6 @@ export default function TeamsPage() {
     }
   }, [authLoading, user, router])
 
-  useEffect(() => {
-    if (!user) {
-      setAdminStatus(false)
-      return
-    }
-    isAdmin().then(setAdminStatus)
-  }, [user])
 
   const loadTeamData = async () => {
     if (!user) return
@@ -90,7 +81,7 @@ export default function TeamsPage() {
 
   const currentMember = useMemo(() => members.find(m => m.user_id === user?.id), [members, user])
   const isCaptain = currentMember?.role === 'captain'
-  const canManage = isCaptain || adminStatus
+  const canManage = isCaptain
 
   const handleCreateTeam = async () => {
     if (!teamName.trim()) return

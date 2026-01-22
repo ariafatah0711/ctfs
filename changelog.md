@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.3.3]
+### Fixed
+- fixed notif kaga tampil.
+
+### Update
+- improve team solves show all challenges.
+- add the setting for hide maintenance, and team solves challenges in challenge filter bar.
+- improve markdown ul, ol, img rendering.
+
 ## v[2.3.2]
 ### Update
 - improve team management UI and UX

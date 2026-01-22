@@ -5,10 +5,12 @@ import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users } from 'luc
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
+import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut, isAdmin } from '@/lib/auth'
 import { useLogs } from '@/contexts/LogsContext'
+import { Switch } from '@/components/ui/switch'
 import APP from '@/config'
 import { subscribeToSolves, getNotifications, createNotification, deleteNotification, subscribeToNotifications } from '@/lib/challenges'
 import { formatRelativeDate } from '@/lib/utils'
@@ -32,10 +34,13 @@ export default function Navbar() {
   const [notifToast, setNotifToast] = useState<{ title: string; message: string } | null>(null)
   const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const notifToastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const notifPanelRef = useRef<HTMLDivElement | null>(null)
+  const notifButtonRef = useRef<HTMLButtonElement | null>(null)
   const [scoreboardOpen, setScoreboardOpen] = useState(false)
   const scoreboardMenuRef = useRef<HTMLDivElement | null>(null)
   const { theme, toggleTheme } = useTheme()
   const avatarSrc =  user?.profile_picture_url || user?.picture || null
+  const [solveSoundEnabled, setSolveSoundEnabled] = useState(true)
 
   const notifSeenKey = user ? `ctfs_seen_notifications_v1:${user.id}` : `ctfs_seen_notifications_v1:anon`
 
@@ -121,13 +126,32 @@ export default function Navbar() {
     })()
   }, [user])
 
+  // Load notification sound setting
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = window.localStorage.getItem('ctf.notif.solveSound')
+      if (raw !== null) {
+        setSolveSoundEnabled(raw === 'true')
+      }
+    } catch {}
+  }, [])
+
+  // Persist notification sound setting
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem('ctf.notif.solveSound', String(solveSoundEnabled))
+    } catch {}
+  }, [solveSoundEnabled])
+
   // Real-time solves subscription (aktif hanya jika APP.notifSolves true)
   useEffect(() => {
     if (!user || !APP.notifSolves) return;
     const unsubscribe = subscribeToSolves(({ username, challenge }) => {
       setSolveNotif({ username, challenge })
       // Play sound only if the solve is NOT by the current user
-      if (username !== user.username) {
+      if (solveSoundEnabled && username !== user.username) {
         try {
           const audio = new Audio('/sounds/notif_solves.mp3')
           audio.volume = 0.5
@@ -142,7 +166,7 @@ export default function Navbar() {
       unsubscribe()
       if (notifTimeout.current) clearTimeout(notifTimeout.current)
     }
-  }, [user])
+  }, [user, solveSoundEnabled])
 
   const handleLogout = async () => {
     setMobileMenuOpen(false)
@@ -240,13 +264,31 @@ export default function Navbar() {
     }
   }, [scoreboardOpen])
 
+  useEffect(() => {
+    if (!notifOpen) return
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (notifPanelRef.current?.contains(target)) return
+      if (notifButtonRef.current?.contains(target)) return
+      setNotifOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [notifOpen])
+
+  useEffect(() => {
+    if (notifOpen) setNotifOpen(false)
+  }, [pathname])
+
   if (loading) return null
 
   return (
     <>
       {/* Real-time solve notification (marquee style) */}
       {notifVisible && (
-        <div className="fixed top-2 right-2 z-[50] flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
+        <div className="fixed top-16 right-2 z-[5000] flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
           <svg className="mr-2" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           <span className="truncate flex-1">
             <b>{solveNotif.username}</b> just solved <b>{solveNotif.challenge}</b>!
@@ -266,7 +308,7 @@ export default function Navbar() {
       )}
       {/* Real-time notification toast */}
       {notifToastVisible && (
-        <div className="fixed top-16 right-2 z-[50] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left" style={{ minWidth: 240, maxWidth: 380 }}>
+        <div className="fixed top-16 right-2 z-[5000] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left" style={{ minWidth: 240, maxWidth: 380 }}>
           <div className="mt-0.5">
             <Bell size={18} className="text-blue-400" />
           </div>
@@ -293,11 +335,14 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center space-x-8">
             <Link href="/" className="flex items-center gap-2 group" data-tour="navbar-logo">
-              <ImageWithFallback
+              <img
                 src={APP.image_icon}
                 alt={`${APP.shortName} logo`}
-                size={42}
+                width={42}
+                height={42}
                 className="rounded-full"
+                loading="eager"
+                decoding="async"
               />
               <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
             </Link>
@@ -444,6 +489,7 @@ export default function Navbar() {
             {/* Notifications Icon (realtime + history) */}
             <div className="relative mr-2" data-tour="navbar-notifications">
               <button
+                ref={notifButtonRef}
                 className={`rounded-full p-1 transition-colors duration-150 ${notifOpen ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
                 title="Notifications"
                 aria-label="Notifications"
@@ -459,7 +505,10 @@ export default function Navbar() {
               )}
 
               {notifOpen && (
-                <div className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 rounded-xl shadow-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-50`}>
+                <div
+                  ref={notifPanelRef}
+                  className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 rounded-xl shadow-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
+                >
                   <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
                     <span>Notifications</span>
                     <div className="flex items-center gap-3">
@@ -477,6 +526,16 @@ export default function Navbar() {
                         Close
                       </button>
                     </div>
+                  </div>
+                  <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium">Solve sound</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Play sound for solve notifications</div>
+                    </div>
+                    <Switch
+                      checked={solveSoundEnabled}
+                      onCheckedChange={setSolveSoundEnabled}
+                    />
                   </div>
                   {adminStatus && (
                     <div className="p-3 border-b border-gray-200 dark:border-gray-800">
@@ -539,7 +598,10 @@ export default function Navbar() {
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">{n.message}</div>
+                            <MarkdownRenderer
+                              content={n.message}
+                              className="text-xs text-gray-600 dark:text-gray-300 leading-snug [&_p]:mb-1 [&_p]:leading-snug"
+                            />
                             <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                               {n.created_at ? formatRelativeDate(n.created_at) : ''}
                             </div>

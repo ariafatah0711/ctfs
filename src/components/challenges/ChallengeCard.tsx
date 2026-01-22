@@ -10,14 +10,15 @@ interface ChallengeCardProps {
     is_new?: boolean;
     is_team_solved?: boolean;
   };
+  highlightTeamSolves?: boolean;
   onClick: () => void;
 }
 
-const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, onClick }) => {
+const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamSolves = true, onClick }) => {
   const isRecentlyCreated = challenge.is_new;
   const noFirstBlood = !challenge.has_first_blood;
   const isMaintenance = !!challenge.is_maintenance;
-  const isTeamSolved = !!challenge.is_team_solved;
+  const isTeamSolved = !!challenge.is_team_solved && highlightTeamSolves;
 
   let ribbonLabel: string | null = null;
   if (isMaintenance) ribbonLabel = "MAINTENANCE";

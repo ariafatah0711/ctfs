@@ -179,8 +179,8 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           h2: ({...props}) => <h2 className="text-2xl font-bold mt-5 mb-3 text-orange-300" {...props} />,
           h3: ({...props}) => <h3 className="text-xl font-semibold mt-4 mb-2 text-orange-200" {...props} />,
           p: ({...props}) => <p className="mb-3 leading-relaxed text-justify" {...props} />,
-          ul: ({...props}) => <ul className="mb-3 space-y-1" {...props} />,
-          ol: ({...props}) => <ol className="mb-3 space-y-1" {...props} />,
+          ul: ({...props}) => <ul className="mb-3 space-y-1 list-disc list-inside" {...props} />,
+          ol: ({...props}) => <ol className="mb-3 space-y-1 list-decimal list-inside" {...props} />,
           li: ({...props}) => <li className="ml-6 list-item" {...props} />,
           code: ({inline, children, ...props}: any) =>
             inline ? (
@@ -195,6 +195,13 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
               </CodeBlockWrapper>
             ),
           a: ({...props}) => <a className="text-orange-400 hover:text-orange-300 hover:underline underline font-medium transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+          img: ({...props}) => (
+            <img
+              {...props}
+              loading="lazy"
+              className="max-w-full h-auto rounded-md my-2 w-full"
+            />
+          ),
           blockquote: ({...props}) => (
             <BlockquoteWrapper isDark>
               <blockquote
