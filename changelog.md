@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.4.2]
+### Added
+- improve filter intro challenge only in main event.
+- improve order event in challenge filter.
+
 ## v[2.4.1]
 ### Fixed
 - fixed scoreboard point.
@@ -433,3 +438,14 @@ All notable changes to this project will be documented in this file.
 **Fixed**
 
 * Notification not showing issue
+
+---
+
+🔔 CTFS Event Management Feature
+
+#### [v2.4.0 – v2.4.1]
+**Added**
+- Event management feature
+
+**Fixed**
+- Fixed scoreboard point calculation issue

@@ -1350,8 +1350,8 @@ BEGIN
   UPDATE public.events
   SET name = COALESCE(p_name, name),
       description = COALESCE(p_description, description),
-      start_time = COALESCE(p_start_time, start_time),
-      end_time = COALESCE(p_end_time, end_time),
+      start_time = p_start_time,
+      end_time = p_end_time,
       updated_at = now()
   WHERE id = p_event_id;
 

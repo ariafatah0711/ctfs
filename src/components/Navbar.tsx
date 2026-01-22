@@ -308,13 +308,13 @@ export default function Navbar() {
       )}
       {/* Real-time notification toast */}
       {notifToastVisible && (
-        <div className="fixed top-16 right-2 z-[5000] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left" style={{ minWidth: 240, maxWidth: 380 }}>
+        <div className="fixed top-16 right-2 z-[5000] flex items-start gap-2 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg border border-gray-700 animate-slide-in-left max-w-[92vw]" style={{ minWidth: 240, maxWidth: 420 }}>
           <div className="mt-0.5">
             <Bell size={18} className="text-blue-400" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold truncate">{notifToast.title}</div>
-            <div className="text-xs text-gray-300 line-clamp-2">{notifToast.message}</div>
+            <div className="text-xs text-gray-300 line-clamp-2 break-words">{notifToast.message}</div>
           </div>
           <button
             onClick={dismissNotifToast}
@@ -330,7 +330,7 @@ export default function Navbar() {
         </div>
       )}
     <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between h-14 items-center">
           {/* Logo */}
           <div className="flex items-center space-x-8">
@@ -504,7 +504,7 @@ export default function Navbar() {
               {notifOpen && (
                 <div
                   ref={notifPanelRef}
-                  className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 rounded-xl shadow-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
+                  className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[420px] sm:max-w-[95vw] max-w-[95vw] rounded-xl shadow-xl border ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
                 >
                   <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
                     <span>Notifications</span>
@@ -568,7 +568,7 @@ export default function Navbar() {
                       </div>
                     </div>
                   )}
-                  <div className="max-h-[70vh] sm:max-h-72 overflow-auto">
+                  <div className="max-h-[70vh] sm:max-h-80 overflow-auto">
                     {notifLoading ? (
                       <div className="p-3 text-sm text-gray-500">Loading...</div>
                     ) : notifItems.length === 0 ? (
@@ -577,12 +577,12 @@ export default function Navbar() {
                       notifItems.map((n) => (
                         <div
                           key={n.id}
-                          className={`px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex items-start justify-between gap-2 ${isNotifRead(n.id) ? 'opacity-70' : ''}`}
+                          className={`relative px-3 py-2 border-b border-gray-200 dark:border-gray-800 ${isNotifRead(n.id) ? 'opacity-70' : ''}`}
                         >
-                          <div>
-                            <div className="text-sm font-semibold flex items-center gap-2">
-                              <span>{n.title}</span>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${getLevelBadgeClass(n.level)}`}>
+                          <div className={`min-w-0`}>
+                            <div className="text-sm font-semibold flex flex-wrap items-center gap-2 min-w-0">
+                              <span className="truncate flex-1 min-w-0">{n.title}</span>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap shrink-0 ${getLevelBadgeClass(n.level)}`}>
                                 {n.level === 'info_platform'
                                   ? 'Info Platform'
                                   : n.level === 'info_challenges'
@@ -590,14 +590,14 @@ export default function Navbar() {
                                   : 'Info'}
                               </span>
                               {!isNotifRead(n.id) && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap shrink-0 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
                                   New
                                 </span>
                               )}
                             </div>
                             <MarkdownRenderer
                               content={n.message}
-                              className="text-xs text-gray-600 dark:text-gray-300 leading-snug [&_p]:mb-1 [&_p]:leading-snug"
+                              className="text-xs text-gray-600 dark:text-gray-300 leading-snug break-words [&_p]:mb-1 [&_p]:leading-snug [&_p]:break-words"
                             />
                             <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                               {n.created_at ? formatRelativeDate(n.created_at) : ''}
@@ -606,7 +606,7 @@ export default function Navbar() {
                           {adminStatus && (
                             <button
                               onClick={() => handleDeleteNotif(n.id)}
-                              className="text-xs text-red-500 hover:underline"
+                              className="absolute bottom-2 right-2 text-xs text-red-500 hover:underline"
                             >
                               Delete
                             </button>

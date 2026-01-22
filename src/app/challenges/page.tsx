@@ -221,6 +221,13 @@ export default function ChallengesPage() {
 
   // Filter challenges based on current filters
   const filteredChallenges = challenges.filter(challenge => {
+    // Special case: when viewing All events, force Intro category to Main only
+    if (eventId === 'all') {
+      const isIntro = String(challenge.category || '').toLowerCase() === 'intro'
+      const isMain = challenge.event_id === null || typeof challenge.event_id === 'undefined'
+      if (isIntro && !isMain) return false
+    }
+
     if (eventId !== 'all') {
       const matchMain = eventId === null && (challenge.event_id === null || typeof challenge.event_id === 'undefined')
       const matchEvent = typeof eventId === 'string' && eventId !== null && challenge.event_id === eventId
@@ -387,7 +394,9 @@ export default function ChallengesPage() {
               <div key={category} className="mb-12">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
-                  <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">{category}</h2>
+                  <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">
+                    {eventId === 'all' && String(category).toLowerCase() === 'intro' ? 'Intro (Main)' : category}
+                  </h2>
                 </div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

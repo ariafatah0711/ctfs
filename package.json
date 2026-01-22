@@ -1,6 +1,6 @@
 {
   "name": "ctfs",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "private": true,
   "scripts": {
     "predev": "node src/scripts/gen-version.js",

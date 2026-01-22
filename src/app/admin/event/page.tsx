@@ -424,7 +424,18 @@ export default function AdminEventPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <div>
-                    <Label className="text-xs">Start Time</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Start Time</Label>
+                      {formData.start_time && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, start_time: '' })}
+                          className="text-xs text-gray-500 hover:underline"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                     <Input
                       type="datetime-local"
                       value={formData.start_time}
@@ -433,7 +444,18 @@ export default function AdminEventPage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">End Time</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">End Time</Label>
+                      {formData.end_time && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, end_time: '' })}
+                          className="text-xs text-gray-500 hover:underline"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                     <Input
                       type="datetime-local"
                       value={formData.end_time}

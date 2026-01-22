@@ -100,7 +100,7 @@ export default function TeamScoreboardPage() {
           </div>
         )}
 
-        {!loading && series.length > 0 && (
+        {!loading && series.length > 0 && !showTotalScore && (
           <TeamScoreboardChart
             series={series}
             isDark={isDark}

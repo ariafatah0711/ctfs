@@ -45,6 +45,21 @@ export default function ChallengeFilterBar({
   const categoryOrder = APP.challengeCategories || [];
   const difficultyOrder = Object.keys(APP.difficultyStyles || {});
 
+  const sortedEvents = React.useMemo(() => {
+    if (!events) return [];
+    return [...events].sort((a, b) => {
+      const aNoEnd = !a.end_time;
+      const bNoEnd = !b.end_time;
+      if (aNoEnd !== bNoEnd) return aNoEnd ? -1 : 1;
+
+      const aEnd = a.end_time ? new Date(a.end_time).getTime() : Number.POSITIVE_INFINITY;
+      const bEnd = b.end_time ? new Date(b.end_time).getTime() : Number.POSITIVE_INFINITY;
+      if (aEnd !== bEnd) return aEnd - bEnd;
+
+      return a.name.localeCompare(b.name);
+    });
+  }, [events]);
+
   const getEventTimingLabel = (evt?: { start_time?: string | null; end_time?: string | null }) => {
     if (!evt) return null;
     const now = new Date();
@@ -113,7 +128,7 @@ export default function ChallengeFilterBar({
           >
             Main
           </button>
-          {events.map(evt => (
+          {sortedEvents.map(evt => (
             <button
               key={evt.id}
               type="button"
