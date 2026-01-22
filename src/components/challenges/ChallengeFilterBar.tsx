@@ -47,16 +47,28 @@ export default function ChallengeFilterBar({
 
   const sortedEvents = React.useMemo(() => {
     if (!events) return [];
+    const now = new Date().getTime();
     return [...events].sort((a, b) => {
       const aNoEnd = !a.end_time;
       const bNoEnd = !b.end_time;
+
+      // Both have no end_time - sort by name
+      if (aNoEnd && bNoEnd) return a.name.localeCompare(b.name);
+
+      // One has no end_time - that comes first (ongoing)
       if (aNoEnd !== bNoEnd) return aNoEnd ? -1 : 1;
 
-      const aEnd = a.end_time ? new Date(a.end_time).getTime() : Number.POSITIVE_INFINITY;
-      const bEnd = b.end_time ? new Date(b.end_time).getTime() : Number.POSITIVE_INFINITY;
-      if (aEnd !== bEnd) return aEnd - bEnd;
+      const aEndTime = new Date(a.end_time!).getTime();
+      const bEndTime = new Date(b.end_time!).getTime();
 
-      return a.name.localeCompare(b.name);
+      const aEnded = now > aEndTime;
+      const bEnded = now > bEndTime;
+
+      // Different ended status - not ended comes first, ended comes last
+      if (aEnded !== bEnded) return aEnded ? 1 : -1;
+
+      // Both ended or both not ended - sort by end_time ascending (nearest first)
+      return aEndTime - bEndTime;
     });
   }, [events]);
 
