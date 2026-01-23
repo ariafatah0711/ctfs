@@ -225,37 +225,46 @@ export default function ChallengesPage() {
   const filteredChallenges = challenges.filter(challenge => {
     // Special case: when viewing All events, force Intro category to Main only
     if (eventId === 'all') {
-      const isIntro = String(challenge.category || '').toLowerCase() === 'intro'
-      const isMain = challenge.event_id === null || typeof challenge.event_id === 'undefined'
-      if (isIntro && !isMain) return false
+      // Hide challenges whose event has ended
+      if (challenge.event_id) {
+        const event = events.find(e => e.id === challenge.event_id);
+        if (event && event.end_time) {
+          const now = new Date();
+          const endTime = new Date(event.end_time);
+          if (endTime < now) return false;
+        }
+      }
+      const isIntro = String(challenge.category || '').toLowerCase() === 'intro';
+      const isMain = challenge.event_id === null || typeof challenge.event_id === 'undefined';
+      if (isIntro && !isMain) return false;
     }
 
     if (eventId !== 'all') {
-      const matchMain = eventId === null && (challenge.event_id === null || typeof challenge.event_id === 'undefined')
-      const matchEvent = typeof eventId === 'string' && eventId !== null && challenge.event_id === eventId
-      if (!matchMain && !matchEvent) return false
+      const matchMain = eventId === null && (challenge.event_id === null || typeof challenge.event_id === 'undefined');
+      const matchEvent = typeof eventId === 'string' && eventId !== null && challenge.event_id === eventId;
+      if (!matchMain && !matchEvent) return false;
     }
-    if (filterSettings.hideMaintenance && challenge.is_maintenance) return false
+    if (filterSettings.hideMaintenance && challenge.is_maintenance) return false;
     // Status filter
-    if (filters.status === 'solved' && !challenge.is_solved) return false
-    if (filters.status === 'unsolved' && challenge.is_solved) return false
+    if (filters.status === 'solved' && !challenge.is_solved) return false;
+    if (filters.status === 'unsolved' && challenge.is_solved) return false;
 
     // Category filter
-    if (filters.category !== 'all' && challenge.category !== filters.category) return false
+    if (filters.category !== 'all' && challenge.category !== filters.category) return false;
 
     // Difficulty filter
-    if (filters.difficulty !== 'all' && challenge.difficulty !== filters.difficulty) return false
+    if (filters.difficulty !== 'all' && challenge.difficulty !== filters.difficulty) return false;
 
     // Search filter
     if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
-      const titleMatch = challenge.title.toLowerCase().includes(searchLower)
-      const descMatch = challenge.description.toLowerCase().includes(searchLower)
-      if (!titleMatch && !descMatch) return false
+      const searchLower = filters.search.toLowerCase();
+      const titleMatch = challenge.title.toLowerCase().includes(searchLower);
+      const descMatch = challenge.description.toLowerCase().includes(searchLower);
+      if (!titleMatch && !descMatch) return false;
     }
 
-    return true
-  })
+    return true;
+  });
 
   // Preferred order for categories (ambil dari config)
   const preferredOrder = APP.challengeCategories || []
