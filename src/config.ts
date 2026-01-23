@@ -33,7 +33,7 @@ export const APP = {
     Easy: 'green',
     Medium: 'yellow',
     Hard: 'red',
-    Impossible: 'purple',
+    Insane: 'purple',
   },
 
   // Base URL (otomatis ambil dari env kalau ada)
