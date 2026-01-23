@@ -21,12 +21,14 @@ export async function addEvent(payload: {
   description?: string | null
   start_time?: string | null
   end_time?: string | null
+  image_url?: string | null
 }) {
   const { data, error } = await supabase.rpc('add_event', {
     p_name: payload.name,
     p_description: payload.description ?? '',
     p_start_time: payload.start_time ?? null,
     p_end_time: payload.end_time ?? null,
+    p_image_url: payload.image_url ?? null,
   })
 
   if (error) {
@@ -42,6 +44,7 @@ export async function updateEvent(eventId: string, payload: {
   description?: string | null
   start_time?: string | null
   end_time?: string | null
+  image_url?: string | null
 }) {
   const { data, error } = await supabase.rpc('update_event', {
     p_event_id: eventId,
@@ -49,6 +52,7 @@ export async function updateEvent(eventId: string, payload: {
     p_description: payload.description ?? null,
     p_start_time: payload.start_time ?? null,
     p_end_time: payload.end_time ?? null,
+    p_image_url: payload.image_url ?? null,
   })
 
   if (error) {

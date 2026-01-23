@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.4.4]
+### Added
+- add event image url support.
+- improve event card image display.
+- add event tab in challenge page.
+- improve navbar.
+
 ## v[2.4.3]
 ### Added
 - Add tag event in challenge detail.

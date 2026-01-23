@@ -102,9 +102,13 @@ CREATE TABLE public.events (
   description TEXT DEFAULT '',
   start_time TIMESTAMP WITH TIME ZONE DEFAULT NULL,
   end_time TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  image_url TEXT DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- ALTER TABLE public.events
+  -- ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT NULL;
 
 -- ALTER TABLE public.users
 --   ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '',
@@ -141,10 +145,10 @@ CREATE TABLE public.challenges (
 -- ADD COLUMN IF NOT EXISTS min_points INTEGER DEFAULT 0,
 -- ADD COLUMN IF NOT EXISTS decay_per_solve INTEGER DEFAULT 0;
 
-ALTER TABLE public.challenges
+-- ALTER TABLE public.challenges
 -- ADD COLUMN IF NOT EXISTS total_solves INTEGER DEFAULT 0;
 -- ADD COLUMN IF NOT EXISTS is_maintenance BOOLEAN DEFAULT false;
-ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
+-- ADD COLUMN IF NOT EXISTS event_id UUID REFERENCES public.events(id) ON DELETE SET NULL;
 
 -- ########################################################
 -- Table: challenges_flags
@@ -1304,13 +1308,14 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION delete_notification(UUID) TO authenticated;
 
 -- ########################################################
--- Function: add_event(p_name, p_description, p_start_time, p_end_time)
+-- Function: add_event(p_name, p_description, p_start_time, p_end_time, p_image_url)
 -- ########################################################
 CREATE OR REPLACE FUNCTION add_event(
   p_name TEXT,
   p_description TEXT DEFAULT '',
   p_start_time TIMESTAMPTZ DEFAULT NULL,
-  p_end_time TIMESTAMPTZ DEFAULT NULL
+  p_end_time TIMESTAMPTZ DEFAULT NULL,
+  p_image_url TEXT DEFAULT NULL
 )
 RETURNS UUID AS $$
 DECLARE
@@ -1320,8 +1325,8 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add event';
   END IF;
 
-  INSERT INTO public.events(name, description, start_time, end_time)
-  VALUES (p_name, COALESCE(p_description, ''), p_start_time, p_end_time)
+  INSERT INTO public.events(name, description, start_time, end_time, image_url)
+  VALUES (p_name, COALESCE(p_description, ''), p_start_time, p_end_time, p_image_url)
   RETURNING id INTO v_event_id;
 
   RETURN v_event_id;
@@ -1329,7 +1334,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_event(TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_event(TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: update_event(p_event_id, ...)
@@ -1339,7 +1344,8 @@ CREATE OR REPLACE FUNCTION update_event(
   p_name TEXT DEFAULT NULL,
   p_description TEXT DEFAULT NULL,
   p_start_time TIMESTAMPTZ DEFAULT NULL,
-  p_end_time TIMESTAMPTZ DEFAULT NULL
+  p_end_time TIMESTAMPTZ DEFAULT NULL,
+  p_image_url TEXT DEFAULT NULL
 )
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -1352,6 +1358,7 @@ BEGIN
       description = COALESCE(p_description, description),
       start_time = p_start_time,
       end_time = p_end_time,
+      image_url = COALESCE(p_image_url, image_url),
       updated_at = now()
   WHERE id = p_event_id;
 
@@ -1360,7 +1367,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION update_event(UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_event(UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: delete_event(p_event_id)

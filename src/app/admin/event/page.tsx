@@ -69,9 +69,10 @@ export default function AdminEventPage() {
     description: '',
     start_time: '',
     end_time: '',
+    image_url: '',
   }
 
-  const [formData, setFormData] = useState(() => ({ ...emptyForm }))
+  const [formData, setFormData] = useState<typeof emptyForm>(() => ({ ...emptyForm }))
 
   const loadEvents = async () => {
     const data = await getEvents()
@@ -123,6 +124,7 @@ export default function AdminEventPage() {
       description: evt.description || '',
       start_time: toInputValue(evt.start_time || null),
       end_time: toInputValue(evt.end_time || null),
+      image_url: evt.image_url || '',
     })
     setOpenForm(true)
   }
@@ -141,6 +143,7 @@ export default function AdminEventPage() {
         description: formData.description?.trim() || '',
         start_time: fromInputValue(formData.start_time),
         end_time: fromInputValue(formData.end_time),
+        image_url: formData.image_url?.trim() || null,
       }
 
       if (editing?.id) {
@@ -463,8 +466,17 @@ export default function AdminEventPage() {
                       className="h-9 px-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
                     />
                   </div>
-                </div>
-                <DialogFooter className="flex gap-2 pt-1">
+                </div>                <div>
+                  <Label className="text-xs">Image URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    value={formData.image_url}
+                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                    className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Add a banner image URL for this event</p>
+                </div>                <DialogFooter className="flex gap-2 pt-1">
                   <Button type="button" variant="ghost" onClick={() => setOpenForm(false)}>Cancel</Button>
                   <Button type="submit" disabled={submitting}>{submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}</Button>
                 </DialogFooter>

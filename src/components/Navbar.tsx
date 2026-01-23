@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Hammer } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
@@ -38,6 +38,8 @@ export default function Navbar() {
   const notifButtonRef = useRef<HTMLButtonElement | null>(null)
   const [scoreboardOpen, setScoreboardOpen] = useState(false)
   const scoreboardMenuRef = useRef<HTMLDivElement | null>(null)
+  const [docsOpen, setDocsOpen] = useState(false)
+  const docsMenuRef = useRef<HTMLDivElement | null>(null)
   const { theme, toggleTheme } = useTheme()
   const avatarSrc =  user?.profile_picture_url || user?.picture || null
   const [solveSoundEnabled, setSolveSoundEnabled] = useState(true)
@@ -265,6 +267,20 @@ export default function Navbar() {
   }, [scoreboardOpen])
 
   useEffect(() => {
+    if (!docsOpen) return
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!docsMenuRef.current) return
+      if (!docsMenuRef.current.contains(event.target as Node)) {
+        setDocsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [docsOpen])
+
+  useEffect(() => {
     if (!notifOpen) return
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
@@ -414,25 +430,48 @@ export default function Navbar() {
                 </Link>
               )}
 
-              <Link
-                href="/rules"
-                className={`px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                title="Rules"
-                aria-label="Rules"
-                data-tour="navbar-rules"
-              >
-                <BookOpen size={18} className="mr-1" /> Rules
-              </Link>
-
-              <Link
-                href="/info"
-                className={`px-3 py-2 rounded-lg flex items-center justify-center transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                title="Info"
-                aria-label="Info"
-                data-tour="navbar-info"
-              >
-                <Info size={18} className="mr-1" /> Info
-              </Link>
+              {/* Info Dropdown (Rules + Info + Docs) */}
+              <div ref={docsMenuRef} className="relative">
+                <button
+                  type="button"
+                  data-tour="navbar-docs"
+                  onClick={() => setDocsOpen((v) => !v)}
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                >
+                  <BookOpen size={18} className="mr-1" /> Info
+                  <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
+                  </svg>
+                </button>
+                {docsOpen && (
+                  <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+                    <Link
+                      href="/info"
+                      onClick={() => setDocsOpen(false)}
+                      className={`block px-3 py-2 text-sm rounded-t-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      data-tour="navbar-info"
+                    >
+                      Info
+                    </Link>
+                    <Link
+                      href="/rules"
+                      onClick={() => setDocsOpen(false)}
+                      className={`block px-3 py-2 text-sm ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      data-tour="navbar-rules"
+                    >
+                      Rules
+                    </Link>
+                    <Link
+                      href="/docs"
+                      onClick={() => setDocsOpen(false)}
+                      className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                      data-tour="navbar-docs"
+                    >
+                      Documentation
+                    </Link>
+                  </div>
+                )}
+              </div>
 
               {adminStatus && user && (
                 <Link
@@ -779,24 +818,38 @@ export default function Navbar() {
                   )}
                 </>
               )}
-              <Link
-                href="/rules"
-                className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                onClick={() => setMobileMenuOpen(false)}
-                title="Rules"
-                aria-label="Rules"
-              >
-                <BookOpen size={18} className="mr-1" /> Rules
-              </Link>
-              <Link
-                href="/info"
-                className={`px-3 py-2 rounded-lg flex items-center gap-1 transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                onClick={() => setMobileMenuOpen(false)}
-                title="Info"
-                aria-label="Info"
-              >
-                <Info size={18} className="mr-1" /> Info
-              </Link>
+              {/* Info Menu (Info + Rules + Docs) - Mobile */}
+              <details className="rounded-lg">
+                <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
+                  <BookOpen size={18} className="mr-1" /> Info
+                </summary>
+                <div className="mt-1 ml-6 flex flex-col gap-1">
+                  <Link
+                    href="/info"
+                    className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-tour="navbar-info"
+                  >
+                    Info
+                  </Link>
+                  <Link
+                    href="/rules"
+                    className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-tour="navbar-rules"
+                  >
+                    Rules
+                  </Link>
+                  <Link
+                    href="/docs"
+                    className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    data-tour="navbar-docs"
+                  >
+                    Documentation
+                  </Link>
+                </div>
+              </details>
               {user && (
                 <>
                   {adminStatus && (

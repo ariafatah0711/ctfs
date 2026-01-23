@@ -8,7 +8,8 @@ import { ChallengeWithSolve, User, Attachment, Event } from '@/types'
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
-import { Flag } from 'lucide-react'
+import EventsTab from '@/components/challenges/EventsTab'
+import { Flag, Zap } from 'lucide-react'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 import { Solver } from '@/components/challenges/SolversList';
@@ -30,6 +31,7 @@ export default function ChallengesPage() {
     }
   };
   const router = useRouter()
+  const [currentTab, setCurrentTab] = useState<'challenges' | 'events'>('challenges')
   const [challengeTab, setChallengeTab] = useState<'challenge' | 'solvers'>('challenge');
   const [solvers, setSolvers] = useState<Solver[]>([]);
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
@@ -341,7 +343,37 @@ export default function ChallengesPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        <TitlePage icon={<Flag size={30} className="text-orange-500 dark:text-orange-300 drop-shadow" />}>challenges</TitlePage>
+        {/* <TitlePage icon={<Flag size={30} className="text-orange-500 dark:text-orange-300 drop-shadow" />}>challenges</TitlePage> */}
+
+        {/* Tab Navigation */}
+        <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setCurrentTab('challenges')}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
+              currentTab === 'challenges'
+                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Flag size={16} />
+              Challenges
+            </div>
+          </button>
+          <button
+            onClick={() => setCurrentTab('events')}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
+              currentTab === 'events'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <Zap size={16} />
+              Events
+            </div>
+          </button>
+        </div>
 
         {/* Subtle background logo watermark */}
         <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.08] dark:opacity-[0.06] z-0">
@@ -353,70 +385,93 @@ export default function ChallengesPage() {
           />
         </div>
 
-        <ChallengeFilterBar
-          filters={filters}
-          settings={filterSettings}
-          categories={categories}
-          difficulties={difficulties}
-          onFilterChange={setFilters}
-          onSettingsChange={setFilterSettings}
-          onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
-          showStatusFilter={true}
-          events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
-          selectedEventId={eventId}
-          onEventChange={setEventId}
-        />
+        {/* CHALLENGES TAB */}
+        {currentTab === 'challenges' && (
+          <>
+            <ChallengeFilterBar
+              filters={filters}
+              settings={filterSettings}
+              categories={categories}
+              difficulties={difficulties}
+              onFilterChange={setFilters}
+              onSettingsChange={setFilterSettings}
+              onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
+              showStatusFilter={true}
+              events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
+              selectedEventId={eventId}
+              onEventChange={setEventId}
+            />
 
-        {/* Challenges Grid Grouped by Category */}
-        <div>
-          {!user || loading ? (
-            <Loader fullscreen color="text-orange-500" />
-          ) : filteredChallenges.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-gray-400 dark:text-gray-500">🔍</span>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {challenges.length === 0
-                  ? "No challenges available"
-                  : "No challenges match your filters"
-                }
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                {challenges.length === 0
-                  ? "Check back later for new challenges"
-                  : "Try adjusting your filter criteria"
-                }
-              </p>
-            </div>
-          ) : (
-            orderedKeys.map((category) => (
-              <div key={category} className="mb-12">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
-                  <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">
-                    {eventId === 'all' && String(category).toLowerCase() === 'intro' ? 'Intro (Main)' : category}
-                  </h2>
+            {/* Challenges Grid Grouped by Category */}
+            <div>
+              {!user || loading ? (
+                <Loader fullscreen color="text-orange-500" />
+              ) : filteredChallenges.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl text-gray-400 dark:text-gray-500">🔍</span>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    {challenges.length === 0
+                      ? "No challenges available"
+                      : "No challenges match your filters"
+                    }
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {challenges.length === 0
+                      ? "Check back later for new challenges"
+                      : "Try adjusting your filter criteria"
+                    }
+                  </p>
                 </div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                >
-                  {grouped[category].map((challenge) => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      highlightTeamSolves={filterSettings.highlightTeamSolves}
-                      onClick={() => setSelectedChallenge(challenge)}
-                    />
-                  ))}
-                </motion.div>
-              </div>
-            ))
-          )}
-        </div>
+              ) : (
+                orderedKeys.map((category) => (
+                  <div key={category} className="mb-12">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
+                      <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">
+                        {eventId === 'all' && String(category).toLowerCase() === 'intro' ? 'Intro (Main)' : category}
+                      </h2>
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                    >
+                      {grouped[category].map((challenge) => (
+                        <ChallengeCard
+                          key={challenge.id}
+                          challenge={challenge}
+                          highlightTeamSolves={filterSettings.highlightTeamSolves}
+                          onClick={() => setSelectedChallenge(challenge)}
+                        />
+                      ))}
+                    </motion.div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
+
+        {/* EVENTS TAB */}
+        {currentTab === 'events' && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <EventsTab
+              events={events}
+              selectedEventId={eventId}
+              onEventSelect={(selected) => {
+                setEventId(selected)
+                setCurrentTab('challenges')
+              }}
+            />
+          </motion.div>
+        )}
       </div>
 
       {/* Dialog tetap bisa pakai !user cek */}

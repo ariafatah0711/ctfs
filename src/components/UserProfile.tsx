@@ -213,7 +213,7 @@ export default function UserProfile({
     setShowUnsolvedModal(true)
     setLoadingUnsolved(true)
     try {
-      const allChallenges = await getChallenges(userId || undefined, false)
+      const allChallenges = await getChallenges(userId || undefined, false, 'all')
       const solvedIds = new Set(solvedChallenges.map(c => c.id))
       const unsolved = allChallenges.filter(c => !solvedIds.has(c.id))
       setUnsolvedChallenges(unsolved)
