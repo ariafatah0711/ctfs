@@ -1,6 +1,6 @@
 "use client"
 
-import { ChallengeWithSolve, Challenge } from '@/types'
+import { ChallengeWithSolve } from '@/types'
 import { getFirstBloodChallengeIds, getChallenges } from '@/lib/challenges'
 import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
@@ -10,35 +10,19 @@ import { getTeamByUserId } from '@/lib/teams'
 import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
 import { useRouter } from 'next/navigation'
-import {
-  Award,
-  Crown,
-  Droplet,
-  Flame,
-  CheckCircle2,
-  LayoutGrid,
-  Grid2X2,
-  Grid3X3,
-  Layers,
-  Medal,
-  ShieldCheck,
-  Swords,
-  Target,
-  Trophy,
-  Zap,
-  Users,
-} from 'lucide-react'
-import ImageWithFallback from './ImageWithFallback'
+import { Award, Crown, Droplet, Flame, CheckCircle2, LayoutGrid, Grid2X2, Grid3X3, Layers, Medal, ShieldCheck, Swords, Target, Trophy, Zap, Users, ChartColumnDecreasing } from 'lucide-react'
+import ImageWithFallback from '../ImageWithFallback'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import EditProfileModal from './custom/EditProfileModal'
+import EditProfileModal from './EditProfileModal'
 import { getCurrentAuthInfo, getCurrentUser } from '@/lib/auth'
 import { useAuth } from '@/contexts/AuthContext'
-import SocialIcon from './custom/SocialIcon'
+import SocialIcon from '../custom/SocialIcon'
 import Loader from '@/components/custom/loading'
-import BackButton from './custom/BackButton'
-import DifficultyBadge from './custom/DifficultyBadge'
+import BackButton from '../custom/BackButton'
+import DifficultyBadge from '../custom/DifficultyBadge'
 import APP from '@/config'
+import UserStatsPlotly from './UserStats'
 
 type UserDetail = {
   id: string
@@ -139,6 +123,7 @@ export default function UserProfile({
   const [loadingUnsolved, setLoadingUnsolved] = useState(false)
   const [authInfo, setAuthInfo] = useState<Array<{ provider: string; email: string }>>([])
   const [teamInfo, setTeamInfo] = useState<{ team: any; members: any[] } | null>(null)
+  const [activeTab, setActiveTab] = useState<'profile' | 'stats'>('profile')
 
   const refreshUserDetail = async () => {
     if (!userId) return
@@ -286,10 +271,41 @@ export default function UserProfile({
         {/* Kondisi: Data */}
         {!isLoading && !hasError && userDetail && (
           <>
-            {/* Back Button */}
-            {onBack && (
-              <BackButton onClick={onBack} label="Go Back" className="mb-4" />
-            )}
+            {/* Tabs */}
+            <div className="mb-4 flex justify-between items-center">
+              {/* Back Button */}
+              {onBack && (
+                <BackButton onClick={onBack} label="Go Back" />
+              )}
+              <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
+                    activeTab === 'profile'
+                      ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users size={16} />
+                    Profile
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveTab('stats')}
+                  className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
+                    activeTab === 'stats'
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <ChartColumnDecreasing size={16} />
+                    Stats
+                  </div>
+                </button>
+              </span>
+            </div>
 
             {/* Profile Header */}
             <motion.div
@@ -298,7 +314,7 @@ export default function UserProfile({
               transition={{ duration: 0.4 }}
             >
               <Card className="bg-white dark:bg-gray-800">
-                <CardContent className="flex items-center space-x-6 py-6">
+                <CardContent className="flex items-start space-x-6 py-6">
                   <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center overflow-hidden">
                     <ImageWithFallback src={avatarSrc} alt={userDetail.username} size={80} className="rounded-full border border-gray-200 dark:border-gray-700" fallbackBg="bg-blue-100 dark:bg-blue-900" />
                   </div>
@@ -488,6 +504,9 @@ export default function UserProfile({
                 </Card>
               )}
             </motion.div>
+
+            {activeTab === 'profile' && (
+            <>
 
             {/* Category Progress */}
             {categoryTotals.map(({ category, total_challenges }) => {
@@ -832,7 +851,17 @@ export default function UserProfile({
                   )}
                 </div>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+              </>
+            )}
+            {activeTab === 'stats' && (
+              <div>
+                <UserStatsPlotly
+                  solvedChallenges={solvedChallenges}
+                  firstBloodIds={firstBloodIds}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

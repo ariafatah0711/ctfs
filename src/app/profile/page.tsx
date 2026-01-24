@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import UserProfile from '@/components/UserProfile'
+import UserProfile from '@/components/user/UserProfile'
 import Loader from '@/components/custom/loading'
 
 export default function ProfilePage() {

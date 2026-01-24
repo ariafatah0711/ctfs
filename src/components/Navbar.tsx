@@ -467,7 +467,7 @@ export default function Navbar() {
                       className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                       data-tour="navbar-docs"
                     >
-                      Documentation
+                      Docs
                     </Link>
                   </div>
                 )}
@@ -522,7 +522,9 @@ export default function Navbar() {
                 </>
               )}
             </div>
+
             {/* Notifications Icon (realtime + history) */}
+            {user && (
             <div className="relative mr-2" data-tour="navbar-notifications">
               <button
                 ref={notifButtonRef}
@@ -657,7 +659,10 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+            )}
+
             {/* Logs Icon */}
+            {user && (
             <div className="relative mr-2" data-tour="navbar-logs">
               <button
                 className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/logs' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
@@ -684,6 +689,8 @@ export default function Navbar() {
                 </span>
               )}
             </div>
+            )}
+
             {/* Theme Switcher Icon Only - moved right */}
             <button
               onClick={toggleTheme}
@@ -846,7 +853,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-tour="navbar-docs"
                   >
-                    Documentation
+                    Docs
                   </Link>
                 </div>
               </details>

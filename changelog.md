@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.1]
+### Added
+- add UserStats component to show user stats in profile page.
+- add tab for userprofile to show profile or stats.
+
+### Fixed
+- hidden the notif icon, and logs icon in navbar when not logged in.
+
 ## v[2.5.0]
 ### Added
 - Add Captcha support in register and login page.

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getUserByUsername } from '@/lib/users'
-import UserProfile from '@/components/UserProfile'
+import UserProfile from '@/components/user/UserProfile'
 import { useAuth } from '@/contexts/AuthContext'
 import Loader from '@/components/custom/loading'
 
