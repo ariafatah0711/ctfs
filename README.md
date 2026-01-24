@@ -233,6 +233,17 @@ vercel --prod
 </p>
 ```
 
+## Security
+### Added Rate Limit in Vercel
+![1769265568619](images/README/1769265568619.png)
+
+### Added cloudflare in supabase
+![1769265616464](images/README/1769265616464.png)
+
+![1769265666794](images/README/1769265666794.png)
+
+![1769265704498](images/README/1769265704498.png)
+
 ---
 
 ## 🗄️ Supabase Backup (GitHub Actions)
