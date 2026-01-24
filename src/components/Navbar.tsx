@@ -346,7 +346,7 @@ export default function Navbar() {
         </div>
       )}
     <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-0">
         <div className="flex justify-between h-14 items-center">
           {/* Logo */}
           <div className="flex items-center space-x-8">

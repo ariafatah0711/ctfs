@@ -37,11 +37,11 @@ export default function ChallengeJoyride() {
             placement: 'center',
             disableBeacon: true,
           },
-          {
-            target: '[data-tour="navbar-logo"]',
-            content: '🏠 Click this logo to explore the home page.',
-            placement: 'bottom',
-          },
+          // {
+          //   target: '[data-tour="navbar-logo"]',
+          //   content: '🏠 Click this logo to explore the home page.',
+          //   placement: 'bottom',
+          // },
           {
             target: '[data-tour="navbar-challenges"]',
             content: '💡 Browse all available challenges here.',
@@ -52,30 +52,35 @@ export default function ChallengeJoyride() {
             content: '🏆 Check the rankings here.',
             placement: 'bottom',
           },
-          {
-            target: '[data-tour="navbar-rules"]',
-            content: '📖 Read the competition rules here.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="navbar-info"]',
-            content: '📢 Find important info and announcements here.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="navbar-profile"]',
-            content: '👤 Open your profile to update your picture, bio, sosmed, and more.',
-            placement: 'bottom',
-          },
+          // {
+          //   target: '[data-tour="navbar-rules"]',
+          //   content: '📖 Read the competition rules here.',
+          //   placement: 'bottom',
+          // },
+          // {
+          //   target: '[data-tour="navbar-info"]',
+          //   content: '📢 Find important info and announcements here.',
+          //   placement: 'bottom',
+          // },
+          // {
+          //   target: '[data-tour="navbar-profile"]',
+          //   content: '👤 Open your profile to update your picture, bio, sosmed, and more.',
+          //   placement: 'bottom',
+          // },
           {
             target: '[data-tour="navbar-notifications"]',
-            content: '🔔 View notifications for recent solves and new challenges.',
-            placement: 'bottom',
+            content: '🔔 View notifications for information.',
+            placement: 'top',
+          },
+          {
+            target: '[data-tour="navbar-logs"]',
+            content: '📜 View Logs for solved challenges history.',
+            placement: 'top',
           },
           {
             target: '[data-tour="challenge-tutorial"]',
             content: '📚 Open the CTF tutorial PDF here.',
-            placement: 'bottom',
+            placement: 'top',
           },
         ]
 
