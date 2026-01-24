@@ -42,8 +42,18 @@ blockquote {
   }
 }
 
-/* gak tau lupa */
+/* Overlay pas zoom (background) */
+/* overlay pas zoom muncul */
+[data-rmiz-modal-overlay="visible"] {
+  background-color: rgba(0, 0, 0, 0.8);
+}
 
+/* pas ilang (biar transisinya halus) */
+[data-rmiz-modal-overlay="hidden"] {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+/* code */
 code {
   background: #2d2a3a !important;
   /* warna gelap */

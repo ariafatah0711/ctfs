@@ -1,6 +1,6 @@
 {
   "name": "ctfs",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "private": true,
   "scripts": {
     "predev": "node src/scripts/gen-version.js",
@@ -35,6 +35,7 @@
     "react-hot-toast": "^2.6.0",
     "react-joyride": "^2.9.3",
     "react-markdown": "^10.1.0",
+    "react-medium-image-zoom": "^5.4.0",
     "react-plotly.js": "^2.6.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",

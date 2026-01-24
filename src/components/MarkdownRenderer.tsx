@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
+import Zoom from 'react-medium-image-zoom'
 import { Copy, Check, ChevronsRight, ChevronsDown } from 'lucide-react'
 
 interface MarkdownRendererProps {
@@ -195,12 +196,21 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
               </CodeBlockWrapper>
             ),
           a: ({...props}) => <a className="text-orange-400 hover:text-orange-300 hover:underline underline font-medium transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
-          img: ({...props}) => (
-            <img
-              {...props}
-              loading="lazy"
-              className="max-w-full h-auto rounded-md my-2 w-full"
-            />
+          // img: ({...props}) => (
+          //   <img
+          //     {...props}
+          //     loading="lazy"
+          //     className="max-w-full h-auto rounded-md my-2 w-full"
+          //   />
+          // ),
+          img: ({ ...props }) => (
+            <Zoom wrapElement="span">
+              <img
+                {...props}
+                loading="lazy"
+                className="max-w-full h-auto rounded-md my-2 w-full cursor-zoom-in"
+              />
+            </Zoom>
           ),
           blockquote: ({...props}) => (
             <BlockquoteWrapper isDark>

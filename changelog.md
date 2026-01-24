@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.4.5]
+### Added
+- improve event card display in event page.
+- add image zoom support in markdown renderer.
+
 ## v[2.4.4]
 ### Added
 - add event image url support.

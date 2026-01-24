@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import 'react-medium-image-zoom/dist/styles.css'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
