@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.0]
+### Added
+- Add Captcha support in register and login page.
+- Add configuration for enabling/disabling captcha in config file.
+
 ## v[2.4.5]
 ### Added
 - improve event card display in event page.

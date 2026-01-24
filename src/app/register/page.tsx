@@ -9,10 +9,13 @@ import { isValidUsername } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
 import Loader from '@/components/custom/loading'
 import GoogleLoginButton from '@/components/GoogleLoginButton'
+import { Turnstile } from '@marsidev/react-turnstile'
+import Config from '@/config'
 
 export default function RegisterPage() {
   const router = useRouter()
   const { setUser, user, loading: authLoading } = useAuth()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -30,10 +33,15 @@ export default function RegisterPage() {
   }, [user, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (Config.captchaToken && !captchaToken) {
+      setError('Please complete the CAPTCHA')
+      setLoading(false)
+      return
+    }
+
     e.preventDefault()
     setLoading(true)
     setError('')
-
 
     // Validasi username
     const usernameError = isValidUsername(formData.username)
@@ -59,7 +67,8 @@ export default function RegisterPage() {
       const { user, error } = await signUp(
         formData.email,
         formData.password,
-        formData.username
+        formData.username,
+        captchaToken ?? undefined
       )
 
       if (error) {
@@ -161,6 +170,19 @@ export default function RegisterPage() {
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900 p-3 text-sm text-red-700 dark:text-red-300">
               {error}
+            </div>
+          )}
+
+          {Config.captchaToken && (
+            <div className="w-full flex justify-center">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                  options={{
+                    theme: 'auto'
+                  }}
+                />
             </div>
           )}
 

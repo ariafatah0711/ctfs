@@ -1,6 +1,6 @@
 {
   "name": "ctfs",
-  "version": "2.4.5",
+  "version": "2.5.0",
   "private": true,
   "scripts": {
     "predev": "node src/scripts/gen-version.js",
@@ -12,6 +12,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.4.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.6",

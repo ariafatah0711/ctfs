@@ -52,6 +52,8 @@ export const APP = {
     hidescoreboardTotal: false, // enable / disable Total Score tab in team scoreboard
   },
 
+  captchaToken: true, // enable / disable captcha token verification on create account
+
   /* Maintenance configuration */
   // mode: 'no' | 'yes' | 'auto'
   // 'no'   -> normal operation

@@ -8,11 +8,14 @@ import { signIn } from '@/lib/auth'
 import { useAuth } from '@/contexts/AuthContext'
 import Loader from '@/components/custom/loading'
 import GoogleLoginButton from '@/components/GoogleLoginButton'
+import { Turnstile } from '@marsidev/react-turnstile'
+import Config from '@/config'
 
 export default function LoginPage() {
   const router = useRouter()
   const { setUser, user, loading: authLoading } = useAuth()
   const [formData, setFormData] = useState({ identifier: '', password: '' })
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -25,10 +28,16 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (Config.captchaToken && !captchaToken) {
+      setError('Please complete the CAPTCHA')
+      setLoading(false)
+      return
+    }
+
     setLoading(true)
     setError('')
     try {
-      const { user, error } = await signIn(formData.identifier, formData.password)
+      const { user, error } = await signIn(formData.identifier, formData.password, captchaToken ?? undefined)
 
       if (error) {
         setError(error)
@@ -113,6 +122,19 @@ export default function LoginPage() {
               Forgot password?
             </Link>
           </div>
+
+          {Config.captchaToken && (
+            <div className="w-full flex justify-center">
+                <Turnstile
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                  options={{
+                    theme: 'auto'
+                  }}
+                />
+            </div>
+          )}
 
           <button
             type="submit"

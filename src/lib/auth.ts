@@ -70,7 +70,7 @@ export async function updatePassword(newPassword: string): Promise<{ error: stri
 /**
  * Register a new user
  */
-export async function signUp(email: string, password: string, username: string): Promise<AuthResponse> {
+export async function signUp(email: string, password: string, username: string, captchaToken?: string): Promise<AuthResponse> {
   try {
   // Validate only @gmail.com emails are allowed for registration
     if (!email.toLowerCase().endsWith('@gmail.com')) {
@@ -96,7 +96,8 @@ export async function signUp(email: string, password: string, username: string):
         data: {
           // username: username,
           // display_name: username
-        }
+        },
+        ...(captchaToken && { captchaToken })
       }
     })
 
@@ -139,7 +140,7 @@ export async function signUp(email: string, password: string, username: string):
   }
 }
 
-export async function signIn(identifier: string, password: string): Promise<AuthResponse> {
+export async function signIn(identifier: string, password: string, captchaToken?: string): Promise<AuthResponse> {
   try {
     let email = identifier;
 
@@ -159,6 +160,9 @@ export async function signIn(identifier: string, password: string): Promise<Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        ...(captchaToken && { captchaToken })
+      }
     });
 
     if (error) {
