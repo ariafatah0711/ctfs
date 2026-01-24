@@ -8,6 +8,8 @@ import { LeaderboardEntry } from '@/types'
 interface ScoreboardTableProps {
   leaderboard: LeaderboardEntry[]
   currentUsername?: string
+  /** Optional event filter to include when linking to the full scoreboard */
+  eventId?: string | null | 'all'
   /** Optional label to show for the score column (defaults to "Score") */
   scoreColumnLabel?: string
   /** Optional renderer for the score column; receives the entry and should return a node */
@@ -16,18 +18,28 @@ interface ScoreboardTableProps {
   showAllLink?: boolean
 }
 
-const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername, scoreColumnLabel, scoreColumnRenderer, showAllLink = true }) => {
+const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername, eventId, scoreColumnLabel, scoreColumnRenderer, showAllLink = true }) => {
   const pathname = usePathname()
 
   return (
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
-        {pathname === '/scoreboard' && showAllLink && (
-          <Link href="/scoreboard/all">
-            <Button variant="default" size="sm">Show All</Button>
-          </Link>
-        )}
+        {pathname === '/scoreboard' && showAllLink && (() => {
+          let href = '/scoreboard/all'
+          if (eventId !== undefined && eventId !== 'all') {
+            if (eventId === null) {
+              href += '?event_id=main'
+            } else {
+              href += `?event_id=${encodeURIComponent(String(eventId))}`
+            }
+          }
+          return (
+            <Link href={href}>
+              <Button variant="default" size="sm">Show All</Button>
+            </Link>
+          )
+        })()}
       </CardHeader>
       <CardContent>
         <motion.div key={`table-${scoreColumnLabel ?? 'score'}-${leaderboard.length}-${leaderboard[0]?.username ?? ''}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>

@@ -655,7 +655,9 @@ GRANT EXECUTE ON FUNCTION update_profile_picture(uuid, text) TO authenticated;
 -- ########################################################
 CREATE OR REPLACE FUNCTION get_leaderboard(
   limit_rows integer DEFAULT 100,
-  offset_rows integer DEFAULT 0
+  offset_rows integer DEFAULT 0,
+  p_event_id UUID DEFAULT NULL,
+  p_event_mode TEXT DEFAULT 'any' -- 'any' = all, 'equals' = match p_event_id, 'is_null' = only NULL event_id
 )
 RETURNS TABLE (
   id UUID,
@@ -669,21 +671,57 @@ BEGIN
   SELECT
     u.id,
     u.username,
-    COALESCE(SUM(c.points), 0) AS score,
-    MAX(s.created_at) AS last_solve,
-    ROW_NUMBER() OVER (ORDER BY COALESCE(SUM(c.points), 0) DESC, MAX(s.created_at) ASC) AS rank
+    COALESCE(
+      SUM(
+        CASE WHEN (
+          p_event_mode = 'any'
+          OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+          OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+        ) THEN c.points ELSE 0 END
+      ), 0
+    ) AS score,
+    MAX(
+      CASE WHEN (
+        p_event_mode = 'any'
+        OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+        OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+      ) THEN s.created_at ELSE NULL END
+    ) AS last_solve,
+    ROW_NUMBER() OVER (
+      ORDER BY COALESCE(
+        SUM(CASE WHEN (
+          p_event_mode = 'any'
+          OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+          OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+        ) THEN c.points ELSE 0 END), 0
+      ) DESC,
+      MAX(CASE WHEN (
+        p_event_mode = 'any'
+        OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+        OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+      ) THEN s.created_at ELSE NULL END) ASC
+    ) AS rank
   FROM public.users u
   LEFT JOIN public.solves s ON u.id = s.user_id
   LEFT JOIN public.challenges c ON s.challenge_id = c.id
   GROUP BY u.id, u.username
-  ORDER BY score DESC, MAX(s.created_at) ASC
+  HAVING COALESCE(
+    SUM(
+      CASE WHEN (
+        p_event_mode = 'any'
+        OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+        OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+      ) THEN c.points ELSE 0 END
+    ), 0
+  ) > 0
+  ORDER BY score DESC, last_solve ASC
   LIMIT limit_rows OFFSET offset_rows;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_leaderboard(integer, integer) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_leaderboard(integer, integer, uuid, text) TO authenticated;
 
 -- ########################################################
 -- Function: get_top_progress(p_user_ids UUID[])
@@ -692,7 +730,9 @@ GRANT EXECUTE ON FUNCTION get_leaderboard(integer, integer) TO authenticated;
 CREATE OR REPLACE FUNCTION get_top_progress(
   p_user_ids UUID[],
   p_limit INT DEFAULT 1000,
-  p_offset INT DEFAULT 0
+  p_offset INT DEFAULT 0,
+  p_event_id UUID DEFAULT NULL,
+  p_event_mode TEXT DEFAULT 'any' -- 'any' = all, 'equals' = match p_event_id, 'is_null' = only NULL event_id
 )
 RETURNS TABLE (
   user_id UUID,
@@ -711,6 +751,11 @@ BEGIN
   JOIN public.challenges c ON c.id = s.challenge_id
   JOIN public.users u ON u.id = s.user_id
   WHERE s.user_id = ANY(p_user_ids)
+    AND (
+      p_event_mode = 'any'
+      OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+      OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+    )
   ORDER BY s.created_at ASC
   LIMIT p_limit OFFSET p_offset;
 END;
@@ -718,7 +763,7 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_top_progress(UUID[], INT, INT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_top_progress(UUID[], INT, INT, UUID, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: submit_flag(p_challenge_id UUID, p_flag TEXT)

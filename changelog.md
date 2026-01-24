@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.2]
+### Added
+- add tab scoreboard event filter.
+- improve event filter in scoreboard page.
+- improve event filter in scoreboard all page.
+- add parameter event_id in scoreboard page for filtering.
+
 ## v[2.5.1]
 ### Added
 - add UserStats component to show user stats in profile page.

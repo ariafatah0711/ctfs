@@ -3,8 +3,8 @@ import { supabase } from './supabase'
 import { Challenge, ChallengeWithSolve, LeaderboardEntry, Attachment } from '@/types'
 
 // Get user rank only (by username)
-export async function getUserRank(username: string): Promise<number | null> {
-  const leaderboard = await getLeaderboard();
+export async function getUserRank(username: string, eventId?: string | null | 'all'): Promise<number | null> {
+  const leaderboard = await getLeaderboard(100, 0, eventId);
   leaderboard.sort((a: any, b: any) => {
     const scoreA = a.progress.length > 0 ? a.progress[a.progress.length - 1].score : 0;
     const scoreB = b.progress.length > 0 ? b.progress[b.progress.length - 1].score : 0;
@@ -274,10 +274,31 @@ export async function getChallengesLite(showAll: boolean = true) {
 /**
  * Get leaderboard with progress
  */
-export async function getLeaderboard(limit = 100, offset = 0) {
+export async function getLeaderboard(limit = 100, offset = 0, eventId?: string | null | 'all') {
+  // Map frontend eventId values to RPC parameters
+  let p_event_mode: string = 'any'
+  let p_event_id: string | null = null
+  if (eventId === 'all') {
+    p_event_mode = 'any'
+    p_event_id = null
+  } else if (eventId === null) {
+    // explicit `null` means Main (only challenges without event)
+    p_event_mode = 'is_null'
+    p_event_id = null
+  } else if (eventId === undefined) {
+    // undefined => no filter (any)
+    p_event_mode = 'any'
+    p_event_id = null
+  } else {
+    p_event_mode = 'equals'
+    p_event_id = eventId
+  }
+
   const { data, error } = await supabase.rpc('get_leaderboard', {
     limit_rows: limit,
     offset_rows: offset,
+    p_event_id,
+    p_event_mode,
   })
   if (error) throw error
   return data
@@ -286,8 +307,8 @@ export async function getLeaderboard(limit = 100, offset = 0) {
 /**
  * Get lightweight leaderboard summary: username and final score (no progress history)
  */
-export async function getLeaderboardSummary(limit = 100, offset = 0) {
-  const data = await getLeaderboard(limit, offset)
+export async function getLeaderboardSummary(limit = 100, offset = 0, eventId?: string | null | 'all') {
+  const data = await getLeaderboard(limit, offset, eventId)
   return (data || []).map((d: any) => ({
     id: d.id,
     username: d.username,
@@ -297,17 +318,36 @@ export async function getLeaderboardSummary(limit = 100, offset = 0) {
   }))
 }
 
-export async function getTopProgress(topUsers: string[]) {
+export async function getTopProgress(topUsers: string[], eventId?: string | null | 'all') {
   const batchSize = 1000
   let offset = 0
   let rows: any[] = []
 
   while (true) {
     // Use RPC to avoid RLS differences between summary and progress
+    // Map event filter for RPC
+    let p_event_mode: string = 'any'
+    let p_event_id: string | null = null
+    if (eventId === 'all') {
+      p_event_mode = 'any'
+      p_event_id = null
+    } else if (eventId === null) {
+      p_event_mode = 'is_null'
+      p_event_id = null
+    } else if (eventId === undefined) {
+      p_event_mode = 'any'
+      p_event_id = null
+    } else {
+      p_event_mode = 'equals'
+      p_event_id = eventId
+    }
+
     const { data, error } = await supabase.rpc('get_top_progress', {
       p_user_ids: topUsers,
       p_limit: batchSize,
       p_offset: offset,
+      p_event_id,
+      p_event_mode,
     })
 
     if (error) throw error
@@ -342,7 +382,7 @@ export async function getTopProgress(topUsers: string[]) {
  * Fetch progress curves for a list of usernames (convenience wrapper).
  * Internally resolves usernames -> ids then reuses getTopProgress which expects user ids.
  */
-export async function getTopProgressByUsernames(usernames: string[]) {
+export async function getTopProgressByUsernames(usernames: string[], eventId?: string | null | 'all') {
   if (!usernames || usernames.length === 0) return {}
 
   // Fetch user ids for the provided usernames
@@ -361,7 +401,7 @@ export async function getTopProgressByUsernames(usernames: string[]) {
 
   if (ids.length === 0) return {}
 
-  const progressById = await getTopProgress(ids)
+  const progressById = await getTopProgress(ids, eventId)
 
   // Transform to username-keyed map
   const result: Record<string, { username: string; history: { date: string; score: number }[] }> = {}
@@ -385,7 +425,7 @@ export async function getTopProgressByUsernames(usernames: string[]) {
  * and award that user the challenge's points. Aggregate per-user and return
  * a sorted leaderboard similar to `getLeaderboardSummary`.
  */
-export async function getFirstBloodLeaderboard(limit = 100, offset = 0) {
+export async function getFirstBloodLeaderboard(limit = 100, offset = 0, eventId?: string | null | 'all') {
   try {
     // Simpler approach: use notification payloads only (assumes notifications include username and points)
     const notifications = await getLogs(2000, 0)
@@ -395,12 +435,50 @@ export async function getFirstBloodLeaderboard(limit = 100, offset = 0) {
     const fbNotifs = notifications.filter((n: any) => n.log_type === 'first_blood')
     if (fbNotifs.length === 0) return []
 
+    // If an event filter was requested, fetch challenge event_id mapping and
+    // filter notifications to only include first-bloods for challenges that
+    // belong to the requested event. `eventId === 'all'` means no filtering.
+    if (eventId !== undefined && eventId !== 'all') {
+      const challengeIds = Array.from(new Set(fbNotifs.map((n: any) => n.log_challenge_id).filter(Boolean)))
+      if (challengeIds.length === 0) return []
+
+      const { data: challenges, error } = await supabase
+        .from('challenges')
+        .select('id, event_id')
+        .in('id', challengeIds)
+
+      if (error) {
+        console.error('Error fetching challenges for first-blood filter:', error)
+        return []
+      }
+
+      const allowed = new Set<string>()
+      for (const c of (challenges || [])) {
+        if (eventId === null) {
+          if (c.event_id == null) allowed.add(c.id)
+        } else {
+          if (c.event_id === eventId) allowed.add(c.id)
+        }
+      }
+
+      // Filter fbNotifs in-place to only those belonging to the allowed set
+      const filtered = fbNotifs.filter((n: any) => allowed.has(n.log_challenge_id))
+      if (filtered.length === 0) return []
+      // replace fbNotifs with filtered list for the rest of the logic
+      // (we can't reassign const, so create a new variable name)
+      // continue using `fbList` below
+      var fbList = filtered
+    } else {
+      // no filtering requested
+      var fbList = fbNotifs
+    }
+
     // Aggregate directly from notifications. We do NOT use numeric "score" here;
     // instead build a cumulative first-blood timeline per user for the chart.
     const countMap: Record<string, number> = {}
     const perUserDates: Record<string, string[]> = {}
 
-    for (const n of fbNotifs) {
+    for (const n of fbList) {
       const username = n.log_username || null
       const created = n.log_created_at || null
       if (!username) continue

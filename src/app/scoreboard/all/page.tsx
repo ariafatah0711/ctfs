@@ -1,20 +1,43 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import BackButton from '@/components/custom/BackButton'
 import { getLeaderboardSummary } from '@/lib/challenges'
+import { getEvents } from '@/lib/events'
+import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { LeaderboardEntry } from '@/types'
 import Link from 'next/link'
 
 export default function ScoreboardAllPage() {
   const { user, loading: authLoading } = useAuth()
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [events, setEvents] = useState<Event[]>([])
+  // Initialize selectedEvent from query param immediately to avoid race
+  const initialQ = searchParams?.get('event_id')
+  const initialSelected = initialQ === null ? 'all' : initialQ === 'main' ? 'main' : initialQ || 'all'
+  const [selectedEvent, setSelectedEvent] = useState<string>(initialSelected)
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const ev = await getEvents()
+        setEvents(ev || [])
+      } catch (err) {
+        console.warn('Failed to fetch events:', err)
+        setEvents([])
+      }
+    }
+    fetchEvents()
+  }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,8 +47,12 @@ export default function ScoreboardAllPage() {
       }
 
       setLoading(true)
-      // Ambil semua data (limit besar)
-      const summary = await getLeaderboardSummary(1000, 0)
+
+      // Map selectedEvent string to param accepted by helper
+      const eventParam = selectedEvent === 'main' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
+
+      // Fetch leaderboard with selected event filter
+      const summary = await getLeaderboardSummary(1000, 0, eventParam)
       summary.sort((a: any, b: any) => b.score - a.score)
 
       const all = summary.map((t: any, i: number) => ({
@@ -41,7 +68,23 @@ export default function ScoreboardAllPage() {
     }
 
     fetchData()
-  }, [user])
+  }, [user, selectedEvent])
+
+  // sync selectedEvent -> URL query
+  useEffect(() => {
+    // Avoid running on server; update query param when selectedEvent changes
+    if (!router) return
+    const param = selectedEvent === 'all' ? null : selectedEvent === 'main' ? 'main' : selectedEvent
+    const url = new URL(window.location.href)
+    if (param === null) {
+      url.searchParams.set('event_id', 'main')
+    } else if (param) {
+      url.searchParams.set('event_id', String(param))
+    } else {
+      url.searchParams.delete('event_id')
+    }
+    router.replace(url.pathname + url.search)
+  }, [selectedEvent, router])
 
   if (authLoading) return <Loader fullscreen color="text-orange-500" />
   if (!user) return null
@@ -50,8 +93,31 @@ export default function ScoreboardAllPage() {
     <div className="">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-6">
         <div className="flex justify-between items-center mb-4">
-          <div>
-            <BackButton href="/scoreboard" label="Back to Top 100" />
+          <div className="flex items-center gap-4">
+            {
+              // Build back href preserving current selectedEvent: omit param for 'all', use 'main' for null, otherwise use id
+            }
+            <BackButton href={(() => {
+              let href = '/scoreboard'
+              if (selectedEvent && selectedEvent !== 'all') {
+                if (selectedEvent === 'main') href += '?event_id=main'
+                else href += `?event_id=${encodeURIComponent(String(selectedEvent))}`
+              }
+              return href
+            })()} label="Back to Top 100" />
+            <div>
+              <select
+                value={selectedEvent}
+                onChange={(e) => setSelectedEvent(e.target.value)}
+                className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+              >
+                <option value="main">Main</option>
+                <option value="all">All Events</option>
+                {events.map(ev => (
+                  <option key={ev.id} value={ev.id}>{ev.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <span className="text-gray-500 text-sm">
             Showing {leaderboard.length} users
