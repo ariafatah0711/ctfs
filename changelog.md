@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.5]
+### Added
+- Add icon for navbar, scoreboard, profile, stats, and logs page.
+- Improve UI for docs page.
+
 ## v[2.5.4]
 ### Added
 - Added tab for profile page to filter by event.
@@ -528,4 +533,23 @@ All notable changes to this project will be documented in this file.
 **Fixed**
 * Perhitungan point scoreboard
 * Notif & log icon disembunyikan saat user belum login
+* Scoreboard hanya menampilkan user dengan score > 0
+
+---
+
+🔔 **CTFS Update – Event & Scoreboard Enhancement**
+#### **[v2.5.0 – v2.5.4]**
+**Added**
+* Event filter di **scoreboard, logs, profile, dan stats**
+* UserStats di profile page
+* Captcha untuk login & register
+
+**Improved**
+* Event & scoreboard UI/UX
+* Challenge event filtering & ordering
+* Navbar & event card display
+
+**Fixed**
+* Perhitungan skor scoreboard
+* Submit challenge saat event tidak aktif
 * Scoreboard hanya menampilkan user dengan score > 0

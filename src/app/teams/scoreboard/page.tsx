@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, Users } from 'lucide-react'
+import { Coins, Sparkles, Trophy, Users } from 'lucide-react'
 import TitlePage from '@/components/custom/TitlePage'
 import Loader from '@/components/custom/loading'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -145,7 +145,15 @@ export default function TeamScoreboardPage() {
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
-              Unique Score
+              <span
+                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                title="Unique Score"
+              >
+                <Sparkles size={16} className="shrink-0" />
+                <span className="truncate whitespace-nowrap block">
+                  Unique Score
+                </span>
+              </span>
             </button>
             {!APP.teams.hidescoreboardTotal && (
               <button
@@ -156,7 +164,15 @@ export default function TeamScoreboardPage() {
                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
-                Total Score
+              <span
+                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                title="Total Score"
+                >
+                  <Coins size={16} className="shrink-0" />
+                  <span className="truncate whitespace-nowrap block">
+                    Total Score
+                  </span>
+                </span>
               </button>
             )}
           </span>

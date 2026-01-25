@@ -25,7 +25,10 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
     <Card className="bg-white dark:bg-gray-800">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
-        {pathname === '/scoreboard' && showAllLink && (() => {
+      {pathname === '/scoreboard' &&
+        showAllLink &&
+        leaderboard.length >= 100 &&
+        (() => {
           let href = '/scoreboard/all'
           if (eventId !== undefined && eventId !== 'all') {
             if (eventId === null) {

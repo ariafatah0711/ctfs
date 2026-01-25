@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import Loader from "@/components/custom/loading";
 import { useLogs } from '@/contexts/LogsContext'
-import { Logs } from "lucide-react";
+import { Flag, Logs } from "lucide-react";
 import { getEvents } from '@/lib/events'
 import APP from '@/config'
 
@@ -89,24 +89,41 @@ export default function LogsPage() {
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
-              <span className="inline-flex items-center gap-2">
-                <span>Challenge Logs</span>
+              <span className="inline-flex items-center gap-2 w-full">
+               <span
+                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                title="Challenge Logs"
+                >
+                  <Flag size={16} className="shrink-0" />
+                  <span className="truncate whitespace-nowrap block">
+                    Challenge Logs
+                  </span>
+                </span>
+
                 {challengeUnread > 0 && (
-                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-semibold bg-red-600 text-white">
-                    {challengeUnread > 99 ? '99+' : String(challengeUnread)}
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-semibold bg-red-600 text-white shrink-0">
+                    {challengeUnread > 99 ? '99+' : challengeUnread}
                   </span>
                 )}
               </span>
             </button>
             <button
-              onClick={() => setTabType('solves')}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                tabType === 'solves'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
-            >
-              Solve Logs
+                onClick={() => setTabType('solves')}
+                className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
+                  tabType === 'solves'
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+              <span
+                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                title="Solve Logs"
+                >
+                  <Logs size={16} className="shrink-0" />
+                  <span className="truncate whitespace-nowrap block">
+                    Solve Logs
+                  </span>
+                </span>
             </button>
           </span>
         </div>

@@ -359,9 +359,9 @@ export default function UserProfile({
               transition={{ duration: 0.4 }}
             >
               <Card className="bg-white dark:bg-gray-800">
-                <CardContent className="flex items-start space-x-6 py-6">
+                <CardContent className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6 py-6">
                   <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center overflow-hidden">
-                    <ImageWithFallback src={avatarSrc} alt={userDetail.username} size={80} className="rounded-full border border-gray-200 dark:border-gray-700" fallbackBg="bg-blue-100 dark:bg-blue-900" />
+                    <ImageWithFallback src={avatarSrc} alt={userDetail.username} size={80} className="max-h-full rounded-full border border-gray-200 dark:border-gray-700" fallbackBg="bg-blue-100 dark:bg-blue-900" />
                   </div>
                   <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white truncate whitespace-nowrap max-w-[160px] sm:max-w-xs block" title={userDetail.username}>
@@ -383,22 +383,20 @@ export default function UserProfile({
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end space-y-2">
+                  <div className="flex flex-col gap-2 w-full md:w-auto md:items-end order-3 md:order-none">
                     {/* Scoreboard-style Event selector (placed below EditProfileModal) */}
-                    <div className="ml-4">
-                      <div className="inline-block">
-                        <select
-                          value={selectedEvent}
-                          onChange={(e) => setSelectedEvent(e.target.value)}
-                          className="min-w-[150px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
-                        >
-                          {!APP.hideEventMain && <option value="main">Main</option>}
-                          <option value="all">All Events</option>
-                          {events.map((ev) => (
-                            <option key={ev.id} value={ev.id}>{(ev as any).name ?? (ev as any).title ?? 'Untitled'}</option>
-                          ))}
-                        </select>
-                      </div>
+                    <div className="w-full md:w-auto">
+                      <select
+                        value={selectedEvent}
+                        onChange={(e) => setSelectedEvent(e.target.value)}
+                        className="w-full md:min-w-[150px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+                      >
+                        {!APP.hideEventMain && <option value="main">Main</option>}
+                        <option value="all">All Events</option>
+                        {events.map((ev) => (
+                          <option key={ev.id} value={ev.id}>{(ev as any).name ?? (ev as any).title ?? 'Untitled'}</option>
+                        ))}
+                      </select>
                     </div>
 
                     {/* Email & Providers info moved to EditProfileModal */}
@@ -426,7 +424,7 @@ export default function UserProfile({
                           })
                         }}
                         onSaved={refreshUserDetail}
-                        triggerButtonClass="min-w-[150px] bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
+                        triggerButtonClass="w-full md:min-w-[150px] bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
                         authInfo={authInfo}
                       />
                     )}

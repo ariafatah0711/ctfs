@@ -3,7 +3,7 @@
 import ScoreboardChart from '@/components/scoreboard/ScoreboardChart'
 import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import ScoreboardEmptyState from '@/components/scoreboard/ScoreboardEmptyState'
-import { Trophy } from 'lucide-react'
+import { Coins, Droplet, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -172,7 +172,15 @@ export default function ScoreboardPage() {
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
-              Points
+              <span
+                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                title="Points"
+              >
+                <Coins size={16} className="shrink-0" />
+                <span className="truncate whitespace-nowrap block">
+                  Points
+                </span>
+              </span>
             </button>
             <button
               onClick={() => setFirstBloodMode(true)}
@@ -182,7 +190,15 @@ export default function ScoreboardPage() {
                   : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
-              First Blood
+              <span
+                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                title="Points"
+              >
+                <Droplet size={16} className="shrink-0" />
+                <span className="truncate whitespace-nowrap block">
+                  First Blood
+                </span>
+              </span>
             </button>
           </span>
         </div>

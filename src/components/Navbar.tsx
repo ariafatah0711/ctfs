@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Hammer } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Scale, Hammer, User } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
@@ -403,7 +403,10 @@ export default function Navbar() {
                             onClick={() => setScoreboardOpen(false)}
                             className={`block px-3 py-2 text-sm ${showTeamScoreboard ? 'rounded-t-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                           >
-                            User Scoreboard
+                            <span className="flex items-center">
+                              <User size={18} className="mr-1" />
+                              User Scoreboard
+                            </span>
                           </Link>
                         )}
                         {showTeamScoreboard && (
@@ -412,7 +415,10 @@ export default function Navbar() {
                             onClick={() => setScoreboardOpen(false)}
                             className={`block px-3 py-2 text-sm ${showUserScoreboard ? 'rounded-b-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                           >
-                            Team Scoreboard
+                            <span className="flex items-center">
+                              <Users size={18} className="mr-1" />
+                              Team Scoreboard
+                            </span>
                           </Link>
                         )}
                       </div>
@@ -438,7 +444,7 @@ export default function Navbar() {
                   onClick={() => setDocsOpen((v) => !v)}
                   className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                 >
-                  <BookOpen size={18} className="mr-1" /> Info
+                  <Info size={18} className="mr-1" /> Info
                   <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                     <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
                   </svg>
@@ -451,7 +457,10 @@ export default function Navbar() {
                       className={`block px-3 py-2 text-sm rounded-t-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                       data-tour="navbar-info"
                     >
-                      Info
+                      <span className="flex items-center">
+                        <Info size={18} className="mr-1" />
+                        Info
+                      </span>
                     </Link>
                     <Link
                       href="/rules"
@@ -459,7 +468,10 @@ export default function Navbar() {
                       className={`block px-3 py-2 text-sm ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                       data-tour="navbar-rules"
                     >
-                      Rules
+                      <span className="flex items-center">
+                        <Scale size={18} className="mr-1" />
+                        Rules
+                      </span>
                     </Link>
                     <Link
                       href="/docs"
@@ -467,7 +479,10 @@ export default function Navbar() {
                       className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                       data-tour="navbar-docs"
                     >
-                      Docs
+                      <span className="flex items-center">
+                        <BookOpen size={18} className="mr-1" />
+                        Docs
+                      </span>
                     </Link>
                   </div>
                 )}
