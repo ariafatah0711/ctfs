@@ -73,17 +73,18 @@ export default function ScoreboardAllPage() {
 
   // sync selectedEvent -> URL query
   useEffect(() => {
-    // Avoid running on server; update query param when selectedEvent changes
     if (!router) return
-    const param = selectedEvent === 'all' ? null : selectedEvent === 'main' ? 'main' : selectedEvent
+
     const url = new URL(window.location.href)
-    if (param === null) {
-      url.searchParams.set('event_id', 'main')
-    } else if (param) {
-      url.searchParams.set('event_id', String(param))
-    } else {
+
+    if (selectedEvent === 'all') {
+      // default = all → HAPUS param
       url.searchParams.delete('event_id')
+    } else {
+      // main atau event id lain → set param
+      url.searchParams.set('event_id', selectedEvent)
     }
+
     router.replace(url.pathname + url.search)
   }, [selectedEvent, router])
 

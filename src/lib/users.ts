@@ -31,9 +31,13 @@ const normalizeTimestamp = (value?: string | null): string | null => {
   return normalized
 }
 
-export async function getUserDetail(userId: string): Promise<UserDetail | null> {
+export async function getUserDetail(userId: string, eventId?: string | null, eventMode?: string): Promise<UserDetail | null> {
   try {
-    const { data, error }: PostgrestSingleResponse<any> = await supabase.rpc('detail_user', { p_id: userId })
+    const { data, error }: PostgrestSingleResponse<any> = await supabase.rpc('detail_user', {
+      p_id: userId,
+      p_event_id: eventId ?? null,
+      p_event_mode: eventMode ?? (eventId ? 'equals' : 'any')
+    })
     if (error || !data || !data.success) {
       console.error('Error fetching user detail:', error || data?.message)
       return null
@@ -167,9 +171,12 @@ export type CategoryTotal = {
   total_challenges: number
 }
 
-export async function getCategoryTotals(): Promise<CategoryTotal[]> {
+export async function getCategoryTotals(eventId?: string | null, eventMode?: string): Promise<CategoryTotal[]> {
   try {
-    const { data, error } = await supabase.rpc('get_category_totals')
+    const { data, error } = await supabase.rpc('get_category_totals', {
+      p_event_id: eventId ?? null,
+      p_event_mode: eventMode ?? (eventId ? 'equals' : 'any')
+    })
 
     if (error) {
       console.error('Error fetching category totals:', error)
@@ -189,9 +196,12 @@ export type DifficultyTotal = {
   total_challenges: number
 }
 
-export async function getDifficultyTotals(): Promise<DifficultyTotal[]> {
+export async function getDifficultyTotals(eventId?: string | null, eventMode?: string): Promise<DifficultyTotal[]> {
   try {
-    const { data, error } = await supabase.rpc('get_difficulty_totals')
+    const { data, error } = await supabase.rpc('get_difficulty_totals', {
+      p_event_id: eventId ?? null,
+      p_event_mode: eventMode ?? (eventId ? 'equals' : 'any')
+    })
 
     if (error) {
       console.error('Error fetching difficulty totals:', error)

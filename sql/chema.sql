@@ -427,7 +427,7 @@ GRANT EXECUTE ON FUNCTION get_user_profile(UUID) TO authenticated;
 -- ########################################################
 -- Function: detail_user(p_id UUID)
 -- ########################################################
-CREATE OR REPLACE FUNCTION detail_user(p_id UUID)
+CREATE OR REPLACE FUNCTION detail_user(p_id UUID, p_event_id UUID DEFAULT NULL, p_event_mode TEXT DEFAULT 'any')
 RETURNS JSON
 AS $$
 DECLARE
@@ -472,8 +472,16 @@ BEGIN
     SELECT
       u.id,
       RANK() OVER (
-        ORDER BY COALESCE(SUM(c.points), 0) DESC,
-                 MAX(s.created_at) ASC
+        ORDER BY COALESCE(SUM(CASE WHEN (
+          p_event_mode = 'any'
+          OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+          OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+        ) THEN c.points ELSE 0 END), 0) DESC,
+                 MAX(CASE WHEN (
+          p_event_mode = 'any'
+          OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+          OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+        ) THEN s.created_at ELSE NULL END) ASC
       ) AS rank
     FROM public.users u
     LEFT JOIN public.solves s ON u.id = s.user_id
@@ -483,7 +491,11 @@ BEGIN
   WHERE r.id = p_id;
 
   -- Score
-  SELECT COALESCE(SUM(c.points), 0)
+  SELECT COALESCE(SUM(CASE WHEN (
+    p_event_mode = 'any'
+    OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+    OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+  ) THEN c.points ELSE 0 END), 0)
   INTO v_score
   FROM public.solves s
   JOIN public.challenges c ON s.challenge_id = c.id
@@ -507,7 +519,12 @@ BEGIN
   INTO v_solves
   FROM public.solves s
   JOIN public.challenges c ON s.challenge_id = c.id
-  WHERE s.user_id = p_id;
+  WHERE s.user_id = p_id
+    AND (
+      p_event_mode = 'any'
+      OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+      OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+    );
 
   RETURN json_build_object(
     'success', true,
@@ -529,7 +546,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION detail_user(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION detail_user(UUID, UUID, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: update_username(p_id UUID, p_username TEXT)
@@ -780,6 +797,7 @@ DECLARE
   v_max_points INTEGER;
   v_is_dynamic BOOLEAN;
   v_is_maintenance BOOLEAN;
+  v_is_active BOOLEAN;
   v_min_points INTEGER;
   v_decay_per_solve INTEGER;
   v_event_id UUID;
@@ -795,10 +813,10 @@ BEGIN
     RETURN json_build_object('success', false, 'message', 'Not authenticated');
   END IF;
 
-  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_maintenance, c.min_points, c.decay_per_solve,
+  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_active, c.is_maintenance, c.min_points, c.decay_per_solve,
          c.event_id, e.start_time, e.end_time, (e.id IS NOT NULL)
-    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_maintenance, v_min_points, v_decay_per_solve,
-         v_event_id, v_event_start, v_event_end, v_event_exists
+        INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_active, v_is_maintenance, v_min_points, v_decay_per_solve,
+          v_event_id, v_event_start, v_event_end, v_event_exists
     FROM challenge_flags cf
     JOIN challenges c ON c.id = cf.challenge_id
     LEFT JOIN events e ON e.id = c.event_id
@@ -810,6 +828,11 @@ BEGIN
 
   IF COALESCE(v_is_maintenance, false) THEN
     RETURN json_build_object('success', false, 'message', 'Challenge is under maintenance');
+  END IF;
+
+  -- Reject submissions when challenge is not active
+  IF NOT COALESCE(v_is_active, TRUE) THEN
+    RETURN json_build_object('success', false, 'message', 'Challenge is not active');
   END IF;
 
   IF v_event_id IS NOT NULL AND NOT COALESCE(v_event_exists, false) THEN
@@ -1148,7 +1171,7 @@ GRANT EXECUTE ON FUNCTION set_challenge_maintenance(UUID, BOOLEAN) TO authentica
 -- ########################################################
 -- Function: get_category_totals()
 -- ########################################################
-CREATE OR REPLACE FUNCTION get_category_totals()
+CREATE OR REPLACE FUNCTION get_category_totals(p_event_id UUID DEFAULT NULL, p_event_mode TEXT DEFAULT 'any')
 RETURNS TABLE (
   category TEXT,
   total_challenges INT
@@ -1158,18 +1181,23 @@ BEGIN
   SELECT c.category, COUNT(*)::int
   FROM public.challenges c
   WHERE c.is_active = true
+    AND (
+      p_event_mode = 'any'
+      OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+      OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+    )
   GROUP BY c.category
   ORDER BY c.category;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION get_category_totals() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_category_totals(UUID, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: get_difficulty_totals()
 -- ########################################################
-CREATE OR REPLACE FUNCTION get_difficulty_totals()
+CREATE OR REPLACE FUNCTION get_difficulty_totals(p_event_id UUID DEFAULT NULL, p_event_mode TEXT DEFAULT 'any')
 RETURNS TABLE (
   difficulty TEXT,
   total_challenges INT
@@ -1179,13 +1207,18 @@ BEGIN
   SELECT c.difficulty, COUNT(*)::int
   FROM public.challenges c
   WHERE c.is_active = true
+    AND (
+      p_event_mode = 'any'
+      OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
+      OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
+    )
   GROUP BY c.difficulty
   ORDER BY c.difficulty;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION get_difficulty_totals() TO authenticated;--
+GRANT EXECUTE ON FUNCTION get_difficulty_totals(UUID, TEXT) TO authenticated;--
 
 -- ########################################################
 -- Function: get_user_first_bloods(p_user_id UUID)

@@ -110,10 +110,10 @@ export default function ScoreboardPage() {
   // sync selectedEvent -> URL query so back/links preserve selection
   useEffect(() => {
     if (!router) return
-    const param = selectedEvent === 'all' ? null : selectedEvent === 'main' ? 'main' : selectedEvent
+    const param = selectedEvent === 'all' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
     const url = new URL(window.location.href)
     if (param === null) {
-      url.searchParams.set('event_id', 'main')
+      url.searchParams.set('event_id', 'all')
     } else if (param) {
       url.searchParams.set('event_id', String(param))
     } else {

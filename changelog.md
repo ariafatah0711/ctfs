@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.4]
+### Added
+- Added tab for profile page to filter by event.
+- Added tab for stats page to filter by event.
+
+### Fixed
+- Fixed Submit challenges when event is not active.
+
 ## v[2.5.3]
 ### Added
 - Added tab for logs page to filter by event.

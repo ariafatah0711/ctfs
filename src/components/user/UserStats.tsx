@@ -64,6 +64,24 @@ export default function UserStatsPlotly({
 
   const t = theme(isDarkMode)
 
+  // If there are no solves, show a friendly empty state matching UserProfile
+  if (!solvedChallenges || solvedChallenges.length === 0) {
+    return (
+      <motion.div className="space-y-6">
+        <Card className="bg-white dark:bg-gray-800">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-sm text-center">User stats</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              No stat data available. Solve some challenges to see stats here!
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    )
+  }
+
   /* ===== CATEGORY ===== */
   const byCategory: Record<string, number> = {}
   solvedChallenges.forEach(s => {

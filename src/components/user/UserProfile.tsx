@@ -6,6 +6,8 @@ import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
 import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
+import { getEvents } from '@/lib/events'
+import { Event } from '@/types'
 import { getTeamByUserId } from '@/lib/teams'
 import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
@@ -61,17 +63,19 @@ type Badge = {
 
 function getUserBadges(rank: number | null, firstBloodCount: number, solvedCount: number, completedCategoryCount: number): Badge[] {
   const badges: Badge[] = [];
-  // Rank (push, don't return early)
-  if (rank === 1) {
-    badges.push({ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: <Crown className="h-3.5 w-3.5" /> });
-  } else if (rank && rank <= 3) {
-    badges.push({ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: <Trophy className="h-3.5 w-3.5" /> });
-  } else if (rank && rank <= 10) {
-    badges.push({ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: <Medal className="h-3.5 w-3.5" /> });
-  } else if (rank && rank <= 25) {
-    badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: <Award className="h-3.5 w-3.5" /> });
-  } else if (rank && rank <= 50) {
-    badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: <ShieldCheck className="h-3.5 w-3.5" /> });
+  // Rank badges: only show if rank is a positive number AND user has at least one solve
+  if (typeof rank === 'number' && rank > 0 && solvedCount > 0) {
+    if (rank === 1) {
+      badges.push({ label: 'Top 1', color: 'bg-yellow-400 text-yellow-900 border-yellow-500', icon: <Crown className="h-3.5 w-3.5" /> });
+    } else if (rank <= 3) {
+      badges.push({ label: 'Top 3', color: 'bg-yellow-300 text-yellow-900 border-yellow-400', icon: <Trophy className="h-3.5 w-3.5" /> });
+    } else if (rank <= 10) {
+      badges.push({ label: 'Top 10', color: 'bg-yellow-200 text-yellow-900 border-yellow-300', icon: <Medal className="h-3.5 w-3.5" /> });
+    } else if (rank <= 25) {
+      badges.push({ label: 'Top 25', color: 'bg-yellow-100 text-yellow-900 border-yellow-200', icon: <Award className="h-3.5 w-3.5" /> });
+    } else if (rank <= 50) {
+      badges.push({ label: 'Top 50', color: 'bg-yellow-50 text-yellow-900 border-yellow-100', icon: <ShieldCheck className="h-3.5 w-3.5" /> });
+    }
   }
 
   // First Blood (show only the highest tier)
@@ -116,6 +120,12 @@ export default function UserProfile({
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [difficultyTotals, setDifficultyTotals] = useState<{ difficulty: string; total_challenges: number }[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+  const [selectedEventMode, setSelectedEventMode] = useState<'any'|'equals'|'is_null'>('any')
+  const [selectedEvent, setSelectedEvent] = useState<string>(() =>
+    selectedEventMode === 'equals' ? (selectedEventId ?? '') : selectedEventMode === 'is_null' ? 'main' : 'all'
+  )
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
   const [showAllModal, setShowAllModal] = useState(false)
   const [showUnsolvedModal, setShowUnsolvedModal] = useState(false)
@@ -128,7 +138,11 @@ export default function UserProfile({
   const refreshUserDetail = async () => {
     if (!userId) return
     try {
-      const detail = await getUserDetail(userId)
+      const detail = await getUserDetail(
+        userId,
+        selectedEventMode === 'equals' ? selectedEventId : null,
+        selectedEventMode
+      )
       setUserDetail(detail)
       if (isCurrentUser) {
         const freshUser = await getCurrentUser()
@@ -150,30 +164,34 @@ export default function UserProfile({
       if (!userId) return
       setLoadingDetail(true)
       try {
-        const detail = await getUserDetail(userId)
+        const detail = await getUserDetail(
+          userId,
+          selectedEventMode === 'equals' ? selectedEventId : null,
+          selectedEventMode
+        )
         setUserDetail(detail)
-        // console.log('Fetched user detail:', detail)
 
         if (detail) {
           const firstBlood = await getFirstBloodChallengeIds(detail.id)
-          // Filter: hanya id yang juga ada di solved_challenges
           const solvedIds = new Set((detail.solved_challenges || []).map(c => c.id))
           setFirstBloodIds(firstBlood.filter(id => solvedIds.has(id)))
 
-          const totals = await getCategoryTotals()
+          const totals = await getCategoryTotals(
+            selectedEventMode === 'equals' ? selectedEventId : null,
+            selectedEventMode
+          )
           setCategoryTotals(totals)
 
-          const diffTotals = await getDifficultyTotals()
+          const diffTotals = await getDifficultyTotals(
+            selectedEventMode === 'equals' ? selectedEventId : null,
+            selectedEventMode
+          )
           setDifficultyTotals(diffTotals)
 
-          // Fetch team info if teams enabled
           if (APP.teams.enabled) {
             const { team, members } = await getTeamByUserId(detail.id)
-            if (team) {
-              setTeamInfo({ team, members })
-            } else {
-              setTeamInfo(null)
-            }
+            if (team) setTeamInfo({ team, members })
+            else setTeamInfo(null)
           }
         }
       } finally {
@@ -181,7 +199,27 @@ export default function UserProfile({
       }
     }
     fetchDetail()
-  }, [userId])
+  }, [userId, selectedEventId, selectedEventMode])
+
+  // Load events list once
+  useEffect(() => {
+    if (events.length > 0) return
+    getEvents().then(ev => setEvents(ev || [])).catch(() => setEvents([]))
+  }, [])
+
+  // Sync scoreboard-style `selectedEvent` with internal mode/id used for fetching
+  useEffect(() => {
+    if (selectedEvent === 'all') {
+      setSelectedEventMode('any')
+      setSelectedEventId(null)
+    } else if (selectedEvent === 'main') {
+      setSelectedEventMode('is_null')
+      setSelectedEventId(null)
+    } else {
+      setSelectedEventMode('equals')
+      setSelectedEventId(selectedEvent)
+    }
+  }, [selectedEvent])
 
   const isLoading = loading || loadingDetail
   const hasError = error || !userDetail
@@ -193,12 +231,18 @@ export default function UserProfile({
     return solvedInCategory >= total_challenges ? count + 1 : count
   }, 0)
 
+  // Only compute badges when there's meaningful activity (solves, first-bloods, or a positive rank)
+  const badges = (userDetail && (solvedChallenges.length > 0 || firstBloodIds.length > 0 || (userDetail.rank && userDetail.rank > 0)))
+    ? getUserBadges(userDetail.rank, firstBloodIds.length, solvedChallenges.length, completedCategoryCount)
+    : []
+
   // Fetch unsolved challenges when modal is opened
   const handleShowUnsolved = async () => {
     setShowUnsolvedModal(true)
     setLoadingUnsolved(true)
     try {
-      const allChallenges = await getChallenges(userId || undefined, false, 'all')
+      const challengeEventParam = selectedEventMode === 'any' ? 'all' : (selectedEventMode === 'equals' ? selectedEventId : null)
+      const allChallenges = await getChallenges(userId || undefined, false, challengeEventParam)
       const solvedIds = new Set(solvedChallenges.map(c => c.id))
       const unsolved = allChallenges.filter(c => !solvedIds.has(c.id))
       setUnsolvedChallenges(unsolved)
@@ -277,6 +321,7 @@ export default function UserProfile({
               {onBack && (
                 <BackButton onClick={onBack} label="Go Back" />
               )}
+              {/* (Event selector moved below EditProfileModal) */}
               <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => setActiveTab('profile')}
@@ -325,7 +370,7 @@ export default function UserProfile({
                     <p className="text-lg text-gray-500 dark:text-gray-300 mt-1">Score: <span className="font-semibold text-orange-600 dark:text-orange-400">{userDetail.score}</span></p>
                     {/* BADGES */}
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {getUserBadges(userDetail.rank, firstBloodIds.length, solvedChallenges.length, completedCategoryCount).map((badge, idx) => (
+                      {badges.map((badge, idx) => (
                         <span
                           key={badge.label + idx}
                           className={`inline-flex items-center border border-gray-300 dark:border-gray-600 px-1.5 py-0.5 rounded-md text-xs font-medium shadow-sm ${badge.color} transition-all duration-150 hover:scale-105`}
@@ -337,35 +382,55 @@ export default function UserProfile({
                       ))}
                     </div>
                   </div>
-                  {/* Email & Providers info moved to EditProfileModal */}
-                  {isCurrentUser && userDetail && (
-                    <EditProfileModal
-                      userId={userDetail.id}
-                      currentUsername={userDetail.username}
-                      currentBio={userDetail.bio || ''}
-                      currentProfilePictureUrl={userDetail.profile_picture_url || ''}
-                      currentSosmed={userDetail.sosmed || {}}
-                      onUsernameChange={username => setUserDetail({ ...userDetail, username })}
-                      onProfileChange={({ username, bio, sosmed, profile_picture_url }) => {
-                        const nextProfileUrl = profile_picture_url ?? userDetail.profile_picture_url ?? null
-                        const isGooglePicture = !!userDetail.picture && userDetail.picture !== userDetail.profile_picture_url
-                        const nextPicture = isGooglePicture
-                          ? userDetail.picture
-                          : (nextProfileUrl || null)
-                        setUserDetail({
-                          ...userDetail,
-                          username,
-                          bio,
-                          sosmed,
-                          profile_picture_url: nextProfileUrl,
-                          picture: nextPicture,
-                        })
-                      }}
-                      onSaved={refreshUserDetail}
-                      triggerButtonClass="bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
-                      authInfo={authInfo}
-                    />
-                  )}
+
+                  <div className="flex flex-col items-end space-y-2">
+                    {/* Scoreboard-style Event selector (placed below EditProfileModal) */}
+                    <div className="ml-4">
+                      <div className="inline-block">
+                        <select
+                          value={selectedEvent}
+                          onChange={(e) => setSelectedEvent(e.target.value)}
+                          className="min-w-[150px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+                        >
+                          {!APP.hideEventMain && <option value="main">Main</option>}
+                          <option value="all">All Events</option>
+                          {events.map((ev) => (
+                            <option key={ev.id} value={ev.id}>{(ev as any).name ?? (ev as any).title ?? 'Untitled'}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Email & Providers info moved to EditProfileModal */}
+                    {isCurrentUser && userDetail && (
+                      <EditProfileModal
+                        userId={userDetail.id}
+                        currentUsername={userDetail.username}
+                        currentBio={userDetail.bio || ''}
+                        currentProfilePictureUrl={userDetail.profile_picture_url || ''}
+                        currentSosmed={userDetail.sosmed || {}}
+                        onUsernameChange={username => setUserDetail({ ...userDetail, username })}
+                        onProfileChange={({ username, bio, sosmed, profile_picture_url }) => {
+                          const nextProfileUrl = profile_picture_url ?? userDetail.profile_picture_url ?? null
+                          const isGooglePicture = !!userDetail.picture && userDetail.picture !== userDetail.profile_picture_url
+                          const nextPicture = isGooglePicture
+                            ? userDetail.picture
+                            : (nextProfileUrl || null)
+                          setUserDetail({
+                            ...userDetail,
+                            username,
+                            bio,
+                            sosmed,
+                            profile_picture_url: nextProfileUrl,
+                            picture: nextPicture,
+                          })
+                        }}
+                        onSaved={refreshUserDetail}
+                        triggerButtonClass="min-w-[150px] bg-blue-600 dark:bg-blue-500 text-white font-semibold hover:bg-blue-700 dark:hover:bg-blue-400 border-none shadow"
+                        authInfo={authInfo}
+                      />
+                    )}
+                  </div>
                 </CardContent>
                 <CardContent className="pt-0 pb-1 px-8">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -449,7 +514,7 @@ export default function UserProfile({
                     <Crown className="h-5 w-5 text-yellow-800 dark:text-yellow-200" />
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {userDetail.rank === 0 ? '0' : `#${userDetail.rank}`}
+                    {(!userDetail.rank || solvedChallenges.length === 0) ? '-' : `#${userDetail.rank}`}
                   </p>
                 </CardContent>
               </Card>
