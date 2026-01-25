@@ -1,12 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.3]
+### Added
+- Added tab for logs page to filter by event.
+- Added tab for scoreboard team page to filter by event.
+
+### Improve
+- Improve tab logs page.
+- Improve tab in scoreboard team page.
+
 ## v[2.5.2]
 ### Added
 - add tab scoreboard event filter.
 - improve event filter in scoreboard page.
 - improve event filter in scoreboard all page.
 - add parameter event_id in scoreboard page for filtering.
+- hide user with 0 score in scoreboard.
 
 ## v[2.5.1]
 ### Added
@@ -485,3 +495,29 @@ All notable changes to this project will be documented in this file.
 
 **Fixed**
 - Fixed scoreboard point calculation issue
+
+---
+
+🔔 **CTFS Update - UserStat, Event & Scoreboard Enhancement**
+#### **[v2.5.0 – v2.5.2]**
+**Added**
+* Captcha support untuk **login & register**
+* **UserStats component** di profile page
+* Tab profile untuk switch **Profile / Stats**
+* Event image URL & image zoom support di markdown
+* Event tab di challenge page, Tag event di challenge detail
+* Event management & admin event page
+* Tab scoreboard untuk event, Parameter `event_id` pada scoreboard untuk filtering
+* Filter event yang lebih lengkap di scoreboard & scoreboard all
+
+**Improved**
+* Tampilan event card di event page
+* Tampilan gambar event
+* Navbar improvement
+* Event filter & ordering di challenge
+* Filter intro challenge khusus main event
+
+**Fixed**
+* Perhitungan point scoreboard
+* Notif & log icon disembunyikan saat user belum login
+* Scoreboard hanya menampilkan user dengan score > 0

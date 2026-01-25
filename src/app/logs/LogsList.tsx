@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getLogs, getRecentSolves } from "@/lib/challenges";
+import { useLogs } from '@/contexts/LogsContext'
 import Link from "next/link";
 import Loader from "@/components/custom/loading";
 import { formatRelativeDate } from '@/lib/utils'
@@ -16,30 +17,47 @@ export type LogEntry = {
   log_created_at: string;
 };
 
-export default function LogsList({ tabType = 'challenges' }: { tabType?: 'challenges' | 'solves' }) {
+export default function LogsList({ tabType = 'challenges', eventId }: { tabType?: 'challenges' | 'solves', eventId?: string | null | 'all' }) {
   const [notifications, setNotifications] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const { getEventChallengeIds } = useLogs()
 
   useEffect(() => {
     (async () => {
-      const notifs = await getLogs(10000, 0); // Ambil semua logs
-      const solves = await getRecentSolves(100, 0); // Ambil 100 recent solves
+      setLoading(true);
+      // fetch logs + recent solves
+      const notifs = await getLogs(10000, 0);
+      const solves = await getRecentSolves(100, 0);
 
-      // Merge dan sort by created_at (newest first)
-      const merged = [...notifs, ...solves]
-        .sort((a, b) => {
-          return new Date(b.log_created_at).getTime() - new Date(a.log_created_at).getTime();
-        });
+      // If eventId is provided and not 'all', get cached challenge ids for that event
+      let eventChallengeIds: Set<string> | null = null;
+      if (eventId !== undefined && eventId !== 'all') {
+        try {
+          const set = await getEventChallengeIds(eventId as any)
+          eventChallengeIds = set
+        } catch (err) {
+          eventChallengeIds = null
+        }
+      }
+
+      // Merge and sort by created_at (newest first)
+      let merged = [...notifs, ...solves]
+        .sort((a, b) => new Date(b.log_created_at).getTime() - new Date(a.log_created_at).getTime());
+
+      // If we have an event filter, keep only notifications/solves whose challenge id belongs to the event
+      if (eventChallengeIds) {
+        merged = merged.filter((n) => eventChallengeIds!.has(String(n.log_challenge_id)));
+      }
 
       setNotifications(merged);
       setLoading(false);
     })();
-  }, []);
+  }, [eventId, getEventChallengeIds]);
 
   // Filter based on tab type
-  const filteredNotifications = tabType === 'challenges'
-    ? notifications.filter(n => n.log_type === 'first_blood' || n.log_type === 'new_challenge')
-    : notifications.filter(n => n.log_type === 'solve');
+  const challengeLogs = notifications.filter(n => n.log_type === 'first_blood' || n.log_type === 'new_challenge');
+  const solveLogs = notifications.filter(n => n.log_type === 'solve');
+  const filteredNotifications = tabType === 'solves' ? solveLogs : challengeLogs;
 
   if (loading) return <Loader fullscreen color="text-orange-500" />;
 

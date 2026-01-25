@@ -9,6 +9,7 @@ import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import BackButton from '@/components/custom/BackButton'
 import { getLeaderboardSummary } from '@/lib/challenges'
 import { getEvents } from '@/lib/events'
+import APP from '@/config'
 import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { LeaderboardEntry } from '@/types'
@@ -111,7 +112,7 @@ export default function ScoreboardAllPage() {
                 onChange={(e) => setSelectedEvent(e.target.value)}
                 className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
               >
-                <option value="main">Main</option>
+                {!APP.hideEventMain && <option value="main">Main</option>}
                 <option value="all">All Events</option>
                 {events.map(ev => (
                   <option key={ev.id} value={ev.id}>{ev.name}</option>

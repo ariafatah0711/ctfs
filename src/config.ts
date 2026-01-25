@@ -43,6 +43,7 @@ export const APP = {
   image_preview: 'og-image.png',
 
   /* Setting Config */
+  captchaToken: true, // enable / disable captcha token verification on create account
   notifSolves: true, // notifikasi global saat ada yang solve challenge
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component
@@ -51,8 +52,7 @@ export const APP = {
     hideScoreboardIndividual: false, // enable / disable individual scoreboard when teams are enabled
     hidescoreboardTotal: false, // enable / disable Total Score tab in team scoreboard
   },
-
-  captchaToken: true, // enable / disable captcha token verification on create account
+  hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event CTFs)
 
   /* Maintenance configuration */
   // mode: 'no' | 'yes' | 'auto'

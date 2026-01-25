@@ -487,10 +487,24 @@ export async function getFirstBloodLeaderboard(limit = 100, offset = 0, eventId?
       if (created) perUserDates[username].push(created)
     }
 
+    // Build list including the timestamp when the user reached their final count
     const result = Object.keys(countMap)
-      .map((username) => ({ username, firstBloodCount: countMap[username] || 0 }))
-      // Sort primarily by firstBloodCount (desc)
-      .sort((a, b) => (b.firstBloodCount || 0) - (a.firstBloodCount || 0))
+      .map((username) => {
+        const count = countMap[username] || 0
+        const dates = (perUserDates[username] || []).slice().sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+        // timestamp when the user achieved their final first-blood count
+        const achievedAt = dates.length >= count && count > 0 ? dates[count - 1] : dates[dates.length - 1] || null
+        return { username, firstBloodCount: count, achievedAt }
+      })
+      // Sort by count desc, then by achievedAt asc (earlier achievement wins)
+      .sort((a, b) => {
+        const diff = (b.firstBloodCount || 0) - (a.firstBloodCount || 0)
+        if (diff !== 0) return diff
+        if (!a.achievedAt && !b.achievedAt) return 0
+        if (!a.achievedAt) return 1
+        if (!b.achievedAt) return -1
+        return new Date(a.achievedAt).getTime() - new Date(b.achievedAt).getTime()
+      })
 
     // Build cumulative progress timeline per user from their notification timestamps
     const progressMap: Record<string, { username: string; history: { date: string; score: number }[] }> = {}

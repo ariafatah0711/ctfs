@@ -11,8 +11,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import TeamScoreboardChart from '@/components/teams/TeamScoreboardChart'
-import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
+import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, getAllTeamSolves, getAllTeamUniqueSolves, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
 import { APP } from '@/config'
+import { getEvents } from '@/lib/events'
+import { Event } from '@/types'
 
 export default function TeamScoreboardPage() {
   const { user, loading: authLoading } = useAuth()
@@ -22,6 +24,8 @@ export default function TeamScoreboardPage() {
   const [entries, setEntries] = useState<TeamScoreboardEntry[]>([])
   const [series, setSeries] = useState<TeamProgressSeries[]>([])
   const [showTotalScore, setShowTotalScore] = useState(false)
+  const [events, setEvents] = useState<Event[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<string>('all')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -33,7 +37,29 @@ export default function TeamScoreboardPage() {
     if (!user) return
     const fetchData = async () => {
       setLoading(true)
-      const { entries: data } = await getTeamScoreboard(200, 0)
+
+      // Load events for selector (UI-only; selection applied to RPC now)
+      if (events.length === 0) {
+        try {
+          const ev = await getEvents()
+          setEvents(ev || [])
+        } catch (err) {
+          console.warn('Failed to fetch events:', err)
+          setEvents([])
+        }
+      }
+      // map selectedEvent to RPC params for scoreboard + progress
+      const p_event_id = selectedEvent === 'all' ? null : selectedEvent === 'main' ? null : selectedEvent
+      const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
+
+      const { entries: data, error: scoreboardError } = await getTeamScoreboard(200, 0, p_event_id, p_event_mode)
+      if (scoreboardError) {
+        console.warn('Failed to fetch team scoreboard:', scoreboardError)
+        setEntries([])
+        setSeries([])
+        setLoading(false)
+        return
+      }
       const list = data || []
 
       // Sort berdasarkan mode yang dipilih
@@ -42,21 +68,38 @@ export default function TeamScoreboardPage() {
         const scoreB = showTotalScore ? b.total_score : b.unique_score
         return scoreB - scoreA
       })
-      setEntries(sortedList)
 
-      const topNames = sortedList.slice(0, 10).map((t) => t.team_name)
-      const progressMap = showTotalScore
-        ? await getTopTeamProgressByNames(topNames)
-        : await getTopTeamUniqueProgressByNames(topNames)
-      const orderedSeries = topNames
-        .map((name) => progressMap[name])
-        .filter(Boolean) as TeamProgressSeries[]
+      // Filter out teams with zero score so they don't appear on the scoreboard
+      const filteredList = sortedList.filter((t) => {
+        const score = showTotalScore ? (t.total_score || 0) : (t.unique_score || 0)
+        return score > 0
+      })
+
+      setEntries(filteredList)
+
+      const topNames = filteredList.slice(0, 10).map((t) => t.team_name)
+
+      // Fetch all teams' solves in a single call, then build per-team progress for the top names
+      const rows = showTotalScore
+        ? await getAllTeamSolves(p_event_id, p_event_mode)
+        : await getAllTeamUniqueSolves(p_event_id, p_event_mode)
+
+      const progress: Record<string, TeamProgressSeries> = {}
+      for (const row of rows) {
+        const name = row.team_name
+        if (!topNames.includes(name)) continue
+        if (!progress[name]) progress[name] = { team_name: name, history: [] }
+        const prev = progress[name].history.at(-1)?.score || 0
+        progress[name].history.push({ date: row.created_at, score: prev + (row.points || 0) })
+      }
+
+      const orderedSeries = topNames.map((n) => progress[n]).filter(Boolean) as TeamProgressSeries[]
       setSeries(orderedSeries)
 
       setLoading(false)
     }
     fetchData()
-  }, [user, showTotalScore])
+  }, [user, showTotalScore, selectedEvent])
 
   if (authLoading) {
     return (
@@ -73,32 +116,51 @@ export default function TeamScoreboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300" />}>Team Scoreboard</TitlePage>
+        {/* <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300" />}>Team Scoreboard</TitlePage> */}
 
-        {!APP.teams.hidescoreboardTotal && (
-          <div className="w-full grid grid-cols-2 gap-2">
+        <div className="mb-4 flex justify-between items-center">
+          <div className="relative">
+            {/* Event selector */}
+            <div className="inline-block">
+              <select
+                value={selectedEvent}
+                onChange={(e) => setSelectedEvent(e.target.value)}
+                className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+              >
+                {!APP.hideEventMain && <option value="main">Main</option>}
+                <option value="all">All Events</option>
+                {events.map((ev) => (
+                  <option key={ev.id} value={ev.id}>{ev.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setShowTotalScore(false)}
-              className={`w-full px-3 py-1 text-sm rounded-md transition-colors ${
+              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
                 !showTotalScore
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
             >
               Unique Score
             </button>
-            <button
-              onClick={() => setShowTotalScore(true)}
-              className={`w-full px-3 py-1 text-sm rounded-md transition-colors ${
-                showTotalScore
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
-              }`}
-            >
-              Total Score
-            </button>
-          </div>
-        )}
+            {!APP.teams.hidescoreboardTotal && (
+              <button
+                onClick={() => setShowTotalScore(true)}
+                className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
+                  showTotalScore
+                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
+              >
+                Total Score
+              </button>
+            )}
+          </span>
+        </div>
 
         {!loading && series.length > 0 && !showTotalScore && (
           <TeamScoreboardChart

@@ -133,13 +133,15 @@ export default function ChallengeFilterBar({
           >
             All
           </button>
-          <button
-            type="button"
-            onClick={() => onEventChange(null)}
-            className={`px-3 py-1.5 text-sm rounded-full border transition ${!selectedEventId ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-          >
-            Main
-          </button>
+          {!APP.hideEventMain && (
+            <button
+              type="button"
+              onClick={() => onEventChange(null)}
+              className={`px-3 py-1.5 text-sm rounded-full border transition ${!selectedEventId ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+            >
+              Main
+            </button>
+          )}
           {sortedEvents.map(evt => (
             <button
               key={evt.id}

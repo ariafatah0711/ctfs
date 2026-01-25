@@ -162,12 +162,19 @@ export async function getTeamChallengesByName(name: string): Promise<{ challenge
 	}
 }
 
-export async function getTeamScoreboard(limit = 100, offset = 0): Promise<{ entries: TeamScoreboardEntry[]; error?: string }> {
+export async function getTeamScoreboard(
+	limit = 100,
+	offset = 0,
+	p_event_id?: string | null,
+	p_event_mode: string = 'any'
+): Promise<{ entries: TeamScoreboardEntry[]; error?: string }> {
 	try {
-		const { data, error } = await supabase.rpc('get_team_scoreboard', { limit_rows: limit, offset_rows: offset })
+		const params = { limit_rows: limit, offset_rows: offset, p_event_id: p_event_id ?? null, p_event_mode }
+		const { data, error } = await supabase.rpc('get_team_scoreboard', params)
 		if (error) return { entries: [], error: error.message }
 		return { entries: (data as TeamScoreboardEntry[]) || [] }
 	} catch (err: any) {
+		console.error('getTeamScoreboard RPC error:', err)
 		return { entries: [], error: err?.message || 'Failed to fetch team scoreboard' }
 	}
 }
@@ -225,6 +232,30 @@ export async function getTopTeamUniqueProgressByNames(teamNames: string[]): Prom
 	} catch (err) {
 		console.error('Error fetching team unique progress:', err)
 		return {}
+	}
+}
+
+// Fetch all teams' solves (single call). Optional event filters: p_event_id|null and p_event_mode ('any'|'main'|'event')
+export async function getAllTeamSolves(p_event_id?: string | null, p_event_mode: string = 'any') {
+	try {
+		const { data, error } = await supabase.rpc('get_team_solves', { p_event_id: p_event_id ?? null, p_event_mode })
+		if (error) throw error
+		return (data as any[]) || []
+	} catch (err: any) {
+		console.error('Error fetching all team solves:', err)
+		return []
+	}
+}
+
+// Fetch all teams' unique solves (first per challenge per team). Optional event filters.
+export async function getAllTeamUniqueSolves(p_event_id?: string | null, p_event_mode: string = 'any') {
+	try {
+		const { data, error } = await supabase.rpc('get_team_unique_solves', { p_event_id: p_event_id ?? null, p_event_mode })
+		if (error) throw error
+		return (data as any[]) || []
+	} catch (err: any) {
+		console.error('Error fetching all team unique solves:', err)
+		return []
 	}
 }
 

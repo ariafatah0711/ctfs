@@ -4,6 +4,7 @@ import { Event } from '@/types'
 import { Card } from '@/components/ui/card'
 import { Calendar, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
+import APP from '@/config'
 
 type Props = {
   events: Event[]
@@ -95,24 +96,26 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
   return (
     <div className="space-y-6">
       {/* Main/No Event Button */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Featured</h3>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onEventSelect(null)}
-          className={`w-full p-4 rounded-lg border-2 transition ${
-            selectedEventId === null
-              ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20'
-              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-emerald-400'
-          }`}
-        >
-          <div className="text-left">
-            <div className="font-bold text-emerald-700 dark:text-emerald-300">MAIN</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Default challenges Dari Platform ini.</div>
-          </div>
-        </motion.button>
-      </div>
+      {!APP.hideEventMain && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Featured</h3>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onEventSelect(null)}
+            className={`w-full p-4 rounded-lg border-2 transition ${
+              selectedEventId === null
+                ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20'
+                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-emerald-400'
+            }`}
+          >
+            <div className="text-left">
+              <div className="font-bold text-emerald-700 dark:text-emerald-300">MAIN</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Default challenges Dari Platform ini.</div>
+            </div>
+          </motion.button>
+        </div>
+      )}
 
       {/* All Events Button */}
       <motion.button
