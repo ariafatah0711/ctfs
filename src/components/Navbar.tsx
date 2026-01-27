@@ -813,7 +813,10 @@ export default function Navbar() {
                               className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
                               onClick={() => setMobileMenuOpen(false)}
                             >
-                              User Scoreboard
+                              <span className="flex items-center">
+                                <User size={18} className="mr-1" />
+                                User Scoreboard
+                              </span>
                             </Link>
                           )}
                           {showTeamScoreboard && (
@@ -822,7 +825,10 @@ export default function Navbar() {
                               className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
                               onClick={() => setMobileMenuOpen(false)}
                             >
-                              Team Scoreboard
+                              <span className="flex items-center">
+                                <Users size={18} className="mr-1" />
+                                Team Scoreboard
+                              </span>
                             </Link>
                           )}
                         </div>
@@ -852,7 +858,10 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-tour="navbar-info"
                   >
-                    Info
+                    <span className="flex items-center">
+                      <Info size={18} className="mr-1" />
+                      Info
+                    </span>
                   </Link>
                   <Link
                     href="/rules"
@@ -860,7 +869,10 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-tour="navbar-rules"
                   >
-                    Rules
+                    <span className="flex items-center">
+                      <Scale size={18} className="mr-1" />
+                      Rules
+                    </span>
                   </Link>
                   <Link
                     href="/docs"
@@ -868,7 +880,10 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                     data-tour="navbar-docs"
                   >
-                    Docs
+                    <span className="flex items-center">
+                      <BookOpen size={18} className="mr-1" />
+                      Docs
+                    </span>
                   </Link>
                 </div>
               </details>

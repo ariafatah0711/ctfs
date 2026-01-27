@@ -91,7 +91,7 @@ export default function LogsPage() {
             >
               <span className="inline-flex items-center gap-2 w-full">
                <span
-                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                className="flex items-center gap-1 max-w-[75px] md:max-w-none overflow-hidden"
                 title="Challenge Logs"
                 >
                   <Flag size={16} className="shrink-0" />
@@ -116,7 +116,7 @@ export default function LogsPage() {
                 }`}
               >
               <span
-                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                className="flex items-center gap-1 max-w-[75px] md:max-w-none overflow-hidden"
                 title="Solve Logs"
                 >
                   <Logs size={16} className="shrink-0" />
