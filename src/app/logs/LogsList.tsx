@@ -139,7 +139,7 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
             {notif.log_type === "new_challenge" ? (
               <>
                 <span className="font-semibold text-blue-600 dark:text-blue-300">New Challenge:</span>
-                <span className="dark:text-gray-100 font-medium">{notif.log_challenge_title}</span>
+                <span className="dark:text-gray-100 font-medium max-w-[300px] truncate inline-block">{notif.log_challenge_title}</span>
                 <span className="text-gray-500 dark:text-gray-400">[{notif.log_category}]</span>
               </>
             ) : notif.log_type === "first_blood" ? (
@@ -150,7 +150,7 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
                     href={notif.log_username ? `/user/${encodeURIComponent(notif.log_username)}` : "#"}
                     className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
                   >
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1 max-w-[300px] truncate">
                       {notif.log_username && notif.log_username.length > 20
                         ? `${notif.log_username.slice(0, 20)}...`
                         : notif.log_username}
@@ -158,17 +158,17 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
                   </Link>
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">solved</span>
-                <b className="dark:text-gray-100 font-medium">{notif.log_challenge_title}</b>
+                <b className="dark:text-gray-100 font-medium max-w-[300px] truncate inline-block">{notif.log_challenge_title}</b>
                 <span className="text-gray-500 dark:text-gray-400">[{notif.log_category}]</span>
               </>
             ) : (
               <>
-                <span className="inline-flex items-center gap-1">
+                <span className="inline-flex items-center gap-1 max-w-[300px] truncate">
                   <Link
                     href={notif.log_username ? `/user/${encodeURIComponent(notif.log_username)}` : "#"}
                     className="text-blue-600 dark:text-blue-300 font-medium hover:underline"
                   >
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1 max-w-[300px] truncate">
                       {notif.log_username && notif.log_username.length > 20
                         ? `${notif.log_username.slice(0, 20)}...`
                         : notif.log_username}
@@ -176,7 +176,7 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
                   </Link>
                 </span>
                 <span className="text-gray-700 dark:text-gray-300">solved</span>
-                <b className="dark:text-gray-100 font-medium">{notif.log_challenge_title}</b>
+                <b className="dark:text-gray-100 font-medium max-w-[300px] truncate inline-flex">{notif.log_challenge_title}</b>
                 <span className="text-gray-500 dark:text-gray-400">[{notif.log_category}]</span>
               </>
             )}

@@ -67,7 +67,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         {/* Header: title + close (DialogTitle for accessibility) */}
         <DialogTitle asChild>
           <h2
-            className={`text-xl font-bold tracking-wide ${challenge.is_solved ? 'text-green-400 dark:text-green-300' : 'text-pink-400 dark:text-pink-300'}`}
+            className={`text-xl font-bold tracking-wide max-w-max truncate block ${challenge.is_solved ? 'text-green-400 dark:text-green-300' : 'text-pink-400 dark:text-pink-300'}`}
             style={{ fontSize: '1.25rem' }}
           >
             {challenge.title}

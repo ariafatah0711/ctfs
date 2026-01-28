@@ -240,8 +240,8 @@ export default function AdminSolversPage() {
             <div className="mb-2">Are you sure you want to delete this solver record? This action cannot be undone.</div>
             {pendingDeleteDetail && (
               <div className="mt-2 p-3 rounded bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 text-sm font-semibold flex flex-col gap-1">
-                <span>👤 <b>User:</b> <span className="font-mono">{pendingDeleteDetail.username}</span></span>
-                <span>🏆 <b>Challenge:</b> <span className="font-mono">{pendingDeleteDetail.challenge_title}</span></span>
+                <span>👤 <b>User:</b> <span className="font-mono max-w-[300px] truncate inline-flex">{pendingDeleteDetail.username}</span></span>
+                <span>🏆 <b>Challenge:</b> <span className="font-mono max-w-[300px] truncate inline-flex">{pendingDeleteDetail.challenge_title}</span></span>
               </div>
             )}
           </div>

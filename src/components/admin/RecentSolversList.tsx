@@ -37,7 +37,7 @@ const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAl
                       {s.username.length > 12 ? `${s.username.slice(0, 12)}...` : s.username}
                     </Link>
                     <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
-                    <span className="text-xs text-gray-700 dark:text-gray-200">{s.challenge_title}</span>
+                    <span className="text-xs text-gray-700 dark:text-gray-200 max-w-[100px] truncate block">{s.challenge_title}</span>
                   </div>
                   <span className="text-xs text-gray-400 dark:text-gray-300">
                     {formatRelativeDate(s.solved_at)}
