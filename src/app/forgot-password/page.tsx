@@ -4,20 +4,27 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { sendPasswordReset } from "@/lib/auth";
 import Link from "next/link";
+import { Turnstile } from '@marsidev/react-turnstile'
+import Config from '@/config'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (Config.captchaToken && !captchaToken) {
+      setError('Please complete the CAPTCHA')
+      return setLoading(false)
+    }
     setLoading(true);
     setError("");
     setSuccess("");
     try {
-      const { error } = await sendPasswordReset(email);
+      const { error } = await sendPasswordReset(email, captchaToken ?? undefined);
       if (error) {
         setError(error);
       } else {
@@ -49,6 +56,16 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          {Config.captchaToken && (
+            <div className="w-full flex justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                options={{ theme: 'auto' }}
+              />
+            </div>
+          )}
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-900 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>
           )}

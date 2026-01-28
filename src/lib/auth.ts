@@ -31,10 +31,11 @@ export async function loginGoogle(): Promise<AuthResponse> {
 /**
  * Send password reset email
  */
-export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
+export async function sendPasswordReset(email: string, captchaToken?: string): Promise<{ error: string | null }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/profile/password` // redirect to forgot-password for new password input
+      redirectTo: `${window.location.origin}/profile/password`, // redirect to forgot-password for new password input
+      ...(captchaToken && { captchaToken })
     })
     if (error) {
       return { error: error.message }
