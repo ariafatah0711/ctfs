@@ -12,12 +12,14 @@ import { LogsProvider } from '@/contexts/LogsContext'
 import { ChatProvider } from '@/contexts/ChatContext'
 import { headers } from 'next/headers'
 import APP from '@/config'
+import Script from 'next/script'
 
 import FloatingToolbar from '@/components/custom/FloatingToolbar'
 import ChatBotAI from '@/components/custom/ChatBotAI'
 import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import ChatToggle from '@/components/custom/ChatToggle'
+import Live2DMaskotAnime from '@/components/custom/Live2DMaskotAnime'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -118,6 +120,7 @@ export default async function RootLayout({
             </ChatProvider>
           </ThemeProvider>
         )}
+        {APP.Live2DMaskotAnime && <Live2DMaskotAnime />}
       </body>
     </html>
   )
