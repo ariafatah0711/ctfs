@@ -70,9 +70,9 @@ export default function TeamDetailPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         <BackButton label="Go Back" className="mb-2" />
-        <TitlePage icon={<Users size={30} className="text-blue-500 dark:text-blue-300" />}>
+        {/* <TitlePage icon={<Users size={30} className="text-blue-500 dark:text-blue-300" />}>
           {team?.name || teamName || 'Team'}
-        </TitlePage>
+        </TitlePage> */}
 
         {loading ? (
           <div className="flex justify-center py-16">

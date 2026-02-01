@@ -254,7 +254,7 @@ export default function TeamsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <TitlePage icon={<Users size={30} className="text-blue-500 dark:text-blue-300" />}>Teams</TitlePage>
+        {/* <TitlePage icon={<Users size={30} className="text-blue-500 dark:text-blue-300" />}>Teams</TitlePage> */}
 
         {status && (
           <div className={`rounded-md px-4 py-3 text-sm ${status.type === 'error'

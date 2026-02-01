@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.5.6]
+### Fixed
+- Fixed issue Chart team scoreboard.
+
+### Added
+- Add Live2D maskot in pages.
+
 ## v[2.5.5]
 ### Added
 - Add icon for navbar, scoreboard, profile, stats, and logs page.

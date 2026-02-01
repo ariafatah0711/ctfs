@@ -179,10 +179,10 @@ export async function getTeamScoreboard(
 	}
 }
 
-export async function getTopTeamProgressByNames(teamNames: string[]): Promise<Record<string, TeamProgressSeries>> {
+export async function getTopTeamProgressByNames(teamNames: string[], p_event_id?: string | null, p_event_mode: string = 'any'): Promise<Record<string, TeamProgressSeries>> {
 	if (!teamNames || teamNames.length === 0) return {}
 	try {
-		const { data, error } = await supabase.rpc('get_team_solves_by_names', { p_names: teamNames })
+		const { data, error } = await supabase.rpc('get_team_solves_by_names', { p_names: teamNames, p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) throw error
 		const rows: Array<{ team_name: string; created_at: string; points: number }> = (data as any[]) || []
 
@@ -207,10 +207,10 @@ export async function getTopTeamProgressByNames(teamNames: string[]): Promise<Re
 	}
 }
 
-export async function getTopTeamUniqueProgressByNames(teamNames: string[]): Promise<Record<string, TeamProgressSeries>> {
+export async function getTopTeamUniqueProgressByNames(teamNames: string[], p_event_id?: string | null, p_event_mode: string = 'any'): Promise<Record<string, TeamProgressSeries>> {
 	if (!teamNames || teamNames.length === 0) return {}
 	try {
-		const { data, error } = await supabase.rpc('get_team_unique_solves_by_names', { p_names: teamNames })
+		const { data, error } = await supabase.rpc('get_team_unique_solves_by_names', { p_names: teamNames, p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) throw error
 		const rows: Array<{ team_name: string; created_at: string; points: number }> = (data as any[]) || []
 

@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import TeamScoreboardChart from '@/components/teams/TeamScoreboardChart'
-import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, getAllTeamSolves, getAllTeamUniqueSolves, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
+import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
 import { APP } from '@/config'
 import { getEvents } from '@/lib/events'
 import { Event } from '@/types'
@@ -79,21 +79,15 @@ export default function TeamScoreboardPage() {
 
       const topNames = filteredList.slice(0, 10).map((t) => t.team_name)
 
-      // Fetch all teams' solves in a single call, then build per-team progress for the top names
-      const rows = showTotalScore
-        ? await getAllTeamSolves(p_event_id, p_event_mode)
-        : await getAllTeamUniqueSolves(p_event_id, p_event_mode)
+      // Fetch progress only for top 10 teams with event filter
+      const progressData = showTotalScore
+        ? await getTopTeamProgressByNames(topNames, p_event_id, p_event_mode)
+        : await getTopTeamUniqueProgressByNames(topNames, p_event_id, p_event_mode)
 
-      const progress: Record<string, TeamProgressSeries> = {}
-      for (const row of rows) {
-        const name = row.team_name
-        if (!topNames.includes(name)) continue
-        if (!progress[name]) progress[name] = { team_name: name, history: [] }
-        const prev = progress[name].history.at(-1)?.score || 0
-        progress[name].history.push({ date: row.created_at, score: prev + (row.points || 0) })
-      }
-
-      const orderedSeries = topNames.map((n) => progress[n]).filter(Boolean) as TeamProgressSeries[]
+      // Build ordered series maintaining the rank order
+      const orderedSeries = topNames
+        .map((name) => progressData[name])
+        .filter(Boolean) as TeamProgressSeries[]
       setSeries(orderedSeries)
 
       setLoading(false)
