@@ -20,6 +20,7 @@ import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import ChatToggle from '@/components/custom/ChatToggle'
 import Live2DMaskotAnime from '@/components/custom/Live2DMaskotAnime'
+// import Live2DInteractive from '@/components/custom/Live2DInteractive'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -121,6 +122,7 @@ export default async function RootLayout({
           </ThemeProvider>
         )}
         {APP.Live2DMaskotAnime && <Live2DMaskotAnime />}
+        {/* {APP.Live2DMaskotAnime && <Live2DInteractive />} */}
       </body>
     </html>
   )
