@@ -54,6 +54,7 @@ export default function Live2DMaskotAnime({
     setIsPlaying(true)
     audioRef.current.src = nextSound
     audioRef.current.currentTime = 0
+    audioRef.current.volume = 0.33
 
     audioRef.current.play().catch(() => {
       setIsPlaying(false)
