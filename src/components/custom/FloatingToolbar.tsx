@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-export default function FloatingToolbar({ children }: { children?: React.ReactNode }) {
+type ToolbarPosition = 'left' | 'right'
+
+export default function FloatingToolbar({
+  children,
+  position = 'right'
+}: {
+  children?: React.ReactNode
+  position?: ToolbarPosition
+}) {
   // Accept children from parent (layout) so layout can decide what to render
   // based on config. FloatingToolbar only handles positioning and visibility.
   const [isVisible, setIsVisible] = useState(false)
@@ -79,12 +87,12 @@ export default function FloatingToolbar({ children }: { children?: React.ReactNo
       id="floating-toolbar"
       onMouseEnter={handleToolbarMouseEnter}
       onMouseLeave={handleToolbarMouseLeave}
-      className={`fixed left-6 bottom-6 z-10 flex flex-col items-end gap-3 transform ${
+      className={`fixed ${position === 'left' ? 'left-6 bottom-6' : 'right-6 bottom-24'} z-10 flex flex-col items-end gap-3 transform ${
         prefersReducedMotion ? 'transition-opacity duration-150' : 'transition-all duration-400 ease-out'
       } ${
         isVisible
           ? 'opacity-100 translate-x-0 translate-y-0 scale-100 blur-0'
-          : 'opacity-0 -translate-x-6 translate-y-4 scale-95 blur-sm pointer-events-none'
+          : `opacity-0 ${position === 'left' ? '-translate-x-6' : 'translate-x-6'} translate-y-4 scale-95 blur-sm pointer-events-none`
       }`}
     >
       {children}

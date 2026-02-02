@@ -19,8 +19,10 @@ import ChatBotAI from '@/components/custom/ChatBotAI'
 import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import ChatToggle from '@/components/custom/ChatToggle'
-import Live2DMaskotAnime from '@/components/custom/Live2DMaskotAnime'
-// import Live2DInteractive from '@/components/custom/Live2DInteractive'
+
+import Live2DMaskotAnime from '@/components/custom/anime/Live2DMaskotAnime'
+// import Live2DInteractive from '@/components/custom/anime/Live2DInteractive'
+import Live2DPixi from '@/components/custom/anime/Live2DPixi'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -109,7 +111,7 @@ export default async function RootLayout({
                     <div className="pt-14">{children}</div>
                     <Toaster position="top-right" reverseOrder={false} />
                     <ChallengeJoyride />
-                    <FloatingToolbar>
+                    <FloatingToolbar position="right">
                       {APP.ChallengeTutorial && <ChallengeTutorial />}
                       {APP.ChatBotAI && <ChatToggle />}
                     </FloatingToolbar>
@@ -123,6 +125,7 @@ export default async function RootLayout({
         )}
         {APP.Live2DMaskotAnime && <Live2DMaskotAnime />}
         {/* {APP.Live2DMaskotAnime && <Live2DInteractive />} */}
+        {/* {APP.Live2DMaskotAnime && <Live2DPixi />} */}
       </body>
     </html>
   )

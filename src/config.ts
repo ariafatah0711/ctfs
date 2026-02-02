@@ -1,4 +1,4 @@
-import Live2DMaskotAnime from "./components/custom/Live2DMaskotAnime"
+import Live2DMaskotAnime from "./components/custom/anime/Live2DMaskotAnime"
 
 export const APP = {
   shortName: 'FGTE',
