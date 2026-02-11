@@ -89,6 +89,116 @@ export async function getChallenges(
 }
 
 /**
+ * Get challenge list (lightweight)
+ * - Avoids downloading heavy fields (description/attachments/hint) for every challenge card.
+ * - Returns the same shape as `ChallengeWithSolve` by filling unused fields with safe defaults.
+ */
+export async function getChallengesList(
+  userId?: string,
+  showAll: boolean = false,
+  eventId?: string | null | 'all'
+): Promise<(ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]> {
+  try {
+    let query = supabase
+      .from('challenges')
+      .select(
+        'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at'
+      )
+      .order('points', { ascending: true })
+      .order('total_solves', { ascending: false })
+
+    if (!showAll) query = query.eq('is_active', true)
+
+    if (eventId === 'all') {
+      // no filter
+    } else if (eventId) {
+      query = query.eq('event_id', eventId)
+    } else {
+      query = query.is('event_id', null)
+    }
+
+    const { data: challenges, error } = await query
+    if (error) throw new Error(error.message)
+    if (!challenges) return []
+
+    const notifications = (await getLogs(500, 0)) as any[]
+    const fbIds = new Set(
+      notifications
+        .filter((n) => n.log_type === 'first_blood')
+        .map((n) => n.log_challenge_id)
+    )
+
+    let solvedIds = new Set<string>()
+    if (userId) {
+      const { data: solves } = await supabase
+        .from('solves')
+        .select('challenge_id')
+        .eq('user_id', userId)
+
+      solvedIds = new Set(solves?.map((s) => s.challenge_id) || [])
+    }
+
+    return (challenges as any[]).map((ch) => {
+      const createdAt = new Date(ch.created_at)
+      const isRecentlyCreated = Date.now() - createdAt.getTime() < 24 * 60 * 60 * 1000
+      const hasFirstBlood = fbIds.has(ch.id)
+
+      return {
+        // lightweight fields from DB
+        ...ch,
+
+        // fill heavy / unused fields so existing UI types don't break
+        description: '',
+        hint: null,
+        attachments: [],
+        flag: '',
+        flag_hash: '',
+
+        // computed flags
+        is_solved: solvedIds.has(ch.id),
+        has_first_blood: hasFirstBlood,
+        is_recently_created: isRecentlyCreated,
+        is_new: isRecentlyCreated || !hasFirstBlood,
+        total_solves: ch.total_solves || 0,
+        is_maintenance: ch.is_maintenance ?? false,
+      }
+    })
+  } catch (err) {
+    console.error('Error fetching challenges (list):', err)
+    return []
+  }
+}
+
+/**
+ * Get full challenge detail by ID (public view)
+ * Intended to be used on-demand when a user opens a challenge dialog.
+ */
+export async function getChallengeDetail(challengeId: string): Promise<ChallengeWithSolve | null> {
+  try {
+    const { data, error } = await supabase
+      .from('challenges')
+      .select(
+        'id, event_id, title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at'
+      )
+      .eq('id', challengeId)
+      .single()
+
+    if (error) throw new Error(error.message)
+    if (!data) return null
+
+    // Fill fields that might exist in the app-level `Challenge` type but are not present in `challenges` table.
+    return {
+      ...(data as any),
+      flag: '',
+      flag_hash: '',
+    } as any
+  } catch (error) {
+    console.error('Error fetching challenge detail:', error)
+    return null
+  }
+}
+
+/**
  * Submit flag for a challenge
  */
 export async function submitFlag(challengeId: string, flag: string) {
@@ -913,5 +1023,33 @@ export function subscribeToSolves(onSolve: (payload: { username: string, challen
   return () => {
     console.log('[subscribeToSolves] Unsubscribing from solves-insert channel...')
     supabase.removeChannel(channel)
+  }
+}
+
+/**
+ * Lightweight activity signal subscription for Logs unread badge.
+ * Does NOT fetch extra data; it only signals that something potentially affecting logs happened.
+ */
+export function subscribeToLogSignals(onSignal: () => void) {
+  const solvesChannel = supabase
+    .channel('logs-signal-solves')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'solves' }, () => {
+      onSignal()
+    })
+    .subscribe()
+
+  const challengesChannel = supabase
+    .channel('logs-signal-challenges')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'challenges' }, (payload) => {
+      const row: any = payload.new || {}
+      // Only signal on active challenges (matches get_logs WHERE is_active = true)
+      if (row.is_active === false) return
+      onSignal()
+    })
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(solvesChannel)
+    supabase.removeChannel(challengesChannel)
   }
 }

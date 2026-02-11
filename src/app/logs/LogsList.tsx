@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { getLogs, getRecentSolves } from "@/lib/challenges";
 import { useLogs } from '@/contexts/LogsContext'
 import Link from "next/link";
 import Loader from "@/components/custom/loading";
@@ -20,39 +19,20 @@ export type LogEntry = {
 export default function LogsList({ tabType = 'challenges', eventId }: { tabType?: 'challenges' | 'solves', eventId?: string | null | 'all' }) {
   const [notifications, setNotifications] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getEventChallengeIds } = useLogs()
+  const { getFeed } = useLogs()
+
+  const eventKey = eventId === undefined ? 'any' : (eventId === null ? 'main' : String(eventId))
+  const cacheKey = `${tabType}:${eventKey}`
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      // fetch logs + recent solves
-      const notifs = await getLogs(10000, 0);
-      const solves = await getRecentSolves(100, 0);
 
-      // If eventId is provided and not 'all', get cached challenge ids for that event
-      let eventChallengeIds: Set<string> | null = null;
-      if (eventId !== undefined && eventId !== 'all') {
-        try {
-          const set = await getEventChallengeIds(eventId as any)
-          eventChallengeIds = set
-        } catch (err) {
-          eventChallengeIds = null
-        }
-      }
-
-      // Merge and sort by created_at (newest first)
-      let merged = [...notifs, ...solves]
-        .sort((a, b) => new Date(b.log_created_at).getTime() - new Date(a.log_created_at).getTime());
-
-      // If we have an event filter, keep only notifications/solves whose challenge id belongs to the event
-      if (eventChallengeIds) {
-        merged = merged.filter((n) => eventChallengeIds!.has(String(n.log_challenge_id)));
-      }
-
-      setNotifications(merged);
-      setLoading(false);
+      const merged = await getFeed(tabType, eventId)
+      setNotifications(merged as LogEntry[])
+      setLoading(false)
     })();
-  }, [eventId, getEventChallengeIds]);
+  }, [cacheKey, eventId, getFeed, tabType]);
 
   // Filter based on tab type
   const challengeLogs = notifications.filter(n => n.log_type === 'first_blood' || n.log_type === 'new_challenge');

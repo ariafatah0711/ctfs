@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getChallenges, submitFlag, getSolversByChallenge } from '@/lib/challenges'
+import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { getEvents } from '@/lib/events'
 import { getMyTeamChallenges } from '@/lib/teams'
 import { ChallengeWithSolve, User, Attachment, Event } from '@/types'
@@ -56,6 +56,29 @@ export default function ChallengesPage() {
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const { user, loading } = require('@/contexts/AuthContext').useAuth();
 
+  // In-memory caches to reduce repeated network usage
+  const [challengeDetailCache] = useState(() => new Map<string, ChallengeWithSolve>())
+  const [solversCache] = useState(() => new Map<string, Solver[]>())
+
+  const normalizeHints = (raw: any): string[] => {
+    let hints: string[] = []
+    if (Array.isArray(raw)) {
+      hints = raw.filter((h: any) => typeof h === 'string')
+    } else if (typeof raw === 'string') {
+      try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) hints = parsed.filter((h: any) => typeof h === 'string')
+        else if (typeof parsed === 'string') hints = [parsed]
+        else hints = []
+      } catch {
+        if (raw.trim() !== '') hints = [raw]
+      }
+    } else if (raw && typeof raw !== 'object') {
+      hints = [String(raw)]
+    }
+    return hints
+  }
+
   const formatRemaining = (ms: number) => {
     const totalMinutes = Math.max(0, Math.floor(ms / 60000));
     const days = Math.floor(totalMinutes / (60 * 24));
@@ -74,7 +97,7 @@ export default function ChallengesPage() {
   const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd);
   const loadChallenges = async () => {
     if (!user) return
-    const challengesData = await getChallenges(user.id, false, 'all')
+    const challengesData = await getChallengesList(user.id, false, 'all')
 
     let teamSolvedIds = new Set<string>()
     if (APP.teams.enabled) {
@@ -82,38 +105,16 @@ export default function ChallengesPage() {
       teamSolvedIds = new Set((teamChallenges || []).map((c: any) => c.challenge_id))
     }
 
-    // Normalize hint field to string[] for each challenge
-    const normalizedChallenges = challengesData.map((challenge: any) => {
-      let hints: string[] = [];
-      const raw = challenge.hint;
-      if (Array.isArray(raw)) {
-        hints = raw.filter((h: any) => typeof h === 'string');
-      } else if (typeof raw === 'string') {
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) {
-            hints = parsed.filter((h: any) => typeof h === 'string');
-          } else if (typeof parsed === 'string') {
-            hints = [parsed];
-          } else if (parsed === null) {
-            hints = [];
-          }
-        } catch {
-          if (raw.trim() !== '') hints = [raw];
-        }
-      } else if (raw && typeof raw === 'object') {
-        // ignore unexpected object
-      } else if (raw) {
-        hints = [String(raw)];
-      }
-      return {
+    // List payload is intentionally lightweight: hint/attachments/description are empty here.
+    setChallenges(
+      challengesData.map((challenge: any) => ({
         ...challenge,
-        hint: hints,
+        hint: [],
+        attachments: [],
+        description: typeof challenge.description === 'string' ? challenge.description : '',
         is_team_solved: teamSolvedIds.has(challenge.id),
-      };
-    });
-
-    setChallenges(normalizedChallenges)
+      }))
+    )
   }
   // Redirect ke /login jika user belum login dan sudah selesai loading
   useEffect(() => {
@@ -133,12 +134,56 @@ export default function ChallengesPage() {
   // Tambahkan useEffect ini setelah deklarasi state
   useEffect(() => {
     if (selectedChallenge) {
-      // Fetch solvers setiap kali challenge detail dibuka
+      // Fetch solvers setiap kali challenge detail dibuka (with cache)
+      const cached = solversCache.get(selectedChallenge.id)
+      if (cached) {
+        setSolvers(cached)
+        return
+      }
       getSolversByChallenge(selectedChallenge.id)
-        .then(setSolvers)
-        .catch(() => setSolvers([]));
+        .then((data) => {
+          solversCache.set(selectedChallenge.id, data)
+          setSolvers(data)
+        })
+        .catch(() => setSolvers([]))
     }
   }, [selectedChallenge]);
+
+  const openChallenge = async (challenge: ChallengeWithSolve) => {
+    setChallengeTab('challenge')
+    setSolvers([])
+    const cached = challengeDetailCache.get(challenge.id)
+    if (cached) {
+      setSelectedChallenge({
+        ...challenge,
+        ...cached,
+        hint: normalizeHints((cached as any).hint),
+      } as any)
+      return
+    }
+
+    // Open immediately with lightweight data; detail will be filled in.
+    setSelectedChallenge({
+      ...challenge,
+      description: challenge.description || 'Loading...',
+      hint: Array.isArray((challenge as any).hint) ? (challenge as any).hint : [],
+      attachments: Array.isArray((challenge as any).attachments) ? (challenge as any).attachments : [],
+    } as any)
+
+    const detail = await getChallengeDetail(challenge.id)
+    if (!detail) return
+    challengeDetailCache.set(challenge.id, detail)
+
+    // Only update if the same challenge is still open
+    setSelectedChallenge((prev) => {
+      if (!prev || prev.id !== challenge.id) return prev
+      return {
+        ...prev,
+        ...detail,
+        hint: normalizeHints((detail as any).hint),
+      } as any
+    })
+  }
 
   // Load filter settings from localStorage (once)
   useEffect(() => {
@@ -180,8 +225,10 @@ export default function ChallengesPage() {
     try {
       const result = await submitFlag(challengeId, flagInputs[challengeId].trim())
 
-      // Refresh challenge list
-      await loadChallenges()
+      // Only refresh challenge list when something actually changes (solve success).
+      if (result?.success) {
+        await loadChallenges()
+      }
 
       // set feedback box
       setFlagFeedback(prev => ({
@@ -276,7 +323,8 @@ export default function ChallengesPage() {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       const titleMatch = challenge.title.toLowerCase().includes(searchLower);
-      const descMatch = challenge.description.toLowerCase().includes(searchLower);
+      const desc = typeof challenge.description === 'string' ? challenge.description : ''
+      const descMatch = desc.toLowerCase().includes(searchLower);
       if (!titleMatch && !descMatch) return false;
     }
 
@@ -511,7 +559,7 @@ export default function ChallengesPage() {
                           key={challenge.id}
                           challenge={challenge}
                           highlightTeamSolves={filterSettings.highlightTeamSolves}
-                          onClick={() => setSelectedChallenge(challenge)}
+                          onClick={() => openChallenge(challenge)}
                         />
                       ))}
                     </motion.div>

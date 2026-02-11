@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Loader from '@/components/custom/loading'
 import BackButton from "@/components/custom/BackButton"
 import { Card, CardContent } from '@/components/ui/card'
-import { getChallenges } from '@/lib/challenges'
+import { getChallengesList } from '@/lib/challenges'
 import { isAdmin } from '@/lib/admin'
 import { getStatsByRange } from '@/lib/activityStats'
 import { getInfo } from '@/lib/users'
@@ -41,7 +41,7 @@ export default function AdminOverviewPage() {
       }
 
       const [data, info, stats] = await Promise.all([
-        getChallenges(undefined, true),
+        getChallengesList(undefined, true),
         getInfo(),
         getStatsByRange(timeRange),
       ])

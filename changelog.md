@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.7.0]
+### Added
+- add ligthweight challenge fetching
+- Improve logs handling and fetching.
+
 ## v[2.6.3]
 ### Added
 - Improve ui for team page.
@@ -585,3 +590,32 @@ All notable changes to this project will be documented in this file.
 * Perhitungan skor scoreboard
 * Submit challenge saat event tidak aktif
 * Scoreboard hanya menampilkan user dengan score > 0
+
+---
+
+🔔 **CTFS Update – Security, Event Filter & Logs Optimization**
+
+#### **[v2.6.0 – v2.7.0]**
+### **Added**
+* Security policy:
+  * Restrict access to inactive challenges
+  * Restrict access when event not started / already ended
+* Markdown hidden comment syntax using `$!`
+* Default event label configuration fallback
+* Event selector in Teams page
+* Back button in Teams page
+* Lightweight challenge fetching (performance improvement)
+* Improved logs fetching system
+* UI improvements for Teams page
+
+### **Improved**
+* Challenge Event filter consistency across pages
+* Event filter logic in summary & stats
+* Overall logs handling & performance
+* Teams page UI/UX refinement
+
+### **Fixed**
+* Challenge Event filter not working properly in some pages
+* Event filter summary showing not-started events
+* Challenge form dialog unable to update to default / null event
+* Minor filtering & edge-case issues related to events

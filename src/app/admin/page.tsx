@@ -21,7 +21,7 @@ import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { isAdmin } from '@/lib/auth'
-import { getChallenges, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
+import { getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
 import { getEvents } from '@/lib/events'
 import { getInfo } from '@/lib/users'
 import { Challenge, Attachment, Event } from '@/types'
@@ -130,7 +130,7 @@ export default function AdminPage() {
         return
       }
 
-      const data = await getChallenges(undefined, true, 'all')
+      const data = await getChallengesList(undefined, true, 'all')
       const info = await getInfo()
       const eventList = await getEvents()
       fetchSolvers(0)
@@ -150,37 +150,41 @@ export default function AdminPage() {
     setShowPreview(false)
   }
 
-  const openEdit = (c: Challenge) => {
+  const openEdit = async (c: Challenge) => {
+    // Fetch full details on-demand (admin list is lightweight)
+    const detail = await getChallengeDetail(c.id)
+    const full = (detail ? { ...c, ...(detail as any) } : c) as any
+
     // normalize hint to array
     let parsedHint: string[] = []
-    if (Array.isArray(c.hint)) parsedHint = c.hint.filter(h => typeof h === 'string')
-    else if (typeof c.hint === 'string' && c.hint.trim() !== '') {
+    if (Array.isArray(full.hint)) parsedHint = full.hint.filter((h: any) => typeof h === 'string')
+    else if (typeof full.hint === 'string' && full.hint.trim() !== '') {
       try {
-        const arr = JSON.parse(c.hint as unknown as string)
-        if (Array.isArray(arr)) parsedHint = arr.filter(h => typeof h === 'string')
-        else parsedHint = [c.hint as unknown as string]
+        const arr = JSON.parse(full.hint as unknown as string)
+        if (Array.isArray(arr)) parsedHint = arr.filter((h: any) => typeof h === 'string')
+        else parsedHint = [full.hint as unknown as string]
       } catch {
-        parsedHint = [c.hint as unknown as string]
+        parsedHint = [full.hint as unknown as string]
       }
     }
 
-    setEditing(c)
+    setEditing(full)
     setFormData({
-      title: c.title,
-      description: c.description || '',
-  category: c.category || APP.challengeCategories?.[0] || 'Web',
-      points: c.points || 100,
-      max_points: c.max_points || c.points || 100,
-      flag: c.flag || '',
+      title: full.title,
+      description: full.description || '',
+      category: full.category || APP.challengeCategories?.[0] || 'Web',
+      points: full.points || 100,
+      max_points: full.max_points || full.points || 100,
+      flag: full.flag || '',
       hint: parsedHint,
-      difficulty: c.difficulty || 'Easy',
-      attachments: c.attachments || [],
-      is_dynamic: c.is_dynamic ?? false,
-      is_active: c.is_active ?? true,
-      is_maintenance: c.is_maintenance ?? false,
-      min_points: c.min_points ?? 0,
-      decay_per_solve: c.decay_per_solve ?? 0,
-      event_id: c.event_id ?? null,
+      difficulty: full.difficulty || 'Easy',
+      attachments: full.attachments || [],
+      is_dynamic: full.is_dynamic ?? false,
+      is_active: full.is_active ?? true,
+      is_maintenance: full.is_maintenance ?? false,
+      min_points: full.min_points ?? 0,
+      decay_per_solve: full.decay_per_solve ?? 0,
+      event_id: full.event_id ?? null,
     })
     setOpenForm(true)
     setShowPreview(false)
@@ -330,7 +334,7 @@ export default function AdminPage() {
         await addChallenge(payload)
       }
 
-      const data = await getChallenges(undefined, true, 'all')
+      const data = await getChallengesList(undefined, true, 'all')
       setChallenges(data)
       setOpenForm(false)
       setEditing(null)
@@ -347,7 +351,7 @@ export default function AdminPage() {
   const doDelete = async (id: string) => {
     try {
       await deleteChallenge(id)
-      const data = await getChallenges(undefined, true, 'all')
+      const data = await getChallengesList(undefined, true, 'all')
       setChallenges(data)
       toast.success('Challenge deleted successfully')
     } catch (err) {
