@@ -447,6 +447,15 @@ export default function Navbar() {
                 </Link>
               )}
 
+              {!user && (
+                <Link
+                  href="/preview"
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                >
+                  <FileText size={18} className="mr-1" /> Preview
+                </Link>
+              )}
+
               {/* Info Dropdown (Rules + Info + Docs) */}
               <div ref={docsMenuRef} className="relative">
                 <button
@@ -920,6 +929,13 @@ export default function Navbar() {
               {/* Tampil jika belum login */}
               {!user && (
                 <>
+                  <Link
+                    href="/preview"
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <FileText size={18} className="mr-1" /> Preview
+                  </Link>
                   <Link
                     href="/login"
                     className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}

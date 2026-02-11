@@ -1820,9 +1820,15 @@ CREATE POLICY "Notifications delete by admin"
 REVOKE ALL ON SCHEMA public FROM anon;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM anon;
+-- Middleware maintenance check uses the anon key; anon needs schema USAGE to access explicitly-granted objects.
+GRANT USAGE ON SCHEMA public TO anon;
 GRANT USAGE ON SCHEMA public TO authenticated;
 
 REVOKE UPDATE ON public.users FROM authenticated;
+-- PostgREST still requires table privileges in addition to RLS policies.
+-- Grant read access to profiles for logged-in users (and optionally anon, if you need public profiles).
+GRANT SELECT ON public.users TO authenticated;
+-- GRANT SELECT ON public.users TO anon;
 GRANT SELECT ON public.events TO authenticated;
 GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;

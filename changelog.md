@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.7.1]
+### Fixed
+- Fixed Bug login.
+
+### Added
+- Added Preview page for unauthenticated user.
+
 ## v[2.7.0]
 ### Added
 - add ligthweight challenge fetching

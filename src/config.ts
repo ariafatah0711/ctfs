@@ -59,6 +59,9 @@ export const APP = {
   hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event CTFs)
   // Label untuk challenges tanpa event_id (event_id = NULL). Jika kosong, fallback ke "Main".
   eventMainLabel: 'FGTE 2026',
+  // Gambar untuk "Main/Featured" event (boleh URL external atau path public). Contoh:
+  // 'https://example.com/banner.png' atau '/images/banner.png'
+  eventMainImageUrl: 'https://raw.githubusercontent.com/ariafatah0711/fgte_s1/refs/heads/main/img/FGTE_2026.png',
 
   /* Maintenance configuration */
   // mode: 'no' | 'yes' | 'auto'

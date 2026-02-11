@@ -52,8 +52,19 @@ const getTimeRemaining = (evt: Event) => {
   return 'Ongoing'
 }
 
+function normalizeImageUrl(url?: string | null) {
+  if (!url) return null
+  const trimmed = String(url).trim()
+  if (!trimmed) return null
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  if (trimmed.startsWith('/')) return trimmed
+  return `/${trimmed}`
+}
+
 export default function EventsTab({ events, selectedEventId, onEventSelect }: Props) {
   const mainLabel = String(APP.eventMainLabel || 'Main')
+  const mainImageUrl = normalizeImageUrl((APP as any).eventMainImageUrl)
+  const showMain = !APP.hideEventMain
   // Split events into ongoing/upcoming and ended
   const now = new Date();
   // Sort events: Active first, then Ongoing (soonest end), then Upcoming (soonest start)
@@ -83,7 +94,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
     const bStart = b.start_time ? new Date(b.start_time) : null;
     return (aStart?.getTime() ?? Infinity) - (bStart?.getTime() ?? Infinity);
   });
-  const ongoingEvents = [...activeList, ...ongoingList, ...upcomingList];
+  const availableEvents = [...activeList, ...ongoingList];
   const endedEvents = events.filter(evt => {
     const end = evt.end_time ? new Date(evt.end_time) : null;
     return end && end <= now;
@@ -94,30 +105,11 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
     return (bEnd?.getTime() ?? 0) - (aEnd?.getTime() ?? 0);
   });
 
+  const hasAvailableSection = showMain || availableEvents.length > 0
+  const hasUpcomingSection = upcomingList.length > 0
+
   return (
     <div className="space-y-6">
-      {/* Main/No Event Button */}
-      {!APP.hideEventMain && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Featured</h3>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onEventSelect(null)}
-            className={`w-full p-4 rounded-lg border-2 transition ${
-              selectedEventId === null
-                ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/20'
-                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-emerald-400'
-            }`}
-          >
-            <div className="text-left">
-              <div className="font-bold text-emerald-700 dark:text-emerald-300">{mainLabel}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Default challenges Dari Platform ini.</div>
-            </div>
-          </motion.button>
-        </div>
-      )}
-
       {/* All Events Button */}
       <motion.button
         whileHover={{ scale: 1.02 }}
@@ -136,11 +128,64 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
       </motion.button>
 
       {/* Available Events List */}
-      {ongoingEvents.length > 0 && (
+      {hasAvailableSection && (
         <div>
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Available Events</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {ongoingEvents.map((evt, idx) => {
+            {showMain && (() => {
+              const isSelected = selectedEventId === null
+              return (
+                <motion.button
+                  key="__main__"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0 }}
+                  onClick={() => onEventSelect(null)}
+                  className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
+                >
+                  <Card
+                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 dark:border-emerald-400 ring-2 ring-emerald-600 dark:ring-emerald-400'
+                        : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-400'
+                    } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+                  >
+                    {mainImageUrl && (
+                      <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                        <img
+                          src={mainImageUrl}
+                          alt={mainLabel}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex-1 p-4 flex flex-col">
+                      <div className="mb-3">
+                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
+                          {mainLabel}
+                        </h4>
+                        <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
+                          Active
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
+                        Default challenges dari platform ini.
+                      </p>
+
+                      <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
+                        <div className="flex items-center gap-2">
+                          <Clock size={14} />
+                          <span>Always available</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.button>
+              )
+            })()}
+            {availableEvents.map((evt, idx) => {
               const status = getEventStatus(evt);
               const timeRemaining = getTimeRemaining(evt);
               const isSelected = selectedEventId === evt.id;
@@ -149,7 +194,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                   key={evt.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  transition={{ duration: 0.3, delay: (idx + (showMain ? 1 : 0)) * 0.05 }}
                   onClick={() => onEventSelect(evt.id)}
                   className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
                 >
@@ -191,6 +236,78 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                       )}
 
                       {/* Time Info */}
+                      <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
+                        {evt.start_time && (
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} />
+                            <span>{new Date(evt.start_time).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Clock size={14} />
+                          <span>{timeRemaining}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </motion.button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Upcoming Events List */}
+      {hasUpcomingSection && (
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Upcoming Events</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {upcomingList.map((evt, idx) => {
+              const status = getEventStatus(evt);
+              const timeRemaining = getTimeRemaining(evt);
+              const isSelected = selectedEventId === evt.id;
+              return (
+                <motion.button
+                  key={evt.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  onClick={() => onEventSelect(evt.id)}
+                  className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
+                >
+                  <Card
+                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-600 dark:border-indigo-400 ring-2 ring-indigo-600 dark:ring-indigo-400'
+                        : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
+                    } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+                  >
+                    {evt.image_url && (
+                      <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                        <img
+                          src={evt.image_url}
+                          alt={evt.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex-1 p-4 flex flex-col">
+                      <div className="mb-3">
+                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
+                          {evt.name}
+                        </h4>
+                        <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
+                          {status.icon} {status.label}
+                        </div>
+                      </div>
+
+                      {evt.description && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
+                          {evt.description}
+                        </p>
+                      )}
+
                       <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
                         {evt.start_time && (
                           <div className="flex items-center gap-2">
@@ -290,7 +407,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
       )}
 
       {/* Empty State */}
-      {ongoingEvents.length === 0 && endedEvents.length === 0 && (
+      {!hasAvailableSection && !hasUpcomingSection && endedEvents.length === 0 && (
         <div className="text-center py-12">
           <div className="text-4xl mb-2">📭</div>
           <p className="text-gray-500 dark:text-gray-400">No events scheduled yet</p>
