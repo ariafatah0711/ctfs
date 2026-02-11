@@ -55,6 +55,73 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   categories,
   events,
 }) => {
+  const sortedEvents = React.useMemo(() => {
+    if (!events) return []
+
+    const nowMs = Date.now()
+
+    const getLabel = (evt: any) => String(evt?.name ?? evt?.title ?? 'Untitled')
+
+    const getState = (evt: any) => {
+      const start = evt?.start_time ? new Date(evt.start_time).getTime() : null
+      const end = evt?.end_time ? new Date(evt.end_time).getTime() : null
+
+      // Permanent = no start & no end
+      if (!start && !end) return 'permanent' as const
+      // Ended
+      if (end && nowMs > end) return 'ended' as const
+      // Upcoming
+      if (start && nowMs < start) return 'upcoming' as const
+      // Ongoing
+      return 'ongoing' as const
+    }
+
+    const statePriority: Record<ReturnType<typeof getState>, number> = {
+      permanent: 0,
+      ongoing: 1,
+      upcoming: 2,
+      ended: 3,
+    }
+
+    const safeTime = (t: number | null) => (typeof t === 'number' && !Number.isNaN(t) ? t : null)
+
+    return [...events].sort((a: any, b: any) => {
+      const stateA = getState(a)
+      const stateB = getState(b)
+      if (stateA !== stateB) return statePriority[stateA] - statePriority[stateB]
+
+      const aStart = safeTime(a?.start_time ? new Date(a.start_time).getTime() : null)
+      const bStart = safeTime(b?.start_time ? new Date(b.start_time).getTime() : null)
+      const aEnd = safeTime(a?.end_time ? new Date(a.end_time).getTime() : null)
+      const bEnd = safeTime(b?.end_time ? new Date(b.end_time).getTime() : null)
+
+      if (stateA === 'permanent') {
+        const aKey = aStart ?? 0
+        const bKey = bStart ?? 0
+        return aKey - bKey || getLabel(a).localeCompare(getLabel(b))
+      }
+
+      if (stateA === 'ongoing') {
+        const aKey = aEnd ?? Infinity
+        const bKey = bEnd ?? Infinity
+        return aKey - bKey || getLabel(a).localeCompare(getLabel(b))
+      }
+
+      if (stateA === 'upcoming') {
+        const aKey = aStart ?? Infinity
+        const bKey = bStart ?? Infinity
+        return aKey - bKey || getLabel(a).localeCompare(getLabel(b))
+      }
+
+      if (stateA === 'ended') {
+        const aKey = aEnd ?? 0
+        const bKey = bEnd ?? 0
+        return bKey - aKey || getLabel(a).localeCompare(getLabel(b))
+      }
+
+      return 0
+    })
+  }, [events])
 
   // small modal for viewing flag in the form
   const [flagPreviewOpen, setFlagPreviewOpen] = useState(false)
@@ -160,8 +227,8 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
                     <SelectItem value="__main__">{String(APP.eventMainLabel || 'Main')}</SelectItem>
-                    {events.map(evt => (
-                      <SelectItem key={evt.id} value={evt.id}>{evt.name}</SelectItem>
+                    {sortedEvents.map((evt: any) => (
+                      <SelectItem key={evt.id} value={evt.id}>{String(evt?.name ?? evt?.title ?? 'Untitled')}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

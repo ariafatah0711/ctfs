@@ -1017,7 +1017,7 @@ BEGIN
       is_dynamic = p_is_dynamic,
       min_points = p_min_points,
       decay_per_solve = p_decay_per_solve,
-        event_id = COALESCE(p_event_id, event_id),
+      event_id = p_event_id,
       updated_at = now()
   WHERE id = p_challenge_id;
 
@@ -1180,7 +1180,15 @@ BEGIN
   RETURN QUERY
   SELECT c.category, COUNT(*)::int
   FROM public.challenges c
+  LEFT JOIN public.events e ON e.id = c.event_id
   WHERE c.is_active = true
+    AND (
+      c.event_id IS NULL
+      OR (
+        (e.start_time IS NULL OR now() >= e.start_time)
+        -- AND (e.end_time IS NULL OR now() <= e.end_time)
+      )
+    )
     AND (
       p_event_mode = 'any'
       OR (p_event_mode = 'is_null' AND c.event_id IS NULL)
@@ -1206,7 +1214,15 @@ BEGIN
   RETURN QUERY
   SELECT c.difficulty, COUNT(*)::int
   FROM public.challenges c
+  LEFT JOIN public.events e ON e.id = c.event_id
   WHERE c.is_active = true
+    AND (
+      c.event_id IS NULL
+      OR (
+        (e.start_time IS NULL OR now() >= e.start_time)
+        -- AND (e.end_time IS NULL OR now() <= e.end_time)
+      )
+    )
     AND (
       p_event_mode = 'any'
       OR (p_event_mode = 'is_null' AND c.event_id IS NULL)

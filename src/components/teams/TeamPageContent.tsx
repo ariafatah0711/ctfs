@@ -182,18 +182,19 @@ export default function TeamPageContent({
             <div className="text-sm text-gray-500 dark:text-gray-300">No members found.</div>
           ) : (
             members.map((m) => (
-              <div key={m.user_id} className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-700 py-3 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded px-2">
-                <div className="flex items-center gap-2">
-                  {m.role === 'captain' ? (
+              <div key={m.user_id} className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-700 py-3 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded px-2">
+                <div className="flex items-start gap-2 min-w-0">
+                  {/* {m.role === 'captain' ? (
                     <Crown size={16} className="text-yellow-500 dark:text-yellow-400" />
                   ) : (
                     <Users size={16} className="text-gray-400" />
-                  )}
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
+                  )} */}
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {m.role === 'captain' ? <Crown size={16} className="text-yellow-500 dark:text-yellow-400" /> : <Users size={16} className="text-gray-400" />}
                       <Link
                         href={`/user/${encodeURIComponent(m.username)}`}
-                        className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
+                        className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors truncate max-w-[220px]"
                       >
                         {m.username}
                       </Link>
@@ -205,17 +206,37 @@ export default function TeamPageContent({
                         {m.role}
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      Solo score {m.solo_score ?? 0} • First {m.first_solve_count ?? 0} (+{m.first_solve_score ?? 0})
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                        Solves <span className="font-semibold text-gray-900 dark:text-white">{m.first_solve_count ?? 0}</span>
+                      </span>
+                      <span className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                        Points <span className="font-semibold text-gray-900 dark:text-white">{m.first_solve_score ?? 0}</span>
+                      </span>
+                      <span className="px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                        Total Points <span className="font-semibold text-gray-900 dark:text-white">{m.solo_score ?? 0}</span>
+                      </span>
                     </div>
                   </div>
                 </div>
                 {canManage && m.user_id !== currentUserId && onKickMember && onTransferCaptain && (
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => onTransferCaptain(m)} disabled={busy}>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onTransferCaptain(m)}
+                      disabled={busy}
+                      aria-label={`Make ${m.username} captain`}
+                    >
                       <Crown size={14} /> Make Captain
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => onKickMember(m)} disabled={busy}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => onKickMember(m)}
+                      disabled={busy}
+                      aria-label={`Kick ${m.username} from team`}
+                    >
                       Kick
                     </Button>
                   </div>

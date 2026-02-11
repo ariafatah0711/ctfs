@@ -67,9 +67,9 @@ export async function regenerateTeamInviteCode(teamId: string): Promise<{ invite
 	}
 }
 
-export async function getMyTeam(): Promise<{ team: TeamInfo | null; members: TeamMember[]; error?: string }> {
+export async function getMyTeam(p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; members: TeamMember[]; error?: string }> {
 	try {
-		const { data, error } = await supabase.rpc('get_my_team')
+		const { data, error } = await supabase.rpc('get_my_team', { p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { team: null, members: [], error: error.message }
 
 		const team = data?.team ?? null
@@ -117,9 +117,9 @@ export type TeamProgressSeries = {
 	history: TeamProgressPoint[]
 }
 
-export async function getMyTeamSummary(): Promise<{ team: TeamInfo | null; stats: TeamSummary | null; error?: string }> {
+export async function getMyTeamSummary(p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; stats: TeamSummary | null; error?: string }> {
 	try {
-		const { data, error } = await supabase.rpc('get_my_team_summary')
+		const { data, error } = await supabase.rpc('get_my_team_summary', { p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { team: null, stats: null, error: error.message }
 		return { team: data?.team ?? null, stats: data?.stats ?? null }
 	} catch (err: any) {
@@ -127,9 +127,9 @@ export async function getMyTeamSummary(): Promise<{ team: TeamInfo | null; stats
 	}
 }
 
-export async function getMyTeamChallenges(): Promise<{ challenges: TeamChallenge[]; error?: string }> {
+export async function getMyTeamChallenges(p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ challenges: TeamChallenge[]; error?: string }> {
 	try {
-		const { data, error } = await supabase.rpc('get_my_team_challenges')
+		const { data, error } = await supabase.rpc('get_my_team_challenges', { p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { challenges: [], error: error.message }
 		return { challenges: (data as TeamChallenge[]) || [] }
 	} catch (err: any) {
@@ -137,9 +137,9 @@ export async function getMyTeamChallenges(): Promise<{ challenges: TeamChallenge
 	}
 }
 
-export async function getTeamByName(name: string): Promise<{ team: TeamInfo | null; members: TeamMember[]; stats: TeamSummary | null; error?: string }> {
+export async function getTeamByName(name: string, p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; members: TeamMember[]; stats: TeamSummary | null; error?: string }> {
 	try {
-		const { data, error } = await supabase.rpc('get_team_by_name', { p_name: name })
+		const { data, error } = await supabase.rpc('get_team_by_name', { p_name: name, p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { team: null, members: [], stats: null, error: error.message }
 		if (!data?.success) return { team: null, members: [], stats: null, error: data?.message || 'Team not found' }
 		return {
@@ -152,9 +152,9 @@ export async function getTeamByName(name: string): Promise<{ team: TeamInfo | nu
 	}
 }
 
-export async function getTeamChallengesByName(name: string): Promise<{ challenges: TeamChallenge[]; error?: string }> {
+export async function getTeamChallengesByName(name: string, p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ challenges: TeamChallenge[]; error?: string }> {
 	try {
-		const { data, error } = await supabase.rpc('get_team_challenges_by_name', { p_name: name })
+		const { data, error } = await supabase.rpc('get_team_challenges_by_name', { p_name: name, p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { challenges: [], error: error.message }
 		return { challenges: (data as TeamChallenge[]) || [] }
 	} catch (err: any) {

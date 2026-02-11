@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.6.3]
+### Added
+- Improve ui for team page.
+- add event selector in teams page.
+- Add back button in teams page.
+
+### Fixed
+- filter event not started summary and stats
+- Fixed form challenge dialog cant update to default event, or null event id.
+
 ## v[2.6.2]
 ### Improved
 - Improve Challenge Event filter in some pages.

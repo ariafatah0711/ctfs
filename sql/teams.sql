@@ -222,7 +222,11 @@ SET search_path = public, auth;
 GRANT EXECUTE ON FUNCTION regenerate_team_invite_code(UUID) TO authenticated;
 
 -- Get current user's team (team + members)
-CREATE OR REPLACE FUNCTION get_my_team()
+DROP FUNCTION IF EXISTS get_my_team();
+CREATE OR REPLACE FUNCTION get_my_team(
+	p_event_id uuid DEFAULT NULL,
+	p_event_mode text DEFAULT 'any'
+)
 RETURNS JSON AS $$
 DECLARE
 	v_user_id UUID := auth.uid()::uuid;
@@ -263,6 +267,12 @@ BEGIN
 			s.created_at
 		FROM public.solves s
 		JOIN team_users tu ON tu.user_id = s.user_id
+		JOIN public.challenges c ON c.id = s.challenge_id
+		WHERE (
+			p_event_mode = 'any'
+			OR (p_event_mode = 'main' AND c.event_id IS NULL)
+			OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+		)
 		ORDER BY s.challenge_id, s.created_at ASC, s.id ASC
 	), user_stats AS (
 		SELECT
@@ -271,6 +281,11 @@ BEGIN
 		FROM team_users tu
 		LEFT JOIN public.solves s ON s.user_id = tu.user_id
 		LEFT JOIN public.challenges c ON c.id = s.challenge_id
+			AND (
+				p_event_mode = 'any'
+				OR (p_event_mode = 'main' AND c.event_id IS NULL)
+				OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+			)
 		GROUP BY tu.user_id
 	), first_stats AS (
 		SELECT
@@ -310,10 +325,14 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_my_team() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_my_team(uuid, text) TO authenticated;
 
 -- Get current team's summary (score + counts)
-CREATE OR REPLACE FUNCTION get_my_team_summary()
+DROP FUNCTION IF EXISTS get_my_team_summary();
+CREATE OR REPLACE FUNCTION get_my_team_summary(
+	p_event_id uuid DEFAULT NULL,
+	p_event_mode text DEFAULT 'any'
+)
 RETURNS JSON AS $$
 DECLARE
 	v_user_id UUID := auth.uid()::uuid;
@@ -353,31 +372,39 @@ BEGIN
 
 	WITH team_users AS (
 		SELECT user_id FROM public.team_members WHERE team_id = v_team_id
-	), team_solves AS (
-		SELECT s.challenge_id
+	), solves_filtered AS (
+		SELECT s.challenge_id, c.points
 		FROM public.solves s
 		JOIN team_users tu ON tu.user_id = s.user_id
-		GROUP BY s.challenge_id
+		JOIN public.challenges c ON c.id = s.challenge_id
+		WHERE (
+			p_event_mode = 'any'
+			OR (p_event_mode = 'main' AND c.event_id IS NULL)
+			OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+		)
+	), unique_calc AS (
+		SELECT
+			COALESCE(SUM(t.points), 0)::BIGINT AS unique_score,
+			COALESCE(COUNT(*), 0)::INT AS unique_challenges
+		FROM (
+			SELECT sf.challenge_id, MAX(sf.points) AS points
+			FROM solves_filtered sf
+			GROUP BY sf.challenge_id
+		) t
+	), totals AS (
+		SELECT
+			COALESCE(SUM(sf.points), 0)::BIGINT AS total_score,
+			COALESCE(COUNT(*), 0)::BIGINT AS total_solves
+		FROM solves_filtered sf
 	)
 	SELECT
-		COALESCE(SUM(c.points), 0),
-		COALESCE(COUNT(*), 0)
-	INTO v_unique_score, v_unique_challenges
-	FROM team_solves ts
-	JOIN public.challenges c ON c.id = ts.challenge_id;
-
-	SELECT COALESCE(COUNT(*), 0)
-	INTO v_total_solves
-	FROM public.solves s
-	JOIN public.team_members tm ON tm.user_id = s.user_id
-	WHERE tm.team_id = v_team_id;
-
-	SELECT COALESCE(SUM(c.points), 0)
-	INTO v_total_score
-	FROM public.solves s
-	JOIN public.team_members tm ON tm.user_id = s.user_id
-	JOIN public.challenges c ON c.id = s.challenge_id
-	WHERE tm.team_id = v_team_id;
+		uc.unique_score,
+		t.total_score,
+		uc.unique_challenges,
+		t.total_solves
+	INTO v_unique_score, v_total_score, v_unique_challenges, v_total_solves
+	FROM unique_calc uc
+	CROSS JOIN totals t;
 
 	RETURN json_build_object('success', true, 'team', v_team, 'stats', json_build_object(
 		'unique_score', v_unique_score,
@@ -390,10 +417,14 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_my_team_summary() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_my_team_summary(uuid, text) TO authenticated;
 
 -- Get current team's solved challenges (unique per team)
-CREATE OR REPLACE FUNCTION get_my_team_challenges()
+DROP FUNCTION IF EXISTS get_my_team_challenges();
+CREATE OR REPLACE FUNCTION get_my_team_challenges(
+	p_event_id uuid DEFAULT NULL,
+	p_event_mode text DEFAULT 'any'
+)
 RETURNS TABLE (
 	challenge_id UUID,
 	title TEXT,
@@ -430,7 +461,13 @@ BEGIN
 			FROM public.solves s2
 			JOIN public.team_members tm2 ON tm2.user_id = s2.user_id
 			JOIN public.users u ON u.id = s2.user_id
+			JOIN public.challenges c2 ON c2.id = s2.challenge_id
 			WHERE tm2.team_id = v_team_id AND s2.challenge_id = c.id
+			AND (
+				p_event_mode = 'any'
+				OR (p_event_mode = 'main' AND c2.event_id IS NULL)
+				OR (p_event_id IS NOT NULL AND c2.event_id = p_event_id)
+			)
 			ORDER BY s2.created_at ASC, s2.id ASC
 			LIMIT 1
 		) AS first_solver_username
@@ -438,6 +475,11 @@ BEGIN
 	JOIN public.team_members tm ON tm.user_id = s.user_id
 	JOIN public.challenges c ON c.id = s.challenge_id
 	WHERE tm.team_id = v_team_id
+	AND (
+		p_event_mode = 'any'
+		OR (p_event_mode = 'main' AND c.event_id IS NULL)
+		OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+	)
 	GROUP BY c.id, c.title, c.category, c.points
 	ORDER BY first_solved_at DESC;
 END;
@@ -445,10 +487,15 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_my_team_challenges() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_my_team_challenges(uuid, text) TO authenticated;
 
 -- Get team by name (public view via RPC)
-CREATE OR REPLACE FUNCTION get_team_by_name(p_name TEXT)
+DROP FUNCTION IF EXISTS get_team_by_name(TEXT);
+CREATE OR REPLACE FUNCTION get_team_by_name(
+	p_name TEXT,
+	p_event_id uuid DEFAULT NULL,
+	p_event_mode text DEFAULT 'any'
+)
 RETURNS JSON AS $$
 DECLARE
 	v_user_id UUID := auth.uid()::uuid;
@@ -498,6 +545,12 @@ BEGIN
 			s.created_at
 		FROM public.solves s
 		JOIN team_users tu ON tu.user_id = s.user_id
+		JOIN public.challenges c ON c.id = s.challenge_id
+		WHERE (
+			p_event_mode = 'any'
+			OR (p_event_mode = 'main' AND c.event_id IS NULL)
+			OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+		)
 		ORDER BY s.challenge_id, s.created_at ASC, s.id ASC
 	), user_stats AS (
 		SELECT
@@ -506,6 +559,11 @@ BEGIN
 		FROM team_users tu
 		LEFT JOIN public.solves s ON s.user_id = tu.user_id
 		LEFT JOIN public.challenges c ON c.id = s.challenge_id
+			AND (
+				p_event_mode = 'any'
+				OR (p_event_mode = 'main' AND c.event_id IS NULL)
+				OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+			)
 		GROUP BY tu.user_id
 	), first_stats AS (
 		SELECT
@@ -541,31 +599,39 @@ BEGIN
 
 	WITH team_users AS (
 		SELECT user_id FROM public.team_members WHERE team_id = v_team_id
-	), team_solves AS (
-		SELECT s.challenge_id
+	), solves_filtered AS (
+		SELECT s.challenge_id, c.points
 		FROM public.solves s
 		JOIN team_users tu ON tu.user_id = s.user_id
-		GROUP BY s.challenge_id
+		JOIN public.challenges c ON c.id = s.challenge_id
+		WHERE (
+			p_event_mode = 'any'
+			OR (p_event_mode = 'main' AND c.event_id IS NULL)
+			OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+		)
+	), unique_calc AS (
+		SELECT
+			COALESCE(SUM(t.points), 0)::BIGINT AS unique_score,
+			COALESCE(COUNT(*), 0)::INT AS unique_challenges
+		FROM (
+			SELECT sf.challenge_id, MAX(sf.points) AS points
+			FROM solves_filtered sf
+			GROUP BY sf.challenge_id
+		) t
+	), totals AS (
+		SELECT
+			COALESCE(SUM(sf.points), 0)::BIGINT AS total_score,
+			COALESCE(COUNT(*), 0)::BIGINT AS total_solves
+		FROM solves_filtered sf
 	)
 	SELECT
-		COALESCE(SUM(c.points), 0),
-		COALESCE(COUNT(*), 0)
-	INTO v_unique_score, v_unique_challenges
-	FROM team_solves ts
-	JOIN public.challenges c ON c.id = ts.challenge_id;
-
-	SELECT COALESCE(COUNT(*), 0)
-	INTO v_total_solves
-	FROM public.solves s
-	JOIN public.team_members tm ON tm.user_id = s.user_id
-	WHERE tm.team_id = v_team_id;
-
-	SELECT COALESCE(SUM(c.points), 0)
-	INTO v_total_score
-	FROM public.solves s
-	JOIN public.team_members tm ON tm.user_id = s.user_id
-	JOIN public.challenges c ON c.id = s.challenge_id
-	WHERE tm.team_id = v_team_id;
+		uc.unique_score,
+		t.total_score,
+		uc.unique_challenges,
+		t.total_solves
+	INTO v_unique_score, v_total_score, v_unique_challenges, v_total_solves
+	FROM unique_calc uc
+	CROSS JOIN totals t;
 
 	RETURN json_build_object(
 		'success', true,
@@ -583,10 +649,15 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_team_by_name(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_team_by_name(TEXT, uuid, text) TO authenticated;
 
 -- Get team solved challenges by team name (public view via RPC)
-CREATE OR REPLACE FUNCTION get_team_challenges_by_name(p_name TEXT)
+DROP FUNCTION IF EXISTS get_team_challenges_by_name(TEXT);
+CREATE OR REPLACE FUNCTION get_team_challenges_by_name(
+	p_name TEXT,
+	p_event_id uuid DEFAULT NULL,
+	p_event_mode text DEFAULT 'any'
+)
 RETURNS TABLE (
 	challenge_id UUID,
 	title TEXT,
@@ -619,7 +690,13 @@ BEGIN
 			FROM public.solves s2
 			JOIN public.team_members tm2 ON tm2.user_id = s2.user_id
 			JOIN public.users u ON u.id = s2.user_id
+			JOIN public.challenges c2 ON c2.id = s2.challenge_id
 			WHERE tm2.team_id = v_team_id AND s2.challenge_id = c.id
+			AND (
+				p_event_mode = 'any'
+				OR (p_event_mode = 'main' AND c2.event_id IS NULL)
+				OR (p_event_id IS NOT NULL AND c2.event_id = p_event_id)
+			)
 			ORDER BY s2.created_at ASC, s2.id ASC
 			LIMIT 1
 		) AS first_solver_username
@@ -627,6 +704,11 @@ BEGIN
 	JOIN public.team_members tm ON tm.user_id = s.user_id
 	JOIN public.challenges c ON c.id = s.challenge_id
 	WHERE tm.team_id = v_team_id
+	AND (
+		p_event_mode = 'any'
+		OR (p_event_mode = 'main' AND c.event_id IS NULL)
+		OR (p_event_id IS NOT NULL AND c.event_id = p_event_id)
+	)
 	GROUP BY c.id, c.title, c.category, c.points
 	ORDER BY first_solved_at DESC;
 END;
@@ -634,7 +716,7 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_team_challenges_by_name(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_team_challenges_by_name(TEXT, uuid, text) TO authenticated;
 
 -- Team scoreboard (rank by unique challenge score)
 DROP FUNCTION IF EXISTS get_team_scoreboard(integer,integer,uuid,text);

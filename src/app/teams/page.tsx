@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Users, UserPlus } from 'lucide-react'
 import TitlePage from '@/components/custom/TitlePage'
+import BackButton from '@/components/custom/BackButton'
 import Loader from '@/components/custom/loading'
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 import TeamPageContent from '@/components/teams/TeamPageContent'
@@ -11,6 +12,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/contexts/AuthContext'
+import EventSelect from '@/components/custom/EventSelect'
+import { getEvents, filterStartedEvents } from '@/lib/events'
+import { Event } from '@/types'
 import {
   createTeam,
   joinTeam,
@@ -34,6 +38,8 @@ export default function TeamsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [events, setEvents] = useState<Event[]>([])
+  const [selectedEvent, setSelectedEvent] = useState<string>('all')
   const [team, setTeam] = useState<TeamInfo | null>(null)
   const [members, setMembers] = useState<TeamMember[]>([])
   const [summary, setSummary] = useState<TeamSummary | null>(null)
@@ -53,16 +59,32 @@ export default function TeamsPage() {
     }
   }, [authLoading, user, router])
 
+  useEffect(() => {
+    if (events.length > 0) return
+    ;(async () => {
+      try {
+        const ev = await getEvents()
+        setEvents(filterStartedEvents(ev || []))
+      } catch {
+        setEvents([])
+      }
+    })()
+  }, [events.length])
+
 
   const loadTeamData = async () => {
     if (!user) return
     setLoading(true)
     setStatus(null)
+
+    const p_event_id = selectedEvent === 'all' ? null : selectedEvent === 'main' ? null : selectedEvent
+    const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
+
     try {
       const [teamRes, summaryRes, challengesRes] = await Promise.all([
-        getMyTeam(),
-        getMyTeamSummary(),
-        getMyTeamChallenges(),
+        getMyTeam(p_event_id, p_event_mode),
+        getMyTeamSummary(p_event_id, p_event_mode),
+        getMyTeamChallenges(p_event_id, p_event_mode),
       ])
 
       setTeam(teamRes.team ?? null)
@@ -77,7 +99,7 @@ export default function TeamsPage() {
   useEffect(() => {
     if (!user) return
     loadTeamData()
-  }, [user])
+  }, [user, selectedEvent])
 
   const currentMember = useMemo(() => members.find(m => m.user_id === user?.id), [members, user])
   const isCaptain = currentMember?.role === 'captain'
@@ -255,6 +277,19 @@ export default function TeamsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         {/* <TitlePage icon={<Users size={30} className="text-blue-500 dark:text-blue-300" />}>Teams</TitlePage> */}
+
+        {team && (
+          <div className="mb-4 flex justify-between items-center">
+            <BackButton label="Go Back" className="mb-2" />
+            <EventSelect
+              value={selectedEvent}
+              onChange={setSelectedEvent}
+              events={events}
+              className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+              getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
+            />
+          </div>
+        )}
 
         {status && (
           <div className={`rounded-md px-4 py-3 text-sm ${status.type === 'error'

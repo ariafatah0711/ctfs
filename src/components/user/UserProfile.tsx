@@ -246,8 +246,41 @@ export default function UserProfile({
     try {
       const challengeEventParam = selectedEventMode === 'any' ? 'all' : (selectedEventMode === 'equals' ? selectedEventId : null)
       const allChallenges = await getChallenges(userId || undefined, false, challengeEventParam)
+
+      const nowMs = Date.now()
+      const eventsById = new Map<string, Event>()
+      for (const ev of events) {
+        if (ev?.id) eventsById.set(ev.id, ev)
+      }
+
+      const isEventActive = (ev?: Event) => {
+        if (!ev) return false
+
+        if (ev.start_time) {
+          const startMs = Date.parse(ev.start_time)
+          if (!Number.isNaN(startMs) && startMs > nowMs) return false
+        }
+
+        if (ev.end_time) {
+          const endMs = Date.parse(ev.end_time)
+          if (!Number.isNaN(endMs) && endMs < nowMs) return false
+        }
+
+        return true
+      }
+
       const solvedIds = new Set(solvedChallenges.map(c => c.id))
-      const unsolved = allChallenges.filter(c => !solvedIds.has(c.id))
+
+      const unsolved = allChallenges.filter((c: any) => {
+        if (solvedIds.has(c.id)) return false
+
+        // Main challenges are always allowed (no event)
+        if (!c.event_id) return true
+
+        // Hide challenges from events that are not currently active (not started / already ended)
+        const ev = eventsById.get(String(c.event_id))
+        return isEventActive(ev)
+      })
       setUnsolvedChallenges(unsolved)
     } catch (err) {
       console.error('Error fetching unsolved challenges:', err)
