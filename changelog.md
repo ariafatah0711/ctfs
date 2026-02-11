@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.6.0]
+### Added
+- Add Security Policy get challenge inactive, and event started/ended.
+- Improve Challenge Event filter.
+- Markdown Rendered Comments `$!` syntax for hidden comments.
+
 ## v[2.5.6]
 ### Fixed
 - Fixed issue Chart team scoreboard.

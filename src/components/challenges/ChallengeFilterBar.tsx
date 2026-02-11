@@ -14,6 +14,7 @@ type Props = {
   events?: { id: string; name: string; start_time?: string | null; end_time?: string | null }[];
   selectedEventId?: string | null | 'all';
   onEventChange?: (eventId: string | null | 'all') => void;
+  includeEndedEvents?: boolean;
   settings?: {
     hideMaintenance: boolean;
     highlightTeamSolves: boolean;
@@ -31,6 +32,7 @@ export default function ChallengeFilterBar({
   events,
   selectedEventId,
   onEventChange,
+  includeEndedEvents = false,
   settings,
   categories,
   difficulties,
@@ -48,27 +50,47 @@ export default function ChallengeFilterBar({
   const sortedEvents = React.useMemo(() => {
     if (!events) return [];
     const now = new Date().getTime();
-    return [...events].sort((a, b) => {
-      const aNoEnd = !a.end_time;
-      const bNoEnd = !b.end_time;
+    const visibleEvents = includeEndedEvents
+      ? events
+      : events.filter(evt => {
+          if (!evt.end_time) return true;
+          return now <= new Date(evt.end_time).getTime();
+        });
+    return [...visibleEvents].sort((a, b) => {
+      const getState = (evt: typeof a): 'ongoing' | 'upcoming' | 'ended' => {
+        const start = evt.start_time ? new Date(evt.start_time).getTime() : null;
+        const end = evt.end_time ? new Date(evt.end_time).getTime() : null;
+        if (end && now > end) return 'ended';
+        if ((!start || start <= now) && (!end || now <= end)) return 'ongoing';
+        return 'upcoming';
+      };
 
-      // Both have no end_time - sort by name
-      if (aNoEnd && bNoEnd) return a.name.localeCompare(b.name);
+      const stateOrder: Record<'ongoing' | 'upcoming' | 'ended', number> = {
+        ongoing: 0,
+        upcoming: 1,
+        ended: 2,
+      };
 
-      // One has no end_time - that comes first (ongoing)
-      if (aNoEnd !== bNoEnd) return aNoEnd ? -1 : 1;
+      const stateA = getState(a);
+      const stateB = getState(b);
+      if (stateA !== stateB) return stateOrder[stateA] - stateOrder[stateB];
 
-      const aEndTime = new Date(a.end_time!).getTime();
-      const bEndTime = new Date(b.end_time!).getTime();
+      // Same state ordering logic
+      if (stateA === 'ongoing') {
+        const aEnd = a.end_time ? new Date(a.end_time).getTime() : Number.POSITIVE_INFINITY;
+        const bEnd = b.end_time ? new Date(b.end_time).getTime() : Number.POSITIVE_INFINITY;
+        return aEnd - bEnd;
+      }
 
-      const aEnded = now > aEndTime;
-      const bEnded = now > bEndTime;
+      if (stateA === 'upcoming') {
+        const aStart = a.start_time ? new Date(a.start_time).getTime() : Number.POSITIVE_INFINITY;
+        const bStart = b.start_time ? new Date(b.start_time).getTime() : Number.POSITIVE_INFINITY;
+        return aStart - bStart;
+      }
 
-      // Different ended status - not ended comes first, ended comes last
-      if (aEnded !== bEnded) return aEnded ? 1 : -1;
-
-      // Both ended or both not ended - sort by end_time ascending (nearest first)
-      return aEndTime - bEndTime;
+      const aEnd = a.end_time ? new Date(a.end_time).getTime() : 0;
+      const bEnd = b.end_time ? new Date(b.end_time).getTime() : 0;
+      return aEnd - bEnd;
     });
   }, [events]);
 
@@ -122,6 +144,7 @@ export default function ChallengeFilterBar({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      data-tour="challenge-filter-bar"
       className="w-full bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3 mb-0"
     >
       {events && onEventChange && (
@@ -158,7 +181,10 @@ export default function ChallengeFilterBar({
         </div>
       )}
 
-      <form className="w-full flex flex-wrap gap-3 items-center">
+      <form
+        className="w-full flex flex-wrap gap-3 items-center"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <label htmlFor="search" className="sr-only">Search challenges</label>
         <div className="flex-1 min-w-[180px]">
           <input
@@ -234,6 +260,7 @@ export default function ChallengeFilterBar({
             <button
               type="button"
               onClick={() => setSettingsOpen(v => !v)}
+              data-tour="challenge-filter-settings"
               className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               aria-label="Open filter settings"
             >

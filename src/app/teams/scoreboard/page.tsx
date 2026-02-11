@@ -13,7 +13,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import TeamScoreboardChart from '@/components/teams/TeamScoreboardChart'
 import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
 import { APP } from '@/config'
-import { getEvents } from '@/lib/events'
+import { getEvents, filterStartedEvents } from '@/lib/events'
 import { Event } from '@/types'
 
 export default function TeamScoreboardPage() {
@@ -42,7 +42,7 @@ export default function TeamScoreboardPage() {
       if (events.length === 0) {
         try {
           const ev = await getEvents()
-          setEvents(ev || [])
+          setEvents(filterStartedEvents(ev || []))
         } catch (err) {
           console.warn('Failed to fetch events:', err)
           setEvents([])

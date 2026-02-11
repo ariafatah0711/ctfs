@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
 import EventsTab from '@/components/challenges/EventsTab'
-import { Flag, Zap } from 'lucide-react'
+import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide-react'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 import { Solver } from '@/components/challenges/SolversList';
@@ -55,6 +55,23 @@ export default function ChallengesPage() {
   })
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const { user, loading } = require('@/contexts/AuthContext').useAuth();
+
+  const formatRemaining = (ms: number) => {
+    const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  const selectedEvent = typeof eventId === 'string' ? events.find(e => e.id === eventId) : null;
+  const nowDate = new Date();
+  const selectedEventStart = selectedEvent?.start_time ? new Date(selectedEvent.start_time) : null;
+  const selectedEventEnd = selectedEvent?.end_time ? new Date(selectedEvent.end_time) : null;
+  const selectedEventNotStarted = !!(selectedEventStart && nowDate < selectedEventStart);
+  const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd);
   const loadChallenges = async () => {
     if (!user) return
     const challengesData = await getChallenges(user.id, false, 'all')
@@ -418,20 +435,59 @@ export default function ChallengesPage() {
               ) : filteredChallenges.length === 0 ? (
                 <div className="text-center py-16">
                   <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl text-gray-400 dark:text-gray-500">🔍</span>
+                    {typeof eventId === 'string' && selectedEventNotStarted ? (
+                      <CalendarClock className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                    ) : typeof eventId === 'string' && selectedEventEnded ? (
+                      <CalendarX className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                    ) : typeof eventId === 'string' && !selectedEvent ? (
+                      <CircleAlert className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                    ) : (
+                      <Search className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                    )}
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                    {challenges.length === 0
-                      ? "No challenges available"
-                      : "No challenges match your filters"
-                    }
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400">
-                    {challenges.length === 0
-                      ? "Check back later for new challenges"
-                      : "Try adjusting your filter criteria"
-                    }
-                  </p>
+                  {typeof eventId === 'string' && selectedEventNotStarted ? (
+                    <>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        Event belum mulai
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Starts in {formatRemaining(selectedEventStart!.getTime() - nowDate.getTime())}
+                      </p>
+                    </>
+                  ) : typeof eventId === 'string' && selectedEventEnded ? (
+                    <>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        Event telah berakhir
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Challenge untuk event ini sudah tidak tersedia.
+                      </p>
+                    </>
+                  ) : typeof eventId === 'string' && !selectedEvent ? (
+                    <>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        Event tidak ditemukan
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Silakan pilih event lain.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                        {challenges.length === 0
+                          ? "No challenges available"
+                          : "No challenges match your filters"
+                        }
+                      </h3>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        {challenges.length === 0
+                          ? "Check back later for new challenges"
+                          : "Try adjusting your filter criteria"
+                        }
+                      </p>
+                    </>
+                  )}
                 </div>
               ) : (
                 orderedKeys.map((category) => (

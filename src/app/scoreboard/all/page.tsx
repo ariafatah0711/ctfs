@@ -8,7 +8,7 @@ import TitlePage from '@/components/custom/TitlePage'
 import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import BackButton from '@/components/custom/BackButton'
 import { getLeaderboardSummary } from '@/lib/challenges'
-import { getEvents } from '@/lib/events'
+import { getEvents, filterStartedEvents } from '@/lib/events'
 import APP from '@/config'
 import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
@@ -31,7 +31,7 @@ export default function ScoreboardAllPage() {
     const fetchEvents = async () => {
       try {
         const ev = await getEvents()
-        setEvents(ev || [])
+        setEvents(filterStartedEvents(ev || []))
       } catch (err) {
         console.warn('Failed to fetch events:', err)
         setEvents([])

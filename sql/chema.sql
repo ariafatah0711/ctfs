@@ -1311,6 +1311,45 @@ SECURITY DEFINER;
 GRANT EXECUTE ON FUNCTION get_logs(INT, INT) TO authenticated;
 
 -- ########################################################
+-- Function: get_recent_solves(p_limit INT, p_offset INT)
+-- Returns solve logs (username + challenge title/category + timestamp)
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_recent_solves(
+  p_limit INT DEFAULT 50,
+  p_offset INT DEFAULT 0
+)
+RETURNS TABLE (
+  log_type TEXT,
+  log_challenge_id UUID,
+  log_challenge_title TEXT,
+  log_category TEXT,
+  log_user_id UUID,
+  log_username TEXT,
+  log_created_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    'solve'::text AS log_type,
+    c.id AS log_challenge_id,
+    c.title AS log_challenge_title,
+    c.category AS log_category,
+    u.id AS log_user_id,
+    u.username AS log_username,
+    s.created_at AS log_created_at
+  FROM public.solves s
+  JOIN public.users u ON u.id = s.user_id
+  JOIN public.challenges c ON c.id = s.challenge_id
+  ORDER BY s.created_at DESC
+  LIMIT p_limit OFFSET p_offset;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION get_recent_solves(INT, INT) TO authenticated;
+
+-- ########################################################
 -- Function: get_notifications(p_limit INT, p_offset INT)
 -- ########################################################
 CREATE OR REPLACE FUNCTION get_notifications(
@@ -1708,10 +1747,32 @@ CREATE POLICY "Solves can select all"
   USING (true);
 
 DROP POLICY IF EXISTS "Challenges can select all" ON public.challenges;
-CREATE POLICY "Challenges can select all"
+DROP POLICY IF EXISTS "Challenges admin select all" ON public.challenges;
+DROP POLICY IF EXISTS "Challenges user select visible" ON public.challenges;
+
+CREATE POLICY "Challenges admin select all"
   ON public.challenges
   FOR SELECT
-  USING (true);
+  USING (is_admin());
+
+-- Non-admin can only read active challenges whose event hasn't ended.
+-- If event_id is NULL => Main challenges are visible.
+CREATE POLICY "Challenges user select visible"
+  ON public.challenges
+  FOR SELECT
+  USING (
+    is_active = true
+    AND (
+      event_id IS NULL
+      OR EXISTS (
+        SELECT 1
+        FROM public.events e
+        WHERE e.id = challenges.event_id
+          AND (e.start_time IS NULL OR now() >= e.start_time)
+          AND (e.end_time IS NULL OR now() <= e.end_time)
+      )
+    )
+  );
 
 DROP POLICY IF EXISTS "Events can select all" ON public.events;
 CREATE POLICY "Events can select all"

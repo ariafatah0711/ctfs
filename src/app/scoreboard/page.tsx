@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 
 import { getLeaderboardSummary, getTopProgressByUsernames, getFirstBloodLeaderboard } from '@/lib/challenges'
 import APP from '@/config'
-import { getEvents } from '@/lib/events'
+import { getEvents, filterStartedEvents } from '@/lib/events'
 import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -51,7 +51,7 @@ export default function ScoreboardPage() {
       if (events.length === 0) {
         try {
           const ev = await getEvents()
-          setEvents(ev || [])
+          setEvents(filterStartedEvents(ev || []))
         } catch (err) {
           console.warn('Failed to fetch events:', err)
           setEvents([])

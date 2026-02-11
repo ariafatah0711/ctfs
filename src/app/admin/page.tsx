@@ -433,6 +433,7 @@ export default function AdminPage() {
                         onFilterChange={handleFilterChange}
                         onClear={handleClearFilters}
                         showStatusFilter={false}
+                        includeEndedEvents
                         events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
                         selectedEventId={eventId}
                         onEventChange={setEventId}

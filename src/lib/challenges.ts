@@ -783,35 +783,17 @@ export async function getLogs(limit = 100, offset = 0) {
  * Get recent solves formatted as notifications
  */
 export async function getRecentSolves(limit = 100, offset = 0) {
-  try {
-    const { data, error } = await supabase
-      .from('solves')
-      .select(`
-        id,
-        created_at,
-        user_id,
-        challenge_id,
-        users(username),
-        challenges(title, category)
-      `)
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+  const { data, error } = await supabase.rpc('get_recent_solves', {
+    p_limit: limit,
+    p_offset: offset,
+  });
 
-    if (error) throw error;
-
-    return ((data as any[]) || []).map(row => ({
-      log_type: 'solve' as const,
-      log_challenge_id: row.challenge_id,
-      log_challenge_title: row.challenges?.title || 'Unknown Challenge',
-      log_category: row.challenges?.category || 'Misc',
-      log_user_id: row.user_id,
-      log_username: row.users?.username || 'Unknown',
-      log_created_at: row.created_at,
-    }));
-  } catch (error) {
+  if (error) {
     console.error('Error fetching recent solves:', error);
     return [];
   }
+
+  return (data as any[]) || [];
 }
 
 /**

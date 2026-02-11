@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Loader from "@/components/custom/loading";
 import { useLogs } from '@/contexts/LogsContext'
 import { Flag, Logs } from "lucide-react";
-import { getEvents } from '@/lib/events'
+import { getEvents, filterStartedEvents } from '@/lib/events'
 import APP from '@/config'
 
 export default function LogsPage() {
@@ -34,7 +34,7 @@ export default function LogsPage() {
       if (events.length === 0) {
         try {
           const ev = await getEvents()
-          setEvents(ev || [])
+          setEvents(filterStartedEvents(ev || []))
         } catch (err) {
           setEvents([])
         }

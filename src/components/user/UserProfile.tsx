@@ -6,7 +6,7 @@ import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
 import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
-import { getEvents } from '@/lib/events'
+import { getEvents, filterStartedEvents } from '@/lib/events'
 import { Event } from '@/types'
 import { getTeamByUserId } from '@/lib/teams'
 import { formatRelativeDate } from '@/lib/utils'
@@ -204,7 +204,9 @@ export default function UserProfile({
   // Load events list once
   useEffect(() => {
     if (events.length > 0) return
-    getEvents().then(ev => setEvents(ev || [])).catch(() => setEvents([]))
+    getEvents()
+      .then(ev => setEvents(filterStartedEvents(ev || [])))
+      .catch(() => setEvents([]))
   }, [])
 
   // Sync scoreboard-style `selectedEvent` with internal mode/id used for fetching

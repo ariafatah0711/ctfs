@@ -105,3 +105,20 @@ export async function getActiveEvents(now: string = new Date().toISOString()): P
 
   return data || []
 }
+
+function eventHasStarted(event: Event, referenceTimeMs: number) {
+  if (!event.start_time) {
+    return true
+  }
+
+  const startMs = Date.parse(event.start_time)
+  if (Number.isNaN(startMs)) {
+    return true
+  }
+
+  return startMs <= referenceTimeMs
+}
+
+export function filterStartedEvents(events: Event[], referenceTimeMs = Date.now()) {
+  return events.filter((event) => eventHasStarted(event, referenceTimeMs))
+}

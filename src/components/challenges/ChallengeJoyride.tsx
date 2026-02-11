@@ -82,6 +82,16 @@ export default function ChallengeJoyride() {
             content: '📚 Open the CTF tutorial PDF here.',
             placement: 'top',
           },
+          {
+            target: '[data-tour="challenge-filter-bar"]',
+            content: '🔎 Use this filter bar to quickly find challenges by status, category, difficulty, and search.',
+            placement: 'bottom',
+          },
+          {
+            target: '[data-tour="challenge-filter-settings"]',
+            content: '⚙️ Open settings to hide maintenance challenges and highlight team solves.',
+            placement: 'bottom',
+          },
         ]
 
         setSteps(desktopSteps)

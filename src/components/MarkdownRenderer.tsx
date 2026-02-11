@@ -9,6 +9,7 @@ import { Copy, Check, ChevronsRight, ChevronsDown } from 'lucide-react'
 interface MarkdownRendererProps {
   content: string
   className?: string
+  onCommentsExtracted?: (comments: string[]) => void
 }
 
 // Helper function to extract text from React children
@@ -160,7 +161,26 @@ function BlockquoteWrapper({ children, isDark = true }: { children: React.ReactN
   )
 }
 
-export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+function parseCustomComments(content: string) {
+  const commentLineRegex = /^\s*\$!\s+(.*)$/
+  const lines = content.split('\n')
+  const filteredLines: string[] = []
+  const comments: string[] = []
+
+  for (const line of lines) {
+    const trimmedStart = line.trimStart()
+    const match = trimmedStart.match(commentLineRegex)
+    if (match) {
+      comments.push(match[1].trim())
+      continue
+    }
+    filteredLines.push(line)
+  }
+
+  return { filtered: filteredLines.join('\n'), comments }
+}
+
+export function MarkdownRenderer({ content, className = '', onCommentsExtracted }: MarkdownRendererProps) {
   if (!content) {
     content = ''
   } else {
@@ -170,6 +190,13 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
       .map(line => line.trim() === '.' ? '' : line)
       .join('\n')
   }
+
+  const { filtered: sanitizedContent, comments } = React.useMemo(() => parseCustomComments(content), [content])
+  React.useEffect(() => {
+    if (onCommentsExtracted) {
+      onCommentsExtracted(comments)
+    }
+  }, [comments, onCommentsExtracted])
 
   return (
     <div className={`max-w-none text-gray-200 text-sm leading-relaxed ${className}`}>
@@ -222,20 +249,22 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
           ),
         }}
       >
-        {content}
+        {sanitizedContent}
       </ReactMarkdown>
     </div>
   )
 }
 
 export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
-  // Replace lines that contain only "." with empty lines
-  if (content) {
-    content = content
+  let normalizedContent = content || ''
+  if (normalizedContent) {
+    normalizedContent = normalizedContent
       .split('\n')
       .map(line => line.trim() === '.' ? '' : line)
       .join('\n')
   }
+
+  const { filtered: sanitizedContent } = React.useMemo(() => parseCustomComments(normalizedContent), [normalizedContent])
 
   return (
     <div className={`max-w-none text-gray-800 dark:text-gray-200 text-sm leading-relaxed ${className}`}>
@@ -261,7 +290,7 @@ export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRende
             ),
         }}
       >
-        {content}
+        {sanitizedContent}
       </ReactMarkdown>
     </div>
   )
