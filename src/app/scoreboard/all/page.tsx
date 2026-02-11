@@ -9,11 +9,11 @@ import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import BackButton from '@/components/custom/BackButton'
 import { getLeaderboardSummary } from '@/lib/challenges'
 import { getEvents, filterStartedEvents } from '@/lib/events'
-import APP from '@/config'
 import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { LeaderboardEntry } from '@/types'
 import Link from 'next/link'
+import EventSelect from '@/components/custom/EventSelect'
 
 export default function ScoreboardAllPage() {
   const { user, loading: authLoading } = useAuth()
@@ -108,17 +108,12 @@ export default function ScoreboardAllPage() {
               return href
             })()} label="Back to Top 100" />
             <div>
-              <select
+              <EventSelect
                 value={selectedEvent}
-                onChange={(e) => setSelectedEvent(e.target.value)}
+                onChange={setSelectedEvent}
+                events={events}
                 className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
-              >
-                {!APP.hideEventMain && <option value="main">{String(APP.eventMainLabel || 'Main')}</option>}
-                <option value="all">All Events</option>
-                {events.map(ev => (
-                  <option key={ev.id} value={ev.id}>{ev.name}</option>
-                ))}
-              </select>
+              />
             </div>
           </div>
           <span className="text-gray-500 text-sm">

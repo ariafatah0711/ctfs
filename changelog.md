@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.6.2]
+### Improved
+- Improve Challenge Event filter in some pages.
+
 ## v[2.6.1]
 ### Fixed
 - Fixed issue Challenge Event filter not working properly in some pages.

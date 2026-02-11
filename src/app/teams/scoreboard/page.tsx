@@ -14,6 +14,7 @@ import TeamScoreboardChart from '@/components/teams/TeamScoreboardChart'
 import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
 import { APP } from '@/config'
 import { getEvents, filterStartedEvents } from '@/lib/events'
+import EventSelect from '@/components/custom/EventSelect'
 import { Event } from '@/types'
 
 export default function TeamScoreboardPage() {
@@ -116,17 +117,13 @@ export default function TeamScoreboardPage() {
           <div className="relative">
             {/* Event selector */}
             <div className="inline-block">
-              <select
+              <EventSelect
                 value={selectedEvent}
-                onChange={(e) => setSelectedEvent(e.target.value)}
+                onChange={setSelectedEvent}
+                events={events}
                 className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
-              >
-                {!APP.hideEventMain && <option value="main">{String(APP.eventMainLabel || 'Main')}</option>}
-                <option value="all">All Events</option>
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>{ev.name}</option>
-                ))}
-              </select>
+                getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
+              />
             </div>
           </div>
 

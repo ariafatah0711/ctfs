@@ -9,7 +9,7 @@ import Loader from "@/components/custom/loading";
 import { useLogs } from '@/contexts/LogsContext'
 import { Flag, Logs } from "lucide-react";
 import { getEvents, filterStartedEvents } from '@/lib/events'
-import APP from '@/config'
+import EventSelect from '@/components/custom/EventSelect'
 
 export default function LogsPage() {
   const router = useRouter();
@@ -66,17 +66,13 @@ export default function LogsPage() {
       {/* Event selector + Tabs: Challenge Logs / Solve Logs (styled similar to scoreboard) */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <select
+          <EventSelect
             value={selectedEvent}
-            onChange={(e) => setSelectedEvent(e.target.value)}
+            onChange={setSelectedEvent}
+            events={events}
             className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded mr-3"
-          >
-            {!APP.hideEventMain && <option value="main">{String(APP.eventMainLabel || 'Main')}</option>}
-            <option value="all">All Events</option>
-            {events.map((ev: any) => (
-              <option key={ev.id} value={ev.id}>{ev.name}</option>
-            ))}
-          </select>
+            getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
+          />
         </div>
 
         <div>
