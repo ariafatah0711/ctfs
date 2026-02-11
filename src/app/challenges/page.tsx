@@ -495,7 +495,9 @@ export default function ChallengesPage() {
                     <div className="flex items-center gap-2 mb-4">
                       <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
                       <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">
-                        {eventId === 'all' && String(category).toLowerCase() === 'intro' ? 'Intro (Main)' : category}
+                        {eventId === 'all' && String(category).toLowerCase() === 'intro'
+                          ? `Intro (${String(APP.eventMainLabel || 'Main')})`
+                          : category}
                       </h2>
                     </div>
                     <motion.div

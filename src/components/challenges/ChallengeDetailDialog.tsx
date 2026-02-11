@@ -9,6 +9,7 @@ import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import SolversList, { Solver } from './SolversList';
 import HintDialog from './HintDialog';
 import { Attachment, ChallengeWithSolve } from '@/types';
+import APP from '@/config';
 
 interface ChallengeDetailDialogProps {
   open: boolean;
@@ -52,7 +53,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
   // Get event name from event_id
   const getEventName = (eventId?: string | null) => {
-    if (!eventId) return 'Main';
+    if (!eventId) return String(APP.eventMainLabel || 'Main');
     const event = events.find(e => e.id === eventId);
     return event?.name || 'Unknown Event';
   };

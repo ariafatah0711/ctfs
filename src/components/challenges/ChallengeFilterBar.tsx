@@ -43,6 +43,7 @@ export default function ChallengeFilterBar({
 }: Props) {
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const resolvedSettings = settings ?? { hideMaintenance: false, highlightTeamSolves: true };
+  const mainLabel = String(APP.eventMainLabel || 'Main');
   // Ambil urutan dari config
   const categoryOrder = APP.challengeCategories || [];
   const difficultyOrder = Object.keys(APP.difficultyStyles || {});
@@ -56,43 +57,69 @@ export default function ChallengeFilterBar({
           if (!evt.end_time) return true;
           return now <= new Date(evt.end_time).getTime();
         });
+
+    const getState = (evt: typeof events[number]) => {
+      const start = evt.start_time ? new Date(evt.start_time).getTime() : null;
+      const end = evt.end_time ? new Date(evt.end_time).getTime() : null;
+
+      // Permanent = benar-benar gak ada start & end
+      if (!start && !end) return 'permanent' as const;
+
+      // Ended
+      if (end && now > end) return 'ended' as const;
+
+      // Upcoming
+      if (start && now < start) return 'upcoming' as const;
+
+      // Ongoing
+      return 'ongoing' as const;
+    };
+
     return [...visibleEvents].sort((a, b) => {
-      const getState = (evt: typeof a): 'ongoing' | 'upcoming' | 'ended' => {
-        const start = evt.start_time ? new Date(evt.start_time).getTime() : null;
-        const end = evt.end_time ? new Date(evt.end_time).getTime() : null;
-        if (end && now > end) return 'ended';
-        if ((!start || start <= now) && (!end || now <= end)) return 'ongoing';
-        return 'upcoming';
-      };
-
-      const stateOrder: Record<'ongoing' | 'upcoming' | 'ended', number> = {
-        ongoing: 0,
-        upcoming: 1,
-        ended: 2,
-      };
-
       const stateA = getState(a);
       const stateB = getState(b);
-      if (stateA !== stateB) return stateOrder[stateA] - stateOrder[stateB];
 
-      // Same state ordering logic
+      const statePriority: Record<typeof stateA, number> = {
+        permanent: 0,
+        ongoing: 1,
+        upcoming: 2,
+        ended: 3,
+      };
+
+      // 1️⃣ Urut berdasarkan state dulu
+      if (stateA !== stateB) {
+        return statePriority[stateA] - statePriority[stateB];
+      }
+
+      // 2️⃣ Kalau state sama → sort by time
+
+      if (stateA === 'permanent') {
+        const aStart = a.start_time ? new Date(a.start_time).getTime() : 0;
+        const bStart = b.start_time ? new Date(b.start_time).getTime() : 0;
+        return aStart - bStart || a.name.localeCompare(b.name);
+      }
+
       if (stateA === 'ongoing') {
-        const aEnd = a.end_time ? new Date(a.end_time).getTime() : Number.POSITIVE_INFINITY;
-        const bEnd = b.end_time ? new Date(b.end_time).getTime() : Number.POSITIVE_INFINITY;
+        const aEnd = a.end_time ? new Date(a.end_time).getTime() : Infinity;
+        const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
         return aEnd - bEnd;
       }
 
       if (stateA === 'upcoming') {
-        const aStart = a.start_time ? new Date(a.start_time).getTime() : Number.POSITIVE_INFINITY;
-        const bStart = b.start_time ? new Date(b.start_time).getTime() : Number.POSITIVE_INFINITY;
+        const aStart = a.start_time ? new Date(a.start_time).getTime() : Infinity;
+        const bStart = b.start_time ? new Date(b.start_time).getTime() : Infinity;
         return aStart - bStart;
       }
 
-      const aEnd = a.end_time ? new Date(a.end_time).getTime() : 0;
-      const bEnd = b.end_time ? new Date(b.end_time).getTime() : 0;
-      return aEnd - bEnd;
+      if (stateA === 'ended') {
+        const aEnd = a.end_time ? new Date(a.end_time).getTime() : 0;
+        const bEnd = b.end_time ? new Date(b.end_time).getTime() : 0;
+        return bEnd - aEnd; // yang paling baru ended dulu
+      }
+
+      return 0;
     });
-  }, [events]);
+  }, [events, includeEndedEvents]);
 
   const getEventTimingLabel = (evt?: { start_time?: string | null; end_time?: string | null }) => {
     if (!evt) return null;
@@ -162,7 +189,7 @@ export default function ChallengeFilterBar({
               onClick={() => onEventChange(null)}
               className={`px-3 py-1.5 text-sm rounded-full border transition ${!selectedEventId ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             >
-              Main
+              {mainLabel}
             </button>
           )}
           {sortedEvents.map(evt => (

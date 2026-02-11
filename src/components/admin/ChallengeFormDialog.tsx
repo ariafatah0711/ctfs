@@ -159,7 +159,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 >
                   <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                    <SelectItem value="__main__">Main</SelectItem>
+                    <SelectItem value="__main__">{String(APP.eventMainLabel || 'Main')}</SelectItem>
                     {events.map(evt => (
                       <SelectItem key={evt.id} value={evt.id}>{evt.name}</SelectItem>
                     ))}

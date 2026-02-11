@@ -393,7 +393,7 @@ export default function UserProfile({
                         onChange={(e) => setSelectedEvent(e.target.value)}
                         className="w-full md:min-w-[150px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
                       >
-                        {!APP.hideEventMain && <option value="main">Main</option>}
+                        {!APP.hideEventMain && <option value="main">{String(APP.eventMainLabel || 'Main')}</option>}
                         <option value="all">All Events</option>
                         {events.map((ev) => (
                           <option key={ev.id} value={ev.id}>{(ev as any).name ?? (ev as any).title ?? 'Untitled'}</option>

@@ -57,6 +57,8 @@ export const APP = {
     hidescoreboardTotal: false, // enable / disable Total Score tab in team scoreboard
   },
   hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event CTFs)
+  // Label untuk challenges tanpa event_id (event_id = NULL). Jika kosong, fallback ke "Main".
+  eventMainLabel: 'FGTE 2026',
 
   /* Maintenance configuration */
   // mode: 'no' | 'yes' | 'auto'

@@ -71,7 +71,7 @@ export default function LogsPage() {
             onChange={(e) => setSelectedEvent(e.target.value)}
             className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded mr-3"
           >
-            {!APP.hideEventMain && <option value="main">Main</option>}
+            {!APP.hideEventMain && <option value="main">{String(APP.eventMainLabel || 'Main')}</option>}
             <option value="all">All Events</option>
             {events.map((ev: any) => (
               <option key={ev.id} value={ev.id}>{ev.name}</option>

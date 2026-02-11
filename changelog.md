@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.6.1]
+### Fixed
+- Fixed issue Challenge Event filter not working properly in some pages.
+- Added default event label if not set in config.
+
 ## v[2.6.0]
 ### Added
 - Add Security Policy get challenge inactive, and event started/ended.

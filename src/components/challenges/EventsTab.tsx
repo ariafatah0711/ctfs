@@ -53,6 +53,7 @@ const getTimeRemaining = (evt: Event) => {
 }
 
 export default function EventsTab({ events, selectedEventId, onEventSelect }: Props) {
+  const mainLabel = String(APP.eventMainLabel || 'Main')
   // Split events into ongoing/upcoming and ended
   const now = new Date();
   // Sort events: Active first, then Ongoing (soonest end), then Upcoming (soonest start)
@@ -110,7 +111,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
             }`}
           >
             <div className="text-left">
-              <div className="font-bold text-emerald-700 dark:text-emerald-300">MAIN</div>
+              <div className="font-bold text-emerald-700 dark:text-emerald-300">{mainLabel}</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">Default challenges Dari Platform ini.</div>
             </div>
           </motion.button>
@@ -130,7 +131,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
       >
         <div className="text-left">
           <div className="font-bold text-blue-700 dark:text-blue-300">ALL Events</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Show all challenges from all events (Exclude - Intro Category that are not Main, and Challenge have Event Ended)</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">Show all challenges from all events (Exclude - Intro Category that are not {mainLabel}, and Challenge have Event Ended)</div>
         </div>
       </motion.button>
 
