@@ -7,12 +7,12 @@ import Loader from '@/components/custom/loading'
 import BackButton from "@/components/custom/BackButton"
 import { Card, CardContent } from '@/components/ui/card'
 import { getChallengesList } from '@/lib/challenges'
-import { isAdmin } from '@/lib/admin'
 import { getStatsByRange } from '@/lib/activityStats'
 import { getInfo } from '@/lib/users'
 import { Challenge } from '@/types'
 import StatsGraph from '@/components/admin/StatsGraph'
 import AuditLogList from '@/components/admin/AuditLogList'
+import { isGlobalAdmin } from '@/lib/admin'
 
 export default function AdminOverviewPage() {
   const router = useRouter()
@@ -33,7 +33,7 @@ export default function AdminOverviewPage() {
         return
       }
 
-      const adminCheck = await isAdmin()
+      const adminCheck = await isGlobalAdmin()
       if (!mounted) return
       if (!adminCheck) {
         router.push('/challenges')

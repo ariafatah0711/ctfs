@@ -34,6 +34,7 @@ interface ChallengeFormDialogProps {
   setShowPreview: (v: boolean) => void
   categories: string[]
   events?: Event[]
+  hideMainEventOption?: boolean
 }
 
 const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
@@ -54,6 +55,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
   setShowPreview,
   categories,
   events,
+  hideMainEventOption = false,
 }) => {
   const sortedEvents = React.useMemo(() => {
     if (!events) return []
@@ -226,7 +228,9 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                 >
                   <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                    <SelectItem value="__main__">{String(APP.eventMainLabel || 'Main')}</SelectItem>
+                    {!hideMainEventOption && (
+                      <SelectItem value="__main__">{String(APP.eventMainLabel || 'Main')}</SelectItem>
+                    )}
                     {sortedEvents.map((evt: any) => (
                       <SelectItem key={evt.id} value={evt.id}>{String(evt?.name ?? evt?.title ?? 'Untitled')}</SelectItem>
                     ))}

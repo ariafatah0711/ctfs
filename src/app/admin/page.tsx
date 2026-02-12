@@ -20,7 +20,7 @@ import Loader from "@/components/custom/loading"
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { isAdmin } from '@/lib/auth'
+import { getAdminScope } from '@/lib/admin'
 import { getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
 import { getEvents } from '@/lib/events'
 import { getInfo } from '@/lib/users'
@@ -31,11 +31,17 @@ export default function AdminPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading } = useAuth()
+  const [adminScope, setAdminScope] = useState<{ is_global_admin: boolean; event_ids: string[] } | null>(null)
+  const isGlobalAdmin = adminScope?.is_global_admin ?? false
+
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [solvers, setSolvers] = useState<any[]>([])
   const [siteInfo, setSiteInfo] = useState<any | null>(null)
   const [events, setEvents] = useState<Event[]>([])
   const [eventId, setEventId] = useState<string | null | 'all'>('all')
+
+  const [urlEventParam, setUrlEventParam] = useState<string | null>(null)
+  const [urlAddParam, setUrlAddParam] = useState(false)
 
   // Dialog / form state
   const [openForm, setOpenForm] = useState(false)
@@ -96,20 +102,8 @@ export default function AdminPage() {
   useEffect(() => {
     const eventParam = searchParams.get('event')
     const addParam = searchParams.get('add')
-
-    if (eventParam === 'all') {
-      setEventId('all')
-    } else if (eventParam) {
-      setEventId(eventParam)
-    }
-
-    if (addParam === '1') {
-      const nextEventId = eventParam && eventParam !== 'all' ? eventParam : null
-      setEditing(null)
-      setFormData({ ...emptyForm, event_id: nextEventId })
-      setOpenForm(true)
-      setShowPreview(false)
-    }
+    setUrlEventParam(eventParam)
+    setUrlAddParam(addParam === '1')
   }, [searchParams])
 
   useEffect(() => {
@@ -123,29 +117,69 @@ export default function AdminPage() {
         return
       }
 
-      const adminCheck = await isAdmin()
+      const scope = await getAdminScope()
       if (!mounted) return
-      if (!adminCheck) {
+
+      const canAccess = scope.is_global_admin || (scope.event_ids && scope.event_ids.length > 0)
+      setAdminScope(scope)
+      if (!canAccess) {
         router.push('/challenges')
         return
       }
 
-      const data = await getChallengesList(undefined, true, 'all')
-      const info = await getInfo()
-      const eventList = await getEvents()
+      const [data, info, eventList] = await Promise.all([
+        getChallengesList(undefined, true, 'all'),
+        getInfo(),
+        getEvents(),
+      ])
+
       fetchSolvers(0)
       if (!mounted) return
+
       setChallenges(data)
       setSiteInfo(info)
-      setEvents(eventList)
+
+      const allowedSet = new Set(scope.event_ids || [])
+      const visibleEvents = scope.is_global_admin
+        ? eventList
+        : eventList.filter((e) => allowedSet.has(String(e.id)))
+      setEvents(visibleEvents)
+
+      // Resolve selected event based on scope
+      if (scope.is_global_admin) {
+        if (urlEventParam === 'all') setEventId('all')
+        else if (urlEventParam) setEventId(urlEventParam)
+      } else {
+        const desired = urlEventParam && allowedSet.has(urlEventParam)
+          ? urlEventParam
+          : (scope.event_ids?.[0] ?? null)
+        if (!desired) {
+          router.push('/challenges')
+          return
+        }
+        setEventId(desired)
+      }
+
+      // Auto-open add dialog from URL
+      if (urlAddParam) {
+        const prefillEventId = scope.is_global_admin
+          ? (urlEventParam && urlEventParam !== 'all' ? urlEventParam : null)
+          : (scope.event_ids?.[0] ?? null)
+        setEditing(null)
+        setFormData({ ...emptyForm, event_id: prefillEventId })
+        setOpenForm(true)
+        setShowPreview(false)
+        setUrlAddParam(false)
+      }
     })()
 
     return () => { mounted = false }
-  }, [user, loading, router])
+  }, [user, loading, router, urlEventParam, urlAddParam])
 
   const openAdd = () => {
     setEditing(null)
-    setFormData({ ...emptyForm })
+    const defaultEventId = !isGlobalAdmin && typeof eventId === 'string' ? eventId : null
+    setFormData({ ...emptyForm, event_id: defaultEventId })
     setOpenForm(true)
     setShowPreview(false)
   }
@@ -360,7 +394,18 @@ export default function AdminPage() {
     }
   }
 
-  const filteredChallenges = challenges.filter((c) => {
+  const allowedEventIds = adminScope?.event_ids ?? []
+  const allowedEventSet = new Set(allowedEventIds)
+  const manageableChallenges = isGlobalAdmin
+    ? challenges
+    : challenges.filter((c) => c.event_id && allowedEventSet.has(String(c.event_id)))
+
+  const handleEventChange = (next: string | null | 'all') => {
+    if (!isGlobalAdmin && (next === 'all' || next === null)) return
+    setEventId(next)
+  }
+
+  const filteredChallenges = manageableChallenges.filter((c) => {
     if (eventId !== 'all') {
       const matchMain = eventId === null && (c.event_id === null || typeof c.event_id === 'undefined')
       const matchEvent = typeof eventId === 'string' && eventId !== null && c.event_id === eventId
@@ -401,9 +446,16 @@ export default function AdminPage() {
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
                   <div className="flex items-center gap-2">
-                    <Link href="/admin/event">
-                      <Button variant="outline">View Events</Button>
-                    </Link>
+                    {isGlobalAdmin && (
+                      <Link href="/admin/event">
+                        <Button variant="outline">View Events</Button>
+                      </Link>
+                    )}
+                    {isGlobalAdmin && (
+                      <Link href="/admin/admins">
+                        <Button variant="outline">Admin Roles</Button>
+                      </Link>
+                    )}
                     <Button onClick={openAdd}>+ Add Challenge</Button>
                   </div>
                 </CardTitle>
@@ -412,7 +464,7 @@ export default function AdminPage() {
                 <div className="mb-4">
                   {/* Kategori terurut dari config, jika ada */}
                   {(() => {
-                    const allCategories = Array.from(new Set(challenges.map(c => c.category))).filter(Boolean)
+                    const allCategories = Array.from(new Set(manageableChallenges.map(c => c.category))).filter(Boolean)
                     const matchedCategorySet = new Set<string>()
                     const orderedCategories = [
                       ...(APP.challengeCategories || []).flatMap(p => {
@@ -433,14 +485,16 @@ export default function AdminPage() {
                       <ChallengeFilterBar
                         filters={filters}
                         categories={orderedCategories}
-                        difficulties={Array.from(new Set(challenges.map(c => c.difficulty)))}
+                        difficulties={Array.from(new Set(manageableChallenges.map(c => c.difficulty)))}
                         onFilterChange={handleFilterChange}
                         onClear={handleClearFilters}
                         showStatusFilter={false}
                         includeEndedEvents
                         events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
                         selectedEventId={eventId}
-                        onEventChange={setEventId}
+                        onEventChange={handleEventChange}
+                        hideAllEventOption={!isGlobalAdmin}
+                        hideMainEventOption={!isGlobalAdmin}
                       />
                     )
                   })()}
@@ -518,7 +572,11 @@ export default function AdminPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <ChallengeOverviewCard challenges={challenges} info={siteInfo || undefined} />
+              <ChallengeOverviewCard
+                challenges={manageableChallenges}
+                info={isGlobalAdmin ? (siteInfo || undefined) : undefined}
+                showViewAll={isGlobalAdmin}
+              />
             </motion.div>
 
             {/* Recent Solvers */}
@@ -553,6 +611,7 @@ export default function AdminPage() {
             setShowPreview={setShowPreview}
             categories={APP.challengeCategories || []}
             events={events}
+            hideMainEventOption={!isGlobalAdmin}
           />
         )}
       </AnimatePresence>

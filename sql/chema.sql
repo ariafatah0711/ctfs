@@ -66,6 +66,7 @@ DROP VIEW IF EXISTS public.challenges_with_masked_flag CASCADE;
 DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
+DROP TABLE IF EXISTS public.event_admins CASCADE;
 DROP TABLE IF EXISTS public.events CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
 DROP TABLE IF EXISTS public.notifications CASCADE;
@@ -106,6 +107,19 @@ CREATE TABLE public.events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- ########################################################
+-- Table: event_admins (scoped admin per event)
+-- ########################################################
+CREATE TABLE public.event_admins (
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  event_id UUID NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  PRIMARY KEY (user_id, event_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_event_admins_user_id ON public.event_admins(user_id);
+CREATE INDEX IF NOT EXISTS idx_event_admins_event_id ON public.event_admins(event_id);
 
 -- ALTER TABLE public.events
   -- ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT NULL;
@@ -231,6 +245,220 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION is_admin() TO authenticated;
+
+-- ########################################################
+-- Function: has_admin_access() (global admin OR event admin)
+-- ########################################################
+CREATE OR REPLACE FUNCTION has_admin_access()
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  IF is_admin() THEN
+    RETURN TRUE;
+  END IF;
+
+  RETURN EXISTS (
+    SELECT 1
+    FROM public.event_admins ea
+    WHERE ea.user_id = v_user_id
+  );
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION has_admin_access() TO authenticated;
+
+-- ########################################################
+-- Function: can_manage_event(p_event_id UUID)
+-- NULL event_id is reserved for global admins only.
+-- ########################################################
+CREATE OR REPLACE FUNCTION can_manage_event(p_event_id UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN FALSE;
+  END IF;
+
+  -- Main (NULL) event is only manageable by global admin.
+  IF p_event_id IS NULL THEN
+    RETURN is_admin();
+  END IF;
+
+  IF is_admin() THEN
+    RETURN TRUE;
+  END IF;
+
+  RETURN EXISTS (
+    SELECT 1
+    FROM public.event_admins ea
+    WHERE ea.user_id = v_user_id
+      AND ea.event_id = p_event_id
+  );
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION can_manage_event(UUID) TO authenticated;
+
+-- ########################################################
+-- Function: can_manage_challenge(p_challenge_id UUID)
+-- ########################################################
+CREATE OR REPLACE FUNCTION can_manage_challenge(p_challenge_id UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+  v_event_id UUID;
+BEGIN
+  SELECT c.event_id INTO v_event_id
+  FROM public.challenges c
+  WHERE c.id = p_challenge_id;
+
+  RETURN can_manage_event(v_event_id);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION can_manage_challenge(UUID) TO authenticated;
+
+-- ########################################################
+-- Function: get_admin_scope() -> { is_global_admin, event_ids }
+-- ########################################################
+CREATE OR REPLACE FUNCTION get_admin_scope()
+RETURNS JSON AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+  v_is_global BOOLEAN := FALSE;
+  v_event_ids UUID[] := ARRAY[]::uuid[];
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN json_build_object('is_global_admin', false, 'event_ids', ARRAY[]::uuid[]);
+  END IF;
+
+  v_is_global := is_admin();
+
+  SELECT COALESCE(array_agg(ea.event_id ORDER BY ea.event_id), ARRAY[]::uuid[])
+  INTO v_event_ids
+  FROM public.event_admins ea
+  WHERE ea.user_id = v_user_id;
+
+  RETURN json_build_object('is_global_admin', v_is_global, 'event_ids', v_event_ids);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_admin_scope() TO authenticated;
+
+-- ########################################################
+-- Event admin management (global-admin-only)
+-- ########################################################
+
+-- List all event admins (scoped)
+CREATE OR REPLACE FUNCTION public.get_event_admins()
+RETURNS TABLE (
+  user_id UUID,
+  username TEXT,
+  event_id UUID,
+  event_name TEXT,
+  created_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only global admin can list event admins';
+  END IF;
+
+  RETURN QUERY
+  SELECT
+    ea.user_id,
+    u.username,
+    ea.event_id,
+    e.name,
+    ea.created_at
+  FROM public.event_admins ea
+  JOIN public.users u ON u.id = ea.user_id
+  JOIN public.events e ON e.id = ea.event_id
+  ORDER BY e.name ASC, u.username ASC;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION public.get_event_admins() TO authenticated;
+
+-- Grant an event admin mapping (event_id cannot be NULL)
+CREATE OR REPLACE FUNCTION public.grant_event_admin(
+  p_user_id UUID,
+  p_event_id UUID
+)
+RETURNS JSON AS $$
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only global admin can grant event admin';
+  END IF;
+
+  IF p_user_id IS NULL THEN
+    RETURN json_build_object('success', false, 'message', 'User is required');
+  END IF;
+
+  IF p_event_id IS NULL THEN
+    RETURN json_build_object('success', false, 'message', 'Event is required');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.users u WHERE u.id = p_user_id) THEN
+    RETURN json_build_object('success', false, 'message', 'User not found');
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public.events e WHERE e.id = p_event_id) THEN
+    RETURN json_build_object('success', false, 'message', 'Event not found');
+  END IF;
+
+  INSERT INTO public.event_admins(user_id, event_id)
+  VALUES (p_user_id, p_event_id)
+  ON CONFLICT (user_id, event_id) DO NOTHING;
+
+  RETURN json_build_object('success', true);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION public.grant_event_admin(UUID, UUID) TO authenticated;
+
+-- Revoke an event admin mapping
+CREATE OR REPLACE FUNCTION public.revoke_event_admin(
+  p_user_id UUID,
+  p_event_id UUID
+)
+RETURNS JSON AS $$
+DECLARE
+  v_deleted INT := 0;
+BEGIN
+  IF NOT is_admin() THEN
+    RAISE EXCEPTION 'Only global admin can revoke event admin';
+  END IF;
+
+  IF p_user_id IS NULL OR p_event_id IS NULL THEN
+    RETURN json_build_object('success', false, 'message', 'User and event are required');
+  END IF;
+
+  DELETE FROM public.event_admins
+  WHERE user_id = p_user_id
+    AND event_id = p_event_id;
+
+  GET DIAGNOSTICS v_deleted = ROW_COUNT;
+
+  RETURN json_build_object('success', true, 'deleted', v_deleted);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION public.revoke_event_admin(UUID, UUID) TO authenticated;
 
 -- ########################################################
 -- Function: create_profile(p_id UUID, p_username TEXT)
@@ -902,7 +1130,7 @@ RETURNS text AS $$
 DECLARE
   v_flag text;
 BEGIN
-  IF NOT is_admin() THEN
+  IF NOT can_manage_challenge(p_challenge_id) THEN
     RAISE EXCEPTION 'Only admin can see flag';
   END IF;
 
@@ -941,7 +1169,7 @@ DECLARE
   v_user_id UUID := auth.uid()::uuid;
   v_challenge_id UUID;
 BEGIN
-  IF NOT is_admin() THEN
+  IF NOT can_manage_event(p_event_id) THEN
     RAISE EXCEPTION 'Only admin can add challenge';
   END IF;
 
@@ -969,7 +1197,7 @@ RETURNS BOOLEAN AS $$
 DECLARE
   v_user_id UUID := auth.uid()::uuid;
 BEGIN
-  IF NOT is_admin() THEN
+  IF NOT can_manage_challenge(p_challenge_id) THEN
     RAISE EXCEPTION 'Only admin can delete challenge';
   END IF;
 
@@ -1006,8 +1234,14 @@ RETURNS BOOLEAN AS $$
 DECLARE
   v_user_id UUID := auth.uid()::uuid;
   v_solver_count INT;
+  v_existing_event_id UUID;
 BEGIN
-  IF NOT is_admin() THEN
+  SELECT c.event_id INTO v_existing_event_id
+  FROM public.challenges c
+  WHERE c.id = p_challenge_id;
+
+  -- Must be allowed to manage the existing challenge AND the target event_id.
+  IF NOT can_manage_event(v_existing_event_id) OR NOT can_manage_event(p_event_id) THEN
     RAISE EXCEPTION 'Only admin can update challenge';
   END IF;
 
@@ -1120,7 +1354,7 @@ DECLARE
   v_user_id UUID := auth.uid()::uuid;
 BEGIN
   -- cek admin
-  IF NOT is_admin() THEN
+  IF NOT can_manage_challenge(p_challenge_id) THEN
     RETURN json_build_object('success', false, 'message', 'Only admin can change challenge status');
   END IF;
 
@@ -1154,7 +1388,7 @@ DECLARE
   v_user_id UUID := auth.uid()::uuid;
 BEGIN
   -- cek admin
-  IF NOT is_admin() THEN
+  IF NOT can_manage_challenge(p_challenge_id) THEN
     RETURN json_build_object('success', false, 'message', 'Only admin can change maintenance status');
   END IF;
 
@@ -1598,7 +1832,7 @@ RETURNS TABLE (
   solved_at TIMESTAMPTZ
 ) AS $$
 BEGIN
-  IF NOT is_admin() THEN
+  IF NOT has_admin_access() THEN
     RAISE EXCEPTION 'Only admin can view all solvers';
   END IF;
 
@@ -1613,6 +1847,17 @@ BEGIN
   FROM public.solves s
   JOIN public.users u ON u.id = s.user_id
   JOIN public.challenges c ON c.id = s.challenge_id
+  WHERE
+    is_admin()
+    OR (
+      c.event_id IS NOT NULL
+      AND EXISTS (
+        SELECT 1
+        FROM public.event_admins ea
+        WHERE ea.user_id = auth.uid()::uuid
+          AND ea.event_id = c.event_id
+      )
+    )
   ORDER BY s.created_at DESC
   LIMIT p_limit OFFSET p_offset;
 END;
@@ -1638,7 +1883,7 @@ RETURNS TABLE (
   solved_at TIMESTAMPTZ
 ) AS $$
 BEGIN
-  IF NOT is_admin() THEN
+  IF NOT has_admin_access() THEN
     RAISE EXCEPTION 'Only admin can view solves by username';
   END IF;
 
@@ -1656,6 +1901,18 @@ BEGIN
   JOIN public.users u ON u.id = s.user_id
   JOIN public.challenges c ON c.id = s.challenge_id
   WHERE lower(u.username) = lower(p_username)
+    AND (
+      is_admin()
+      OR (
+        c.event_id IS NOT NULL
+        AND EXISTS (
+          SELECT 1
+          FROM public.event_admins ea
+          WHERE ea.user_id = auth.uid()::uuid
+            AND ea.event_id = c.event_id
+        )
+      )
+    )
   ORDER BY s.created_at DESC;
 END;
 $$ LANGUAGE plpgsql
@@ -1680,7 +1937,7 @@ RETURNS TABLE (
   solved_at TIMESTAMPTZ
 ) AS $$
 BEGIN
-  IF NOT is_admin() THEN
+  IF NOT has_admin_access() THEN
     RAISE EXCEPTION 'Only admin can view solves by challenge';
   END IF;
 
@@ -1698,6 +1955,18 @@ BEGIN
   JOIN public.users u ON u.id = s.user_id
   JOIN public.challenges c ON c.id = s.challenge_id
   WHERE lower(c.title) = lower(p_challenge_title)
+    AND (
+      is_admin()
+      OR (
+        c.event_id IS NOT NULL
+        AND EXISTS (
+          SELECT 1
+          FROM public.event_admins ea
+          WHERE ea.user_id = auth.uid()::uuid
+            AND ea.event_id = c.event_id
+        )
+      )
+    )
   ORDER BY s.created_at DESC;
 END;
 $$ LANGUAGE plpgsql
@@ -1715,9 +1984,22 @@ RETURNS BOOLEAN AS $$
 DECLARE
   v_user_id UUID := auth.uid()::uuid;
 BEGIN
-  -- cek admin
-  IF NOT is_admin() THEN
+  -- cek admin (global) atau event admin yang relevan
+  IF NOT has_admin_access() THEN
     RAISE EXCEPTION 'Only admin can delete solver';
+  END IF;
+
+  IF NOT is_admin() THEN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM public.solves s
+      JOIN public.challenges c ON c.id = s.challenge_id
+      JOIN public.event_admins ea ON ea.event_id = c.event_id
+      WHERE s.id = p_solve_id
+        AND ea.user_id = v_user_id
+    ) THEN
+      RAISE EXCEPTION 'Only admin can delete solver';
+    END IF;
   END IF;
 
   DELETE FROM public.solves WHERE id = p_solve_id;
@@ -1773,6 +2055,7 @@ GRANT EXECUTE ON FUNCTION get_info() TO authenticated;
 -- ########################################################
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.event_admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.challenge_flags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.solves ENABLE ROW LEVEL SECURITY;
@@ -1796,12 +2079,23 @@ CREATE POLICY "Solves can select all"
 
 DROP POLICY IF EXISTS "Challenges can select all" ON public.challenges;
 DROP POLICY IF EXISTS "Challenges admin select all" ON public.challenges;
+DROP POLICY IF EXISTS "Challenges event admin select scoped" ON public.challenges;
 DROP POLICY IF EXISTS "Challenges user select visible" ON public.challenges;
 
 CREATE POLICY "Challenges admin select all"
   ON public.challenges
   FOR SELECT
   USING (is_admin());
+
+-- Event admins can read challenges only for their assigned events.
+-- Note: challenges with NULL event_id (Main) remain global-admin-only.
+CREATE POLICY "Challenges event admin select scoped"
+  ON public.challenges
+  FOR SELECT
+  USING (
+    challenges.event_id IS NOT NULL
+    AND can_manage_event(challenges.event_id)
+  );
 
 -- Non-admin can only read active challenges whose event hasn't ended.
 -- If event_id is NULL => Main challenges are visible.
@@ -1827,6 +2121,25 @@ CREATE POLICY "Events can select all"
   ON public.events
   FOR SELECT
   USING (true);
+
+-- event_admins mapping is only manageable by global admins
+DROP POLICY IF EXISTS "Event admins select by admin" ON public.event_admins;
+CREATE POLICY "Event admins select by admin"
+  ON public.event_admins
+  FOR SELECT
+  USING (is_admin() OR user_id = auth.uid()::uuid);
+
+DROP POLICY IF EXISTS "Event admins insert by admin" ON public.event_admins;
+CREATE POLICY "Event admins insert by admin"
+  ON public.event_admins
+  FOR INSERT
+  WITH CHECK (is_admin());
+
+DROP POLICY IF EXISTS "Event admins delete by admin" ON public.event_admins;
+CREATE POLICY "Event admins delete by admin"
+  ON public.event_admins
+  FOR DELETE
+  USING (is_admin());
 
 DROP POLICY IF EXISTS "Notifications readable" ON public.notifications;
 CREATE POLICY "Notifications readable"
@@ -1864,6 +2177,7 @@ GRANT SELECT ON public.users TO authenticated;
 GRANT SELECT ON public.events TO authenticated;
 GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
+GRANT SELECT ON public.event_admins TO authenticated;
 
 -- ########################################################
 -- Function: get_auth_audit_logs(p_limit INT, p_offset INT)

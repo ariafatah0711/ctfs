@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 
 interface ChallengeOverviewCardProps {
   challenges: Challenge[]
+  showViewAll?: boolean
   info?: {
     total_users: number
     total_admins: number
@@ -16,15 +17,17 @@ interface ChallengeOverviewCardProps {
   }
 }
 
-const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenges, info }) => {
+const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenges, info, showViewAll = true }) => {
   return (
   // <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
   <Card className="shrink-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-gray-900 dark:text-white">Overview</CardTitle>
-        <Link href="/admin/overview">
-          <Button variant="default" size="sm">View All</Button>
-        </Link>
+        {showViewAll && (
+          <Link href="/admin/overview">
+            <Button variant="default" size="sm">View All</Button>
+          </Link>
+        )}
       </CardHeader>
       <CardContent>
         {info && (

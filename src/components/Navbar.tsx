@@ -8,7 +8,8 @@ import ImageWithFallback from './ImageWithFallback'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { signOut, isAdmin } from '@/lib/auth'
+import { signOut } from '@/lib/auth'
+import { isAdmin, isGlobalAdmin } from '@/lib/admin'
 import { useLogs } from '@/contexts/LogsContext'
 import { Switch } from '@/components/ui/switch'
 import APP from '@/config'
@@ -22,6 +23,7 @@ export default function Navbar() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
+  const [globalAdminStatus, setGlobalAdminStatus] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifLoading, setNotifLoading] = useState(false)
   const [notifUnreadCount, setNotifUnreadCount] = useState(0)
@@ -75,8 +77,10 @@ export default function Navbar() {
   useEffect(() => {
     if (user) {
       isAdmin().then(setAdminStatus)
+      isGlobalAdmin().then(setGlobalAdminStatus)
     } else {
       setAdminStatus(false)
+      setGlobalAdminStatus(false)
     }
   }, [user])
 
@@ -175,6 +179,7 @@ export default function Navbar() {
     await signOut()
     setUser(null)
     setAdminStatus(false)
+    setGlobalAdminStatus(false)
     router.push('/login')
   }
 
@@ -610,7 +615,7 @@ export default function Navbar() {
                       onCheckedChange={setSolveSoundEnabled}
                     />
                   </div>
-                  {adminStatus && (
+                  {globalAdminStatus && (
                     <div className="p-3 border-b border-gray-200 dark:border-gray-800">
                       <input
                         value={notifTitle}
@@ -679,7 +684,7 @@ export default function Navbar() {
                               {n.created_at ? formatRelativeDate(n.created_at) : ''}
                             </div>
                           </div>
-                          {adminStatus && (
+                          {globalAdminStatus && (
                             <button
                               onClick={() => handleDeleteNotif(n.id)}
                               className="absolute bottom-2 right-2 text-xs text-red-500 hover:underline"

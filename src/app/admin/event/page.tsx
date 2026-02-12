@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { isAdmin } from '@/lib/auth'
+import { isGlobalAdmin } from '@/lib/admin'
 import { addEvent, deleteEvent, getEvents, setChallengesEvent, updateEvent } from '@/lib/events'
 import { getChallengesLite } from '@/lib/challenges'
 import { Event } from '@/types'
@@ -94,7 +94,7 @@ export default function AdminEventPage() {
         return
       }
 
-      const adminCheck = await isAdmin()
+      const adminCheck = await isGlobalAdmin()
       if (!mounted) return
       setIsAdminUser(adminCheck)
       if (!adminCheck) {

@@ -14,6 +14,8 @@ type Props = {
   events?: { id: string; name: string; start_time?: string | null; end_time?: string | null }[];
   selectedEventId?: string | null | 'all';
   onEventChange?: (eventId: string | null | 'all') => void;
+  hideAllEventOption?: boolean;
+  hideMainEventOption?: boolean;
   includeEndedEvents?: boolean;
   settings?: {
     hideMaintenance: boolean;
@@ -32,6 +34,8 @@ export default function ChallengeFilterBar({
   events,
   selectedEventId,
   onEventChange,
+  hideAllEventOption = false,
+  hideMainEventOption = false,
   includeEndedEvents = false,
   settings,
   categories,
@@ -194,14 +198,16 @@ export default function ChallengeFilterBar({
       {events && onEventChange && (
         <div className="mb-3">
           <div className="w-full flex flex-row flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 py-2">
-            <button
-              type="button"
-              onClick={() => onEventChange('all')}
-              className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-            >
-              All
-            </button>
-            {!APP.hideEventMain && (
+            {!hideAllEventOption && (
+              <button
+                type="button"
+                onClick={() => onEventChange('all')}
+                className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+              >
+                All
+              </button>
+            )}
+            {!hideMainEventOption && !APP.hideEventMain && (
               <button
                 type="button"
                 onClick={() => onEventChange(null)}

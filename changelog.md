@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.0.0]
+### Added
+- Add Admin Event for managing events, including add, edit, delte, view flag challenge in event you manage.
+
 ## v[2.7.3]
 ### Fixed
 - Fixed profile image data rendering issue.
