@@ -1,5 +1,3 @@
-import Live2DMaskotAnime from "./components/custom/anime/Live2DMaskotAnime"
-
 export const APP = {
   shortName: 'FGTE',
   fullName: 'CTFS Platform',
@@ -50,7 +48,7 @@ export const APP = {
   notifSolves: true, // notifikasi global saat ada yang solve challenge
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component
-  Live2DMaskotAnime: true, // enable / disable Live2D Maskot Anime component
+  Live2DMaskotAnime: false, // enable / disable Live2D Maskot Anime component
   teams: {
     enabled: true, // enable / disable teams feature
     hideScoreboardIndividual: false, // enable / disable individual scoreboard when teams are enabled
