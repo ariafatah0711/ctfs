@@ -1295,7 +1295,15 @@ BEGIN
       NULL::text AS username,
       c.created_at
     FROM public.challenges c
+    LEFT JOIN public.events e ON e.id = c.event_id
     WHERE c.is_active = true
+      AND (
+        c.event_id IS NULL
+        OR (
+          (e.start_time IS NULL OR now() >= e.start_time)
+          AND (e.end_time IS NULL OR now() <= e.end_time)
+        )
+      )
 
     UNION ALL
 
@@ -1309,6 +1317,7 @@ BEGIN
       u.username,
       s.created_at
     FROM public.challenges c
+    LEFT JOIN public.events e ON e.id = c.event_id
     JOIN (
       SELECT challenge_id, MIN(created_at) AS first_solve
       FROM public.solves
@@ -1317,6 +1326,13 @@ BEGIN
     JOIN public.solves s ON s.challenge_id = c.id AND s.created_at = fs.first_solve
     JOIN public.users u ON u.id = s.user_id
     WHERE c.is_active = true
+      AND (
+        c.event_id IS NULL
+        OR (
+          (e.start_time IS NULL OR now() >= e.start_time)
+          AND (e.end_time IS NULL OR now() <= e.end_time)
+        )
+      )
   ) t
   ORDER BY t.created_at DESC
   LIMIT p_limit OFFSET p_offset;
@@ -1356,6 +1372,14 @@ BEGIN
   FROM public.solves s
   JOIN public.users u ON u.id = s.user_id
   JOIN public.challenges c ON c.id = s.challenge_id
+  LEFT JOIN public.events e ON e.id = c.event_id
+  WHERE (
+    c.event_id IS NULL
+    OR (
+      (e.start_time IS NULL OR now() >= e.start_time)
+      AND (e.end_time IS NULL OR now() <= e.end_time)
+    )
+  )
   ORDER BY s.created_at DESC
   LIMIT p_limit OFFSET p_offset;
 END;

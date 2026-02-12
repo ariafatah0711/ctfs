@@ -50,6 +50,12 @@ export default function EventSelect({
 }: Props) {
   const nowMs = referenceTimeMs ?? Date.now()
 
+  const isValueKnown = React.useMemo(() => {
+    if (value === allValue && showAll) return true
+    if (value === mainValue && showMain) return true
+    return events.some((e) => String(e.id) === String(value))
+  }, [value, events, showAll, allValue, showMain, mainValue])
+
   const sortedEvents = React.useMemo(() => {
     if (sortMode === 'none') return events
 
@@ -121,6 +127,11 @@ export default function EventSelect({
       onChange={(e) => onChange(e.target.value)}
       className={className}
     >
+      {!isValueKnown && (
+        <option value={value} disabled>
+          Event not found — select again
+        </option>
+      )}
       {showAll && <option value={allValue}>{allLabel}</option>}
       {showMain && <option value={mainValue}>{mainLabel}</option>}
       {sortedEvents.map((ev) => (
