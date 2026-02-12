@@ -10,21 +10,21 @@
 [https://ctf.ariaf.my.id](https://ctf.ariaf.my.id)
 
 ### Page Screenshot
-<!-- ![Root Page](images/README/image-18.png) -->
-![Home Page](images/README/image-9.png)
-![Scoreboard](images/README/image-10.png)
-![Admin Dashboard](images/README/image-11.png)
-![Admin Overview](images/README/image-17.png)
-![Notifications](images/README/image-12.png)
+<!-- ![Root Page](.github/images/README/image-18.png) -->
+![Home Page](.github/images/README/image-9.png)
+![Scoreboard](.github/images/README/image-10.png)
+![Admin Dashboard](.github/images/README/image-11.png)
+![Admin Overview](.github/images/README/image-17.png)
+![Notifications](.github/images/README/image-12.png)
 
 <details>
 <summary>📸 More Screenshot Demo (Click to expand)</summary>
 
 ### User Features
-![Profile Page](images/README/image-13.png)
-![Admin Solves](images/README/image-16.png)
-![Login](images/README/image-14.png)
-![Signup](images/README/image-15.png)
+![Profile Page](.github/images/README/image-13.png)
+![Admin Solves](.github/images/README/image-16.png)
+![Login](.github/images/README/image-14.png)
+![Signup](.github/images/README/image-15.png)
 
 </details>
 
@@ -49,15 +49,15 @@ cd ctfs
 
 3. **Disable Email Confirmation (Opsional)**
    Go to **Authentication** in Supabase and disable email confirmation.
-   ![Disable Email Confirmation](images/README/image-3.png)
+   ![Disable Email Confirmation](.github/images/README/image-3.png)
 
 4. **Enable Allow manual linking (Opsional)**
    Go to **Authentication → Settings → External OAuth Providers** and enable the option. (jika ingin ingin bisa bind google ketika sudah login manual)
-   ![1766862561984](images/README/1766862561984.png)
+   ![1766862561984](.github/images/README/1766862561984.png)
 
 5. **Enable Realtime public.solves**
    Go to **Database → Table** and enable Realtime for the `public.solves` table.
-  ![1766920400738](images/README/1766920400738.png)
+  ![1766920400738](.github/images/README/1766920400738.png)
 
 #### Optional
 
@@ -148,7 +148,7 @@ npm run start
 > **Tip:**
 > After registering a user, you can make them an administrator by setting `admin` to `true` in the Supabase `users` table via the dashboard.
 
-![Set Admin](images/README/image.png)
+![Set Admin](.github/images/README/image.png)
 
 ---
 
@@ -196,7 +196,7 @@ vercel --prod
      https://<YOUR_PROJECT_REF>.supabase.co/auth/v1/callback
      ```
 
-   ![Google OAuth](images/README/image-1.png)
+   ![Google OAuth](.github/images/README/image-1.png)
 
 3. **Configure Redirect URL**
    Dashboard → Authentication → URL Configuration → Site URL.
@@ -206,7 +206,7 @@ vercel --prod
    https://ctf.ariaf.my.id
    ```
 
-   ![Site URL](images/README/image-2.png)
+   ![Site URL](.github/images/README/image-2.png)
 
 ## 6. Opsional Supabase Reset Emils
 ```html
@@ -235,14 +235,14 @@ vercel --prod
 
 ## Security
 ### Added Rate Limit in Vercel
-![1769265568619](images/README/1769265568619.png)
+![1769265568619](.github/images/README/1769265568619.png)
 
 ### Added cloudflare in supabase
-![1769265616464](images/README/1769265616464.png)
+![1769265616464](.github/images/README/1769265616464.png)
 
-![1769265666794](images/README/1769265666794.png)
+![1769265666794](.github/images/README/1769265666794.png)
 
-![1769265704498](images/README/1769265704498.png)
+![1769265704498](.github/images/README/1769265704498.png)
 
 ---
 
