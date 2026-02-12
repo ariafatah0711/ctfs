@@ -6,6 +6,47 @@ export interface AuthResponse {
   error: string | null
 }
 
+function getAuthAvatarUrl(authUser: any): string | null {
+  if (!authUser) return null
+  const meta = authUser.user_metadata ?? authUser.raw_user_meta_data ?? null
+  if (!meta) return null
+
+  const candidate =
+    meta.picture ||
+    meta.avatar_url ||
+    meta.photoURL ||
+    meta.profile_picture_url ||
+    meta.picture_url ||
+    null
+
+  if (!candidate) return null
+  const trimmed = String(candidate).trim()
+  if (!trimmed) return null
+  const lower = trimmed.toLowerCase()
+  if (lower === 'null' || lower === 'undefined' || lower === 'none') return null
+  return trimmed
+}
+
+function mergeProfilePicture<T extends Record<string, any>>(base: T, authUser: any, profileRow?: any): T {
+  const merged: any = { ...base }
+
+  // Prefer DB-managed profile_picture_url if present
+  if (profileRow?.profile_picture_url != null) {
+    merged.profile_picture_url = profileRow.profile_picture_url
+  }
+
+  // Prefer RPC picture, else fall back to auth metadata
+  const authAvatar = getAuthAvatarUrl(authUser)
+  merged.picture = profileRow?.picture ?? merged.picture ?? authAvatar ?? null
+
+  // If base was missing profile_picture_url and RPC has it, keep it
+  if (merged.profile_picture_url == null && profileRow?.profile_picture_url != null) {
+    merged.profile_picture_url = profileRow.profile_picture_url
+  }
+
+  return merged
+}
+
 /**
  * Sign in with Google OAuth
  */
@@ -135,7 +176,12 @@ export async function signUp(email: string, password: string, username: string, 
       return { user: null, error: userError.message };
     }
 
-    return { user: userData, error: null };
+    // Also fetch picture fields via RPC (uses auth.users metadata)
+    const { data: profileRows } = await supabase.rpc('get_user_profile', { p_id: authData.user.id })
+    const profileRow = Array.isArray(profileRows) ? profileRows[0] : null
+    const mergedUser = mergeProfilePicture(userData as any, authData.user, profileRow)
+
+    return { user: mergedUser, error: null };
   } catch (error) {
     return { user: null, error: 'Registration failed' }
   }
@@ -211,7 +257,12 @@ export async function signIn(identifier: string, password: string, captchaToken?
       userData = newUserData;
     }
 
-    return { user: userData, error: null };
+    // Fetch picture fields via RPC (uses auth.users metadata)
+    const { data: profileRows } = await supabase.rpc('get_user_profile', { p_id: data.user.id })
+    const profileRow = Array.isArray(profileRows) ? profileRows[0] : null
+    const mergedUser = mergeProfilePicture(userData as any, data.user, profileRow)
+
+    return { user: mergedUser, error: null };
   } catch (error) {
     return { user: null, error: 'Login failed' };
   }
@@ -257,8 +308,9 @@ export async function getCurrentUser(): Promise<User | null> {
         return null;
       }
     }
-    // console.log("Current user data:", userData);
-    return userData;
+    // Ensure picture is present even if RPC/DB didn't have it yet
+    const merged = mergeProfilePicture(userData as any, user, userData)
+    return merged;
   } catch (error) {
     return null;
   }

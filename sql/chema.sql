@@ -413,7 +413,11 @@ BEGIN
   SELECT
     u.id,
     u.username,
-    COALESCE(au.raw_user_meta_data->>'picture', u.profile_picture_url) AS picture,
+    COALESCE(
+      au.raw_user_meta_data->>'picture',
+      au.raw_user_meta_data->>'avatar_url',
+      u.profile_picture_url
+    ) AS picture,
     u.profile_picture_url
   FROM public.users u
   LEFT JOIN auth.users au ON au.id = u.id
@@ -453,7 +457,11 @@ BEGIN
 
   -- Ambil picture
   SELECT
-    COALESCE(au.raw_user_meta_data->>'picture', v_user.profile_picture_url),
+    COALESCE(
+      au.raw_user_meta_data->>'picture',
+      au.raw_user_meta_data->>'avatar_url',
+      v_user.profile_picture_url
+    ),
     NULLIF(
       GREATEST(
         COALESCE(au.last_sign_in_at, 'epoch'::timestamptz),

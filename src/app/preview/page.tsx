@@ -19,6 +19,19 @@ function normalizeImageUrl(url?: string | null) {
   return `/${trimmed}`
 }
 
+function formatEventDateTime(value?: string | null) {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 const getEventStatus = (evt: Event) => {
   const now = new Date()
   const start = evt.start_time ? new Date(evt.start_time) : null
@@ -272,6 +285,10 @@ export default function PreviewPage() {
                       {availableEvents.map((evt) => {
                         const status = getEventStatus(evt)
                         const timeRemaining = getTimeRemaining(evt)
+                        const startText = formatEventDateTime(evt.start_time)
+                        const endText = formatEventDateTime(evt.end_time)
+                        const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
+                        const endLabel = endText ? ((evt.end_time && new Date(evt.end_time) > now) ? 'Ends' : 'Ended') : null
                         return (
                           <Card
                             key={evt.id}
@@ -300,10 +317,16 @@ export default function PreviewPage() {
                               )}
 
                               <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                                {evt.start_time && (
+                                {startText && startLabel && (
                                   <div className="flex items-center gap-2">
                                     <Calendar size={14} />
-                                    <span>{new Date(evt.start_time).toLocaleDateString()}</span>
+                                    <span>{startLabel}: {startText}</span>
+                                  </div>
+                                )}
+                                {endText && endLabel && (
+                                  <div className="flex items-center gap-2">
+                                    <Calendar size={14} />
+                                    <span>{endLabel}: {endText}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2">
@@ -326,6 +349,10 @@ export default function PreviewPage() {
                       {upcomingList.map((evt) => {
                         const status = getEventStatus(evt)
                         const timeRemaining = getTimeRemaining(evt)
+                        const startText = formatEventDateTime(evt.start_time)
+                        const endText = formatEventDateTime(evt.end_time)
+                        const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
+                        const endLabel = endText ? ((evt.end_time && new Date(evt.end_time) > now) ? 'Ends' : 'Ended') : null
                         return (
                           <Card
                             key={evt.id}
@@ -354,10 +381,16 @@ export default function PreviewPage() {
                               )}
 
                               <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                                {evt.start_time && (
+                                {startText && startLabel && (
                                   <div className="flex items-center gap-2">
                                     <Calendar size={14} />
-                                    <span>{new Date(evt.start_time).toLocaleDateString()}</span>
+                                    <span>{startLabel}: {startText}</span>
+                                  </div>
+                                )}
+                                {endText && endLabel && (
+                                  <div className="flex items-center gap-2">
+                                    <Calendar size={14} />
+                                    <span>{endLabel}: {endText}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2">
@@ -380,6 +413,10 @@ export default function PreviewPage() {
                       {endedEvents.map((evt) => {
                         const status = getEventStatus(evt)
                         const timeRemaining = getTimeRemaining(evt)
+                        const startText = formatEventDateTime(evt.start_time)
+                        const endText = formatEventDateTime(evt.end_time)
+                        const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
+                        const endLabel = endText ? ((evt.end_time && new Date(evt.end_time) > now) ? 'Ends' : 'Ended') : null
                         return (
                           <Card
                             key={evt.id}
@@ -408,10 +445,16 @@ export default function PreviewPage() {
                               )}
 
                               <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                                {evt.start_time && (
+                                {startText && startLabel && (
                                   <div className="flex items-center gap-2">
                                     <Calendar size={14} />
-                                    <span>{new Date(evt.start_time).toLocaleDateString()}</span>
+                                    <span>{startLabel}: {startText}</span>
+                                  </div>
+                                )}
+                                {endText && endLabel && (
+                                  <div className="flex items-center gap-2">
+                                    <Calendar size={14} />
+                                    <span>{endLabel}: {endText}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2">
