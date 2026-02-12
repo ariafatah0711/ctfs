@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.1.0]
+### Improved
+- Improve Notification ui navbar.
+- Improve localstorage with setting.ts, and userState.ts for better state management.
+- Imrpove event filter challenge.
+
 ## v[3.0.0]
 ### Added
 - Add Admin Event for managing events, including add, edit, delte, view flag challenge in event you manage.

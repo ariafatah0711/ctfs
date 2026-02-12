@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { getThemeSetting, setThemeSetting } from "@/lib/settings";
 
 export type Theme = "light" | "dark";
 
@@ -13,7 +14,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("theme") as Theme) || "dark";
+      const stored = getThemeSetting();
+      return (stored as Theme) || "dark";
     }
     return "dark";
   });
@@ -25,7 +27,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } else {
         document.documentElement.classList.remove("dark");
       }
-      localStorage.setItem("theme", theme);
+      setThemeSetting(theme);
     }
   }, [theme]);
 

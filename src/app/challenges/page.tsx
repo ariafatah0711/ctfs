@@ -16,6 +16,8 @@ import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 import APP from '@/config'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { useEventContext } from '@/contexts/EventContext'
+import { getChallengeFilterSettings, setChallengeFilterSettings } from '@/lib/settings'
+import { formatEventDurationCompact } from '@/lib/utils'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
@@ -79,15 +81,7 @@ export default function ChallengesPage() {
     return hints
   }
 
-  const formatRemaining = (ms: number) => {
-    const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-    const days = Math.floor(totalMinutes / (60 * 24));
-    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-    const minutes = totalMinutes % 60;
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
+  const formatRemaining = (ms: number) => formatEventDurationCompact(ms)
 
   const selectedEventObj = (typeof eventId === 'string' && eventId !== 'all') ? events.find(e => e.id === eventId) : null;
   const nowDate = new Date();
@@ -187,16 +181,8 @@ export default function ChallengesPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
-      const raw = window.localStorage.getItem('ctf.challengeFilterSettings')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (typeof parsed?.hideMaintenance === 'boolean' && typeof parsed?.highlightTeamSolves === 'boolean') {
-          setFilterSettings({
-            hideMaintenance: parsed.hideMaintenance,
-            highlightTeamSolves: parsed.highlightTeamSolves,
-          })
-        }
-      }
+      const stored = getChallengeFilterSettings()
+      if (stored) setFilterSettings(stored)
     } catch {
       // ignore malformed storage
     } finally {
@@ -208,7 +194,7 @@ export default function ChallengesPage() {
   useEffect(() => {
     if (!settingsLoaded || typeof window === 'undefined') return
     try {
-      window.localStorage.setItem('ctf.challengeFilterSettings', JSON.stringify(filterSettings))
+      setChallengeFilterSettings(filterSettings)
     } catch {
       // ignore storage errors
     }

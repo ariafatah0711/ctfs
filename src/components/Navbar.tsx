@@ -7,6 +7,7 @@ import { useEffect, useState, useRef } from 'react'
 import ImageWithFallback from './ImageWithFallback'
 import { MarkdownRenderer } from '@/components/MarkdownRenderer'
 import { useTheme } from '@/contexts/ThemeContext'
+import { getSolveSoundEnabledSetting, setSolveSoundEnabledSetting } from '@/lib/settings'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut } from '@/lib/auth'
 import { isAdmin, isGlobalAdmin } from '@/lib/admin'
@@ -15,6 +16,7 @@ import { Switch } from '@/components/ui/switch'
 import APP from '@/config'
 import { subscribeToSolves, getNotifications, createNotification, deleteNotification, subscribeToNotifications } from '@/lib/challenges'
 import { formatRelativeDate } from '@/lib/utils'
+import { addNotifSeenIds, getNotifSeenIds } from '@/lib/userState'
 
 export default function Navbar() {
   const router = useRouter()
@@ -46,24 +48,26 @@ export default function Navbar() {
   const avatarSrc =  user?.profile_picture_url || user?.picture || null
   const [solveSoundEnabled, setSolveSoundEnabled] = useState(true)
 
-  const notifSeenKey = user ? `ctfs_seen_notifications_v1:${user.id}` : `ctfs_seen_notifications_v1:anon`
-
-  const getSeenNotifIds = () => {
-    if (typeof window === 'undefined') return new Set<string>()
-    try {
-      const seenJson = localStorage.getItem(notifSeenKey)
-      const seen: string[] = seenJson ? JSON.parse(seenJson) : []
-      return new Set(seen)
-    } catch {
-      return new Set<string>()
-    }
+  const mergeNotifications = (
+    existing: Array<{ id: string; title: string; message: string; level: string; created_at: string }>,
+    incoming: Array<{ id: string; title: string; message: string; level: string; created_at: string }>
+  ) => {
+    const byId = new Map<string, { id: string; title: string; message: string; level: string; created_at: string }>()
+    for (const n of existing || []) byId.set(String(n.id), n)
+    for (const n of incoming || []) byId.set(String(n.id), n)
+    const merged = Array.from(byId.values())
+    merged.sort((a, b) => {
+      const ta = a.created_at ? Date.parse(a.created_at) : 0
+      const tb = b.created_at ? Date.parse(b.created_at) : 0
+      return tb - ta
+    })
+    return merged
   }
 
+  const getSeenNotifIds = () => new Set<string>(getNotifSeenIds(user?.id || 'anon'))
+
   const markNotificationsSeen = (ids: string[]) => {
-    if (typeof window === 'undefined') return
-    const seen = getSeenNotifIds()
-    ids.forEach(id => seen.add(id))
-    localStorage.setItem(notifSeenKey, JSON.stringify(Array.from(seen)))
+    addNotifSeenIds(user?.id || 'anon', ids)
   }
 
   const markAllNotificationsRead = async () => {
@@ -136,10 +140,7 @@ export default function Navbar() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
-      const raw = window.localStorage.getItem('ctf.notif.solveSound')
-      if (raw !== null) {
-        setSolveSoundEnabled(raw === 'true')
-      }
+      setSolveSoundEnabled(getSolveSoundEnabledSetting())
     } catch {}
   }, [])
 
@@ -147,7 +148,7 @@ export default function Navbar() {
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
-      window.localStorage.setItem('ctf.notif.solveSound', String(solveSoundEnabled))
+      setSolveSoundEnabledSetting(solveSoundEnabled)
     } catch {}
   }, [solveSoundEnabled])
 
@@ -208,7 +209,7 @@ export default function Navbar() {
     if (!notifOpen && user) {
       setNotifLoading(true)
       const items = await getNotifications(30, 0)
-      setNotifItems(items || [])
+      setNotifItems((prev) => mergeNotifications(prev, (items || []) as any))
       setNotifLoading(false)
     }
   }
@@ -585,7 +586,7 @@ export default function Navbar() {
               {notifOpen && (
                 <div
                   ref={notifPanelRef}
-                  className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[420px] sm:max-w-[95vw] max-w-[95vw] rounded-xl shadow-xl border ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
+                  className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[520px] sm:max-w-[95vw] max-w-[95vw] rounded-xl shadow-xl border overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
                 >
                   <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
                     <span>Notifications</span>
@@ -658,28 +659,35 @@ export default function Navbar() {
                       notifItems.map((n) => (
                         <div
                           key={n.id}
-                          className={`relative px-3 py-2 border-b border-gray-200 dark:border-gray-800 ${isNotifRead(n.id) ? 'opacity-70' : ''}`}
+                          className={`group relative px-3 py-2 border-b border-gray-200 dark:border-gray-800 ${isNotifRead(n.id) ? 'opacity-70' : ''} ${theme === 'dark' ? 'hover:bg-gray-800/40' : 'hover:bg-gray-50'} transition-colors`}
                         >
                           <div className={`min-w-0`}>
-                            <div className="text-sm font-semibold flex flex-wrap items-center gap-2 min-w-0">
-                              <span className="truncate flex-1 min-w-0">{n.title}</span>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap shrink-0 ${getLevelBadgeClass(n.level)}`}>
-                                {n.level === 'info_platform'
-                                  ? 'Info Platform'
-                                  : n.level === 'info_challenges'
-                                  ? 'Info Challenges'
-                                  : 'Info'}
-                              </span>
-                              {!isNotifRead(n.id) && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap shrink-0 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
-                                  New
+                            <div className="flex items-start gap-2 min-w-0 pr-10">
+                              <div className="text-sm font-semibold truncate flex-1 min-w-0" title={n.title}>
+                                {n.title}
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getLevelBadgeClass(n.level)}`}>
+                                  {n.level === 'info_platform'
+                                    ? 'Info Platform'
+                                    : n.level === 'info_challenges'
+                                    ? 'Info Challenges'
+                                    : 'Info'}
                                 </span>
-                              )}
+                                {!isNotifRead(n.id) && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                    New
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <MarkdownRenderer
-                              content={n.message}
-                              className="text-xs text-gray-600 dark:text-gray-300 leading-snug break-words [&_p]:mb-1 [&_p]:leading-snug [&_p]:break-words"
-                            />
+                            <div className="mt-1 text-gray-600 dark:text-gray-300">
+                              <MarkdownRenderer
+                                content={n.message}
+                                variant="compact"
+                                className="break-words [&_a]:text-blue-600 dark:[&_a]:text-blue-400"
+                              />
+                            </div>
                             <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                               {n.created_at ? formatRelativeDate(n.created_at) : ''}
                             </div>
@@ -687,7 +695,7 @@ export default function Navbar() {
                           {globalAdminStatus && (
                             <button
                               onClick={() => handleDeleteNotif(n.id)}
-                              className="absolute bottom-2 right-2 text-xs text-red-500 hover:underline"
+                              className="absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                               Delete
                             </button>

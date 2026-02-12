@@ -3,6 +3,7 @@ import APP from '@/config';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { formatEventTimingLabel } from '@/lib/utils';
 
 type Props = {
   filters: {
@@ -17,6 +18,9 @@ type Props = {
   hideAllEventOption?: boolean;
   hideMainEventOption?: boolean;
   includeEndedEvents?: boolean;
+  // Controls which upcoming events appear in the event pill filter.
+  // Default: 30 days. Set to null to show all upcoming events (useful for admin).
+  upcomingVisibilityWindowDays?: number | null;
   settings?: {
     hideMaintenance: boolean;
     highlightTeamSolves: boolean;
@@ -37,6 +41,7 @@ export default function ChallengeFilterBar({
   hideAllEventOption = false,
   hideMainEventOption = false,
   includeEndedEvents = false,
+  upcomingVisibilityWindowDays = 30,
   settings,
   categories,
   difficulties,
@@ -55,12 +60,34 @@ export default function ChallengeFilterBar({
   const sortedEvents = React.useMemo(() => {
     if (!events) return [];
     const now = new Date().getTime();
+    const UPCOMING_VISIBLE_WINDOW_MS =
+      upcomingVisibilityWindowDays === null
+        ? Number.POSITIVE_INFINITY
+        : Math.max(0, upcomingVisibilityWindowDays) * 24 * 60 * 60 * 1000;
     const visibleEvents = includeEndedEvents
       ? events
       : events.filter(evt => {
           if (!evt.end_time) return true;
           return now <= new Date(evt.end_time).getTime();
         });
+
+    const filteredUpcoming = visibleEvents.filter(evt => {
+      if (typeof selectedEventId === 'string' && selectedEventId !== 'all' && evt.id === selectedEventId) {
+        return true;
+      }
+
+      if (!evt.start_time) return true;
+      const start = new Date(evt.start_time).getTime();
+      if (Number.isNaN(start)) return true;
+      const remaining = start - now;
+
+      // Only apply the window to upcoming events.
+      if (remaining <= 0) return true;
+
+      // Hide far-future upcoming events from the filter bar to prevent clutter.
+      if (remaining > UPCOMING_VISIBLE_WINDOW_MS) return false;
+      return true;
+    });
 
     const getState = (evt: typeof events[number]) => {
       const start = evt.start_time ? new Date(evt.start_time).getTime() : null;
@@ -79,7 +106,7 @@ export default function ChallengeFilterBar({
       return 'ongoing' as const;
     };
 
-    return [...visibleEvents].sort((a, b) => {
+    return [...filteredUpcoming].sort((a, b) => {
       const stateA = getState(a);
       const stateB = getState(b);
 
@@ -123,43 +150,10 @@ export default function ChallengeFilterBar({
 
       return 0;
     });
-  }, [events, includeEndedEvents]);
+  }, [events, includeEndedEvents, selectedEventId, upcomingVisibilityWindowDays]);
 
   const getEventTimingLabel = (evt?: { start_time?: string | null; end_time?: string | null }) => {
-    if (!evt) return null;
-    const now = new Date();
-    const start = evt.start_time ? new Date(evt.start_time) : null;
-    const end = evt.end_time ? new Date(evt.end_time) : null;
-
-    const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
-    const formatRemaining = (ms: number) => {
-      const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-      const days = Math.floor(totalMinutes / (60 * 24));
-      const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-      const minutes = totalMinutes % 60;
-      if (days > 0) return `${days}d ${hours}h`;
-      if (hours > 0) return `${hours}h ${minutes}m`;
-      return `${minutes}m`;
-    };
-
-    if (start && now < start) {
-      const remaining = start.getTime() - now.getTime();
-      if (remaining > ONE_YEAR_MS) return null;
-      return `Starts in ${formatRemaining(remaining)}`;
-    }
-    if (end && now > end) {
-      return 'Ended';
-    }
-    if (end) {
-      const remaining = end.getTime() - now.getTime();
-      if (remaining > ONE_YEAR_MS) return null;
-      return `Ends in ${formatRemaining(remaining)}`;
-    }
-    if (start) {
-      return 'Ongoing';
-    }
-    return null;
+    return formatEventTimingLabel(evt);
   };
 
   const selectedEvent = React.useMemo(() => {

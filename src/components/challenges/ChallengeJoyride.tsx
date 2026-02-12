@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Joyride, { Step, STATUS } from 'react-joyride'
 import { useAuth } from '@/contexts/AuthContext'
+import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/lib/settings'
 
 export default function ChallengeJoyride() {
   const pathname = usePathname()
@@ -24,8 +25,8 @@ export default function ChallengeJoyride() {
       return
     }
 
-    // Check if user has seen the guide (using localStorage)
-    const hasSeenGuide = localStorage.getItem(`ctf_tutorial_guide_seen_${user.id}`)
+    // Check if user has seen the guide
+    const hasSeenGuide = getChallengeGuideSeenSetting(user.id)
 
     if (!hasSeenGuide) {
       // Wait a bit for page to load, then start tour
@@ -133,7 +134,7 @@ export default function ChallengeJoyride() {
   const handleTourEnd = () => {
     setRunTour(false)
     if (user) {
-      localStorage.setItem(`ctf_tutorial_guide_seen_${user.id}`, 'true')
+      setChallengeGuideSeenSetting(true)
     }
   }
 

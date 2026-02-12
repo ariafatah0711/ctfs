@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { getLogs, getRecentSolves, getChallengesList, subscribeToLogSignals } from '@/lib/challenges'
 import { useAuth } from '@/contexts/AuthContext'
+import { addLogsSeenIds, getLogsSeenIds } from '@/lib/userState'
 
 type LogShape = {
   log_type: 'new_challenge' | 'first_blood'
@@ -27,7 +28,6 @@ type LogsContextType = {
 
 const LogsContext = createContext<LogsContextType | undefined>(undefined)
 
-const SEEN_KEY_PREFIX = 'ctfs_seen_logs_v1:'
 // Unread badge refresh: keep fresh-ish but avoid spamming RPCs.
 const LOGS_CACHE_TTL_MS = 10_000
 const LOGS_SIGNAL_MIN_REFRESH_MS = 5_000
@@ -60,8 +60,6 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   const refreshDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Hard throttle: at most one refresh per window, even if many inserts arrive.
   const lastSignalRefreshAtRef = useRef<number>(0)
-
-  const storageKey = user ? `${SEEN_KEY_PREFIX}${user.id}` : `${SEEN_KEY_PREFIX}anon`
 
   const logId = (n: LogShape) => `${n.log_type}|${n.log_challenge_id}|${n.log_user_id || ''}|${n.log_created_at}`
 
@@ -162,9 +160,9 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
       }
       const logs = await getLogsCached(false)
       const ids = logs.map(logId)
-      const seenJson = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null
-      const seen: string[] = seenJson ? JSON.parse(seenJson) : []
-      const unread = ids.filter(id => !seen.includes(id)).length
+      const seen = getLogsSeenIds(user.id)
+      const seenSet = new Set(seen)
+      const unread = ids.filter((id) => !seenSet.has(id)).length
       setUnreadCount(unread)
     } catch (err) {
       console.warn('Failed to refresh logs', err)
@@ -224,12 +222,10 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
             const ids = (logs || [])
               .filter((n: LogShape) => (allowed ? allowed.has(String(n.log_challenge_id)) : true))
               .map((n: LogShape) => logId(n))
-            const seenJson = localStorage.getItem(storageKey)
-            const seen: string[] = seenJson ? JSON.parse(seenJson) : []
-            const merged = Array.from(new Set([...seen, ...ids]))
-            localStorage.setItem(storageKey, JSON.stringify(merged))
+            const merged = addLogsSeenIds(user.id, ids)
+            const mergedSet = new Set(merged)
             // recompute unread by subtracting newly seen ids from current logs
-            const remaining = (logs || []).map(logId).filter(id => !merged.includes(id)).length
+            const remaining = (logs || []).map(logId).filter((id) => !mergedSet.has(id)).length
             setUnreadCount(remaining)
           }).catch(err => {
             console.warn('markAllRead failed to fetch logs/challenges', err)
@@ -238,10 +234,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
         // No event filter or eventId === 'all' -> mark all logs as read
         getLogsCached(false).then((logs: any) => {
           const ids = (logs || []).map((n: LogShape) => logId(n))
-          const seenJson = localStorage.getItem(storageKey)
-          const seen: string[] = seenJson ? JSON.parse(seenJson) : []
-          const merged = Array.from(new Set([...seen, ...ids]))
-          localStorage.setItem(storageKey, JSON.stringify(merged))
+          addLogsSeenIds(user.id, ids)
           setUnreadCount(0)
         }).catch(err => {
           console.warn('markAllRead failed to fetch logs', err)

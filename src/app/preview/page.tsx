@@ -6,7 +6,7 @@ import { getPreviewData, PreviewData } from '@/lib/preview'
 import { Calendar, Clock, Users, CheckCircle2, Trophy, Zap } from 'lucide-react'
 import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import { LeaderboardEntry, Event } from '@/types'
-import { formatRelativeDate } from '@/lib/utils'
+import { formatEventDurationCompact, formatRelativeDate } from '@/lib/utils'
 import APP from '@/config'
 import Link from 'next/link'
 
@@ -48,23 +48,13 @@ const getTimeRemaining = (evt: Event) => {
   const start = evt.start_time ? new Date(evt.start_time) : null
   const end = evt.end_time ? new Date(evt.end_time) : null
 
-  const formatRemaining = (ms: number) => {
-    const totalMinutes = Math.max(0, Math.floor(ms / 60000))
-    const days = Math.floor(totalMinutes / (60 * 24))
-    const hours = Math.floor((totalMinutes % (60 * 24)) / 60)
-    const minutes = totalMinutes % 60
-    if (days > 0) return `${days}d ${hours}h left`
-    if (hours > 0) return `${hours}h ${minutes}m left`
-    return `${minutes}m left`
-  }
-
   if (start && now < start) {
     const diff = start.getTime() - now.getTime()
-    return `Starts in ${formatRemaining(diff)}`
+    return `Starts in ${formatEventDurationCompact(diff)}`
   }
   if (end && now < end) {
     const diff = end.getTime() - now.getTime()
-    return `Ends in ${formatRemaining(diff)}`
+    return `Ends in ${formatEventDurationCompact(diff)}`
   }
   if (end && now >= end) {
     return 'Event ended'

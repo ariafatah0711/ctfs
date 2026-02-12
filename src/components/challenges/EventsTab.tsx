@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Calendar, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import APP from '@/config'
+import { formatEventDurationCompact } from '@/lib/utils'
 
 type Props = {
   events: Event[]
@@ -28,23 +29,13 @@ const getTimeRemaining = (evt: Event) => {
   const start = evt.start_time ? new Date(evt.start_time) : null
   const end = evt.end_time ? new Date(evt.end_time) : null
 
-  const formatRemaining = (ms: number) => {
-    const totalMinutes = Math.max(0, Math.floor(ms / 60000))
-    const days = Math.floor(totalMinutes / (60 * 24))
-    const hours = Math.floor((totalMinutes % (60 * 24)) / 60)
-    const minutes = totalMinutes % 60
-    if (days > 0) return `${days}d ${hours}h left`
-    if (hours > 0) return `${hours}h ${minutes}m left`
-    return `${minutes}m left`
-  }
-
   if (start && now < start) {
     const diff = start.getTime() - now.getTime()
-    return `Starts in ${formatRemaining(diff)}`
+    return `Starts in ${formatEventDurationCompact(diff)}`
   }
   if (end && now < end) {
     const diff = end.getTime() - now.getTime()
-    return `Ends in ${formatRemaining(diff)}`
+    return `Ends in ${formatEventDurationCompact(diff)}`
   }
   if (end && now >= end) {
     return 'Event ended'

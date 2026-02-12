@@ -10,6 +10,7 @@ interface MarkdownRendererProps {
   content: string
   className?: string
   onCommentsExtracted?: (comments: string[]) => void
+  variant?: 'default' | 'compact'
 }
 
 // Helper function to extract text from React children
@@ -180,7 +181,7 @@ function parseCustomComments(content: string) {
   return { filtered: filteredLines.join('\n'), comments }
 }
 
-export function MarkdownRenderer({ content, className = '', onCommentsExtracted }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = '', onCommentsExtracted, variant = 'default' }: MarkdownRendererProps) {
   if (!content) {
     content = ''
   } else {
@@ -197,6 +198,60 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted 
       onCommentsExtracted(comments)
     }
   }, [comments, onCommentsExtracted])
+
+  if (variant === 'compact') {
+    return (
+      <div className={`max-w-none text-inherit text-xs leading-snug ${className}`.trim()}>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm, remarkBreaks]}
+          components={{
+            h1: ({ ...props }) => <h1 className="text-sm font-semibold mb-1" {...props} />,
+            h2: ({ ...props }) => <h2 className="text-sm font-semibold mb-1" {...props} />,
+            h3: ({ ...props }) => <h3 className="text-xs font-semibold mb-1" {...props} />,
+            p: ({ ...props }) => <p className="mb-1 leading-snug" {...props} />,
+            ul: ({ ...props }) => <ul className="mb-1 list-disc list-inside space-y-0.5" {...props} />,
+            ol: ({ ...props }) => <ol className="mb-1 list-decimal list-inside space-y-0.5" {...props} />,
+            li: ({ ...props }) => <li className="ml-4 list-item" {...props} />,
+            strong: ({ ...props }) => <strong className="font-semibold" {...props} />,
+            em: ({ ...props }) => <em className="italic" {...props} />,
+            a: ({ ...props }) => (
+              <a
+                className="underline underline-offset-2 hover:opacity-90"
+                target="_blank"
+                rel="noopener noreferrer"
+                {...props}
+              />
+            ),
+            code: ({ inline, children, ...props }: any) =>
+              inline ? (
+                <code
+                  className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-[11px] font-mono break-words"
+                  {...props}
+                >
+                  {children}
+                </code>
+              ) : (
+                <CodeBlockWrapper isDark={false}>
+                  <pre className="bg-gray-100 dark:bg-gray-950 p-3 rounded-lg text-[11px] font-mono max-w-full border border-gray-200 dark:border-gray-800">
+                    <code className="text-gray-900 dark:text-gray-100" {...props}>
+                      {children}
+                    </code>
+                  </pre>
+                </CodeBlockWrapper>
+              ),
+            blockquote: ({ ...props }) => (
+              <blockquote
+                className="border-l-2 border-gray-300 dark:border-gray-700 pl-3 text-xs opacity-90 my-2"
+                {...props}
+              />
+            ),
+          }}
+        >
+          {sanitizedContent}
+        </ReactMarkdown>
+      </div>
+    )
+  }
 
   return (
     <div className={`max-w-none text-gray-200 text-sm leading-relaxed ${className}`}>

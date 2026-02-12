@@ -6,6 +6,7 @@ import { Dialog, DialogContent} from '@/components/ui/dialog'
 import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
 import { useAuth } from '@/contexts/AuthContext'
 import APP from '@/config'
+import { setChallengeGuideSeenSetting } from '@/lib/settings'
 
 interface ChallengeTutorialProps {}
 
@@ -17,8 +18,8 @@ export default function ChallengeTutorial(_: ChallengeTutorialProps) {
 
   const handleStartJoyride = () => {
     if (user) {
-      // Hapus localStorage flag
-      localStorage.removeItem(`ctf_tutorial_guide_seen_${user.id}`)
+      // Reset joyride seen flag
+      setChallengeGuideSeenSetting(false)
       // Close tutorial dialog
       setShow(false)
       // Navigate ke challenges page (joyride akan auto-start)

@@ -3,6 +3,7 @@
 import React from 'react'
 import { getEvents, filterStartedEvents } from '@/lib/events'
 import type { Event } from '@/types'
+import { getSelectedEventSetting, setSelectedEventSetting } from '@/lib/settings'
 
 export type SelectedEvent = 'all' | 'main' | string
 
@@ -15,8 +16,6 @@ type EventContextValue = {
   refreshEvents: () => Promise<void>
 }
 
-const STORAGE_KEY = 'ctf.selectedEvent'
-
 const EventContext = React.createContext<EventContextValue | null>(null)
 
 export function EventProvider({ children }: { children: React.ReactNode }) {
@@ -25,9 +24,9 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const [selectedEvent, setSelectedEventState] = React.useState<SelectedEvent>(() => {
     if (typeof window === 'undefined') return 'all'
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY)
-      if (!raw) return 'all'
-      const v = String(raw).trim()
+      const stored = getSelectedEventSetting()
+      if (!stored) return 'all'
+      const v = String(stored).trim()
       if (!v || v === 'undefined') return 'all'
       if (v === 'null') return 'main'
       return v
@@ -40,7 +39,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (typeof window === 'undefined') return
     try {
-      window.localStorage.setItem(STORAGE_KEY, String(selectedEvent))
+      setSelectedEventSetting(String(selectedEvent))
     } catch {
       // ignore
     }

@@ -57,3 +57,52 @@ export function formatRelativeDate(isoDate: string) {
 
   return new Date(isoDate).toLocaleString()
 }
+
+export type EventTimingLike = {
+  start_time?: string | null
+  end_time?: string | null
+}
+
+// Compact duration formatter for event countdowns.
+// Rules:
+// - >= 1 year: "1y" (caps long countdowns)
+// - > 30 days: "200d" (days only)
+// - otherwise: "4d 2h" / "3h 12m" / "8m"
+export function formatEventDurationCompact(ms: number) {
+  const safeMs = Number.isFinite(ms) ? Math.max(0, ms) : 0
+  const totalMinutes = Math.floor(safeMs / 60000)
+  const totalHours = Math.floor(totalMinutes / 60)
+  const days = Math.floor(totalHours / 24)
+  const hours = totalHours % 24
+  const minutes = totalMinutes % 60
+
+  if (days >= 365) return '1y'
+  if (days > 30) return `${days}d`
+  if (days > 0) return `${days}d ${hours}h`
+  if (totalHours > 0) return `${totalHours}h ${minutes}m`
+  return `${minutes}m`
+}
+
+export function formatEventTimingLabel(evt?: EventTimingLike, now: Date = new Date()): string | null {
+  if (!evt) return null
+  const start = evt.start_time ? new Date(evt.start_time) : null
+  const end = evt.end_time ? new Date(evt.end_time) : null
+
+  if (start && !Number.isNaN(start.getTime()) && now < start) {
+    return `Starts in ${formatEventDurationCompact(start.getTime() - now.getTime())}`
+  }
+
+  if (end && !Number.isNaN(end.getTime()) && now > end) {
+    return 'Ended'
+  }
+
+  if (end && !Number.isNaN(end.getTime())) {
+    return `Ends in ${formatEventDurationCompact(end.getTime() - now.getTime())}`
+  }
+
+  if (start && !Number.isNaN(start.getTime())) {
+    return 'Ongoing'
+  }
+
+  return null
+}
