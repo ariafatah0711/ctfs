@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge } from '@/lib/challenges'
-import { getEvents } from '@/lib/events'
 import { getMyTeamChallenges } from '@/lib/teams'
 import { ChallengeWithSolve, User, Attachment, Event } from '@/types'
 import { motion } from 'framer-motion'
@@ -16,6 +15,7 @@ import { Solver } from '@/components/challenges/SolversList';
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 import APP from '@/config'
 import ImageWithFallback from '@/components/ImageWithFallback'
+import { useEventContext } from '@/contexts/EventContext'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
@@ -47,8 +47,8 @@ export default function ChallengesPage() {
     difficulty: 'all',
     search: ''
   })
-  const [eventId, setEventId] = useState<string | null | 'all'>('all')
-  const [events, setEvents] = useState<Event[]>([])
+  const { events, selectedEvent, setSelectedEvent } = useEventContext()
+  const eventId: string | null | 'all' = selectedEvent === 'main' ? null : (selectedEvent as any)
   const [filterSettings, setFilterSettings] = useState({
     hideMaintenance: false,
     highlightTeamSolves: true,
@@ -89,10 +89,10 @@ export default function ChallengesPage() {
     return `${minutes}m`;
   };
 
-  const selectedEvent = typeof eventId === 'string' ? events.find(e => e.id === eventId) : null;
+  const selectedEventObj = (typeof eventId === 'string' && eventId !== 'all') ? events.find(e => e.id === eventId) : null;
   const nowDate = new Date();
-  const selectedEventStart = selectedEvent?.start_time ? new Date(selectedEvent.start_time) : null;
-  const selectedEventEnd = selectedEvent?.end_time ? new Date(selectedEvent.end_time) : null;
+  const selectedEventStart = selectedEventObj?.start_time ? new Date(selectedEventObj.start_time) : null;
+  const selectedEventEnd = selectedEventObj?.end_time ? new Date(selectedEventObj.end_time) : null;
   const selectedEventNotStarted = !!(selectedEventStart && nowDate < selectedEventStart);
   const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd);
   const loadChallenges = async () => {
@@ -127,9 +127,7 @@ export default function ChallengesPage() {
     loadChallenges()
   }, [user])
 
-  useEffect(() => {
-    getEvents().then(setEvents).catch(() => setEvents([]))
-  }, [])
+  // Events are loaded globally via EventProvider
 
   // Tambahkan useEffect ini setelah deklarasi state
   useEffect(() => {
@@ -473,7 +471,7 @@ export default function ChallengesPage() {
               showStatusFilter={true}
               events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
               selectedEventId={eventId}
-              onEventChange={setEventId}
+              onEventChange={(id) => setSelectedEvent(id === null ? 'main' : id)}
             />
 
             {/* Challenges Grid Grouped by Category */}
@@ -487,7 +485,7 @@ export default function ChallengesPage() {
                       <CalendarClock className="w-7 h-7 text-gray-400 dark:text-gray-500" />
                     ) : typeof eventId === 'string' && selectedEventEnded ? (
                       <CalendarX className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-                    ) : typeof eventId === 'string' && !selectedEvent ? (
+                    ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
                       <CircleAlert className="w-7 h-7 text-gray-400 dark:text-gray-500" />
                     ) : (
                       <Search className="w-7 h-7 text-gray-400 dark:text-gray-500" />
@@ -511,7 +509,7 @@ export default function ChallengesPage() {
                         Challenge untuk event ini sudah tidak tersedia.
                       </p>
                     </>
-                  ) : typeof eventId === 'string' && !selectedEvent ? (
+                  ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
                     <>
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                         Event tidak ditemukan
@@ -581,7 +579,7 @@ export default function ChallengesPage() {
               events={events}
               selectedEventId={eventId}
               onEventSelect={(selected) => {
-                setEventId(selected)
+                setSelectedEvent(selected === null ? 'main' : selected)
                 setCurrentTab('challenges')
               }}
             />

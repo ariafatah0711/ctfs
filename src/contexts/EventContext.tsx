@@ -1,0 +1,88 @@
+'use client'
+
+import React from 'react'
+import { getEvents, filterStartedEvents } from '@/lib/events'
+import type { Event } from '@/types'
+
+export type SelectedEvent = 'all' | 'main' | string
+
+type EventContextValue = {
+  events: Event[]
+  startedEvents: Event[]
+  eventsLoading: boolean
+  selectedEvent: SelectedEvent
+  setSelectedEvent: (value: SelectedEvent) => void
+  refreshEvents: () => Promise<void>
+}
+
+const STORAGE_KEY = 'ctf.selectedEvent'
+
+const EventContext = React.createContext<EventContextValue | null>(null)
+
+export function EventProvider({ children }: { children: React.ReactNode }) {
+  const [events, setEvents] = React.useState<Event[]>([])
+  const [eventsLoading, setEventsLoading] = React.useState(false)
+  const [selectedEvent, setSelectedEventState] = React.useState<SelectedEvent>(() => {
+    if (typeof window === 'undefined') return 'all'
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (!raw) return 'all'
+      const v = String(raw).trim()
+      if (!v || v === 'undefined') return 'all'
+      if (v === 'null') return 'main'
+      return v
+    } catch {
+      return 'all'
+    }
+  })
+
+  // Persist selection to localStorage
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(STORAGE_KEY, String(selectedEvent))
+    } catch {
+      // ignore
+    }
+  }, [selectedEvent])
+
+  const refreshEvents = React.useCallback(async () => {
+    setEventsLoading(true)
+    try {
+      const data = await getEvents()
+      setEvents(data || [])
+    } catch {
+      setEvents([])
+    } finally {
+      setEventsLoading(false)
+    }
+  }, [])
+
+  // Fetch events once
+  React.useEffect(() => {
+    refreshEvents()
+  }, [refreshEvents])
+
+  const startedEvents = React.useMemo(() => filterStartedEvents(events || []), [events])
+
+  const setSelectedEvent = React.useCallback((value: SelectedEvent) => {
+    setSelectedEventState(value)
+  }, [])
+
+  const ctx: EventContextValue = {
+    events,
+    startedEvents,
+    eventsLoading,
+    selectedEvent,
+    setSelectedEvent,
+    refreshEvents,
+  }
+
+  return <EventContext.Provider value={ctx}>{children}</EventContext.Provider>
+}
+
+export function useEventContext() {
+  const ctx = React.useContext(EventContext)
+  if (!ctx) throw new Error('useEventContext must be used within <EventProvider>')
+  return ctx
+}

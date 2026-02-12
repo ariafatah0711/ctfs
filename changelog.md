@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[2.7.2]
+### Added
+- Added EventContext for global event data access.
+
 ## v[2.7.1]
 ### Fixed
 - Fixed Bug login.

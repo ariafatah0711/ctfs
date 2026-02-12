@@ -8,16 +8,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import Loader from "@/components/custom/loading";
 import { useLogs } from '@/contexts/LogsContext'
 import { Flag, Logs } from "lucide-react";
-import { getEvents, filterStartedEvents } from '@/lib/events'
 import EventSelect from '@/components/custom/EventSelect'
+import { useEventContext } from '@/contexts/EventContext'
 
 export default function LogsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { markAllRead, refresh, unreadCount: challengeUnread } = useLogs()
   const [tabType, setTabType] = useState<'challenges' | 'solves'>('solves')
-  const [events, setEvents] = useState<any[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<string>('all')
+  const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -29,18 +28,7 @@ export default function LogsPage() {
     }
   }, [authLoading, user, router]);
 
-  useEffect(() => {
-    (async () => {
-      if (events.length === 0) {
-        try {
-          const ev = await getEvents()
-          setEvents(filterStartedEvents(ev || []))
-        } catch (err) {
-          setEvents([])
-        }
-      }
-    })()
-  }, [events.length])
+  // Events are loaded globally via EventProvider
 
   // Mark challenge logs as read when user selects the Challenges tab
   useEffect(() => {
@@ -69,7 +57,7 @@ export default function LogsPage() {
           <EventSelect
             value={selectedEvent}
             onChange={setSelectedEvent}
-            events={events}
+            events={startedEvents}
             className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded mr-3"
             getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
           />

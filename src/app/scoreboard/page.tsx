@@ -5,7 +5,7 @@ import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
 import ScoreboardEmptyState from '@/components/scoreboard/ScoreboardEmptyState'
 import { Coins, Droplet, Trophy } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
@@ -13,25 +13,20 @@ import { Button } from '@/components/ui/button'
 
 import { getLeaderboardSummary, getTopProgressByUsernames, getFirstBloodLeaderboard } from '@/lib/challenges'
 import APP from '@/config'
-import { getEvents, filterStartedEvents } from '@/lib/events'
-import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LeaderboardEntry } from '@/types'
 import EventSelect from '@/components/custom/EventSelect'
+import { useEventContext } from '@/contexts/EventContext'
 
 export default function ScoreboardPage() {
   const { user, loading: authLoading } = useAuth()
   const { theme } = useTheme()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const initialQ = searchParams?.get('event_id')
-  const initialSelected = initialQ === null ? 'all' : initialQ === 'main' ? 'main' : initialQ || 'all'
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [firstBloodMode, setFirstBloodMode] = useState(false)
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<string>(initialSelected)
+  const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [menuOpen, setMenuOpen] = useState(false)
 
   // 🔒 redirect if not logged in
@@ -47,16 +42,6 @@ export default function ScoreboardPage() {
       if (!user) {
         setLoading(false)
         return
-      }
-      // load events when component mounts
-      if (events.length === 0) {
-        try {
-          const ev = await getEvents()
-          setEvents(filterStartedEvents(ev || []))
-        } catch (err) {
-          console.warn('Failed to fetch events:', err)
-          setEvents([])
-        }
       }
       // Map selectedEvent string to parameter accepted by helpers
       const eventParam = selectedEvent === 'main' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
@@ -108,21 +93,6 @@ export default function ScoreboardPage() {
     fetchData()
   }, [user, firstBloodMode, selectedEvent])
 
-  // sync selectedEvent -> URL query so back/links preserve selection
-  useEffect(() => {
-    if (!router) return
-    const param = selectedEvent === 'all' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
-    const url = new URL(window.location.href)
-    if (param === null) {
-      url.searchParams.set('event_id', 'all')
-    } else if (param) {
-      url.searchParams.set('event_id', String(param))
-    } else {
-      url.searchParams.delete('event_id')
-    }
-    router.replace(url.pathname + url.search)
-  }, [selectedEvent, router])
-
   // tunggu authContext
   if (authLoading) return <Loader fullscreen color="text-orange-500" />
   // do not render if not logged in (so redirect can happen)
@@ -153,7 +123,7 @@ export default function ScoreboardPage() {
               <EventSelect
                 value={selectedEvent}
                 onChange={setSelectedEvent}
-                events={events}
+                events={startedEvents}
                 className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
                 getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
               />

@@ -9,9 +9,8 @@ import BackButton from '@/components/custom/BackButton'
 import TeamPageContent from '@/components/teams/TeamPageContent'
 import EventSelect from '@/components/custom/EventSelect'
 import { useAuth } from '@/contexts/AuthContext'
+import { useEventContext } from '@/contexts/EventContext'
 import { getTeamByName, getTeamChallengesByName, TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '@/lib/teams'
-import { getEvents, filterStartedEvents } from '@/lib/events'
-import { Event } from '@/types'
 
 export default function TeamDetailPage() {
   const { user, loading: authLoading } = useAuth()
@@ -25,26 +24,13 @@ export default function TeamDetailPage() {
   const [summary, setSummary] = useState<TeamSummary | null>(null)
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
   const [error, setError] = useState<string | null>(null)
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<string>('all')
+  const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login')
     }
   }, [authLoading, user, router])
-
-  useEffect(() => {
-    if (events.length > 0) return
-    ;(async () => {
-      try {
-        const ev = await getEvents()
-        setEvents(filterStartedEvents(ev || []))
-      } catch {
-        setEvents([])
-      }
-    })()
-  }, [events.length])
 
   useEffect(() => {
     if (!user || !teamName) return
@@ -100,7 +86,7 @@ export default function TeamDetailPage() {
             <EventSelect
               value={selectedEvent}
               onChange={setSelectedEvent}
-              events={events}
+              events={startedEvents}
               className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
               getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
             />

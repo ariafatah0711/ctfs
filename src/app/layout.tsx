@@ -19,6 +19,7 @@ import ChatBotAI from '@/components/custom/ChatBotAI'
 import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import ChatToggle from '@/components/custom/ChatToggle'
+import { EventProvider } from '@/contexts/EventContext'
 
 import Live2DMaskotAnime from '@/components/custom/anime/Live2DMaskotAnime'
 // import Live2DInteractive from '@/components/custom/anime/Live2DInteractive'
@@ -103,24 +104,26 @@ export default async function RootLayout({
         ) : (
           // Normal mode: with navbar and providers
           <ThemeProvider>
-            <ChatProvider>
-              <AuthProvider>
-                <LogsProvider>
-                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                    <Navbar />
-                    <div className="pt-14">{children}</div>
-                    <Toaster position="top-right" reverseOrder={false} />
-                    <ChallengeJoyride />
-                    <FloatingToolbar position="right">
-                      {APP.ChallengeTutorial && <ChallengeTutorial />}
-                      {APP.ChatBotAI && <ChatToggle />}
-                    </FloatingToolbar>
-                    {APP.ChatBotAI && <ChatBotAI />}
-                    <ScrollToggle />
-                  </div>
-                </LogsProvider>
-              </AuthProvider>
-            </ChatProvider>
+            <EventProvider>
+              <ChatProvider>
+                <AuthProvider>
+                  <LogsProvider>
+                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                      <Navbar />
+                      <div className="pt-14">{children}</div>
+                      <Toaster position="top-right" reverseOrder={false} />
+                      <ChallengeJoyride />
+                      <FloatingToolbar position="right">
+                        {APP.ChallengeTutorial && <ChallengeTutorial />}
+                        {APP.ChatBotAI && <ChatToggle />}
+                      </FloatingToolbar>
+                      {APP.ChatBotAI && <ChatBotAI />}
+                      <ScrollToggle />
+                    </div>
+                  </LogsProvider>
+                </AuthProvider>
+              </ChatProvider>
+            </EventProvider>
           </ThemeProvider>
         )}
         {APP.Live2DMaskotAnime && <Live2DMaskotAnime />}

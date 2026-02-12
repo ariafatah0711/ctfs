@@ -127,6 +127,8 @@ export default function ChallengeFilterBar({
     const start = evt.start_time ? new Date(evt.start_time) : null;
     const end = evt.end_time ? new Date(evt.end_time) : null;
 
+    const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
     const formatRemaining = (ms: number) => {
       const totalMinutes = Math.max(0, Math.floor(ms / 60000));
       const days = Math.floor(totalMinutes / (60 * 24));
@@ -138,19 +140,34 @@ export default function ChallengeFilterBar({
     };
 
     if (start && now < start) {
-      return `Starts in ${formatRemaining(start.getTime() - now.getTime())}`;
+      const remaining = start.getTime() - now.getTime();
+      if (remaining > ONE_YEAR_MS) return null;
+      return `Starts in ${formatRemaining(remaining)}`;
     }
     if (end && now > end) {
       return 'Ended';
     }
     if (end) {
-      return `Ends in ${formatRemaining(end.getTime() - now.getTime())}`;
+      const remaining = end.getTime() - now.getTime();
+      if (remaining > ONE_YEAR_MS) return null;
+      return `Ends in ${formatRemaining(remaining)}`;
     }
     if (start) {
       return 'Ongoing';
     }
     return null;
   };
+
+  const selectedEvent = React.useMemo(() => {
+    if (!events) return null;
+    if (typeof selectedEventId !== 'string') return null;
+    if (selectedEventId === 'all') return null;
+    return events.find(e => e.id === selectedEventId) ?? null;
+  }, [events, selectedEventId]);
+
+  const selectedTimingLabel = React.useMemo(() => {
+    return selectedEvent ? getEventTimingLabel(selectedEvent) : null;
+  }, [selectedEvent]);
 
   // Sort categories sesuai order di config
   const sortedCategories = [
@@ -175,36 +192,50 @@ export default function ChallengeFilterBar({
       className="w-full bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3 mb-0"
     >
       {events && onEventChange && (
-        <div className="w-full flex flex-wrap gap-2 py-2 mb-3">
-          <button
-            type="button"
-            onClick={() => onEventChange('all')}
-            className={`px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-          >
-            All
-          </button>
-          {!APP.hideEventMain && (
+        <div className="mb-3">
+          <div className="w-full flex flex-row flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 py-2">
             <button
               type="button"
-              onClick={() => onEventChange(null)}
-              className={`px-3 py-1.5 text-sm rounded-full border transition ${!selectedEventId ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+              onClick={() => onEventChange('all')}
+              className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
             >
-              {mainLabel}
+              All
             </button>
+            {!APP.hideEventMain && (
+              <button
+                type="button"
+                onClick={() => onEventChange(null)}
+                className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${!selectedEventId ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+              >
+                {mainLabel}
+              </button>
+            )}
+            {sortedEvents.map(evt => {
+              const timing = getEventTimingLabel(evt);
+              const isSelected = selectedEventId === evt.id;
+              return (
+                <button
+                  key={evt.id}
+                  type="button"
+                  onClick={() => onEventChange(evt.id)}
+                  className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                  title={timing || undefined}
+                >
+                  <span>{evt.name}</span>
+                  {isSelected && timing && (
+                    <span className="ml-2 text-[10px] opacity-80 hidden sm:inline">{timing}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Selected event timing (mobile) */}
+          {selectedTimingLabel && (
+            <div className="sm:hidden mt-2 text-xs text-gray-600 dark:text-gray-300">
+              {selectedTimingLabel}
+            </div>
           )}
-          {sortedEvents.map(evt => (
-            <button
-              key={evt.id}
-              type="button"
-              onClick={() => onEventChange(evt.id)}
-              className={`px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === evt.id ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-            >
-              <span>{evt.name}</span>
-              {getEventTimingLabel(evt) && (
-                <span className="ml-2 text-[10px] opacity-80">{getEventTimingLabel(evt)}</span>
-              )}
-            </button>
-          ))}
         </div>
       )}
 

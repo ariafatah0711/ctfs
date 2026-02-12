@@ -13,8 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/contexts/AuthContext'
 import EventSelect from '@/components/custom/EventSelect'
-import { getEvents, filterStartedEvents } from '@/lib/events'
-import { Event } from '@/types'
+import { useEventContext } from '@/contexts/EventContext'
 import {
   createTeam,
   joinTeam,
@@ -38,8 +37,7 @@ export default function TeamsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<string>('all')
+  const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [team, setTeam] = useState<TeamInfo | null>(null)
   const [members, setMembers] = useState<TeamMember[]>([])
   const [summary, setSummary] = useState<TeamSummary | null>(null)
@@ -59,17 +57,7 @@ export default function TeamsPage() {
     }
   }, [authLoading, user, router])
 
-  useEffect(() => {
-    if (events.length > 0) return
-    ;(async () => {
-      try {
-        const ev = await getEvents()
-        setEvents(filterStartedEvents(ev || []))
-      } catch {
-        setEvents([])
-      }
-    })()
-  }, [events.length])
+  // Events are loaded globally via EventProvider
 
 
   const loadTeamData = async () => {
@@ -284,7 +272,7 @@ export default function TeamsPage() {
             <EventSelect
               value={selectedEvent}
               onChange={setSelectedEvent}
-              events={events}
+              events={startedEvents}
               className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
               getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
             />

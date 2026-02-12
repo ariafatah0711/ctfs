@@ -10,23 +10,21 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useEventContext } from '@/contexts/EventContext'
 import TeamScoreboardChart from '@/components/teams/TeamScoreboardChart'
 import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
 import { APP } from '@/config'
-import { getEvents, filterStartedEvents } from '@/lib/events'
 import EventSelect from '@/components/custom/EventSelect'
-import { Event } from '@/types'
 
 export default function TeamScoreboardPage() {
   const { user, loading: authLoading } = useAuth()
   const { theme } = useTheme()
   const router = useRouter()
+  const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [loading, setLoading] = useState(true)
   const [entries, setEntries] = useState<TeamScoreboardEntry[]>([])
   const [series, setSeries] = useState<TeamProgressSeries[]>([])
   const [showTotalScore, setShowTotalScore] = useState(false)
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<string>('all')
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -39,16 +37,6 @@ export default function TeamScoreboardPage() {
     const fetchData = async () => {
       setLoading(true)
 
-      // Load events for selector (UI-only; selection applied to RPC now)
-      if (events.length === 0) {
-        try {
-          const ev = await getEvents()
-          setEvents(filterStartedEvents(ev || []))
-        } catch (err) {
-          console.warn('Failed to fetch events:', err)
-          setEvents([])
-        }
-      }
       // map selectedEvent to RPC params for scoreboard + progress
       const p_event_id = selectedEvent === 'all' ? null : selectedEvent === 'main' ? null : selectedEvent
       const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
@@ -120,7 +108,7 @@ export default function TeamScoreboardPage() {
               <EventSelect
                 value={selectedEvent}
                 onChange={setSelectedEvent}
-                events={events}
+                events={startedEvents}
                 className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
                 getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
               />

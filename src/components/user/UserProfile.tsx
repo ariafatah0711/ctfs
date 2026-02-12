@@ -6,7 +6,6 @@ import { useEffect, useState, Fragment } from 'react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
 import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
-import { getEvents, filterStartedEvents } from '@/lib/events'
 import { Event } from '@/types'
 import { getTeamByUserId } from '@/lib/teams'
 import { formatRelativeDate } from '@/lib/utils'
@@ -19,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import EditProfileModal from './EditProfileModal'
 import { getCurrentAuthInfo, getCurrentUser } from '@/lib/auth'
 import { useAuth } from '@/contexts/AuthContext'
+import { useEventContext } from '@/contexts/EventContext'
 import SocialIcon from '../custom/SocialIcon'
 import Loader from '@/components/custom/loading'
 import BackButton from '../custom/BackButton'
@@ -117,15 +117,16 @@ export default function UserProfile({
 }: Props) {
   const router = useRouter()
   const { setUser } = useAuth()
+  const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null)
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [difficultyTotals, setDifficultyTotals] = useState<{ difficulty: string; total_challenges: number }[]>([])
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
-  const [selectedEventMode, setSelectedEventMode] = useState<'any'|'equals'|'is_null'>('any')
-  const [selectedEvent, setSelectedEvent] = useState<string>(() =>
-    selectedEventMode === 'equals' ? (selectedEventId ?? '') : selectedEventMode === 'is_null' ? 'main' : 'all'
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(() =>
+    selectedEvent === 'all' || selectedEvent === 'main' ? null : selectedEvent
+  )
+  const [selectedEventMode, setSelectedEventMode] = useState<'any'|'equals'|'is_null'>(() =>
+    selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'is_null' : 'equals'
   )
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
   const [showAllModal, setShowAllModal] = useState(false)
@@ -202,14 +203,6 @@ export default function UserProfile({
     fetchDetail()
   }, [userId, selectedEventId, selectedEventMode])
 
-  // Load events list once
-  useEffect(() => {
-    if (events.length > 0) return
-    getEvents()
-      .then(ev => setEvents(filterStartedEvents(ev || [])))
-      .catch(() => setEvents([]))
-  }, [])
-
   // Sync scoreboard-style `selectedEvent` with internal mode/id used for fetching
   useEffect(() => {
     if (selectedEvent === 'all') {
@@ -249,7 +242,7 @@ export default function UserProfile({
 
       const nowMs = Date.now()
       const eventsById = new Map<string, Event>()
-      for (const ev of events) {
+      for (const ev of startedEvents) {
         if (ev?.id) eventsById.set(ev.id, ev)
       }
 
@@ -425,7 +418,7 @@ export default function UserProfile({
                       <EventSelect
                         value={selectedEvent}
                         onChange={setSelectedEvent}
-                        events={events as any}
+                        events={startedEvents as any}
                         className="w-full md:min-w-[150px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
                         getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
                       />
