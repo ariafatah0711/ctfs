@@ -92,6 +92,13 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         </CardContent>
       </Card>
 
+      {/* Solved count bottom-left */}
+      <div className="absolute bottom-2 left-2 z-10">
+        <div className={`text-white text-xs font-medium px-2 py-0.5 rounded-md shadow ${isMaintenance ? 'bg-amber-900/85' : 'bg-black/40'}`}>
+          ✓ {challenge.total_solves ?? 0} solved
+        </div>
+      </div>
+
       {/* Maintenance hover info */}
       {isMaintenance && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -99,7 +106,6 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
             <div className="font-semibold mb-1">⚠️ Informasi</div>
             <div>Saat ini service tidak dapat diakses karena VPS sudah tidak aktif.</div>
             <div>Peserta yang sudah mengerjakan tetap mendapatkan poin.</div>
-            <div>Akses akan dibuka kembali jika VPS sudah tersedia dan akan diumumkan.</div>
           </div>
         </div>
       )}

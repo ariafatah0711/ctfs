@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.1.1]
+### Added
+- Add solved count on challenge card.
+
 ## v[3.1.0]
 ### Improved
 - Improve Notification ui navbar.
