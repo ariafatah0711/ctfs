@@ -7,10 +7,11 @@ export const APP = {
 
   challengeCategories: [
     'Intro',
-    'Misc',
     'Osint',
     'Crypto',
     'Forensics',
+    'Stegnography',
+    'Misc',
     'Web',
     'Reverse',
     'Pwn',
@@ -49,6 +50,7 @@ export const APP = {
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component
   Live2DMaskotAnime: false, // enable / disable Live2D Maskot Anime component
+
   teams: {
     enabled: true, // enable / disable teams feature
     hideScoreboardIndividual: false, // enable / disable individual scoreboard when teams are enabled
@@ -56,6 +58,7 @@ export const APP = {
   },
   hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event CTFs)
   // Label untuk challenges tanpa event_id (event_id = NULL). Jika kosong, fallback ke "Main".
+
   eventMainLabel: 'FGTE 2026',
   // Gambar untuk "Main/Featured" event (boleh URL external atau path public). Contoh:
   // 'https://example.com/banner.png' atau '/images/banner.png'
