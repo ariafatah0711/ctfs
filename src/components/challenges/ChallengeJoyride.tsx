@@ -153,7 +153,7 @@ export default function ChallengeJoyride() {
       run={runTour}
       continuous
       showProgress={false}
-      showSkipButton={false}
+      showSkipButton={true}
       hideBackButton={false}
       disableCloseOnEsc={true}
       disableOverlayClose={true}
