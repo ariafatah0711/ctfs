@@ -77,6 +77,19 @@ export default function ChallengesPage() {
     return hints
   }
 
+  // Difficulty ranking available across the component so multiple sorts can use it
+  const difficultyOrder = Object.keys((APP as any).difficultyStyles || {})
+    .map((k) => String(k).trim().toLowerCase())
+
+  const difficultyRank = (d: any) => {
+    if (!d) return difficultyOrder.length
+    const s = String(d).trim().toLowerCase()
+    // handle common misspelling
+    if (s === 'imposible') return difficultyOrder.indexOf('impossible') !== -1 ? difficultyOrder.indexOf('impossible') : difficultyOrder.length
+    const idx = difficultyOrder.indexOf(s)
+    return idx === -1 ? difficultyOrder.length : idx
+  }
+
   const formatRemaining = (ms: number) => formatEventDurationCompact(ms)
 
   const selectedEventObj = (typeof eventId === 'string' && eventId !== 'all') ? events.find(e => e.id === eventId) : null;
@@ -89,21 +102,13 @@ export default function ChallengesPage() {
     if (!user) return
     const challengesData = await getChallengesList(user.id, false, 'all')
 
-    // Sort by points ascending; if points equal, sort by difficulty order defined in APP.difficultyStyles
-    const difficultyOrder = Object.keys((APP as any).difficultyStyles || {})
-      .map((k) => String(k).trim().toLowerCase())
-
-    const difficultyRank = (d: any) => {
-      if (!d) return difficultyOrder.length
-      const s = String(d).trim().toLowerCase()
-      // handle common misspelling
-      if (s === 'imposible') return difficultyOrder.indexOf('impossible') !== -1 ? difficultyOrder.indexOf('impossible') : difficultyOrder.length
-      const idx = difficultyOrder.indexOf(s)
-      return idx === -1 ? difficultyOrder.length : idx
-    }
-
+    // Sort by points ascending; if points equal, prefer challenges with more total_solves,
+    // then by difficulty order defined in APP.difficultyStyles, then title.
     ;(challengesData || []).sort((a: any, b: any) => {
       if ((a.points ?? 0) !== (b.points ?? 0)) return (a.points ?? 0) - (b.points ?? 0)
+      const sa = (a.total_solves ?? 0)
+      const sb = (b.total_solves ?? 0)
+      if (sa !== sb) return sb - sa
       const ra = difficultyRank(a.difficulty)
       const rb = difficultyRank(b.difficulty)
       if (ra !== rb) return ra - rb
@@ -555,9 +560,14 @@ export default function ChallengesPage() {
                     {filteredChallenges
                       .slice()
                       .sort((a, b) => {
-                        const ra = categoryRank[a.category] ?? orderedKeys.length
-                        const rb = categoryRank[b.category] ?? orderedKeys.length
-                        if (ra !== rb) return ra - rb
+                        // Compact view ordering: points (asc) → total_solves (desc) → difficulty → title
+                        if ((a.points ?? 0) !== (b.points ?? 0)) return (a.points ?? 0) - (b.points ?? 0)
+                        const sa = (a.total_solves ?? 0)
+                        const sb = (b.total_solves ?? 0)
+                        if (sa !== sb) return sb - sa
+                        const dra = difficultyRank(a.difficulty)
+                        const drb = difficultyRank(b.difficulty)
+                        if (dra !== drb) return dra - drb
                         return String(a.title || '').localeCompare(String(b.title || ''))
                       })
                       .map((challenge) => (

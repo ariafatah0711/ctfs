@@ -445,18 +445,27 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Challenge List</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap justify-end">
                     {isGlobalAdmin && (
                       <Link href="/admin/event">
-                        <Button variant="outline">View Events</Button>
+                        <Button variant="outline" size="sm" className="whitespace-nowrap">
+                          <span className="hidden md:inline">View Events</span>
+                          <span className="md:hidden">Events</span>
+                        </Button>
                       </Link>
                     )}
                     {isGlobalAdmin && (
                       <Link href="/admin/admins">
-                        <Button variant="outline">Admin Roles</Button>
+                        <Button variant="outline" size="sm" className="whitespace-nowrap">
+                          <span className="hidden md:inline">Admin Roles</span>
+                          <span className="md:hidden">Roles</span>
+                        </Button>
                       </Link>
                     )}
-                    <Button onClick={openAdd}>+ Add Challenge</Button>
+                    <Button onClick={openAdd} size="sm" className="whitespace-nowrap">
+                      <span className="hidden md:inline">+ Add Challenge</span>
+                      <span className="md:hidden">+ Add</span>
+                    </Button>
                   </div>
                 </CardTitle>
               </CardHeader>
