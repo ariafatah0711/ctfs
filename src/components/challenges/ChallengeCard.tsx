@@ -54,9 +54,15 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         </div>
       )}
 
-      {/* Difficulty circle kiri atas */}
-      <div className="absolute top-2 left-2 z-10">
-        <span className={`block w-2 h-2 rounded-full shadow ${diffCircleColor}`}></span>
+      {/* Difficulty badge top-left (icon + label) */}
+      <div className="absolute top-1 left-1 z-10">
+        <div
+          className={`flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-semibold text-white shadow ${isMaintenance ? 'bg-amber-800' : diffCircleColor}`}
+          title={`Difficulty: ${normalizedDiff}`}
+          aria-label={`Difficulty: ${normalizedDiff}`}
+        >
+          <span className="capitalize">{normalizedDiff}</span>
+        </div>
       </div>
 
       <Card
@@ -95,7 +101,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       {/* Solved count bottom-left */}
       <div className="absolute bottom-2 left-2 z-10">
         <div className={`text-white text-xs font-medium px-2 py-0.5 rounded-md shadow ${isMaintenance ? 'bg-amber-900/85' : 'bg-black/40'}`}>
-          ✓ {challenge.total_solves ?? 0} solved
+          ✓ {challenge.total_solves ?? 0}
         </div>
       </div>
 

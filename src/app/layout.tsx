@@ -20,6 +20,7 @@ import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
 import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import ChatToggle from '@/components/custom/ChatToggle'
 import { EventProvider } from '@/contexts/EventContext'
+import { FilterProvider } from '@/contexts/FilterContext'
 
 import Live2DMaskotAnime from '@/components/custom/anime/Live2DMaskotAnime'
 // import Live2DInteractive from '@/components/custom/anime/Live2DInteractive'
@@ -104,7 +105,8 @@ export default async function RootLayout({
         ) : (
           // Normal mode: with navbar and providers
           <ThemeProvider>
-            <EventProvider>
+            <FilterProvider>
+              <EventProvider>
               <ChatProvider>
                 <AuthProvider>
                   <LogsProvider>
@@ -123,7 +125,8 @@ export default async function RootLayout({
                   </LogsProvider>
                 </AuthProvider>
               </ChatProvider>
-            </EventProvider>
+              </EventProvider>
+            </FilterProvider>
           </ThemeProvider>
         )}
         {APP.Live2DMaskotAnime && <Live2DMaskotAnime />}

@@ -16,6 +16,7 @@ import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
 import APP from '@/config'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { useEventContext } from '@/contexts/EventContext'
+import { useFilterContext } from '@/contexts/FilterContext'
 import { getChallengeFilterSettings, setChallengeFilterSettings } from '@/lib/settings'
 import { formatEventDurationCompact } from '@/lib/utils'
 
@@ -43,12 +44,7 @@ export default function ChallengesPage() {
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
-  const [filters, setFilters] = useState({
-    status: 'all',
-    category: 'all',
-    difficulty: 'all',
-    search: ''
-  })
+  const { filters, setFilters } = useFilterContext()
   const { events, selectedEvent, setSelectedEvent } = useEventContext()
   const eventId: string | null | 'all' = selectedEvent === 'main' ? null : (selectedEvent as any)
   const [filterSettings, setFilterSettings] = useState({
@@ -92,6 +88,27 @@ export default function ChallengesPage() {
   const loadChallenges = async () => {
     if (!user) return
     const challengesData = await getChallengesList(user.id, false, 'all')
+
+    // Sort by points ascending; if points equal, sort by difficulty order defined in APP.difficultyStyles
+    const difficultyOrder = Object.keys((APP as any).difficultyStyles || {})
+      .map((k) => String(k).trim().toLowerCase())
+
+    const difficultyRank = (d: any) => {
+      if (!d) return difficultyOrder.length
+      const s = String(d).trim().toLowerCase()
+      // handle common misspelling
+      if (s === 'imposible') return difficultyOrder.indexOf('impossible') !== -1 ? difficultyOrder.indexOf('impossible') : difficultyOrder.length
+      const idx = difficultyOrder.indexOf(s)
+      return idx === -1 ? difficultyOrder.length : idx
+    }
+
+    ;(challengesData || []).sort((a: any, b: any) => {
+      if ((a.points ?? 0) !== (b.points ?? 0)) return (a.points ?? 0) - (b.points ?? 0)
+      const ra = difficultyRank(a.difficulty)
+      const rb = difficultyRank(b.difficulty)
+      if (ra !== rb) return ra - rb
+      return String(a.title || '').localeCompare(String(b.title || ''))
+    })
 
     let teamSolvedIds = new Set<string>()
     if (APP.teams.enabled) {
@@ -446,7 +463,7 @@ export default function ChallengesPage() {
         {/* CHALLENGES TAB */}
         {currentTab === 'challenges' && (
           <>
-            <ChallengeFilterBar
+              <ChallengeFilterBar
               filters={filters}
               settings={filterSettings}
               categories={categories}

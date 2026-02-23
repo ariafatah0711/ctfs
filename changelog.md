@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.1.2]
+### Improved
+- Improve challenge card to show solved count, and maintenance status.
+- Improve challenge filter bar to not reset event selection when applying other filters, and only mark filters as dirty based on challenge filters (status, category, difficulty, search), not event selection.
+
 ## v[3.1.1]
 ### Added
 - Add solved count on challenge card.

@@ -167,6 +167,16 @@ export default function ChallengeFilterBar({
     return selectedEvent ? getEventTimingLabel(selectedEvent) : null;
   }, [selectedEvent]);
 
+  // Dirty indicators: whether a control differs from default
+  const defaultFilters = { status: 'all', category: 'all', difficulty: 'all', search: '' }
+  const isStatusDirty = (filters.status || 'all') !== defaultFilters.status
+  const isCategoryDirty = (filters.category || 'all') !== defaultFilters.category
+  const isDifficultyDirty = (filters.difficulty || 'all') !== defaultFilters.difficulty
+  const isSearchDirty = (String(filters.search || '').trim() !== defaultFilters.search)
+  const isEventDirty = selectedEventId !== 'all' && selectedEventId !== undefined && selectedEventId !== null
+  // `anyFilterDirty` should only reflect challenge filters (not event selection)
+  const anyFilterDirty = isStatusDirty || isCategoryDirty || isDifficultyDirty || isSearchDirty
+
   // Sort categories sesuai order di config
   const sortedCategories = [
     ...categoryOrder.filter(cat => categories.includes(cat)),
@@ -196,7 +206,7 @@ export default function ChallengeFilterBar({
               <button
                 type="button"
                 onClick={() => onEventChange('all')}
-                className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
               >
                 All
               </button>
@@ -218,7 +228,7 @@ export default function ChallengeFilterBar({
                   key={evt.id}
                   type="button"
                   onClick={() => onEventChange(evt.id)}
-                  className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                  className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'} ${isSelected && isEventDirty ? 'ring-2' : ''}`}
                   title={timing || undefined}
                 >
                   <span>{evt.name}</span>
@@ -251,7 +261,7 @@ export default function ChallengeFilterBar({
           value={filters.search}
           onChange={e => onFilterChange({ ...filters, search: e.target.value })}
           placeholder="Search challenge..."
-          className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition"
+          className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition ${isSearchDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
         />
         </div>
 
@@ -262,7 +272,7 @@ export default function ChallengeFilterBar({
               id="status"
               value={filters.status || 'all'}
               onChange={e => onFilterChange({ ...filters, status: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900"
+              className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${isStatusDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
             >
               <option value="all">All Status</option>
               <option value="unsolved">Unsolved</option>
@@ -277,7 +287,7 @@ export default function ChallengeFilterBar({
             id="category"
             value={filters.category}
             onChange={e => onFilterChange({ ...filters, category: e.target.value })}
-            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900"
+            className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${isCategoryDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
           >
             <option value="all">All Categories</option>
             {sortedCategories.map(category => (
@@ -292,7 +302,7 @@ export default function ChallengeFilterBar({
             id="difficulty"
             value={filters.difficulty}
             onChange={e => onFilterChange({ ...filters, difficulty: e.target.value })}
-            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900"
+            className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${isDifficultyDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
           >
             <option value="all">All Difficulties</option>
             {sortedDifficulties.map(difficulty => (
@@ -305,7 +315,7 @@ export default function ChallengeFilterBar({
           <button
             type="button"
             onClick={onClear}
-            className="w-full px-3 py-2 text-sm text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 rounded hover:bg-blue-100 dark:hover:bg-blue-800 transition"
+            className={`w-full px-3 py-2 text-sm rounded transition ${anyFilterDirty ? 'bg-amber-500 text-white hover:bg-amber-600' : 'text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 hover:bg-blue-100 dark:hover:bg-blue-800'}`}
             aria-label="Clear filters"
           >
             Clear
