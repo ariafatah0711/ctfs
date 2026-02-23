@@ -267,7 +267,7 @@ export default function ChallengeFilterBar({
           value={filters.search}
           onChange={e => onFilterChange({ ...filters, search: e.target.value })}
           placeholder="Search challenge..."
-          className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition ${isSearchDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
+          className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${filters.search && String(filters.search).trim() !== '' ? 'bg-amber-500 text-white dark:bg-amber-600' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'} transition ${isSearchDirty ? 'ring-2' : ''}`}
         />
         </div>
 
@@ -278,7 +278,7 @@ export default function ChallengeFilterBar({
               id="status"
               value={filters.status || 'all'}
               onChange={e => onFilterChange({ ...filters, status: e.target.value })}
-              className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${isStatusDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
+              className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${filters.status && filters.status !== 'all' ? 'bg-amber-500 text-white dark:bg-amber-600' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'} ${isStatusDirty ? 'ring-2' : ''}`}
             >
               <option value="all">All Status</option>
               <option value="unsolved">Unsolved</option>
@@ -293,7 +293,7 @@ export default function ChallengeFilterBar({
             id="category"
             value={filters.category}
             onChange={e => onFilterChange({ ...filters, category: e.target.value })}
-            className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${isCategoryDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
+            className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${filters.category && filters.category !== 'all' ? 'bg-amber-500 text-white dark:bg-amber-600' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'} ${isCategoryDirty ? 'ring-2' : ''}`}
           >
             <option value="all">All Categories</option>
             {sortedCategories.map(category => (
@@ -308,7 +308,7 @@ export default function ChallengeFilterBar({
             id="difficulty"
             value={filters.difficulty}
             onChange={e => onFilterChange({ ...filters, difficulty: e.target.value })}
-            className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${isDifficultyDirty ? 'ring-2 bg-amber-50 dark:bg-amber-900/40' : ''}`}
+            className={`w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 ${filters.difficulty && filters.difficulty !== 'all' ? 'bg-amber-500 text-white dark:bg-amber-600' : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100'} ${isDifficultyDirty ? 'ring-2' : ''}`}
           >
             <option value="all">All Difficulties</option>
             {sortedDifficulties.map(difficulty => (

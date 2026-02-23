@@ -44,7 +44,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.97 }}
       key={challenge.id}
-      className="relative overflow-hidden group"
+      className={`relative overflow-hidden group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {/* Ribbon pojok kanan atas */}
       {ribbonLabel && (
@@ -70,12 +70,12 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         onClick={isMaintenance ? undefined : onClick}
         className={`shadow-md rounded-md transition-colors
           ${isMaintenance
-            ? 'bg-amber-800 dark:bg-amber-900 cursor-not-allowed opacity-95'
+            ? 'bg-amber-800 dark:bg-amber-900 opacity-95'
             : (challenge.is_solved
-                ? 'bg-green-600 dark:bg-green-700 cursor-pointer'
+                ? 'bg-green-600 dark:bg-green-700'
                 : (isTeamSolved
-                    ? 'bg-purple-600 dark:bg-purple-700 cursor-pointer'
-                    : 'bg-blue-600 dark:bg-blue-700 cursor-pointer'))}
+                    ? 'bg-purple-600 dark:bg-purple-700'
+                    : 'bg-blue-600 dark:bg-blue-700'))}
         `}
       >
         <CardHeader className="flex items-center justify-center pl-6 pr-4">
