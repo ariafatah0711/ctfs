@@ -11,10 +11,11 @@ interface ChallengeCardProps {
     is_team_solved?: boolean;
   };
   highlightTeamSolves?: boolean;
+  showCategory?: boolean;
   onClick: () => void;
 }
 
-const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamSolves = true, onClick }) => {
+const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamSolves = true, showCategory = false, onClick }) => {
   const isRecentlyCreated = challenge.is_new;
   const noFirstBlood = !challenge.has_first_blood;
   const isMaintenance = !!challenge.is_maintenance;
@@ -55,9 +56,9 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       )}
 
       {/* Difficulty badge top-left (icon + label) */}
-      <div className="absolute top-1 left-1 z-10">
+      <div className="absolute top-2 left-2 z-10">
         <div
-          className={`flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-semibold text-white shadow ${isMaintenance ? 'bg-amber-800' : diffCircleColor}`}
+          className={`flex items-center gap-2 px-2 py-0.5 rounded-md text-xs font-semibold text-white shadow ${isMaintenance ? 'bg-amber-800' : diffCircleColor}`}
           title={`Difficulty: ${normalizedDiff}`}
           aria-label={`Difficulty: ${normalizedDiff}`}
         >
@@ -77,11 +78,11 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
                     : 'bg-blue-600 dark:bg-blue-700 cursor-pointer'))}
         `}
       >
-        <CardHeader className="flex items-center justify-center">
+        <CardHeader className="flex items-center justify-center pl-6 pr-4">
           <h3
             className="text-white dark:text-gray-100 font-semibold text-center truncate"
             style={{
-              maxWidth: "180px",
+              maxWidth: "140px",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -99,17 +100,29 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       </Card>
 
       {/* Solved count bottom-left */}
+      {!isMaintenance && (
       <div className="absolute bottom-2 left-2 z-10">
         <div className={`text-white text-xs font-medium px-2 py-0.5 rounded-md shadow ${isMaintenance ? 'bg-amber-900/85' : 'bg-black/40'}`}>
           ✓ {challenge.total_solves ?? 0}
         </div>
       </div>
+      )}
+
+      {/* Category bottom-right (only shown when requested, e.g. compact mode) */}
+      {/** showCategory defaults to false so it won't appear in regular layout */}
+      {showCategory && (
+        <div className="absolute bottom-2 right-2 z-10">
+          <div className={`text-white text-xs font-medium px-2 py-0.5 rounded-md shadow ${isMaintenance ? 'bg-amber-900/85' : 'bg-black/40'}`}>
+            {challenge.category}
+          </div>
+        </div>
+      )}
 
       {/* Maintenance hover info */}
       {isMaintenance && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="max-w-[260px] bg-amber-900/95 text-white text-[11px] leading-relaxed px-3 py-2 rounded-lg border border-amber-700 shadow-xl justify-center text-justify">
-            <div className="font-semibold mb-1">⚠️ Informasi</div>
+            <div className="font-semibold mb-1 text-center">⚠️ Informasi</div>
             <div>Saat ini service tidak dapat diakses karena VPS sudah tidak aktif.</div>
             <div>Peserta yang sudah mengerjakan tetap mendapatkan poin.</div>
           </div>

@@ -1,9 +1,25 @@
 import React from 'react';
 import APP from '@/config';
 import { motion } from 'framer-motion';
-import { Settings } from 'lucide-react';
+import { Settings, LayoutGrid, List } from 'lucide-react';
+import { useFilterContext } from '@/contexts/FilterContext';
 import { Switch } from '@/components/ui/switch';
 import { formatEventTimingLabel } from '@/lib/utils';
+
+function LayoutToggle() {
+  const { layoutMode, setLayoutMode } = useFilterContext()
+
+  return (
+    <button
+      type="button"
+      onClick={() => setLayoutMode(layoutMode === 'compact' ? 'grouped' : 'compact')}
+      title={layoutMode === 'compact' ? 'Switch to grouped view' : 'Switch to compact view'}
+      className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+    >
+      {layoutMode === 'compact' ? <LayoutGrid size={16} /> : <List size={16} />}
+    </button>
+  )
+}
 
 type Props = {
   filters: {
@@ -50,107 +66,97 @@ export default function ChallengeFilterBar({
   onClear,
   showStatusFilter = true,
 }: Props) {
-  const [settingsOpen, setSettingsOpen] = React.useState(false);
-  const resolvedSettings = settings ?? { hideMaintenance: false, highlightTeamSolves: true };
-  const mainLabel = String(APP.eventMainLabel || 'Main');
-  // Ambil urutan dari config
-  const categoryOrder = APP.challengeCategories || [];
-  const difficultyOrder = Object.keys(APP.difficultyStyles || {});
+  const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const resolvedSettings = settings ?? { hideMaintenance: false, highlightTeamSolves: true }
+  const mainLabel = String(APP.eventMainLabel || 'Main')
+  const categoryOrder = APP.challengeCategories || []
+  const difficultyOrder = Object.keys(APP.difficultyStyles || {})
 
   const sortedEvents = React.useMemo(() => {
-    if (!events) return [];
-    const now = new Date().getTime();
+    if (!events) return []
+    const now = new Date().getTime()
     const UPCOMING_VISIBLE_WINDOW_MS =
       upcomingVisibilityWindowDays === null
         ? Number.POSITIVE_INFINITY
-        : Math.max(0, upcomingVisibilityWindowDays) * 24 * 60 * 60 * 1000;
+        : Math.max(0, upcomingVisibilityWindowDays) * 24 * 60 * 60 * 1000
+
     const visibleEvents = includeEndedEvents
       ? events
       : events.filter(evt => {
-          if (!evt.end_time) return true;
-          return now <= new Date(evt.end_time).getTime();
-        });
+          if (!evt.end_time) return true
+          return now <= new Date(evt.end_time).getTime()
+        })
 
     const filteredUpcoming = visibleEvents.filter(evt => {
       if (typeof selectedEventId === 'string' && selectedEventId !== 'all' && evt.id === selectedEventId) {
-        return true;
+        return true
       }
 
-      if (!evt.start_time) return true;
-      const start = new Date(evt.start_time).getTime();
-      if (Number.isNaN(start)) return true;
-      const remaining = start - now;
+      if (!evt.start_time) return true
+      const start = new Date(evt.start_time).getTime()
+      if (Number.isNaN(start)) return true
+      const remaining = start - now
 
       // Only apply the window to upcoming events.
-      if (remaining <= 0) return true;
+      if (remaining <= 0) return true
 
       // Hide far-future upcoming events from the filter bar to prevent clutter.
-      if (remaining > UPCOMING_VISIBLE_WINDOW_MS) return false;
-      return true;
-    });
+      if (remaining > UPCOMING_VISIBLE_WINDOW_MS) return false
+      return true
+    })
 
     const getState = (evt: typeof events[number]) => {
-      const start = evt.start_time ? new Date(evt.start_time).getTime() : null;
-      const end = evt.end_time ? new Date(evt.end_time).getTime() : null;
+      const start = evt.start_time ? new Date(evt.start_time).getTime() : null
+      const end = evt.end_time ? new Date(evt.end_time).getTime() : null
 
-      // Permanent = benar-benar gak ada start & end
-      if (!start && !end) return 'permanent' as const;
-
-      // Ended
-      if (end && now > end) return 'ended' as const;
-
-      // Upcoming
-      if (start && now < start) return 'upcoming' as const;
-
-      // Ongoing
-      return 'ongoing' as const;
-    };
+      if (!start && !end) return 'permanent' as const
+      if (end && now > end) return 'ended' as const
+      if (start && now < start) return 'upcoming' as const
+      return 'ongoing' as const
+    }
 
     return [...filteredUpcoming].sort((a, b) => {
-      const stateA = getState(a);
-      const stateB = getState(b);
+      const stateA = getState(a)
+      const stateB = getState(b)
 
       const statePriority: Record<typeof stateA, number> = {
         permanent: 0,
         ongoing: 1,
         upcoming: 2,
         ended: 3,
-      };
-
-      // 1️⃣ Urut berdasarkan state dulu
-      if (stateA !== stateB) {
-        return statePriority[stateA] - statePriority[stateB];
       }
 
-      // 2️⃣ Kalau state sama → sort by time
+      if (stateA !== stateB) {
+        return statePriority[stateA] - statePriority[stateB]
+      }
 
       if (stateA === 'permanent') {
-        const aStart = a.start_time ? new Date(a.start_time).getTime() : 0;
-        const bStart = b.start_time ? new Date(b.start_time).getTime() : 0;
-        return aStart - bStart || a.name.localeCompare(b.name);
+        const aStart = a.start_time ? new Date(a.start_time).getTime() : 0
+        const bStart = b.start_time ? new Date(b.start_time).getTime() : 0
+        return aStart - bStart || a.name.localeCompare(b.name)
       }
 
       if (stateA === 'ongoing') {
-        const aEnd = a.end_time ? new Date(a.end_time).getTime() : Infinity;
-        const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity;
-        return aEnd - bEnd;
+        const aEnd = a.end_time ? new Date(a.end_time).getTime() : Infinity
+        const bEnd = b.end_time ? new Date(b.end_time).getTime() : Infinity
+        return aEnd - bEnd
       }
 
       if (stateA === 'upcoming') {
-        const aStart = a.start_time ? new Date(a.start_time).getTime() : Infinity;
-        const bStart = b.start_time ? new Date(b.start_time).getTime() : Infinity;
-        return aStart - bStart;
+        const aStart = a.start_time ? new Date(a.start_time).getTime() : Infinity
+        const bStart = b.start_time ? new Date(b.start_time).getTime() : Infinity
+        return aStart - bStart
       }
 
       if (stateA === 'ended') {
-        const aEnd = a.end_time ? new Date(a.end_time).getTime() : 0;
-        const bEnd = b.end_time ? new Date(b.end_time).getTime() : 0;
-        return bEnd - aEnd; // yang paling baru ended dulu
+        const aEnd = a.end_time ? new Date(a.end_time).getTime() : 0
+        const bEnd = b.end_time ? new Date(b.end_time).getTime() : 0
+        return bEnd - aEnd
       }
 
-      return 0;
-    });
-  }, [events, includeEndedEvents, selectedEventId, upcomingVisibilityWindowDays]);
+      return 0
+    })
+  }, [events, includeEndedEvents, selectedEventId, upcomingVisibilityWindowDays])
 
   const getEventTimingLabel = (evt?: { start_time?: string | null; end_time?: string | null }) => {
     return formatEventTimingLabel(evt);
@@ -322,47 +328,51 @@ export default function ChallengeFilterBar({
           </button>
         </div>
 
-        {/* Settings */}
+        {/* Settings + Layout toggle */}
         {onSettingsChange && (
-          <div className="relative flex-none ml-auto">
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(v => !v)}
-              data-tour="challenge-filter-settings"
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-              aria-label="Open filter settings"
-            >
-              <Settings size={16} />
-            </button>
+          <div className="relative flex-none ml-auto flex items-center gap-2">
+            <LayoutToggle />
 
-            {settingsOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg p-3 z-40">
-                <div className="flex items-center justify-between py-2">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Hide maintenance</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Exclude maintenance challenges</p>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(v => !v)}
+                data-tour="challenge-filter-settings"
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                aria-label="Open filter settings"
+              >
+                <Settings size={16} />
+              </button>
+
+              {settingsOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg p-3 z-40">
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Hide maintenance</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Exclude maintenance challenges</p>
+                    </div>
+                    <Switch
+                      checked={resolvedSettings.hideMaintenance}
+                      onCheckedChange={(checked) =>
+                        onSettingsChange({ ...resolvedSettings, hideMaintenance: checked })
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={resolvedSettings.hideMaintenance}
-                    onCheckedChange={(checked) =>
-                      onSettingsChange({ ...resolvedSettings, hideMaintenance: checked })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Team solve highlight</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Purple cards for team solves</p>
+                  <div className="flex items-center justify-between py-2">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Team solve highlight</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Purple cards for team solves</p>
+                    </div>
+                    <Switch
+                      checked={resolvedSettings.highlightTeamSolves}
+                      onCheckedChange={(checked) =>
+                        onSettingsChange({ ...resolvedSettings, highlightTeamSolves: checked })
+                      }
+                    />
                   </div>
-                  <Switch
-                    checked={resolvedSettings.highlightTeamSolves}
-                    onCheckedChange={(checked) =>
-                      onSettingsChange({ ...resolvedSettings, highlightTeamSolves: checked })
-                    }
-                  />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </form>

@@ -44,7 +44,7 @@ export default function ChallengesPage() {
   const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
   const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
-  const { filters, setFilters } = useFilterContext()
+  const { filters, setFilters, layoutMode } = useFilterContext()
   const { events, selectedEvent, setSelectedEvent } = useEventContext()
   const eventId: string | null | 'all' = selectedEvent === 'main' ? null : (selectedEvent as any)
   const [filterSettings, setFilterSettings] = useState({
@@ -383,6 +383,12 @@ export default function ChallengesPage() {
     ...groupKeys.filter(k => !matchedKeySet.has(k)).sort()
   ]
 
+  // Category rank map used for compact sorting (respect preferred order)
+  const categoryRank = orderedKeys.reduce((acc, k, idx) => {
+    acc[k] = idx
+    return acc
+  }, {} as Record<string, number>)
+
   const downloadFile = async (attachment: Attachment, attachmentKey: string) => {
     setDownloading(prev => ({ ...prev, [attachmentKey]: true }))
 
@@ -539,33 +545,61 @@ export default function ChallengesPage() {
                   )}
                 </div>
               ) : (
-                orderedKeys.map((category) => (
-                  <div key={category} className="mb-12">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
-                      <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">
-                        {eventId === 'all' && String(category).toLowerCase() === 'intro'
-                          ? `Intro (${String(APP.eventMainLabel || 'Main')})`
-                          : category}
-                      </h2>
-                    </div>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5 }}
-                      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                    >
-                      {grouped[category].map((challenge) => (
-                        <ChallengeCard
-                          key={challenge.id}
-                          challenge={challenge}
-                          highlightTeamSolves={filterSettings.highlightTeamSolves}
-                          onClick={() => openChallenge(challenge)}
-                        />
+                layoutMode === 'compact' ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                  >
+                    {filteredChallenges
+                      .slice()
+                      .sort((a, b) => {
+                        const ra = categoryRank[a.category] ?? orderedKeys.length
+                        const rb = categoryRank[b.category] ?? orderedKeys.length
+                        if (ra !== rb) return ra - rb
+                        return String(a.title || '').localeCompare(String(b.title || ''))
+                      })
+                      .map((challenge) => (
+                        <div key={challenge.id} className="relative">
+                          <ChallengeCard
+                            challenge={challenge}
+                            highlightTeamSolves={filterSettings.highlightTeamSolves}
+                            showCategory={true}
+                            onClick={() => openChallenge(challenge)}
+                          />
+                        </div>
                       ))}
-                    </motion.div>
-                  </div>
-                ))
+                  </motion.div>
+                ) : (
+                  orderedKeys.map((category) => (
+                    <div key={category} className="mb-12">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-orange-400 dark:text-orange-300 text-2xl">{'»'}</span>
+                        <h2 className="text-xl sm:text-2xl tracking-widest font-bold uppercase text-gray-800 dark:text-white">
+                          {eventId === 'all' && String(category).toLowerCase() === 'intro'
+                            ? `Intro (${String(APP.eventMainLabel || 'Main')})`
+                            : category}
+                        </h2>
+                      </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                      >
+                        {grouped[category].map((challenge) => (
+                          <ChallengeCard
+                            key={challenge.id}
+                            challenge={challenge}
+                            highlightTeamSolves={filterSettings.highlightTeamSolves}
+                            onClick={() => openChallenge(challenge)}
+                          />
+                        ))}
+                      </motion.div>
+                    </div>
+                  ))
+                )
               )}
             </div>
           </>

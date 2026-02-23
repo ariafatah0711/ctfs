@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.1.3]
+### Added
+- Add layout compact challenge
+
 ## v[3.1.2]
 ### Improved
 - Improve challenge card to show solved count, and maintenance status.
