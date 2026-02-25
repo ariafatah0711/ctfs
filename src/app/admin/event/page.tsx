@@ -10,7 +10,7 @@ import { isGlobalAdmin } from '@/lib/admin'
 import { addEvent, deleteEvent, getEvents, setChallengesEvent, updateEvent } from '@/lib/events'
 import { getChallengesLite } from '@/lib/challenges'
 import { Event } from '@/types'
-import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
+import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBarFloating'
 import APP from '@/config'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

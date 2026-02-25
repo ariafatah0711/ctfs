@@ -13,6 +13,7 @@ import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 import { Solver } from '@/components/challenges/SolversList';
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
+import ChallengeFilterSidebar from '@/components/challenges/ChallengeFilterSidebar'
 import APP from '@/config'
 import ImageWithFallback from '@/components/ImageWithFallback'
 import { useEventContext } from '@/contexts/EventContext'
@@ -428,6 +429,20 @@ export default function ChallengesPage() {
   if (!user) return null
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Desktop fixed sidebar placed outside the centered container */}
+      {/* <div className="hidden lg:block fixed top-20 w-72 h-[calc(100vh-5rem)] overflow-auto z-20 left-[calc((100vw-72rem)/2-17rem)]">
+        <ChallengeFilterSidebar
+          filters={filters}
+          events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
+          selectedEventId={eventId}
+          onEventChange={(id) => setSelectedEvent(id === null ? 'main' : id)}
+          categories={categories}
+          difficulties={difficulties}
+          onFilterChange={setFilters}
+          onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
+        />
+      </div> */}
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
         {/* <TitlePage icon={<Flag size={30} className="text-orange-500 dark:text-orange-300 drop-shadow" />}>challenges</TitlePage> */}
 
