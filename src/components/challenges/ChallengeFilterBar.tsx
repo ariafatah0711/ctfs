@@ -1,7 +1,7 @@
 import React from 'react';
 import APP from '@/config';
 import { motion } from 'framer-motion';
-import { Settings, LayoutGrid, List } from 'lucide-react';
+import { Settings, LayoutGrid, List, Zap } from 'lucide-react';
 import { useFilterContext } from '@/contexts/FilterContext';
 import { Switch } from '@/components/ui/switch';
 import { formatEventTimingLabel } from '@/lib/utils';
@@ -21,6 +21,13 @@ function LayoutToggle() {
   )
 }
 
+type EventItem = {
+  id: string;
+  name: string;
+  start_time?: string | null;
+  end_time?: string | null;
+};
+
 type Props = {
   filters: {
     status?: string;
@@ -28,12 +35,15 @@ type Props = {
     difficulty: string;
     search: string;
   };
-  events?: { id: string; name: string; start_time?: string | null; end_time?: string | null }[];
+  events?: EventItem[];
   selectedEventId?: string | null | 'all';
   onEventChange?: (eventId: string | null | 'all') => void;
   hideAllEventOption?: boolean;
   hideMainEventOption?: boolean;
   includeEndedEvents?: boolean;
+  // When false, do not show timing/visual state (colors/icons) for events.
+  // Useful for admin views where timing badges are not desired.
+  showEventState?: boolean;
   // Controls which upcoming events appear in the event pill filter.
   // Default: 30 days. Set to null to show all upcoming events (useful for admin).
   upcomingVisibilityWindowDays?: number | null;
@@ -57,6 +67,7 @@ export default function ChallengeFilterBar({
   hideAllEventOption = false,
   hideMainEventOption = false,
   includeEndedEvents = false,
+  showEventState = true,
   upcomingVisibilityWindowDays = 30,
   settings,
   categories,
@@ -106,6 +117,7 @@ export default function ChallengeFilterBar({
     })
 
     const getState = (evt: typeof events[number]) => {
+      if (!showEventState) return 'ongoing' as const
       const start = evt.start_time ? new Date(evt.start_time).getTime() : null
       const end = evt.end_time ? new Date(evt.end_time).getTime() : null
 
@@ -173,6 +185,47 @@ export default function ChallengeFilterBar({
     return selectedEvent ? getEventTimingLabel(selectedEvent) : null;
   }, [selectedEvent]);
 
+  const shouldShowTimingAlways = (evt: EventItem) => {
+    if (!showEventState) return false;
+    if (!evt.end_time) return false;
+
+    const now = Date.now();
+    const end = new Date(evt.end_time).getTime();
+
+    if (Number.isNaN(end)) return false;
+
+    const windowMs =
+      upcomingVisibilityWindowDays === null
+        ? Infinity
+        : upcomingVisibilityWindowDays * 24 * 60 * 60 * 1000;
+
+    return end > now && end - now <= windowMs;
+  };
+
+  const getEventVisualState = (evt: EventItem) => {
+    if (!showEventState) return 'ongoing';
+    const now = Date.now();
+    const start = evt.start_time ? new Date(evt.start_time).getTime() : null;
+    const end = evt.end_time ? new Date(evt.end_time).getTime() : null;
+
+    const windowMs =
+      upcomingVisibilityWindowDays === null
+        ? Infinity
+        : upcomingVisibilityWindowDays * 24 * 60 * 60 * 1000;
+
+    if (start && now < start) {
+      const diff = start - now;
+      if (diff <= windowMs) return 'upcoming-soon';
+      return 'upcoming';
+    }
+
+    if (end && now > end) return 'ended';
+
+    if (end && end - now <= windowMs) return 'ending-soon';
+
+    return 'ongoing';
+  };
+
   // Dirty indicators: whether a control differs from default
   const defaultFilters = { status: 'all', category: 'all', difficulty: 'all', search: '' }
   const isStatusDirty = (filters.status || 'all') !== defaultFilters.status
@@ -229,17 +282,56 @@ export default function ChallengeFilterBar({
             {sortedEvents.map(evt => {
               const timing = getEventTimingLabel(evt);
               const isSelected = selectedEventId === evt.id;
+              const state = getEventVisualState(evt);
+
+              const stateStyles = {
+                'upcoming-soon':
+                  'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300',
+
+                'ending-soon':
+                  'border-purple-400 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300',
+
+                'ongoing':
+                  'border-green-400 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300',
+
+                'ended':
+                  'opacity-50',
+
+                'upcoming':
+                  '',
+              };
+
               return (
                 <button
                   key={evt.id}
                   type="button"
                   onClick={() => onEventChange(evt.id)}
-                  className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${isSelected ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'} ${isSelected && isEventDirty ? 'ring-2' : ''}`}
+                  className={`
+                    shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition flex items-center gap-1
+                    ${
+                      isSelected
+                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                          : (`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700
+                            hover:bg-gray-50 dark:hover:bg-gray-800` + (showEventState ? ` ${stateStyles[state]}` : ''))
+                    }
+                  `}
                   title={timing || undefined}
                 >
+                  {/* icon */}
+                  {showEventState && state === 'upcoming-soon' && (
+                    <Zap size={12} className="text-yellow-500" />
+                  )}
+
+                  {showEventState && state === 'ending-soon' && (
+                    <Zap size={12} className="text-purple-500" />
+                  )}
+
                   <span>{evt.name}</span>
-                  {isSelected && timing && (
-                    <span className="ml-2 text-[10px] opacity-80 hidden sm:inline">{timing}</span>
+
+                  {showEventState && (isSelected || shouldShowTimingAlways(evt)) && timing && (
+                    <span className="ml-1 text-[10px] opacity-80 hidden sm:inline">
+                      {timing}
+                    </span>
                   )}
                 </button>
               );
@@ -247,7 +339,7 @@ export default function ChallengeFilterBar({
           </div>
 
           {/* Selected event timing (mobile) */}
-          {selectedTimingLabel && (
+          {showEventState && selectedTimingLabel && (
             <div className="sm:hidden mt-2 text-xs text-gray-600 dark:text-gray-300">
               {selectedTimingLabel}
             </div>

@@ -4,6 +4,7 @@ import React from 'react'
 import { getEvents, filterStartedEvents } from '@/lib/events'
 import type { Event } from '@/types'
 import { getSelectedEventSetting, setSelectedEventSetting } from '@/lib/settings'
+import { useAuth } from '@/contexts/AuthContext'
 
 export type SelectedEvent = 'all' | 'main' | string
 
@@ -57,10 +58,15 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Fetch events once
+  // Fetch events after auth finishes loading or when user changes
+  const { user, loading } = useAuth()
+
   React.useEffect(() => {
-    refreshEvents()
-  }, [refreshEvents])
+    if (!loading) {
+      // refresh so event list reflects current user's permissions/state
+      refreshEvents()
+    }
+  }, [loading, user, refreshEvents])
 
   const startedEvents = React.useMemo(() => filterStartedEvents(events || []), [events])
 

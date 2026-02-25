@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[1.3.4]
+### Added
+- Higlight Event challenge filter in challenge page.
+
 ## v[3.1.3]
 ### Added
 - Add layout compact challenge

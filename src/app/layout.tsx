@@ -106,26 +106,26 @@ export default async function RootLayout({
           // Normal mode: with navbar and providers
           <ThemeProvider>
             <FilterProvider>
-              <EventProvider>
-              <ChatProvider>
-                <AuthProvider>
-                  <LogsProvider>
-                    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                      <Navbar />
-                      <div className="pt-14">{children}</div>
-                      <Toaster position="top-right" reverseOrder={false} />
-                      <ChallengeJoyride />
-                      <FloatingToolbar position="right">
-                        {APP.ChallengeTutorial && <ChallengeTutorial />}
-                        {APP.ChatBotAI && <ChatToggle />}
-                      </FloatingToolbar>
-                      {APP.ChatBotAI && <ChatBotAI />}
-                      <ScrollToggle />
-                    </div>
-                  </LogsProvider>
-                </AuthProvider>
-              </ChatProvider>
-              </EventProvider>
+              <AuthProvider>
+                <EventProvider>
+                  <ChatProvider>
+                    <LogsProvider>
+                      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                        <Navbar />
+                        <div className="pt-14">{children}</div>
+                        <Toaster position="top-right" reverseOrder={false} />
+                        <ChallengeJoyride />
+                        <FloatingToolbar position="right">
+                          {APP.ChallengeTutorial && <ChallengeTutorial />}
+                          {APP.ChatBotAI && <ChatToggle />}
+                        </FloatingToolbar>
+                        {APP.ChatBotAI && <ChatBotAI />}
+                        <ScrollToggle />
+                      </div>
+                    </LogsProvider>
+                  </ChatProvider>
+                </EventProvider>
+              </AuthProvider>
             </FilterProvider>
           </ThemeProvider>
         )}

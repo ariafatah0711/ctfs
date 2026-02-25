@@ -501,6 +501,7 @@ export default function AdminPage() {
                         includeEndedEvents
                         upcomingVisibilityWindowDays={null}
                         events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
+                        showEventState={false}
                         selectedEventId={eventId}
                         onEventChange={handleEventChange}
                         hideAllEventOption={!isGlobalAdmin}
