@@ -103,10 +103,14 @@ CREATE TABLE public.events (
   description TEXT DEFAULT '',
   start_time TIMESTAMP WITH TIME ZONE DEFAULT NULL,
   end_time TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+  always_show_challenges BOOLEAN DEFAULT false,
   image_url TEXT DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- ALTER TABLE public.events
+-- ADD COLUMN IF NOT EXISTS always_show_challenges BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- ########################################################
 -- Table: event_admins (scoped admin per event)
@@ -1727,6 +1731,7 @@ CREATE OR REPLACE FUNCTION add_event(
   p_description TEXT DEFAULT '',
   p_start_time TIMESTAMPTZ DEFAULT NULL,
   p_end_time TIMESTAMPTZ DEFAULT NULL,
+  p_always_show_challenges BOOLEAN DEFAULT FALSE,
   p_image_url TEXT DEFAULT NULL
 )
 RETURNS UUID AS $$
@@ -1737,8 +1742,8 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add event';
   END IF;
 
-  INSERT INTO public.events(name, description, start_time, end_time, image_url)
-  VALUES (p_name, COALESCE(p_description, ''), p_start_time, p_end_time, p_image_url)
+  INSERT INTO public.events(name, description, start_time, end_time, always_show_challenges, image_url)
+  VALUES (p_name, COALESCE(p_description, ''), p_start_time, p_end_time, COALESCE(p_always_show_challenges, FALSE), p_image_url)
   RETURNING id INTO v_event_id;
 
   RETURN v_event_id;
@@ -1746,7 +1751,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_event(TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_event(TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: update_event(p_event_id, ...)
@@ -1757,6 +1762,7 @@ CREATE OR REPLACE FUNCTION update_event(
   p_description TEXT DEFAULT NULL,
   p_start_time TIMESTAMPTZ DEFAULT NULL,
   p_end_time TIMESTAMPTZ DEFAULT NULL,
+  p_always_show_challenges BOOLEAN DEFAULT NULL,
   p_image_url TEXT DEFAULT NULL
 )
 RETURNS BOOLEAN AS $$
@@ -1770,6 +1776,7 @@ BEGIN
       description = COALESCE(p_description, description),
       start_time = p_start_time,
       end_time = p_end_time,
+        always_show_challenges = COALESCE(p_always_show_challenges, always_show_challenges),
       image_url = COALESCE(p_image_url, image_url),
       updated_at = now()
   WHERE id = p_event_id;
@@ -1779,7 +1786,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION update_event(UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION update_event(UUID, TEXT, TEXT, TIMESTAMPTZ, TIMESTAMPTZ, BOOLEAN, TEXT) TO authenticated;
 
 -- ########################################################
 -- Function: delete_event(p_event_id)
@@ -2100,21 +2107,33 @@ CREATE POLICY "Challenges event admin select scoped"
 -- Non-admin can only read active challenges whose event hasn't ended.
 -- If event_id is NULL => Main challenges are visible.
 CREATE POLICY "Challenges user select visible"
-  ON public.challenges
-  FOR SELECT
-  USING (
-    is_active = true
-    AND (
-      event_id IS NULL
-      OR EXISTS (
-        SELECT 1
-        FROM public.events e
-        WHERE e.id = challenges.event_id
-          AND (e.start_time IS NULL OR now() >= e.start_time)
-          AND (e.end_time IS NULL OR now() <= e.end_time)
-      )
+ON public.challenges
+FOR SELECT
+USING (
+  is_active = true
+  AND (
+    event_id IS NULL
+    OR EXISTS (
+      SELECT 1
+      FROM public.events e
+      WHERE e.id = challenges.event_id
+        AND (
+          -- sedang berlangsung
+          (
+            (e.start_time IS NULL OR now() >= e.start_time)
+            AND (e.end_time IS NULL OR now() <= e.end_time)
+          )
+
+          -- ATAU sudah berakhir DAN always_show_challenges = true
+          OR (
+            e.always_show_challenges = true
+            AND e.end_time IS NOT NULL
+            AND now() > e.end_time
+          )
+        )
     )
-  );
+  )
+);
 
 DROP POLICY IF EXISTS "Events can select all" ON public.events;
 CREATE POLICY "Events can select all"

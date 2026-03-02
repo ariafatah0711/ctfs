@@ -22,6 +22,7 @@ export interface Event {
   description?: string | null
   start_time?: string | null
   end_time?: string | null
+  always_show_challenges?: boolean | null
   image_url?: string | null
   created_at?: string
   updated_at?: string

@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
 import { DIALOG_CONTENT_CLASS } from '@/styles/dialog'
 import Loader from '@/components/custom/loading'
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
@@ -69,6 +70,7 @@ export default function AdminEventPage() {
     description: '',
     start_time: '',
     end_time: '',
+    always_show_challenges: false,
     image_url: '',
   }
 
@@ -124,6 +126,7 @@ export default function AdminEventPage() {
       description: evt.description || '',
       start_time: toInputValue(evt.start_time || null),
       end_time: toInputValue(evt.end_time || null),
+      always_show_challenges: Boolean(evt.always_show_challenges),
       image_url: evt.image_url || '',
     })
     setOpenForm(true)
@@ -143,6 +146,7 @@ export default function AdminEventPage() {
         description: formData.description?.trim() || '',
         start_time: fromInputValue(formData.start_time),
         end_time: fromInputValue(formData.end_time),
+        always_show_challenges: formData.always_show_challenges,
         image_url: formData.image_url?.trim() || null,
       }
 
@@ -316,6 +320,12 @@ export default function AdminEventPage() {
                         {evt.start_time ? `Start: ${new Date(evt.start_time).toLocaleString()}` : 'Start: -'}
                         <span className="mx-2">•</span>
                         {evt.end_time ? `End: ${new Date(evt.end_time).toLocaleString()}` : 'End: -'}
+                        {evt.always_show_challenges && (
+                          <>
+                            <span className="mx-2">•</span>
+                            Always show challenges
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -402,33 +412,38 @@ export default function AdminEventPage() {
       <AnimatePresence>
         {openForm && (
           <Dialog open={openForm} onOpenChange={setOpenForm}>
-            <DialogContent className={`${DIALOG_CONTENT_CLASS} max-w-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700`}>
+            <DialogContent
+              className={`${DIALOG_CONTENT_CLASS} max-w-3xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden`}
+              style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
+            >
               <DialogHeader>
                 <DialogTitle>{editing ? 'Edit Event' : 'Add Event'}</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div>
-                  <Label className="text-xs">Name</Label>
-                  <Input
-                    required
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs">Description</Label>
-                  <Textarea
-                    rows={2}
-                    value={formData.description}
-                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="md:col-span-2">
+                    <Label>Name</Label>
+                    <Input
+                      required
+                      value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label>Description</Label>
+                    <Textarea
+                      rows={3}
+                      value={formData.description}
+                      onChange={e => setFormData({ ...formData, description: e.target.value })}
+                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    />
+                  </div>
+
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs">Start Time</Label>
+                      <Label>Start Time</Label>
                       {formData.start_time && (
                         <button
                           type="button"
@@ -443,12 +458,13 @@ export default function AdminEventPage() {
                       type="datetime-local"
                       value={formData.start_time}
                       onChange={e => setFormData({ ...formData, start_time: e.target.value })}
-                      className="h-9 px-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
+                      className="h-9 px-2 text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
                     />
                   </div>
+
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs">End Time</Label>
+                      <Label>End Time</Label>
                       {formData.end_time && (
                         <button
                           type="button"
@@ -463,22 +479,50 @@ export default function AdminEventPage() {
                       type="datetime-local"
                       value={formData.end_time}
                       onChange={e => setFormData({ ...formData, end_time: e.target.value })}
-                      className="h-9 px-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
+                      className="h-9 px-2 text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
                     />
                   </div>
-                </div>                <div>
-                  <Label className="text-xs">Image URL</Label>
-                  <Input
-                    type="url"
-                    placeholder="https://example.com/image.jpg"
-                    value={formData.image_url}
-                    onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                    className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-500/30"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Add a banner image URL for this event</p>
-                </div>                <DialogFooter className="flex gap-2 pt-1">
-                  <Button type="button" variant="ghost" onClick={() => setOpenForm(false)}>Cancel</Button>
-                  <Button type="submit" disabled={submitting}>{submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}</Button>
+
+                  <div className="md:col-span-2 flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-800/40">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Always show challenges</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Show event challenges after end.</p>
+                    </div>
+                    <Switch
+                      checked={formData.always_show_challenges}
+                      onCheckedChange={checked => setFormData({ ...formData, always_show_challenges: checked })}
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label>Image URL</Label>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/image.jpg"
+                      value={formData.image_url}
+                      onChange={e => setFormData({ ...formData, image_url: e.target.value })}
+                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Add a banner image URL for this event</p>
+                  </div>
+                </div>
+
+                <DialogFooter className="flex flex-row items-center justify-end gap-2 sticky bottom-0 z-10 pt-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setOpenForm(false)}
+                    className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-600 dark:text-white dark:hover:bg-primary-700"
+                  >
+                    {submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>

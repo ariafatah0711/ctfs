@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## v[1.3.4]
+## v[3.1.5]
+### Added
+- Add policy to show challenges after event ended if always_show_challenges is true in event config.
+
+## v[3.3.4]
 ### Added
 - Higlight Event challenge filter in challenge page.
 

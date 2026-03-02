@@ -21,6 +21,7 @@ export async function addEvent(payload: {
   description?: string | null
   start_time?: string | null
   end_time?: string | null
+  always_show_challenges?: boolean | null
   image_url?: string | null
 }) {
   const { data, error } = await supabase.rpc('add_event', {
@@ -28,6 +29,7 @@ export async function addEvent(payload: {
     p_description: payload.description ?? '',
     p_start_time: payload.start_time ?? null,
     p_end_time: payload.end_time ?? null,
+    p_always_show_challenges: payload.always_show_challenges ?? false,
     p_image_url: payload.image_url ?? null,
   })
 
@@ -44,6 +46,7 @@ export async function updateEvent(eventId: string, payload: {
   description?: string | null
   start_time?: string | null
   end_time?: string | null
+  always_show_challenges?: boolean | null
   image_url?: string | null
 }) {
   const { data, error } = await supabase.rpc('update_event', {
@@ -52,6 +55,7 @@ export async function updateEvent(eventId: string, payload: {
     p_description: payload.description ?? null,
     p_start_time: payload.start_time ?? null,
     p_end_time: payload.end_time ?? null,
+    p_always_show_challenges: payload.always_show_challenges ?? null,
     p_image_url: payload.image_url ?? null,
   })
 
@@ -107,6 +111,10 @@ export async function getActiveEvents(now: string = new Date().toISOString()): P
 }
 
 function eventHasStarted(event: Event, referenceTimeMs: number) {
+  if (event.always_show_challenges) {
+    return true
+  }
+
   if (!event.start_time) {
     return true
   }

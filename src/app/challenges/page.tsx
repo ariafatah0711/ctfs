@@ -296,17 +296,21 @@ export default function ChallengesPage() {
   const filteredChallenges = challenges.filter(challenge => {
     // Special case: when viewing All events, force Intro category to Main only
     if (eventId === 'all') {
-      // Hide challenges whose event has ended
+      // For Event challenges, only show when event is ongoing.
+      // Hide upcoming and ended events in All view.
       if (challenge.event_id) {
-        const event = events.find(e => e.id === challenge.event_id);
-        if (event && event.end_time) {
-          const now = new Date();
-          const endTime = new Date(event.end_time);
-          if (endTime < now) return false;
-        }
+        const event = events.find(e => e.id === challenge.event_id)
+        if (!event) return false
+
+        const now = Date.now()
+        const start = event.start_time ? new Date(event.start_time).getTime() : null
+        const end = event.end_time ? new Date(event.end_time).getTime() : null
+
+        if (start && !Number.isNaN(start) && now < start) return false
+        if (end && !Number.isNaN(end) && now > end) return false
       }
-      const isIntro = String(challenge.category || '').toLowerCase() === 'intro';
-      const isMain = challenge.event_id === null || typeof challenge.event_id === 'undefined';
+      const isIntro = String(challenge.category || '').toLowerCase() === 'intro'
+      const isMain = challenge.event_id === null || typeof challenge.event_id === 'undefined'
       if (isIntro && !isMain) return false;
     }
 
@@ -498,7 +502,7 @@ export default function ChallengesPage() {
               onSettingsChange={setFilterSettings}
               onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
               showStatusFilter={true}
-              events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
+              events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time, always_show_challenges: e.always_show_challenges }))}
               selectedEventId={eventId}
               onEventChange={(id) => setSelectedEvent(id === null ? 'main' : id)}
             />

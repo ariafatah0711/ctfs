@@ -26,6 +26,7 @@ type EventItem = {
   name: string;
   start_time?: string | null;
   end_time?: string | null;
+  always_show_challenges?: boolean | null;
 };
 
 type Props = {
@@ -95,7 +96,10 @@ export default function ChallengeFilterBar({
       ? events
       : events.filter(evt => {
           if (!evt.end_time) return true
-          return now <= new Date(evt.end_time).getTime()
+          const end = new Date(evt.end_time).getTime()
+          if (Number.isNaN(end)) return true
+          if (now <= end) return true
+          return Boolean(evt.always_show_challenges)
         })
 
     const filteredUpcoming = visibleEvents.filter(evt => {
@@ -283,6 +287,7 @@ export default function ChallengeFilterBar({
               const timing = getEventTimingLabel(evt);
               const isSelected = selectedEventId === evt.id;
               const state = getEventVisualState(evt);
+              const isEndedButAlwaysVisible = state === 'ended' && Boolean(evt.always_show_challenges)
 
               const stateStyles = {
                 'upcoming-soon':
@@ -295,7 +300,7 @@ export default function ChallengeFilterBar({
                   'border-green-400 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300',
 
                 'ended':
-                  'opacity-50',
+                  'opacity-50 border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-400',
 
                 'upcoming':
                   '',
@@ -308,6 +313,7 @@ export default function ChallengeFilterBar({
                   onClick={() => onEventChange(evt.id)}
                   className={`
                     shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition flex items-center gap-1
+                    ${isEndedButAlwaysVisible && !isSelected ? 'text-[11px] opacity-40 border-dashed' : ''}
                     ${
                       isSelected
                           ? 'bg-indigo-600 border-indigo-600 text-white'
@@ -327,6 +333,10 @@ export default function ChallengeFilterBar({
                   )}
 
                   <span>{evt.name}</span>
+
+                  {showEventState && isEndedButAlwaysVisible && !isSelected && (
+                    <span className="text-[10px] opacity-70">ended</span>
+                  )}
 
                   {showEventState && (isSelected || shouldShowTimingAlways(evt)) && timing && (
                     <span className="ml-1 text-[10px] opacity-80 hidden sm:inline">
