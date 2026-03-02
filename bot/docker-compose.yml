@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: ctfs-first-blood-bot
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./state.json:/app/state.json
+    environment:
+      - PYTHONUNBUFFERED=1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

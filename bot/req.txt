@@ -1,0 +1,4 @@
+discord.py>=2.0.0
+aiohttp>=3.8.0
+python-dotenv>=0.21.0
+python-dateutil

@@ -2198,6 +2198,10 @@ GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
 GRANT SELECT ON public.event_admins TO authenticated;
 
+GRANT EXECUTE ON FUNCTION public.get_logs(INT, INT) TO anon;
+GRANT SELECT ON public.challenges TO anon;
+GRANT SELECT ON public.events TO anon;
+
 -- ########################################################
 -- Function: get_auth_audit_logs(p_limit INT, p_offset INT)
 -- ########################################################
