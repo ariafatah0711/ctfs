@@ -276,3 +276,13 @@ Automate daily backup of your Supabase database to GitHub using [matheusbcprog/s
 * **Backup regularly!**
 
 ---
+
+```bash
+-- Recalculate points untuk SEMUA challenge dynamic
+UPDATE public.challenges c
+SET points = GREATEST(
+    COALESCE(c.min_points, 0),
+    COALESCE(c.max_points, 0) - COALESCE(c.decay_per_solve, 0) * GREATEST(c.total_solves - 1, 0)
+)
+WHERE c.is_dynamic = true;
+```

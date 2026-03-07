@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.1.6]
+### Fixed
+fixed bug dynamic score not triger in submit challenge.
+
 ## v[3.1.5]
 ### Added
 - Add policy to show challenges after event ended if always_show_challenges is true in event config.

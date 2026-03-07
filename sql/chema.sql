@@ -568,16 +568,44 @@ CREATE OR REPLACE FUNCTION update_challenge_solve_count()
 RETURNS TRIGGER AS $$
 DECLARE
   v_challenge_id UUID;
+  v_solve_count INT;
+  v_is_dynamic BOOLEAN;
+  v_max_points INTEGER;
+  v_min_points INTEGER;
+  v_decay_per_solve INTEGER;
+  v_adjusted_count INT;
 BEGIN
   -- Tentuin challenge_id mana yang harus dihitung
   v_challenge_id := COALESCE(NEW.challenge_id, OLD.challenge_id);
 
+  -- Count current solves
+  SELECT COUNT(*) INTO v_solve_count
+  FROM public.solves s WHERE s.challenge_id = v_challenge_id;
+
   -- Update total_solves berdasarkan jumlah solve terkini
   UPDATE public.challenges c
-  SET total_solves = (
-    SELECT COUNT(*) FROM public.solves s WHERE s.challenge_id = v_challenge_id
-  )
+  SET total_solves = v_solve_count
   WHERE c.id = v_challenge_id;
+
+  -- Jika dynamic, recalculate points
+  SELECT c.is_dynamic, c.max_points, c.min_points, c.decay_per_solve
+  INTO v_is_dynamic, v_max_points, v_min_points, v_decay_per_solve
+  FROM public.challenges c
+  WHERE c.id = v_challenge_id;
+
+  IF COALESCE(v_is_dynamic, false) THEN
+    -- Samakan dengan update_challenge: pakai jumlah_solver - 1 (kecuali 0)
+    v_adjusted_count := v_solve_count;
+    IF v_adjusted_count > 0 THEN
+      v_adjusted_count := v_adjusted_count - 1;
+    END IF;
+    UPDATE public.challenges c
+    SET points = GREATEST(
+        COALESCE(v_min_points, 0),
+        COALESCE(v_max_points, 0) - COALESCE(v_decay_per_solve, 0) * v_adjusted_count
+    )
+    WHERE c.id = v_challenge_id;
+  END IF;
 
   RETURN NEW;
 END;
