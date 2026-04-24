@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge } from '@/lib/challenges'
 import { getMyTeamChallenges } from '@/lib/teams'
-import { ChallengeWithSolve, User, Attachment, Event } from '@/types'
+import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/types'
+import { getMyEventMembership, joinEvent } from '@/lib/events'
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
 import EventsTab from '@/components/challenges/EventsTab'
 import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide-react'
+import toast from 'react-hot-toast'
 import Loader from '@/components/custom/loading'
 import TitlePage from '@/components/custom/TitlePage'
 import { Solver } from '@/components/challenges/SolversList';
@@ -53,6 +55,11 @@ export default function ChallengesPage() {
     highlightTeamSolves: true,
   })
   const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const [eventMembership, setEventMembership] = useState<EventMembershipStatus | null>(null)
+  const [eventMembershipLoading, setEventMembershipLoading] = useState(false)
+  const [joiningEvent, setJoiningEvent] = useState(false)
+  const [joinKeyInput, setJoinKeyInput] = useState('')
+  const [joinNoteInput, setJoinNoteInput] = useState('')
   const { user, loading } = require('@/contexts/AuthContext').useAuth();
 
   // In-memory caches to reduce repeated network usage
@@ -143,6 +150,31 @@ export default function ChallengesPage() {
   useEffect(() => {
     loadChallenges()
   }, [user])
+
+  useEffect(() => {
+    let mounted = true
+    const loadMembership = async () => {
+      if (!user || typeof eventId !== 'string' || eventId === 'all') {
+        if (mounted) setEventMembership(null)
+        return
+      }
+
+      setEventMembershipLoading(true)
+      try {
+        const data = await getMyEventMembership(eventId)
+        if (!mounted) return
+        setEventMembership(data)
+      } finally {
+        if (mounted) setEventMembershipLoading(false)
+      }
+    }
+
+    void loadMembership()
+
+    return () => {
+      mounted = false
+    }
+  }, [user, eventId])
 
   // Events are loaded globally via EventProvider
 
@@ -291,6 +323,44 @@ export default function ChallengesPage() {
   const handleFlagInputChange = (challengeId: string, value: string) => {
     setFlagInputs(prev => ({ ...prev, [challengeId]: value }))
   }
+
+  const handleJoinSelectedEvent = async () => {
+    if (typeof eventId !== 'string' || eventId === 'all') return
+
+    const joinMode = eventMembership?.join_mode || 'open'
+    if (joinMode === 'key' && !joinKeyInput.trim()) {
+      toast.error('Join key is required')
+      return
+    }
+
+    setJoiningEvent(true)
+    try {
+      const result = await joinEvent(
+        eventId,
+        joinMode === 'key' ? joinKeyInput.trim() : null,
+        joinMode === 'request' ? joinNoteInput.trim() : null
+      )
+      if (result?.success) {
+        toast.success(result.message || 'Join request submitted')
+        const updated = await getMyEventMembership(eventId)
+        setEventMembership(updated)
+        await loadChallenges()
+      } else {
+        toast.error(result?.message || 'Failed to join event')
+      }
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to join event')
+    } finally {
+      setJoiningEvent(false)
+    }
+  }
+
+  const selectedJoinMode = eventMembership?.join_mode || (selectedEventObj?.join_mode || 'open')
+  const eventJoinBlocked =
+    typeof eventId === 'string' &&
+    eventId !== 'all' &&
+    selectedJoinMode !== 'open' &&
+    !eventMembership?.is_member
 
   // Filter challenges based on current filters
   const filteredChallenges = challenges.filter(challenge => {
@@ -509,67 +579,122 @@ export default function ChallengesPage() {
 
             {/* Challenges Grid Grouped by Category */}
             <div>
-              {!user || loading ? (
+              {eventMembershipLoading ? (
                 <Loader fullscreen color="text-orange-500" />
-              ) : filteredChallenges.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {typeof eventId === 'string' && selectedEventNotStarted ? (
-                      <CalendarClock className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-                    ) : typeof eventId === 'string' && selectedEventEnded ? (
-                      <CalendarX className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-                    ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
-                      <CircleAlert className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-                    ) : (
-                      <Search className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-                    )}
-                  </div>
-                  {typeof eventId === 'string' && selectedEventNotStarted ? (
-                    <>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        Event belum mulai
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Starts in {formatRemaining(selectedEventStart!.getTime() - nowDate.getTime())}
-                      </p>
-                    </>
-                  ) : typeof eventId === 'string' && selectedEventEnded ? (
-                    <>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        Event telah berakhir
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Challenge untuk event ini sudah tidak tersedia.
-                      </p>
-                    </>
-                  ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
-                    <>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        Event tidak ditemukan
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Silakan pilih event lain.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        {challenges.length === 0
-                          ? "No challenges available"
-                          : "No challenges match your filters"
-                        }
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        {challenges.length === 0
-                          ? "Check back later for new challenges"
-                          : "Try adjusting your filter criteria"
-                        }
-                      </p>
-                    </>
+              ) : eventJoinBlocked ? (
+                <div className="max-w-xl mx-auto rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 p-6 text-center">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Join event required</h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                    You need to join <span className="font-medium">{selectedEventObj?.name || 'this event'}</span> before opening its challenges.
+                  </p>
+
+                  {selectedJoinMode === 'key' && (
+                    <div className="mt-4 text-left">
+                      <label className="text-xs text-gray-500 dark:text-gray-400">Event key</label>
+                      <input
+                        type="text"
+                        value={joinKeyInput}
+                        onChange={(e) => setJoinKeyInput(e.target.value)}
+                        placeholder="Enter event join key"
+                        className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
                   )}
+
+                  {selectedJoinMode === 'request' && (
+                    <div className="mt-4 text-left">
+                      <label className="text-xs text-gray-500 dark:text-gray-400">Request note (optional)</label>
+                      <textarea
+                        value={joinNoteInput}
+                        onChange={(e) => setJoinNoteInput(e.target.value)}
+                        placeholder="Write a short note to admin"
+                        rows={3}
+                        className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
+                      />
+                    </div>
+                  )}
+
+                  {eventMembership?.request_status === 'pending' ? (
+                    <p className="mt-4 text-sm text-amber-600 dark:text-amber-400">Your request is pending admin approval.</p>
+                  ) : eventMembership?.request_status === 'rejected' ? (
+                    <p className="mt-4 text-sm text-red-600 dark:text-red-400">Your previous request was rejected. You can submit again.</p>
+                  ) : null}
+
+                  <button
+                    onClick={handleJoinSelectedEvent}
+                    disabled={joiningEvent || (selectedJoinMode === 'request' && eventMembership?.request_status === 'pending')}
+                    className="mt-5 inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60"
+                  >
+                    {joiningEvent
+                      ? 'Processing...'
+                      : selectedJoinMode === 'request'
+                        ? 'Send Join Request'
+                        : selectedJoinMode === 'key'
+                          ? 'Join With Key'
+                          : 'Join Event'}
+                  </button>
                 </div>
               ) : (
-                layoutMode === 'compact' ? (
+                !user || loading ? (
+                  <Loader fullscreen color="text-orange-500" />
+                ) : filteredChallenges.length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      {typeof eventId === 'string' && selectedEventNotStarted ? (
+                        <CalendarClock className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                      ) : typeof eventId === 'string' && selectedEventEnded ? (
+                        <CalendarX className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                      ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
+                        <CircleAlert className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                      ) : (
+                        <Search className="w-7 h-7 text-gray-400 dark:text-gray-500" />
+                      )}
+                    </div>
+                    {typeof eventId === 'string' && selectedEventNotStarted ? (
+                      <>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                          Event belum mulai
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Starts in {formatRemaining(selectedEventStart!.getTime() - nowDate.getTime())}
+                        </p>
+                      </>
+                    ) : typeof eventId === 'string' && selectedEventEnded ? (
+                      <>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                          Event telah berakhir
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Challenge untuk event ini sudah tidak tersedia.
+                        </p>
+                      </>
+                    ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
+                      <>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                          Event tidak ditemukan
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400">
+                          Silakan pilih event lain.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                          {challenges.length === 0
+                            ? 'No challenges available'
+                            : 'No challenges match your filters'
+                          }
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400">
+                          {challenges.length === 0
+                            ? 'Check back later for new challenges'
+                            : 'Try adjusting your filter criteria'
+                          }
+                        </p>
+                      </>
+                    )}
+                  </div>
+                ) : layoutMode === 'compact' ? (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -579,7 +704,7 @@ export default function ChallengesPage() {
                     {filteredChallenges
                       .slice()
                       .sort((a, b) => {
-                        // Compact view ordering: points (asc) → total_solves (desc) → difficulty → title
+                        // Compact view ordering: points (asc) -> total_solves (desc) -> difficulty -> title
                         if ((a.points ?? 0) !== (b.points ?? 0)) return (a.points ?? 0) - (b.points ?? 0)
                         const sa = (a.total_solves ?? 0)
                         const sb = (b.total_solves ?? 0)

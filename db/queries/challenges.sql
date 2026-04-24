@@ -142,6 +142,8 @@ DECLARE
   v_event_start TIMESTAMPTZ;
   v_event_end TIMESTAMPTZ;
   v_event_exists BOOLEAN;
+  v_event_join_mode TEXT;
+  v_is_event_member BOOLEAN := FALSE;
   v_solver_count INTEGER;
   v_awarded_points INTEGER;
   v_existing INT;
@@ -152,10 +154,10 @@ BEGIN
     RETURN json_build_object('success', false, 'message', 'Not authenticated');
   END IF;
 
-  SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_active, c.is_maintenance, c.min_points, c.decay_per_solve,
-         c.event_id, e.start_time, e.end_time, (e.id IS NOT NULL)
-  INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_active, v_is_maintenance, v_min_points, v_decay_per_solve,
-       v_event_id, v_event_start, v_event_end, v_event_exists
+    SELECT cf.flag_hash, c.points, c.max_points, c.is_dynamic, c.is_active, c.is_maintenance, c.min_points, c.decay_per_solve,
+        c.event_id, e.start_time, e.end_time, (e.id IS NOT NULL), e.join_mode
+    INTO v_flag_hash, v_points, v_max_points, v_is_dynamic, v_is_active, v_is_maintenance, v_min_points, v_decay_per_solve,
+      v_event_id, v_event_start, v_event_end, v_event_exists, v_event_join_mode
   FROM public.challenge_flags cf
   JOIN public.challenges c ON c.id = cf.challenge_id
   LEFT JOIN public.events e ON e.id = c.event_id
@@ -183,6 +185,19 @@ BEGIN
 
   IF NOT v_is_admin_override THEN
     IF v_event_id IS NOT NULL THEN
+      IF COALESCE(v_event_join_mode, 'open') <> 'open' THEN
+        SELECT EXISTS (
+          SELECT 1
+          FROM public.event_participants ep
+          WHERE ep.event_id = v_event_id
+            AND ep.user_id = v_user_id
+        ) INTO v_is_event_member;
+
+        IF NOT v_is_event_member THEN
+          RETURN json_build_object('success', false, 'message', 'Join this event first before submitting flags');
+        END IF;
+      END IF;
+
       IF v_event_start IS NOT NULL AND now() < v_event_start THEN
         RETURN json_build_object('success', false, 'message', 'Event has not started yet');
       END IF;

@@ -7,12 +7,14 @@ const outputFile = path.join(ROOT, "init.sql");
 // Explicit execution order to avoid filename-based ordering issues.
 const orderedFiles = [
   // 1) Reset first
-  //   "schema/_reset.sql",
+  "schema/_reset.sql",
 
   // 2) Tables (respect FK dependencies)
   "schema/users.sql",
   "schema/events.sql",
   "schema/event_admins.sql",
+  "schema/event_participants.sql",
+  "schema/event_join_requests.sql",
   "schema/challenges.sql",
   "schema/challenge_flags.sql",
   "schema/solves.sql",
@@ -25,6 +27,7 @@ const orderedFiles = [
   // 3) Query/functions (core first)
   "queries/users.sql",
   "queries/event_admins.sql",
+  "queries/event_membership.sql",
   "queries/challenge_flags.sql",
   "queries/events.sql",
   "queries/challenges.sql",

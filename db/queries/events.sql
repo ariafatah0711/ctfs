@@ -54,6 +54,7 @@ BEGIN
       end_time = p_end_time,
       always_show_challenges = COALESCE(p_always_show_challenges, always_show_challenges),
       image_url = COALESCE(p_image_url, image_url),
+      join_mode = COALESCE(join_mode, 'open'),
       updated_at = now()
   WHERE id = p_event_id;
 

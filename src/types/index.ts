@@ -20,12 +20,43 @@ export interface Event {
   id: string
   name: string
   description?: string | null
+  join_mode?: 'open' | 'request' | 'key'
+  join_key?: string | null
   start_time?: string | null
   end_time?: string | null
   always_show_challenges?: boolean | null
   image_url?: string | null
   created_at?: string
   updated_at?: string
+}
+
+export interface EventJoinSettings {
+  success: boolean
+  event_id: string
+  join_mode: 'open' | 'request' | 'key'
+  has_join_key: boolean
+  message?: string
+}
+
+export interface EventMembershipStatus {
+  success: boolean
+  event_id: string
+  join_mode: 'open' | 'request' | 'key'
+  is_member: boolean
+  request_status: 'pending' | 'approved' | 'rejected' | null
+  message?: string
+}
+
+export interface EventJoinRequestRow {
+  request_id: string
+  event_id: string
+  user_id: string
+  username: string
+  status: 'pending' | 'approved' | 'rejected'
+  note?: string | null
+  requested_at: string
+  reviewed_at?: string | null
+  reviewed_by?: string | null
 }
 
 export interface Challenge {

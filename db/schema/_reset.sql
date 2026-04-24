@@ -64,6 +64,8 @@ DROP VIEW IF EXISTS public.challenges_with_masked_flag CASCADE;
 DROP TABLE IF EXISTS public.challenge_flags CASCADE;
 DROP TABLE IF EXISTS public.solves CASCADE;
 DROP TABLE IF EXISTS public.challenges CASCADE;
+DROP TABLE IF EXISTS public.event_join_requests CASCADE;
+DROP TABLE IF EXISTS public.event_participants CASCADE;
 DROP TABLE IF EXISTS public.event_admins CASCADE;
 DROP TABLE IF EXISTS public.events CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;

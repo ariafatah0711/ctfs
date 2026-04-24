@@ -45,7 +45,7 @@ export const APP = {
   image_preview: 'og-image.png',
 
   /* Setting Config */
-  captchaToken: true, // enable / disable captcha token verification on create account
+  captchaToken: process.env.NEXT_PUBLIC_CAPTCHA_TOKEN || false, // enable / disable captcha token verification on create account
   notifSolves: true, // notifikasi global saat ada yang solve challenge
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component

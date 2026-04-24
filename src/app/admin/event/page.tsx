@@ -7,9 +7,19 @@ import toast from 'react-hot-toast'
 
 import { useAuth } from '@/contexts/AuthContext'
 import { isGlobalAdmin } from '@/lib/admin'
-import { addEvent, deleteEvent, getEvents, setChallengesEvent, updateEvent } from '@/lib/events'
+import {
+  addEvent,
+  deleteEvent,
+  getEvents,
+  listEventJoinRequests,
+  regenerateEventJoinKey,
+  reviewEventJoinRequest,
+  setChallengesEvent,
+  setEventJoinSettings,
+  updateEvent,
+} from '@/lib/events'
 import { getChallengesLite } from '@/lib/challenges'
-import { Event } from '@/types'
+import { Event, EventJoinRequestRow } from '@/types'
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBarFloating'
 import APP from '@/config'
 
@@ -64,10 +74,16 @@ export default function AdminEventPage() {
 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<Event | null>(null)
+  const [manageEventId, setManageEventId] = useState('')
+  const [joinRequests, setJoinRequests] = useState<EventJoinRequestRow[]>([])
+  const [loadingJoinRequests, setLoadingJoinRequests] = useState(false)
+  const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null)
 
   const emptyForm = {
     name: '',
     description: '',
+    join_mode: 'open' as 'open' | 'request' | 'key',
+    join_key: '',
     start_time: '',
     end_time: '',
     always_show_challenges: false,
@@ -79,6 +95,23 @@ export default function AdminEventPage() {
   const loadEvents = async () => {
     const data = await getEvents()
     setEvents(data)
+    if (!manageEventId && data.length > 0) {
+      setManageEventId(data[0].id)
+    }
+  }
+
+  const loadJoinRequests = async (eventId: string) => {
+    if (!eventId) {
+      setJoinRequests([])
+      return
+    }
+    setLoadingJoinRequests(true)
+    try {
+      const data = await listEventJoinRequests(eventId, 'pending')
+      setJoinRequests(data)
+    } finally {
+      setLoadingJoinRequests(false)
+    }
   }
 
   const loadChallenges = async () => {
@@ -124,6 +157,8 @@ export default function AdminEventPage() {
     setFormData({
       name: evt.name || '',
       description: evt.description || '',
+      join_mode: evt.join_mode || 'open',
+      join_key: evt.join_key || '',
       start_time: toInputValue(evt.start_time || null),
       end_time: toInputValue(evt.end_time || null),
       always_show_challenges: Boolean(evt.always_show_challenges),
@@ -152,9 +187,14 @@ export default function AdminEventPage() {
 
       if (editing?.id) {
         await updateEvent(editing.id, payload)
+        await setEventJoinSettings(editing.id, formData.join_mode, formData.join_mode === 'key' ? formData.join_key.trim() : null)
         toast.success('Event updated')
       } else {
-        await addEvent(payload)
+        const created = await addEvent(payload)
+        const createdEventId = Array.isArray(created) ? created[0]?.id : created?.id
+        if (createdEventId) {
+          await setEventJoinSettings(createdEventId, formData.join_mode, formData.join_mode === 'key' ? formData.join_key.trim() : null)
+        }
         toast.success('Event created')
       }
 
@@ -167,6 +207,36 @@ export default function AdminEventPage() {
       toast.error('Failed to save event')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleRegenerateJoinKey = async () => {
+    if (!editing?.id) {
+      toast.error('Save event first before regenerating key')
+      return
+    }
+    try {
+      const key = await regenerateEventJoinKey(editing.id)
+      setFormData((prev) => ({ ...prev, join_key: key }))
+      toast.success('Join key regenerated')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to regenerate join key')
+    }
+  }
+
+  const handleReviewRequest = async (requestId: string, approve: boolean) => {
+    if (!manageEventId) return
+    setReviewingRequestId(requestId)
+    try {
+      await reviewEventJoinRequest(requestId, approve)
+      await loadJoinRequests(manageEventId)
+      toast.success(approve ? 'Request approved' : 'Request rejected')
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to review request')
+    } finally {
+      setReviewingRequestId(null)
     }
   }
 
@@ -197,6 +267,16 @@ export default function AdminEventPage() {
       return aTime - bTime
     })
   }, [events])
+
+  useEffect(() => {
+    if (!manageEventId && sortedEvents.length > 0) {
+      setManageEventId(sortedEvents[0].id)
+      return
+    }
+    if (manageEventId) {
+      void loadJoinRequests(manageEventId)
+    }
+  }, [manageEventId, sortedEvents])
 
   const filteredChallenges = useMemo(() => {
     const q = (filters.search || '').toLowerCase()
@@ -407,6 +487,62 @@ export default function AdminEventPage() {
             <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">Selected: {selectedIds.length}</div>
           </CardContent>
         </Card>
+
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-gray-900 dark:text-white">Join Requests</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <Label>Event</Label>
+              <select
+                value={manageEventId}
+                onChange={(e) => setManageEventId(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+              >
+                <option value="">Select event</option>
+                {sortedEvents.map((evt) => (
+                  <option key={evt.id} value={evt.id}>{evt.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+              {loadingJoinRequests ? (
+                <div className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">Loading requests...</div>
+              ) : joinRequests.length === 0 ? (
+                <div className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">No pending requests</div>
+              ) : (
+                joinRequests.map((req) => (
+                  <div key={req.request_id} className="px-3 py-3 border-b last:border-b-0 border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{req.username || req.user_id}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Requested at {new Date(req.requested_at).toLocaleString()}</p>
+                      {req.note && <p className="text-xs mt-1 text-gray-600 dark:text-gray-300">Note: {req.note}</p>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleReviewRequest(req.request_id, true)}
+                        disabled={reviewingRequestId === req.request_id}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleReviewRequest(req.request_id, false)}
+                        disabled={reviewingRequestId === req.request_id}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </main>
 
       <AnimatePresence>
@@ -437,6 +573,41 @@ export default function AdminEventPage() {
                       rows={3}
                       value={formData.description}
                       onChange={e => setFormData({ ...formData, description: e.target.value })}
+                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Join Mode</Label>
+                    <select
+                      value={formData.join_mode}
+                      onChange={(e) => setFormData({ ...formData, join_mode: e.target.value as 'open' | 'request' | 'key' })}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+                    >
+                      <option value="open">Open (direct join)</option>
+                      <option value="request">Request (admin approval)</option>
+                      <option value="key">Key (invite key)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <Label>Join Key</Label>
+                      {editing?.id && formData.join_mode === 'key' && (
+                        <button
+                          type="button"
+                          onClick={handleRegenerateJoinKey}
+                          className="text-xs text-primary-600 hover:underline"
+                        >
+                          Regenerate
+                        </button>
+                      )}
+                    </div>
+                    <Input
+                      value={formData.join_key}
+                      onChange={(e) => setFormData({ ...formData, join_key: e.target.value })}
+                      disabled={formData.join_mode !== 'key'}
+                      placeholder={formData.join_mode === 'key' ? 'Enter custom join key' : 'Join key only for key mode'}
                       className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
                     />
                   </div>
