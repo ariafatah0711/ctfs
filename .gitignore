@@ -50,3 +50,5 @@ version.ts
 .agents/
 
 .vercel
+
+db/init.sql

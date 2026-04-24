@@ -6,6 +6,7 @@
     "predev": "node src/scripts/gen-version.js",
     "prebuild": "node src/scripts/gen-version.js",
     "prestart": "node src/scripts/gen-version.js",
+    "setup": "node db/build-init-sql.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

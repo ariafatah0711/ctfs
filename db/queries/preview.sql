@@ -1,14 +1,9 @@
 -- ==============================================
--- Preview (Anon-safe) RPC
--- Limited public data for landing/preview pages
+-- Queries: preview (public landing)
+-- Source: sql/preview.sql
 -- ==============================================
 
--- Returns:
--- - top N leaderboard (username, score, last_solve, rank)
--- - events list
--- - total users
--- - total solves
-
+-- SELECT
 DROP FUNCTION IF EXISTS public.get_preview(integer, integer, uuid, text);
 
 CREATE OR REPLACE FUNCTION public.get_preview(
@@ -30,7 +25,6 @@ BEGIN
   v_lb_limit := GREATEST(0, LEAST(COALESCE(p_leaderboard_limit, 25), 50));
   v_ev_limit := GREATEST(0, LEAST(COALESCE(p_events_limit, 10), 50));
 
-  -- Events list (safe fields only)
   IF v_ev_limit > 0 THEN
     SELECT COALESCE(json_agg(row_to_json(e_row)), '[]'::json)
     INTO v_events
@@ -48,9 +42,8 @@ BEGIN
     ) e_row;
   END IF;
 
-  -- Simple totals (anon-safe)
   SELECT COUNT(*)::BIGINT INTO v_total_users FROM public.users;
-  -- Total solves (respect event filter); not capped.
+
   SELECT COUNT(*)::BIGINT
   INTO v_total_solves
   FROM public.solves s
@@ -61,7 +54,6 @@ BEGIN
     OR (p_event_mode = 'equals' AND c.event_id = p_event_id)
   );
 
-  -- Recent solves (anon-safe, max 25)
   SELECT COALESCE(json_agg(row_to_json(s_row)), '[]'::json)
   INTO v_solves
   FROM (
@@ -83,7 +75,6 @@ BEGIN
     LIMIT 25
   ) s_row;
 
-  -- Leaderboard (top N)
   IF v_lb_limit > 0 THEN
     SELECT COALESCE(json_agg(row_to_json(lb_row)), '[]'::json)
     INTO v_leaderboard
