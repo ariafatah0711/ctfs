@@ -59,6 +59,14 @@ export interface EventJoinRequestRow {
   reviewed_by?: string | null
 }
 
+export interface EventMemberRow {
+  event_id: string
+  user_id: string
+  username: string
+  joined_at: string
+  joined_by?: string | null
+}
+
 export interface Challenge {
   id: string
   event_id?: string | null

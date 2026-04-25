@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Event, EventJoinRequestRow, EventJoinSettings, EventMembershipStatus } from '@/types'
+import { Event, EventJoinRequestRow, EventJoinSettings, EventMembershipStatus, EventMemberRow } from '@/types'
 
 export async function getEvents(): Promise<Event[]> {
   const { data, error } = await supabase
@@ -233,4 +233,45 @@ export async function reviewEventJoinRequest(requestId: string, approve: boolean
   }
 
   return data as { success: boolean; status?: 'approved' | 'rejected'; message?: string }
+}
+
+export async function listEventMembers(eventId: string): Promise<EventMemberRow[]> {
+  const { data, error } = await supabase.rpc('list_event_members', {
+    p_event_id: eventId,
+  })
+
+  if (error) {
+    console.error('Error listing event members:', error)
+    return []
+  }
+
+  return (data || []) as EventMemberRow[]
+}
+
+export async function adminAddEventMember(eventId: string, userId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('admin_add_event_member', {
+    p_event_id: eventId,
+    p_user_id: userId,
+  })
+
+  if (error) {
+    console.error('Error adding event member:', error)
+    throw error
+  }
+
+  return Boolean(data)
+}
+
+export async function adminRemoveEventMember(eventId: string, userId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('admin_remove_event_member', {
+    p_event_id: eventId,
+    p_user_id: userId,
+  })
+
+  if (error) {
+    console.error('Error removing event member:', error)
+    throw error
+  }
+
+  return Boolean(data)
 }

@@ -8,9 +8,12 @@ import toast from 'react-hot-toast'
 import { useAuth } from '@/contexts/AuthContext'
 import { isGlobalAdmin } from '@/lib/admin'
 import {
+  adminAddEventMember,
+  adminRemoveEventMember,
   addEvent,
   deleteEvent,
   getEvents,
+  listEventMembers,
   listEventJoinRequests,
   regenerateEventJoinKey,
   reviewEventJoinRequest,
@@ -19,7 +22,8 @@ import {
   updateEvent,
 } from '@/lib/events'
 import { getChallengesLite } from '@/lib/challenges'
-import { Event, EventJoinRequestRow } from '@/types'
+import { getAllUsers } from '@/lib/users'
+import { Event, EventJoinRequestRow, EventMemberRow, User } from '@/types'
 import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBarFloating'
 import APP from '@/config'
 
@@ -78,6 +82,13 @@ export default function AdminEventPage() {
   const [joinRequests, setJoinRequests] = useState<EventJoinRequestRow[]>([])
   const [loadingJoinRequests, setLoadingJoinRequests] = useState(false)
   const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null)
+  const [eventMembers, setEventMembers] = useState<EventMemberRow[]>([])
+  const [loadingEventMembers, setLoadingEventMembers] = useState(false)
+  const [memberActionUserId, setMemberActionUserId] = useState<string | null>(null)
+  const [allUsers, setAllUsers] = useState<User[]>([])
+  const [assignUserQuery, setAssignUserQuery] = useState('')
+  const [memberQuery, setMemberQuery] = useState('')
+  const [selectedCandidateUserIds, setSelectedCandidateUserIds] = useState<string[]>([])
 
   const emptyForm = {
     name: '',
@@ -119,6 +130,25 @@ export default function AdminEventPage() {
     setChallenges(data)
   }
 
+  const loadEventMembers = async (eventId: string) => {
+    if (!eventId) {
+      setEventMembers([])
+      return
+    }
+    setLoadingEventMembers(true)
+    try {
+      const data = await listEventMembers(eventId)
+      setEventMembers(data)
+    } finally {
+      setLoadingEventMembers(false)
+    }
+  }
+
+  const loadUsers = async () => {
+    const data = await getAllUsers()
+    setAllUsers(data)
+  }
+
   useEffect(() => {
     let mounted = true
     ;(async () => {
@@ -139,6 +169,7 @@ export default function AdminEventPage() {
 
       await loadEvents()
       await loadChallenges()
+      await loadUsers()
     })()
 
     return () => {
@@ -231,6 +262,7 @@ export default function AdminEventPage() {
     try {
       await reviewEventJoinRequest(requestId, approve)
       await loadJoinRequests(manageEventId)
+      await loadEventMembers(manageEventId)
       toast.success(approve ? 'Request approved' : 'Request rejected')
     } catch (err) {
       console.error(err)
@@ -275,8 +307,116 @@ export default function AdminEventPage() {
     }
     if (manageEventId) {
       void loadJoinRequests(manageEventId)
+      void loadEventMembers(manageEventId)
     }
   }, [manageEventId, sortedEvents])
+
+  const handleQuickAddMember = async (targetUserId: string) => {
+    if (!manageEventId) {
+      toast.error('Select an event first')
+      return
+    }
+    setMemberActionUserId(targetUserId)
+    try {
+      await adminAddEventMember(manageEventId, targetUserId)
+      await loadEventMembers(manageEventId)
+      await loadJoinRequests(manageEventId)
+      setAssignUserQuery('')
+      toast.success('Member added to event')
+    } catch (err) {
+      console.error(err)
+      toast.error((err as any)?.message || 'Failed to add member')
+    } finally {
+      setMemberActionUserId(null)
+    }
+  }
+
+  const toggleCandidateSelection = (targetUserId: string) => {
+    setSelectedCandidateUserIds((prev) => {
+      if (prev.includes(targetUserId)) {
+        return prev.filter((id) => id !== targetUserId)
+      }
+      return [...prev, targetUserId]
+    })
+  }
+
+  const selectAllCandidates = () => {
+    setSelectedCandidateUserIds(candidateUsers.map((u) => u.id))
+  }
+
+  const clearCandidateSelection = () => {
+    setSelectedCandidateUserIds([])
+  }
+
+  const handleQuickAddSelectedMembers = async () => {
+    if (!manageEventId) {
+      toast.error('Select an event first')
+      return
+    }
+
+    if (selectedCandidateUserIds.length === 0) {
+      toast.error('No user selected')
+      return
+    }
+
+    setMemberActionUserId('__bulk__')
+    try {
+      await Promise.all(
+        selectedCandidateUserIds.map((userId) => adminAddEventMember(manageEventId, userId))
+      )
+      await loadEventMembers(manageEventId)
+      await loadJoinRequests(manageEventId)
+      clearCandidateSelection()
+      setAssignUserQuery('')
+      toast.success(`${selectedCandidateUserIds.length} member(s) added to event`)
+    } catch (err) {
+      console.error(err)
+      toast.error((err as any)?.message || 'Failed to add selected members')
+    } finally {
+      setMemberActionUserId(null)
+    }
+  }
+
+  const handleRemoveMember = async (targetUserId: string) => {
+    if (!manageEventId) return
+    setMemberActionUserId(targetUserId)
+    try {
+      await adminRemoveEventMember(manageEventId, targetUserId)
+      await loadEventMembers(manageEventId)
+      toast.success('Member removed from event')
+    } catch (err) {
+      console.error(err)
+      toast.error((err as any)?.message || 'Failed to remove member')
+    } finally {
+      setMemberActionUserId(null)
+    }
+  }
+
+  const candidateUsers = useMemo(() => {
+    const joinedSet = new Set(eventMembers.map((m) => m.user_id))
+    const q = assignUserQuery.trim().toLowerCase()
+
+    return allUsers
+      .filter((u) => !joinedSet.has(u.id))
+      .filter((u) => {
+        if (!q) return true
+        return u.username.toLowerCase().includes(q) || u.id.toLowerCase().includes(q)
+      })
+      .slice(0, 8)
+  }, [allUsers, eventMembers, assignUserQuery])
+
+  const filteredEventMembers = useMemo(() => {
+    const q = memberQuery.trim().toLowerCase()
+    if (!q) return eventMembers
+    return eventMembers.filter((m) => {
+      return m.username.toLowerCase().includes(q) || m.user_id.toLowerCase().includes(q)
+    })
+  }, [eventMembers, memberQuery])
+
+  useEffect(() => {
+    const visibleIds = new Set(candidateUsers.map((u) => u.id))
+    setSelectedCandidateUserIds((prev) => prev.filter((id) => visibleIds.has(id)))
+  }, [candidateUsers])
 
   const filteredChallenges = useMemo(() => {
     const q = (filters.search || '').toLowerCase()
@@ -416,6 +556,130 @@ export default function AdminEventPage() {
                 ))}
               </motion.div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-gray-900 dark:text-white">Event Members</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label>Event</Label>
+              <select
+                value={manageEventId}
+                onChange={(e) => setManageEventId(e.target.value)}
+                className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+              >
+                <option value="">Select event</option>
+                {sortedEvents.map((evt) => (
+                  <option key={evt.id} value={evt.id}>{evt.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Quick Assign User</Label>
+                <Input
+                  placeholder="Search username..."
+                  value={assignUserQuery}
+                  onChange={(e) => setAssignUserQuery(e.target.value)}
+                  className="mt-2"
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={selectAllCandidates}
+                    disabled={candidateUsers.length === 0}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={clearCandidateSelection}
+                    disabled={selectedCandidateUserIds.length === 0}
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleQuickAddSelectedMembers}
+                    disabled={memberActionUserId === '__bulk__' || selectedCandidateUserIds.length === 0}
+                  >
+                    Add Selected ({selectedCandidateUserIds.length})
+                  </Button>
+                </div>
+                <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+                  {manageEventId === '' ? (
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Select event first</div>
+                  ) : candidateUsers.length === 0 ? (
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">No available users</div>
+                  ) : (
+                    candidateUsers.map((u) => (
+                      <div key={u.id} className="px-3 py-2 border-b last:border-b-0 border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            className="mt-1 h-4 w-4 accent-primary-500"
+                            checked={selectedCandidateUserIds.includes(u.id)}
+                            onChange={() => toggleCandidateSelection(u.id)}
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{u.username}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{u.id}</p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => handleQuickAddMember(u.id)}
+                          disabled={memberActionUserId === u.id}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label>Current Members</Label>
+                <Input
+                  placeholder="Search current member..."
+                  value={memberQuery}
+                  onChange={(e) => setMemberQuery(e.target.value)}
+                  className="mt-2"
+                />
+                <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-md max-h-[300px] overflow-auto">
+                  {loadingEventMembers ? (
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Loading members...</div>
+                  ) : filteredEventMembers.length === 0 ? (
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">No members yet</div>
+                  ) : (
+                    filteredEventMembers.map((m) => (
+                      <div key={m.user_id} className="px-3 py-2 border-b last:border-b-0 border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{m.username}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{m.user_id}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Joined: {new Date(m.joined_at).toLocaleString()}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleRemoveMember(m.user_id)}
+                          disabled={memberActionUserId === m.user_id}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

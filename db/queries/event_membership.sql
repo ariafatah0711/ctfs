@@ -416,3 +416,10 @@ CREATE POLICY "Event join requests admin only"
   FOR ALL
   USING (is_admin())
   WITH CHECK (is_admin());
+
+GRANT SELECT ON TABLE public.event_participants TO authenticated;
+DROP POLICY IF EXISTS "Event participants self select" ON public.event_participants;
+CREATE POLICY "Event participants self select"
+  ON public.event_participants
+  FOR SELECT
+  USING (user_id = auth.uid()::uuid);

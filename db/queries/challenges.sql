@@ -522,6 +522,15 @@ USING (
       FROM public.events e
       WHERE e.id = challenges.event_id
         AND (
+          COALESCE(e.join_mode, 'open') = 'open'
+          OR EXISTS (
+            SELECT 1
+            FROM public.event_participants ep
+            WHERE ep.event_id = e.id
+              AND ep.user_id = auth.uid()::uuid
+          )
+        )
+        AND (
           (
             (e.start_time IS NULL OR now() >= e.start_time)
             AND (e.end_time IS NULL OR now() <= e.end_time)

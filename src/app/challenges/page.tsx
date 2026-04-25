@@ -5,6 +5,7 @@ import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChalleng
 import { getMyTeamChallenges } from '@/lib/teams'
 import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/types'
 import { getMyEventMembership, joinEvent } from '@/lib/events'
+import { getAdminScope } from '@/lib/admin'
 import { motion } from 'framer-motion'
 import ChallengeCard from '@/components/challenges/ChallengeCard'
 import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
@@ -57,6 +58,8 @@ export default function ChallengesPage() {
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [eventMembership, setEventMembership] = useState<EventMembershipStatus | null>(null)
   const [eventMembershipLoading, setEventMembershipLoading] = useState(false)
+  const [isGlobalAdminUser, setIsGlobalAdminUser] = useState(false)
+  const [eventAdminIds, setEventAdminIds] = useState<string[]>([])
   const [joiningEvent, setJoiningEvent] = useState(false)
   const [joinKeyInput, setJoinKeyInput] = useState('')
   const [joinNoteInput, setJoinNoteInput] = useState('')
@@ -149,6 +152,31 @@ export default function ChallengesPage() {
 
   useEffect(() => {
     loadChallenges()
+  }, [user])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadScope = async () => {
+      if (!user) {
+        if (mounted) {
+          setIsGlobalAdminUser(false)
+          setEventAdminIds([])
+        }
+        return
+      }
+
+      const scope = await getAdminScope()
+      if (!mounted) return
+      setIsGlobalAdminUser(!!scope.is_global_admin)
+      setEventAdminIds(scope.event_ids || [])
+    }
+
+    void loadScope()
+
+    return () => {
+      mounted = false
+    }
   }, [user])
 
   useEffect(() => {
@@ -356,11 +384,21 @@ export default function ChallengesPage() {
   }
 
   const selectedJoinMode = eventMembership?.join_mode || (selectedEventObj?.join_mode || 'open')
+  const isSelectedEventAdmin = typeof eventId === 'string' && eventId !== 'all' && eventAdminIds.includes(eventId)
+  const canBypassEventJoin = isGlobalAdminUser || isSelectedEventAdmin
   const eventJoinBlocked =
     typeof eventId === 'string' &&
     eventId !== 'all' &&
     selectedJoinMode !== 'open' &&
-    !eventMembership?.is_member
+    !eventMembership?.is_member &&
+    !canBypassEventJoin
+
+  const showJoinPanel =
+    typeof eventId === 'string' &&
+    eventId !== 'all' &&
+    selectedJoinMode !== 'open' &&
+    !eventMembership?.is_member &&
+    !canBypassEventJoin
 
   // Filter challenges based on current filters
   const filteredChallenges = challenges.filter(challenge => {
@@ -577,62 +615,71 @@ export default function ChallengesPage() {
               onEventChange={(id) => setSelectedEvent(id === null ? 'main' : id)}
             />
 
+            {showJoinPanel && (
+              <div className="mt-4 max-w-2xl rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 p-5">
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Join event dulu untuk buka challenge</h3>
+                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                  Event: <span className="font-medium">{selectedEventObj?.name || 'Unknown Event'}</span>
+                </p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Kamu bisa join sebelum event mulai atau saat event sedang berjalan.
+                </p>
+
+                {selectedJoinMode === 'key' && (
+                  <div className="mt-3">
+                    <label className="text-xs text-gray-500 dark:text-gray-400">Event key</label>
+                    <input
+                      type="text"
+                      value={joinKeyInput}
+                      onChange={(e) => setJoinKeyInput(e.target.value)}
+                      placeholder="Masukkan key event"
+                      className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                )}
+
+                {selectedJoinMode === 'request' && (
+                  <div className="mt-3">
+                    <label className="text-xs text-gray-500 dark:text-gray-400">Catatan request (opsional)</label>
+                    <textarea
+                      value={joinNoteInput}
+                      onChange={(e) => setJoinNoteInput(e.target.value)}
+                      placeholder="Tulis alasan singkat join event"
+                      rows={3}
+                      className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
+                    />
+                  </div>
+                )}
+
+                {eventMembership?.request_status === 'pending' ? (
+                  <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">Request kamu masih pending approval admin.</p>
+                ) : eventMembership?.request_status === 'rejected' ? (
+                  <p className="mt-3 text-sm text-red-600 dark:text-red-400">Request sebelumnya ditolak. Kamu bisa kirim ulang.</p>
+                ) : null}
+
+                <button
+                  onClick={handleJoinSelectedEvent}
+                  disabled={joiningEvent || (selectedJoinMode === 'request' && eventMembership?.request_status === 'pending')}
+                  className="mt-4 inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60"
+                >
+                  {joiningEvent
+                    ? 'Processing...'
+                    : selectedJoinMode === 'request'
+                      ? 'Kirim Join Request'
+                      : selectedJoinMode === 'key'
+                        ? 'Join Pakai Key'
+                        : 'Join Event'}
+                </button>
+              </div>
+            )}
+
             {/* Challenges Grid Grouped by Category */}
             <div>
               {eventMembershipLoading ? (
                 <Loader fullscreen color="text-orange-500" />
               ) : eventJoinBlocked ? (
-                <div className="max-w-xl mx-auto rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 p-6 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Join event required</h3>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    You need to join <span className="font-medium">{selectedEventObj?.name || 'this event'}</span> before opening its challenges.
-                  </p>
-
-                  {selectedJoinMode === 'key' && (
-                    <div className="mt-4 text-left">
-                      <label className="text-xs text-gray-500 dark:text-gray-400">Event key</label>
-                      <input
-                        type="text"
-                        value={joinKeyInput}
-                        onChange={(e) => setJoinKeyInput(e.target.value)}
-                        placeholder="Enter event join key"
-                        className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-                  )}
-
-                  {selectedJoinMode === 'request' && (
-                    <div className="mt-4 text-left">
-                      <label className="text-xs text-gray-500 dark:text-gray-400">Request note (optional)</label>
-                      <textarea
-                        value={joinNoteInput}
-                        onChange={(e) => setJoinNoteInput(e.target.value)}
-                        placeholder="Write a short note to admin"
-                        rows={3}
-                        className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
-                      />
-                    </div>
-                  )}
-
-                  {eventMembership?.request_status === 'pending' ? (
-                    <p className="mt-4 text-sm text-amber-600 dark:text-amber-400">Your request is pending admin approval.</p>
-                  ) : eventMembership?.request_status === 'rejected' ? (
-                    <p className="mt-4 text-sm text-red-600 dark:text-red-400">Your previous request was rejected. You can submit again.</p>
-                  ) : null}
-
-                  <button
-                    onClick={handleJoinSelectedEvent}
-                    disabled={joiningEvent || (selectedJoinMode === 'request' && eventMembership?.request_status === 'pending')}
-                    className="mt-5 inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60"
-                  >
-                    {joiningEvent
-                      ? 'Processing...'
-                      : selectedJoinMode === 'request'
-                        ? 'Send Join Request'
-                        : selectedJoinMode === 'key'
-                          ? 'Join With Key'
-                          : 'Join Event'}
-                  </button>
+                <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400">
+                  Challenge dikunci sampai kamu join event.
                 </div>
               ) : (
                 !user || loading ? (
