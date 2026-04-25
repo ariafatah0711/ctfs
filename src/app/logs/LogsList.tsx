@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useLogs } from '@/contexts/LogsContext'
 import Link from "next/link";
-import Loader from "@/components/custom/loading";
+import { Loader } from '@/shared/components';
 import { formatRelativeDate } from '@/lib/utils'
 
 export type LogEntry = {

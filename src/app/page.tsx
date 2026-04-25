@@ -1,11 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import Loader from "@/components/custom/loading"
+import { Loader } from '@/shared/components'
 import Footer from "@/components/custom/Footer"
 import { Button } from "@/components/ui/button"
 import { Flag } from 'lucide-react'
-import ImageWithFallback from "@/components/ImageWithFallback"
+import { ImageWithFallback } from '@/shared/components'
 import Link from "next/link"
 import APP from '@/config'
 

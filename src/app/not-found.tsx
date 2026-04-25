@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
 
 export default function NotFound() {
   const { user, loading } = useAuth()

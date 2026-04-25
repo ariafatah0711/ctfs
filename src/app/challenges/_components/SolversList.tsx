@@ -1,10 +1,8 @@
 import React from 'react';
 import { formatRelativeDate } from '@/lib/utils'
+import type { Solver } from '../_types'
 
-export type Solver = {
-  username: string;
-  solvedAt: string;
-};
+export type { Solver } from '../_types'
 
 interface SolversListProps {
   solvers: Solver[];

@@ -7,16 +7,18 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Copy, Check } from 'lucide-react'
-import ChallengeListItem from '@/components/admin/ChallengeListItem'
-import ChallengeOverviewCard from '@/components/admin/ChallengeOverviewCard'
-import RecentSolversList from '@/components/admin/RecentSolversList'
-import ChallengeFormDialog from '@/components/admin/ChallengeFormDialog'
+import {
+  ChallengeFormDialog,
+  ChallengeListItem,
+  ChallengeOverviewCard,
+  RecentSolversList,
+  ChallengeFilterBar
+} from './_components'
 
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
-import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
-import Loader from "@/components/custom/loading"
+import { Loader } from '@/shared/components'
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 
 import { useAuth } from '@/contexts/AuthContext'
@@ -498,7 +500,7 @@ export default function AdminPage() {
                         onFilterChange={handleFilterChange}
                         onClear={handleClearFilters}
                         showStatusFilter={false}
-                        includeEndedEvents
+                        includeEndedEvents={false}
                         upcomingVisibilityWindowDays={null}
                         events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time }))}
                         showEventState={false}

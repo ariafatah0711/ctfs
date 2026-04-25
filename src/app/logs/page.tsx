@@ -1,11 +1,11 @@
 "use client";
 import { Suspense, useState } from "react";
 import LogsList from "./LogsList";
-import TitlePage from "@/components/custom/TitlePage";
+import { TitlePage } from '@/shared/components';
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import Loader from "@/components/custom/loading";
+import { Loader } from '@/shared/components';
 import { useLogs } from '@/contexts/LogsContext'
 import { Flag, Logs } from "lucide-react";
 import EventSelect from '@/components/custom/EventSelect'

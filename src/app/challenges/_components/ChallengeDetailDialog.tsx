@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from 'react';
 import { FileText, Link as LinkIcon, Lightbulb } from 'lucide-react';
 import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
@@ -5,28 +7,36 @@ import CustomBadge from '@/components/ui/CustomBadge';
 import DifficultyBadge from '@/components/custom/DifficultyBadge';
 import toast from 'react-hot-toast';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { MarkdownRenderer } from '@/components/MarkdownRenderer';
-import SolversList, { Solver } from './SolversList';
+import { MarkdownRenderer } from '@/shared/components'
+import SolversList from './SolversList';
 import HintDialog from './HintDialog';
 import { Attachment, ChallengeWithSolve } from '@/types';
 import APP from '@/config';
+import type {
+  ChallengeDialogTab,
+  HintModalState,
+  KeyedBooleanMap,
+  KeyedFlagFeedbackMap,
+  KeyedStringMap,
+  Solver,
+} from '../_types'
 
 interface ChallengeDetailDialogProps {
   open: boolean;
   challenge: ChallengeWithSolve | null;
   solvers: Solver[];
-  challengeTab: 'challenge' | 'solvers';
-  setChallengeTab: (tab: 'challenge' | 'solvers', challengeId?: string) => void;
+  challengeTab: ChallengeDialogTab;
+  setChallengeTab: (tab: ChallengeDialogTab, challengeId?: string) => void;
   onClose: () => void;
-  flagInputs: { [key: string]: string };
+  flagInputs: KeyedStringMap;
   handleFlagInputChange: (challengeId: string, value: string) => void;
   handleFlagSubmit: (challengeId: string) => void;
-  submitting: { [key: string]: boolean };
-  flagFeedback: { [key: string]: { success: boolean, message: string } | null };
-  downloading: { [key: string]: boolean };
+  submitting: KeyedBooleanMap;
+  flagFeedback: KeyedFlagFeedbackMap;
+  downloading: KeyedBooleanMap;
   downloadFile: (attachment: Attachment, attachmentKey: string) => void;
-  showHintModal: { challenge: ChallengeWithSolve | null, hintIdx?: number };
-  setShowHintModal: (modal: { challenge: ChallengeWithSolve | null, hintIdx?: number }) => void;
+  showHintModal: HintModalState;
+  setShowHintModal: (modal: HintModalState) => void;
   events?: { id: string; name: string }[];
 }
 

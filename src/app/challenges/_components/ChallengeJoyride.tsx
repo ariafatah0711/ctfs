@@ -38,11 +38,6 @@ export default function ChallengeJoyride() {
             placement: 'center',
             disableBeacon: true,
           },
-          // {
-          //   target: '[data-tour="navbar-logo"]',
-          //   content: '🏠 Click this logo to explore the home page.',
-          //   placement: 'bottom',
-          // },
           {
             target: '[data-tour="navbar-challenges"]',
             content: '💡 Browse all available challenges here.',
@@ -53,21 +48,6 @@ export default function ChallengeJoyride() {
             content: '🏆 Check the rankings here.',
             placement: 'bottom',
           },
-          // {
-          //   target: '[data-tour="navbar-rules"]',
-          //   content: '📖 Read the competition rules here.',
-          //   placement: 'bottom',
-          // },
-          // {
-          //   target: '[data-tour="navbar-info"]',
-          //   content: '📢 Find important info and announcements here.',
-          //   placement: 'bottom',
-          // },
-          // {
-          //   target: '[data-tour="navbar-profile"]',
-          //   content: '👤 Open your profile to update your picture, bio, sosmed, and more.',
-          //   placement: 'bottom',
-          // },
           {
             target: '[data-tour="navbar-notifications"]',
             content: '🔔 View notifications for information.',
@@ -111,7 +91,6 @@ export default function ChallengeJoyride() {
     if (!step) return
 
     const handleClickOnTarget = () => {
-
       // Auto-advance to next step after short delay
       setTimeout(() => {
         if (storeRef.current) {

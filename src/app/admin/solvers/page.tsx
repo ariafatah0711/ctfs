@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext"
 import { isAdmin } from "@/lib/admin"
 import { getSolversAll, getSolversByUsername, getSolversByChallengeTitle, deleteSolver } from "@/lib/challenges"
 import ConfirmDialog from "@/components/custom/ConfirmDialog"
-import Loader from "@/components/custom/loading"
+import { Loader } from '@/shared/components'
 import BackButton from "@/components/custom/BackButton"
 
 import { motion } from "framer-motion"

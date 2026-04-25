@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { updatePassword } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
 
 export default function ChangePasswordPage() {
   const { user, loading: authLoading } = useAuth()

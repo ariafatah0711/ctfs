@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getUserByUsername } from '@/lib/users'
-import UserProfile from '@/components/user/UserProfile'
 import { useAuth } from '@/contexts/AuthContext'
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
+import { UserProfile } from '@/shared/components/user'
 
 export default function UserProfilePage() {
   const router = useRouter()

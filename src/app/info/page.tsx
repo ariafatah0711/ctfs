@@ -4,7 +4,7 @@ import APP from "@/config";
 import { Users, Github, BookOpen, ScrollText, Info, ListOrdered } from 'lucide-react';
 import { motion } from "framer-motion";
 import { useEffect, useState } from 'react'
-import Loader from "@/components/custom/loading";
+import { Loader } from '@/shared/components';
 import Footer from "@/components/custom/Footer";
 import { VERSION, BUILD_TIME } from "@/version";
 import { Star, GitBranch } from 'lucide-react'

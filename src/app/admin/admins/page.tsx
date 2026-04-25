@@ -9,7 +9,7 @@ import { isGlobalAdmin, getEventAdmins, getGlobalAdmins, grantEventAdmin, revoke
 import { getEvents } from '@/lib/events'
 import { Event } from '@/types'
 
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
 import BackButton from '@/components/custom/BackButton'
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 

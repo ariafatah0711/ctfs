@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { isGlobalAdmin } from '@/lib/admin'
+import { isGlobalAdmin, searchUsersByUsername, type UserLite } from '@/lib/admin'
 import {
   adminAddEventMember,
   adminRemoveEventMember,
@@ -22,9 +22,9 @@ import {
   updateEvent,
 } from '@/lib/events'
 import { getChallengesLite } from '@/lib/challenges'
-import { getAllUsers } from '@/lib/users'
-import { Event, EventJoinRequestRow, EventMemberRow, User } from '@/types'
-import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBarFloating'
+import { Event, EventJoinRequestRow, EventMemberRow } from '@/types'
+// import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBarFloating'
+import ChallengeFilterBar from '@/app/challenges/_components/ChallengeFilterBarFloating'
 import APP from '@/config'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,7 +35,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { DIALOG_CONTENT_CLASS } from '@/styles/dialog'
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
 import ConfirmDialog from '@/components/custom/ConfirmDialog'
 import BackButton from '@/components/custom/BackButton'
 
@@ -85,8 +85,9 @@ export default function AdminEventPage() {
   const [eventMembers, setEventMembers] = useState<EventMemberRow[]>([])
   const [loadingEventMembers, setLoadingEventMembers] = useState(false)
   const [memberActionUserId, setMemberActionUserId] = useState<string | null>(null)
-  const [allUsers, setAllUsers] = useState<User[]>([])
   const [assignUserQuery, setAssignUserQuery] = useState('')
+  const [searchedUsers, setSearchedUsers] = useState<UserLite[]>([])
+  const [loadingUserSearch, setLoadingUserSearch] = useState(false)
   const [memberQuery, setMemberQuery] = useState('')
   const [selectedCandidateUserIds, setSelectedCandidateUserIds] = useState<string[]>([])
 
@@ -144,11 +145,6 @@ export default function AdminEventPage() {
     }
   }
 
-  const loadUsers = async () => {
-    const data = await getAllUsers()
-    setAllUsers(data)
-  }
-
   useEffect(() => {
     let mounted = true
     ;(async () => {
@@ -169,7 +165,6 @@ export default function AdminEventPage() {
 
       await loadEvents()
       await loadChallenges()
-      await loadUsers()
     })()
 
     return () => {
@@ -311,6 +306,39 @@ export default function AdminEventPage() {
     }
   }, [manageEventId, sortedEvents])
 
+  useEffect(() => {
+    const q = assignUserQuery.trim()
+
+    if (!manageEventId || q.length < 2) {
+      setSearchedUsers([])
+      setLoadingUserSearch(false)
+      return
+    }
+
+    let canceled = false
+    setLoadingUserSearch(true)
+
+    const timer = setTimeout(async () => {
+      try {
+        const data = await searchUsersByUsername(q, 12)
+        if (canceled) return
+        setSearchedUsers(data)
+      } catch (err) {
+        if (!canceled) {
+          console.error(err)
+          setSearchedUsers([])
+        }
+      } finally {
+        if (!canceled) setLoadingUserSearch(false)
+      }
+    }, 250)
+
+    return () => {
+      canceled = true
+      clearTimeout(timer)
+    }
+  }, [assignUserQuery, manageEventId])
+
   const handleQuickAddMember = async (targetUserId: string) => {
     if (!manageEventId) {
       toast.error('Select an event first')
@@ -320,8 +348,9 @@ export default function AdminEventPage() {
     try {
       await adminAddEventMember(manageEventId, targetUserId)
       await loadEventMembers(manageEventId)
-      await loadJoinRequests(manageEventId)
       setAssignUserQuery('')
+      setSearchedUsers([])
+      clearCandidateSelection()
       toast.success('Member added to event')
     } catch (err) {
       console.error(err)
@@ -365,9 +394,9 @@ export default function AdminEventPage() {
         selectedCandidateUserIds.map((userId) => adminAddEventMember(manageEventId, userId))
       )
       await loadEventMembers(manageEventId)
-      await loadJoinRequests(manageEventId)
       clearCandidateSelection()
       setAssignUserQuery('')
+      setSearchedUsers([])
       toast.success(`${selectedCandidateUserIds.length} member(s) added to event`)
     } catch (err) {
       console.error(err)
@@ -394,16 +423,11 @@ export default function AdminEventPage() {
 
   const candidateUsers = useMemo(() => {
     const joinedSet = new Set(eventMembers.map((m) => m.user_id))
-    const q = assignUserQuery.trim().toLowerCase()
 
-    return allUsers
+    return searchedUsers
       .filter((u) => !joinedSet.has(u.id))
-      .filter((u) => {
-        if (!q) return true
-        return u.username.toLowerCase().includes(q) || u.id.toLowerCase().includes(q)
-      })
       .slice(0, 8)
-  }, [allUsers, eventMembers, assignUserQuery])
+  }, [searchedUsers, eventMembers])
 
   const filteredEventMembers = useMemo(() => {
     const q = memberQuery.trim().toLowerCase()
@@ -582,11 +606,14 @@ export default function AdminEventPage() {
               <div>
                 <Label>Quick Assign User</Label>
                 <Input
-                  placeholder="Search username..."
+                  placeholder="Type username (min 2 chars)..."
                   value={assignUserQuery}
                   onChange={(e) => setAssignUserQuery(e.target.value)}
                   className="mt-2"
                 />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Search on demand. Tidak lagi memuat semua user sekaligus.
+                </p>
                 <div className="mt-2 flex items-center gap-2">
                   <Button
                     size="sm"
@@ -615,8 +642,12 @@ export default function AdminEventPage() {
                 <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                   {manageEventId === '' ? (
                     <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Select event first</div>
+                  ) : assignUserQuery.trim().length < 2 ? (
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Type at least 2 characters to search users</div>
+                  ) : loadingUserSearch ? (
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Searching users...</div>
                   ) : candidateUsers.length === 0 ? (
-                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">No available users</div>
+                    <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">No matching users (or all already members)</div>
                   ) : (
                     candidateUsers.map((u) => (
                       <div key={u.id} className="px-3 py-2 border-b last:border-b-0 border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">

@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import Loader from '@/components/custom/loading';
+import { Loader } from '@/shared/components';
 import Footer from "@/components/custom/Footer"
 import { motion } from "framer-motion";
 import { Scale } from 'lucide-react';
 import APP from '@/config';
-import { RulesMarkdownRenderer } from '@/components/MarkdownRenderer'
+import { RulesMarkdownRenderer } from '@/shared/components'
 import { Button } from '@/components/ui/button';
 
 const RULES = [

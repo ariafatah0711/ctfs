@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MessageCircleQuestionMark, FileText, Play } from 'lucide-react';
 import { Dialog, DialogContent} from '@/components/ui/dialog'
@@ -36,17 +36,17 @@ export default function ChallengeTutorial(_: ChallengeTutorialProps) {
       {/* Floating toggle button — position follows ScrollToggle when present */}
       {/* Position tutorial above other floating toggles; support up to 3 stacks */}
       {/** bottom spacing map: 0 -> 6, 1 -> 24, 2 -> 40, 3+ -> 56 */}
-        <div>
+      <div>
         <button
           aria-label="Open tutorial"
           onClick={() => setShow(s => !s)}
           data-tour="challenge-tutorial"
-            className="h-12 w-12 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+          className="h-12 w-12 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
           title={show ? 'Close tutorial' : 'Open tutorial'}
         >
           <MessageCircleQuestionMark size={20} />
         </button>
-        </div>
+      </div>
 
       {/* detect presence of ScrollToggle and update position */}
       <script

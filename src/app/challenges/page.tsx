@@ -7,18 +7,35 @@ import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/types'
 import { getMyEventMembership, joinEvent } from '@/lib/events'
 import { getAdminScope } from '@/lib/admin'
 import { motion } from 'framer-motion'
-import ChallengeCard from '@/components/challenges/ChallengeCard'
-import ChallengeDetailDialog from '@/components/challenges/ChallengeDetailDialog'
-import EventsTab from '@/components/challenges/EventsTab'
+import {
+  ChallengeCard,
+  ChallengeDetailDialog,
+  ChallengeFilterBar,
+  ChallengeFilterSidebar,
+  EventsTab,
+} from './_components'
+import {
+  buildFuzzyOrderedList,
+  getDifficultyOrder,
+  normalizeChallengeHints,
+  sortChallengesByDisplayPriority,
+  groupChallengesByCategory,
+} from './_lib'
+import type {
+  ChallengeDialogTab,
+  ChallengeFilterSettings,
+  ChallengesMainTab,
+  EventSelectorValue,
+  HintModalState,
+  KeyedBooleanMap,
+  KeyedFlagFeedbackMap,
+  KeyedStringMap,
+  Solver,
+} from './_types'
 import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide-react'
 import toast from 'react-hot-toast'
-import Loader from '@/components/custom/loading'
-import TitlePage from '@/components/custom/TitlePage'
-import { Solver } from '@/components/challenges/SolversList';
-import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBar'
-import ChallengeFilterSidebar from '@/components/challenges/ChallengeFilterSidebar'
+import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
 import APP from '@/config'
-import ImageWithFallback from '@/components/ImageWithFallback'
 import { useEventContext } from '@/contexts/EventContext'
 import { useFilterContext } from '@/contexts/FilterContext'
 import { getChallengeFilterSettings, setChallengeFilterSettings } from '@/lib/settings'
@@ -26,7 +43,7 @@ import { formatEventDurationCompact } from '@/lib/utils'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
-  const handleTabChange = async (tab: 'challenge' | 'solvers', challengeId: string) => {
+  const handleTabChange = async (tab: ChallengeDialogTab, challengeId: string) => {
     setChallengeTab(tab);
     if (tab === 'solvers') {
       try {
@@ -38,20 +55,20 @@ export default function ChallengesPage() {
     }
   };
   const router = useRouter()
-  const [currentTab, setCurrentTab] = useState<'challenges' | 'events'>('challenges')
-  const [challengeTab, setChallengeTab] = useState<'challenge' | 'solvers'>('challenge');
+  const [currentTab, setCurrentTab] = useState<ChallengesMainTab>('challenges')
+  const [challengeTab, setChallengeTab] = useState<ChallengeDialogTab>('challenge');
   const [solvers, setSolvers] = useState<Solver[]>([]);
   const [challenges, setChallenges] = useState<ChallengeWithSolve[]>([])
-  const [flagInputs, setFlagInputs] = useState<{[key: string]: string}>({})
-  const [flagFeedback, setFlagFeedback] = useState<{[key: string]: { success: boolean, message: string } | null}>({})
-  const [submitting, setSubmitting] = useState<{[key: string]: boolean}>({})
-  const [showHintModal, setShowHintModal] = useState<{challenge: ChallengeWithSolve | null, hintIdx?: number}>({challenge: null})
-  const [downloading, setDownloading] = useState<{[key: string]: boolean}>({})
+  const [flagInputs, setFlagInputs] = useState<KeyedStringMap>({})
+  const [flagFeedback, setFlagFeedback] = useState<KeyedFlagFeedbackMap>({})
+  const [submitting, setSubmitting] = useState<KeyedBooleanMap>({})
+  const [showHintModal, setShowHintModal] = useState<HintModalState>({ challenge: null })
+  const [downloading, setDownloading] = useState<KeyedBooleanMap>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
   const { filters, setFilters, layoutMode } = useFilterContext()
   const { events, selectedEvent, setSelectedEvent } = useEventContext()
-  const eventId: string | null | 'all' = selectedEvent === 'main' ? null : (selectedEvent as any)
-  const [filterSettings, setFilterSettings] = useState({
+  const eventId: EventSelectorValue = selectedEvent === 'main' ? null : (selectedEvent as any)
+  const [filterSettings, setFilterSettings] = useState<ChallengeFilterSettings>({
     hideMaintenance: false,
     highlightTeamSolves: true,
   })
@@ -69,37 +86,8 @@ export default function ChallengesPage() {
   const [challengeDetailCache] = useState(() => new Map<string, ChallengeWithSolve>())
   const [solversCache] = useState(() => new Map<string, Solver[]>())
 
-  const normalizeHints = (raw: any): string[] => {
-    let hints: string[] = []
-    if (Array.isArray(raw)) {
-      hints = raw.filter((h: any) => typeof h === 'string')
-    } else if (typeof raw === 'string') {
-      try {
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed)) hints = parsed.filter((h: any) => typeof h === 'string')
-        else if (typeof parsed === 'string') hints = [parsed]
-        else hints = []
-      } catch {
-        if (raw.trim() !== '') hints = [raw]
-      }
-    } else if (raw && typeof raw !== 'object') {
-      hints = [String(raw)]
-    }
-    return hints
-  }
-
   // Difficulty ranking available across the component so multiple sorts can use it
-  const difficultyOrder = Object.keys((APP as any).difficultyStyles || {})
-    .map((k) => String(k).trim().toLowerCase())
-
-  const difficultyRank = (d: any) => {
-    if (!d) return difficultyOrder.length
-    const s = String(d).trim().toLowerCase()
-    // handle common misspelling
-    if (s === 'imposible') return difficultyOrder.indexOf('impossible') !== -1 ? difficultyOrder.indexOf('impossible') : difficultyOrder.length
-    const idx = difficultyOrder.indexOf(s)
-    return idx === -1 ? difficultyOrder.length : idx
-  }
+  const difficultyOrder = getDifficultyOrder((APP as any).difficultyStyles)
 
   const formatRemaining = (ms: number) => formatEventDurationCompact(ms)
 
@@ -112,19 +100,7 @@ export default function ChallengesPage() {
   const loadChallenges = async () => {
     if (!user) return
     const challengesData = await getChallengesList(user.id, false, 'all')
-
-    // Sort by points ascending; if points equal, prefer challenges with more total_solves,
-    // then by difficulty order defined in APP.difficultyStyles, then title.
-    ;(challengesData || []).sort((a: any, b: any) => {
-      if ((a.points ?? 0) !== (b.points ?? 0)) return (a.points ?? 0) - (b.points ?? 0)
-      const sa = (a.total_solves ?? 0)
-      const sb = (b.total_solves ?? 0)
-      if (sa !== sb) return sb - sa
-      const ra = difficultyRank(a.difficulty)
-      const rb = difficultyRank(b.difficulty)
-      if (ra !== rb) return ra - rb
-      return String(a.title || '').localeCompare(String(b.title || ''))
-    })
+    const sortedChallenges = sortChallengesByDisplayPriority(challengesData || [], difficultyOrder)
 
     let teamSolvedIds = new Set<string>()
     if (APP.teams.enabled) {
@@ -134,7 +110,7 @@ export default function ChallengesPage() {
 
     // List payload is intentionally lightweight: hint/attachments/description are empty here.
     setChallenges(
-      challengesData.map((challenge: any) => ({
+      sortedChallenges.map((challenge: any) => ({
         ...challenge,
         hint: [],
         attachments: [],
@@ -232,7 +208,7 @@ export default function ChallengesPage() {
       setSelectedChallenge({
         ...challenge,
         ...cached,
-        hint: normalizeHints((cached as any).hint),
+        hint: normalizeChallengeHints((cached as any).hint),
       } as any)
       return
     }
@@ -255,7 +231,7 @@ export default function ChallengesPage() {
       return {
         ...prev,
         ...detail,
-        hint: normalizeHints((detail as any).hint),
+        hint: normalizeChallengeHints((detail as any).hint),
       } as any
     })
   }
@@ -454,58 +430,16 @@ export default function ChallengesPage() {
   const preferredOrder = APP.challengeCategories || []
 
   // Get unique categories and difficulties for filter options
-  const allCategories = Array.from(new Set(challenges.map(c => c.category))).filter(Boolean)
-  // Build categories by fuzzy-matching preferredOrder items (substring, case-insensitive)
-  const matchedCategorySet = new Set<string>()
-  const categories = [
-    ...preferredOrder.flatMap(p => {
-      const pLower = p.toLowerCase()
-      const found = allCategories.find(c => {
-        const cLower = c.toLowerCase()
-        return cLower.includes(pLower) || pLower.includes(cLower)
-      })
-      if (found && !matchedCategorySet.has(found)) {
-        matchedCategorySet.add(found)
-        return found
-      }
-      return [] as string[]
-    }),
-    ...allCategories.filter(c => !matchedCategorySet.has(c)).sort()
-  ]
+  const allCategories = Array.from(new Set(challenges.map(c => c.category))).filter(Boolean) as string[]
+  const categories = buildFuzzyOrderedList(preferredOrder, allCategories)
 
   const difficulties = Array.from(new Set(challenges.map(c => c.difficulty))).sort()
 
   // Pre-compute grouping and ordering for rendering to avoid JSX IIFE parsing issues
-  const grouped = filteredChallenges.reduce((acc, challenge) => {
-    if (!acc[challenge.category]) acc[challenge.category] = []
-    acc[challenge.category].push(challenge)
-    return acc
-  }, {} as {[key: string]: ChallengeWithSolve[]})
+  const grouped = groupChallengesByCategory(filteredChallenges)
 
   const groupKeys = Object.keys(grouped)
-  // Fuzzy match group keys against preferredOrder
-  const matchedKeySet = new Set<string>()
-  const orderedKeys = [
-    ...preferredOrder.flatMap(p => {
-      const pLower = p.toLowerCase()
-      const found = groupKeys.find(k => {
-        const kLower = k.toLowerCase()
-        return kLower.includes(pLower) || pLower.includes(kLower)
-      })
-      if (found && !matchedKeySet.has(found)) {
-        matchedKeySet.add(found)
-        return found
-      }
-      return [] as string[]
-    }),
-    ...groupKeys.filter(k => !matchedKeySet.has(k)).sort()
-  ]
-
-  // Category rank map used for compact sorting (respect preferred order)
-  const categoryRank = orderedKeys.reduce((acc, k, idx) => {
-    acc[k] = idx
-    return acc
-  }, {} as Record<string, number>)
+  const orderedKeys = buildFuzzyOrderedList(preferredOrder, groupKeys)
 
   const downloadFile = async (attachment: Attachment, attachmentKey: string) => {
     setDownloading(prev => ({ ...prev, [attachmentKey]: true }))
@@ -748,19 +682,7 @@ export default function ChallengesPage() {
                     transition={{ duration: 0.5 }}
                     className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
                   >
-                    {filteredChallenges
-                      .slice()
-                      .sort((a, b) => {
-                        // Compact view ordering: points (asc) -> total_solves (desc) -> difficulty -> title
-                        if ((a.points ?? 0) !== (b.points ?? 0)) return (a.points ?? 0) - (b.points ?? 0)
-                        const sa = (a.total_solves ?? 0)
-                        const sb = (b.total_solves ?? 0)
-                        if (sa !== sb) return sb - sa
-                        const dra = difficultyRank(a.difficulty)
-                        const drb = difficultyRank(b.difficulty)
-                        if (dra !== drb) return dra - drb
-                        return String(a.title || '').localeCompare(String(b.title || ''))
-                      })
+                    {sortChallengesByDisplayPriority(filteredChallenges, difficultyOrder)
                       .map((challenge) => (
                         <div key={challenge.id} className="relative">
                           <ChallengeCard

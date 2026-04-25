@@ -3,15 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
 import BackButton from "@/components/custom/BackButton"
 import { Card, CardContent } from '@/components/ui/card'
 import { getChallengesList } from '@/lib/challenges'
 import { getStatsByRange } from '@/lib/activityStats'
 import { getInfo } from '@/lib/users'
 import { Challenge } from '@/types'
-import StatsGraph from '@/components/admin/StatsGraph'
-import AuditLogList from '@/components/admin/AuditLogList'
+import { AuditLogList, StatsGraph } from '../_components'
 import { isGlobalAdmin } from '@/lib/admin'
 
 export default function AdminOverviewPage() {

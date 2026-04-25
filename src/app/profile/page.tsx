@@ -3,8 +3,8 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import UserProfile from '@/components/user/UserProfile'
-import Loader from '@/components/custom/loading'
+import { Loader } from '@/shared/components'
+import { UserProfile } from '@/shared/components/user'
 
 export default function ProfilePage() {
   const router = useRouter()
