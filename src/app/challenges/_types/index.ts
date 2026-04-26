@@ -1,4 +1,4 @@
-import type { ChallengeWithSolve } from '@/types'
+import type { ChallengeWithSolve } from '@/shared/types'
 
 export type ChallengesMainTab = 'challenges' | 'events'
 export type ChallengeDialogTab = 'challenge' | 'solvers'

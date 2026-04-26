@@ -1,8 +1,11 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
-import { ChallengeWithSolve } from "@/types";
+// React Imports
 import React from "react";
 import { Lightbulb } from 'lucide-react';
+
+// Shared Imports
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui";
+import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+import { ChallengeWithSolve } from '@/shared/types'
 
 interface HintDialogProps {
   challenge: ChallengeWithSolve | null;

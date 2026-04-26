@@ -1,18 +1,11 @@
 import React from 'react'
-import { formatRelativeDate } from '@/lib/utils'
+import { formatRelativeDate } from '../_lib'
 import Link from 'next/link'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-
-interface Solver {
-  solve_id: string
-  username: string
-  challenge_title: string
-  solved_at: string
-}
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+import { SolverRow } from '../_types'
 
 interface RecentSolversListProps {
-  solvers: Solver[]
+  solvers: SolverRow[]
   onViewAll: () => void
 }
 

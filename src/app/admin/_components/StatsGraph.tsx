@@ -11,7 +11,7 @@ import {
   TimeScale
 } from 'chart.js'
 import 'chartjs-adapter-date-fns'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui'
 import type { ChartData, ChartOptions, Scale, Tick, CoreScaleOptions } from 'chart.js'
 import React from 'react'
 

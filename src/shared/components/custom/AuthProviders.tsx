@@ -1,10 +1,10 @@
 "use client";
 
-import { bindGoogleManual, unbindGoogleManual } from "@/lib/auth";
+import { bindGoogleManual, unbindGoogleManual } from "@/shared/lib/auth";
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { Mail, Chrome, X } from "lucide-react";
-import ConfirmDialog from '@/components/custom/ConfirmDialog';
+import ConfirmDialog from './ConfirmDialog';
 
 type AuthInfo = { provider: string; email: string };
 

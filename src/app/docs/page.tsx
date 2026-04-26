@@ -1,9 +1,12 @@
 "use client"
 
+// React Imports
 import { BookOpen, Clock, ArrowRight } from "lucide-react"
-import Footer from "@/components/custom/Footer"
-import Link from "next/link"
 import { motion } from "framer-motion"
+import Link from "next/link"
+
+// Shared Imports
+import { Footer } from "@/shared/components/custom"
 
 export default function DocsPage() {
   return (

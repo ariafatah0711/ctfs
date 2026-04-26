@@ -1,17 +1,21 @@
 "use client"
 
+// React Imports
 import React, { useState } from 'react';
 import { FileText, Link as LinkIcon, Lightbulb } from 'lucide-react';
-import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
-import CustomBadge from '@/components/ui/CustomBadge';
-import DifficultyBadge from '@/components/custom/DifficultyBadge';
 import toast from 'react-hot-toast';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+
+// Shared Imports
+import APP from '@/config';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, CustomBadge } from "@/shared/ui";
 import { MarkdownRenderer } from '@/shared/components'
+import { DifficultyBadge } from '@/shared/components/custom';
+import { Attachment, ChallengeWithSolve } from '@/shared/types';
+import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+
+// Local Imports
 import SolversList from './SolversList';
 import HintDialog from './HintDialog';
-import { Attachment, ChallengeWithSolve } from '@/types';
-import APP from '@/config';
 import type {
   ChallengeDialogTab,
   HintModalState,

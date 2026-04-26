@@ -1,18 +1,20 @@
 'use client'
 
+// React Imports
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Loader } from '@/shared/components'
-import { TitlePage } from '@/shared/components'
-import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
-import BackButton from '@/components/custom/BackButton'
-import { getLeaderboardSummary } from '@/lib/challenges'
-import { useAuth } from '@/contexts/AuthContext'
-import { LeaderboardEntry } from '@/types'
 import Link from 'next/link'
-import EventSelect from '@/components/custom/EventSelect'
-import { useEventContext } from '@/contexts/EventContext'
+
+// Shared Imports
+import { Loader, TitlePage } from '@/shared/components'
+import { EventSelect, BackButton } from '@/shared/components/custom'
+import { getLeaderboardSummary } from '@/shared/lib'
+import { useAuth, useEventContext } from '@/shared/contexts'
+import { LeaderboardEntry } from '@/shared/types'
+
+// Local Imports
+import ScoreboardTable from '../_components/ScoreboardTable'
 
 export default function ScoreboardAllPage() {
   const { user, loading: authLoading } = useAuth()

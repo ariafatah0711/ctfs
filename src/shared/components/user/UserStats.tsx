@@ -1,13 +1,15 @@
 ﻿"use client"
 
+// React Imports
 import React from "react"
 import { motion } from "framer-motion"
 import dynamic from "next/dynamic"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { ChallengeWithSolve } from "@/types"
-import { useTheme } from "@/contexts/ThemeContext"
+
+// Shared Imports
 import APP from "@/config"
+import { Skeleton, Card, CardHeader, CardTitle, CardContent } from "@/shared/ui"
+import { useTheme } from "@/shared/contexts"
+import { ChallengeWithSolve } from "@/shared/types"
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
@@ -257,4 +259,3 @@ export default function UserStatsPlotly({
     </motion.div>
   )
 }
-

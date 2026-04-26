@@ -1,9 +1,8 @@
 import React from 'react'
-import { Badge } from '@/components/ui/badge'
-import DifficultyBadge from '@/components/custom/DifficultyBadge'
-import { Button } from '@/components/ui/button'
+import { customComponents } from '@/shared/components'
+import { Badge, Button } from '@/shared/ui'
 import { Pencil, Trash2, Flag, CheckCircle2, CircleOff, Wrench } from 'lucide-react'
-import { Challenge } from '@/types'
+import { Challenge } from '../_types'
 
 interface ChallengeListItemProps {
   challenge: Challenge
@@ -22,6 +21,7 @@ const ChallengeListItem: React.FC<ChallengeListItemProps> = ({
   onToggleActive,
   onToggleMaintenance,
 }) => {
+  const { DifficultyBadge } = customComponents
   const handleToggleActive = async (id: string, checked: boolean) => {
     await onToggleActive(id, checked); // update ke backend
   };

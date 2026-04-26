@@ -1,7 +1,7 @@
 'use client'
 
 import { MessageSquare } from 'lucide-react'
-import { useChat } from '@/contexts/ChatContext'
+import { useChat } from '@/shared/contexts'
 
 export default function ChatToggle() {
   const { open, setOpen } = useChat()

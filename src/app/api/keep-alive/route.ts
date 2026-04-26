@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/shared/lib/supabase'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 import { keepAliveConfig as config } from './keep-alive-config'

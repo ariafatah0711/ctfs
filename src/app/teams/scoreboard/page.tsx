@@ -1,20 +1,21 @@
 'use client'
 
+// React Imports
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Coins, Sparkles, Trophy, Users } from 'lucide-react'
-import { TitlePage } from '@/shared/components'
-import { Loader } from '@/shared/components'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useAuth } from '@/contexts/AuthContext'
-import { useTheme } from '@/contexts/ThemeContext'
-import { useEventContext } from '@/contexts/EventContext'
-import TeamScoreboardChart from '@/components/teams/TeamScoreboardChart'
-import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/lib/teams'
+
+// Shared Imports
 import { APP } from '@/config'
-import EventSelect from '@/components/custom/EventSelect'
+import { Loader, TitlePage } from '@/shared/components'
+import { EventSelect } from '@/shared/components/custom'
+import { Card, CardHeader, CardTitle, CardContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui'
+import { useAuth, useTheme, useEventContext } from '@/shared/contexts'
+import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames, TeamProgressSeries, TeamScoreboardEntry } from '@/shared/lib'
+
+// Local Imports
+import TeamScoreboardChart from '../_components/TeamScoreboardChart'
 
 export default function TeamScoreboardPage() {
   const { user, loading: authLoading } = useAuth()

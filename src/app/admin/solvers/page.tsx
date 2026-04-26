@@ -4,26 +4,23 @@ import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { customComponents, Loader } from '@/shared/components'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
 import { Trash2 } from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
-import { isAdmin } from "@/lib/admin"
-import { getSolversAll, getSolversByUsername, getSolversByChallengeTitle, deleteSolver } from "@/lib/challenges"
-import ConfirmDialog from "@/components/custom/ConfirmDialog"
-import { Loader } from '@/shared/components'
-import BackButton from "@/components/custom/BackButton"
+import { useAuth } from '@/shared/hooks'
+import { isAdmin, getSolversAll, getSolversByUsername, getSolversByChallengeTitle, deleteSolver, formatRelativeDate } from '../_lib'
+import { SolverRow } from '../_types'
 
 import { motion } from "framer-motion"
 import toast from "react-hot-toast"
-import { formatRelativeDate } from '@/lib/utils'
 
 export default function AdminSolversPage() {
+  const { BackButton, ConfirmDialog } = customComponents
   const router = useRouter()
   const { user, loading } = useAuth()
   const [isAdminUser, setIsAdminUser] = useState(false)
 
-  const [solvers, setSolvers] = useState<any[]>([])
+  const [solvers, setSolvers] = useState<SolverRow[]>([])
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)

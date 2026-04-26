@@ -1,13 +1,15 @@
 "use client";
 
-import APP from "@/config";
-import { Users, Github, BookOpen, ScrollText, Info, ListOrdered } from 'lucide-react';
-import { motion } from "framer-motion";
+// React Imports
 import { useEffect, useState } from 'react'
-import { Loader } from '@/shared/components';
-import Footer from "@/components/custom/Footer";
+import { motion } from "framer-motion";
+import { Star, GitBranch, Users, Github, BookOpen, ScrollText, Info, ListOrdered } from 'lucide-react'
+
+// Shared Imports
+import APP from "@/config";
 import { VERSION, BUILD_TIME } from "@/version";
-import { Star, GitBranch } from 'lucide-react'
+import { Loader } from '@/shared/components';
+import { Footer } from "@/shared/components/custom";
 
 function DiscordIcon({
   size = 16,
@@ -75,7 +77,7 @@ const LINKS = [
 
 export default function InfoPage() {
   const [repoStats, setRepoStats] = useState<{ stars: number; forks: number } | null>(null)
-  const { loading } = require("@/contexts/AuthContext").useAuth();
+  const { loading } = require("@/shared/contexts").useAuth();
 
   useEffect(() => {
     const repoUrl = APP.links?.github

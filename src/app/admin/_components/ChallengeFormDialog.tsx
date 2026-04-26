@@ -3,28 +3,38 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Flag } from 'lucide-react'
 import { Check } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { DIALOG_CONTENT_CLASS, DIALOG_CONTENT_CLASS_XL } from "@/styles/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { MarkdownRenderer } from '@/components/MarkdownRenderer'
-import { Attachment, Challenge, Event } from '@/types'
-import { getFlag } from '@/lib/challenges'
+import { MarkdownRenderer } from '@/shared/components'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  Textarea,
+} from '@/shared/ui'
+import { DIALOG_CONTENT_CLASS, DIALOG_CONTENT_CLASS_XL } from "@/shared/styles"
+import { getFlag } from '../_lib'
+import { Attachment, Challenge, ChallengeFormData, Event } from '../_types'
 import APP from '@/config'
 
 interface ChallengeFormDialogProps {
   open: boolean
   editing: Challenge | null
-  formData: any
+  formData: ChallengeFormData
   submitting: boolean
   showPreview: boolean
   onOpenChange: (v: boolean) => void
   onSubmit: (e?: React.FormEvent) => void
-  onChange: (data: any) => void
+  onChange: React.Dispatch<React.SetStateAction<ChallengeFormData>>
   onAddHint: () => void
   onUpdateHint: (i: number, v: string) => void
   onRemoveHint: (i: number) => void
@@ -62,9 +72,9 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
 
     const nowMs = Date.now()
 
-    const getLabel = (evt: any) => String(evt?.name ?? evt?.title ?? 'Untitled')
+    const getLabel = (evt: Event) => String(evt?.name ?? 'Untitled')
 
-    const getState = (evt: any) => {
+    const getState = (evt: Event) => {
       const start = evt?.start_time ? new Date(evt.start_time).getTime() : null
       const end = evt?.end_time ? new Date(evt.end_time).getTime() : null
 
@@ -87,7 +97,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
 
     const safeTime = (t: number | null) => (typeof t === 'number' && !Number.isNaN(t) ? t : null)
 
-    return [...events].sort((a: any, b: any) => {
+    return [...events].sort((a: Event, b: Event) => {
       const stateA = getState(a)
       const stateB = getState(b)
       if (stateA !== stateB) return statePriority[stateA] - statePriority[stateB]
@@ -231,8 +241,8 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                     {!hideMainEventOption && (
                       <SelectItem value="__main__">{String(APP.eventMainLabel || 'Main')}</SelectItem>
                     )}
-                    {sortedEvents.map((evt: any) => (
-                      <SelectItem key={evt.id} value={evt.id}>{String(evt?.name ?? evt?.title ?? 'Untitled')}</SelectItem>
+                    {sortedEvents.map((evt: Event) => (
+                      <SelectItem key={evt.id} value={evt.id}>{String(evt?.name ?? 'Untitled')}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -266,7 +276,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                       <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
                         {/* Generate difficulty options from config to keep consistent */}
-                        {Object.keys((APP as any).difficultyStyles || {}).map(key => {
+                        {Object.keys(APP.difficultyStyles || {}).map(key => {
                           const label = key.charAt(0).toUpperCase() + key.slice(1)
                           const value = label
                           return (<SelectItem key={key} value={value}>{label}</SelectItem>)
@@ -304,7 +314,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
                       <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
                       <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                        {Object.keys((APP as any).difficultyStyles || {}).map(key => {
+                        {Object.keys(APP.difficultyStyles || {}).map(key => {
                           const label = key.charAt(0).toUpperCase() + key.slice(1)
                           const value = label
                           return (<SelectItem key={key} value={value}>{label}</SelectItem>)
@@ -335,7 +345,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                     className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
                     placeholder="Batas minimum"
                   />
-                  {formData.max_points !== '' && formData.min_points > formData.max_points && (
+                  {formData.max_points !== '' && Number(formData.min_points) > Number(formData.max_points) && (
                     <p className="text-xs text-red-500 mt-1">Min Points tidak boleh lebih dari Max Points</p>
                   )}
                 </div>
@@ -439,7 +449,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                     <Input className="col-span-3" value={a.name} onChange={e => onUpdateAttachment(idx, 'name', e.target.value)} placeholder="File name / Label" required />
                     <Input className="col-span-6" value={a.url} onChange={e => onUpdateAttachment(idx, 'url', e.target.value)} placeholder="URL" required />
-                    <Select value={a.type} onValueChange={v => onUpdateAttachment(idx, 'type', v as any)}>
+                    <Select value={a.type} onValueChange={(v: 'file' | 'link') => onUpdateAttachment(idx, 'type', v)}>
                       <SelectTrigger className="col-span-2"><SelectValue placeholder="Type" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="file">File</SelectItem>

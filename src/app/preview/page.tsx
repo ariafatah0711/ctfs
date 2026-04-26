@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getPreviewData, PreviewData } from '@/lib/preview'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { getPreviewData, PreviewData } from '@/shared/lib/preview'
 import { Calendar, Clock, Users, CheckCircle2, Trophy, Zap } from 'lucide-react'
-import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
-import { LeaderboardEntry, Event } from '@/types'
-import { formatEventDurationCompact, formatRelativeDate } from '@/lib/utils'
+import ScoreboardTable from '@/app/scoreboard/_components/ScoreboardTable'
+import { LeaderboardEntry, Event } from '@/shared/types'
+import { formatEventDurationCompact, formatRelativeDate } from '@/shared/lib/utils'
 import APP from '@/config'
 import Link from 'next/link'
 

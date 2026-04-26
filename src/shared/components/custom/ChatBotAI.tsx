@@ -1,6 +1,6 @@
 'use client'
 
-import { useChat } from '@/contexts/ChatContext'
+import { useChat } from '@/shared/contexts'
 
 export default function ChatBotAI() {
   const { open, setOpen } = useChat()

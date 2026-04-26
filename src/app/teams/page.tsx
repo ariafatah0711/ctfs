@@ -1,36 +1,20 @@
 'use client'
 
+// React Imports
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Users, UserPlus } from 'lucide-react'
-import { TitlePage } from '@/shared/components'
-import BackButton from '@/components/custom/BackButton'
-import { Loader } from '@/shared/components'
-import ConfirmDialog from '@/components/custom/ConfirmDialog'
-import TeamPageContent from '@/components/teams/TeamPageContent'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useAuth } from '@/contexts/AuthContext'
-import EventSelect from '@/components/custom/EventSelect'
-import { useEventContext } from '@/contexts/EventContext'
-import {
-  createTeam,
-  joinTeam,
-  leaveTeam,
-  deleteTeam,
-  regenerateTeamInviteCode,
-  getMyTeam,
-  getMyTeamSummary,
-  getMyTeamChallenges,
-  kickTeamMember,
-  transferTeamCaptain,
-  renameTeam,
-  TeamMember,
-  TeamInfo,
-  TeamSummary,
-  TeamChallenge,
-} from '@/lib/teams'
+
+// Shared Imports
+import { Loader, TitlePage } from '@/shared/components'
+import { BackButton, ConfirmDialog, EventSelect } from '@/shared/components/custom'
+import { Button, Input, Card, CardHeader, CardTitle, CardContent  } from '@/shared/ui'
+import { useAuth, useEventContext } from '@/shared/contexts'
+import { createTeam, joinTeam, leaveTeam, deleteTeam, regenerateTeamInviteCode, getMyTeam, getMyTeamSummary, getMyTeamChallenges, kickTeamMember, transferTeamCaptain, renameTeam, TeamMember, TeamInfo, TeamSummary, TeamChallenge,
+} from '@/shared/lib'
+
+// Local Imports
+import TeamPageContent from './_components/TeamPageContent'
 
 export default function TeamsPage() {
   const { user, loading: authLoading } = useAuth()

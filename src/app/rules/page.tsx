@@ -1,13 +1,15 @@
 "use client"
 
+// React Imports
 import { useState, useEffect } from "react";
-import { Loader } from '@/shared/components';
-import Footer from "@/components/custom/Footer"
 import { motion } from "framer-motion";
 import { Scale } from 'lucide-react';
+
+// Shared Imports
 import APP from '@/config';
-import { RulesMarkdownRenderer } from '@/shared/components'
-import { Button } from '@/components/ui/button';
+import { RulesMarkdownRenderer, Loader } from '@/shared/components'
+import { Footer } from "@/shared/components/custom";
+import { Button } from '@/shared/ui';
 
 const RULES = [
   {
@@ -45,7 +47,7 @@ const RULES = [
 ];
 
 export default function RulesPage() {
-  const { loading } = require("@/contexts/AuthContext").useAuth();
+  const { loading } = require("@/shared/contexts").useAuth();
   if (loading) return <Loader fullscreen color="text-orange-500" />
 
   return (

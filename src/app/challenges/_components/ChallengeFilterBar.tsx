@@ -1,10 +1,13 @@
+// React Imports
 import React from 'react';
-import APP from '@/config';
 import { motion } from 'framer-motion';
 import { Settings, LayoutGrid, List, Zap } from 'lucide-react';
-import { useFilterContext } from '@/contexts/FilterContext';
-import { Switch } from '@/components/ui/switch';
-import { formatEventTimingLabel } from '@/lib/utils';
+
+// Shared Imports
+import APP from '@/config';
+import { Switch } from '@/shared/ui';
+import { formatEventTimingLabel } from '@/shared/lib';
+import { useFilterContext } from '@/shared/contexts';
 
 function LayoutToggle() {
   const { layoutMode, setLayoutMode } = useFilterContext()

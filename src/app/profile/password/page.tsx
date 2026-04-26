@@ -1,11 +1,14 @@
 'use client'
 
+// React Imports
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { updatePassword } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+
+// Shared Imports
 import { Loader } from '@/shared/components'
+import { updatePassword } from '@/shared/lib'
+import { useAuth } from '@/shared/contexts'
 
 export default function ChangePasswordPage() {
   const { user, loading: authLoading } = useAuth()

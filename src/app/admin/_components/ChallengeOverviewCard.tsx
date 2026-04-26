@@ -1,20 +1,13 @@
 import React from 'react'
 import Link from 'next/link'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Challenge } from '@/types'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+import { Challenge, SiteInfo } from '../_types'
 import { motion } from 'framer-motion'
 
 interface ChallengeOverviewCardProps {
   challenges: Challenge[]
   showViewAll?: boolean
-  info?: {
-    total_users: number
-    total_admins: number
-    total_solves: number
-    unique_solvers: number
-  }
+  info?: SiteInfo
 }
 
 const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenges, info, showViewAll = true }) => {
@@ -38,11 +31,11 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Admins</div>
-              <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_admins}</div>
+              <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_admins ?? 0}</div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Uniq Solvers</div>
-              <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.unique_solvers}</div>
+              <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.unique_solvers ?? 0}</div>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Solves</div>

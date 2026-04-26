@@ -1,23 +1,24 @@
 'use client'
 
-import ScoreboardChart from '@/components/scoreboard/ScoreboardChart'
-import ScoreboardTable from '@/components/scoreboard/ScoreboardTable'
-import ScoreboardEmptyState from '@/components/scoreboard/ScoreboardEmptyState'
-import { Coins, Droplet, Trophy } from 'lucide-react'
+// React Imports
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Loader } from '@/shared/components'
-import { TitlePage } from '@/shared/components'
-import { Button } from '@/components/ui/button'
+import { Coins, Droplet, Trophy } from 'lucide-react'
 
-import { getLeaderboardSummary, getTopProgressByUsernames, getFirstBloodLeaderboard } from '@/lib/challenges'
+// Shared Imports
 import APP from '@/config'
-import { useAuth } from '@/contexts/AuthContext'
-import { useTheme } from '@/contexts/ThemeContext'
-import { LeaderboardEntry } from '@/types'
-import EventSelect from '@/components/custom/EventSelect'
-import { useEventContext } from '@/contexts/EventContext'
+import { Loader, TitlePage } from '@/shared/components'
+import { EventSelect } from '@/shared/components/custom'
+import { Button } from '@/shared/ui/button'
+import { getLeaderboardSummary, getTopProgressByUsernames, getFirstBloodLeaderboard } from '@/shared/lib'
+import { useTheme, useAuth, useEventContext } from '@/shared/contexts'
+import { LeaderboardEntry } from '@/shared/types'
+
+// Local Imports
+import ScoreboardChart from '@/app/scoreboard/_components/ScoreboardChart'
+import ScoreboardTable from '@/app/scoreboard/_components/ScoreboardTable'
+import ScoreboardEmptyState from '@/app/scoreboard/_components/ScoreboardEmptyState'
 
 export default function ScoreboardPage() {
   const { user, loading: authLoading } = useAuth()

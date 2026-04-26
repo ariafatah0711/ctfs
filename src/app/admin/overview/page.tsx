@@ -2,22 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { Loader } from '@/shared/components'
-import BackButton from "@/components/custom/BackButton"
-import { Card, CardContent } from '@/components/ui/card'
-import { getChallengesList } from '@/lib/challenges'
-import { getStatsByRange } from '@/lib/activityStats'
-import { getInfo } from '@/lib/users'
-import { Challenge } from '@/types'
+import { useAuth } from '@/shared/hooks'
+import { Loader, customComponents } from '@/shared/components'
+import { Card, CardContent } from '@/shared/ui'
+import { getChallengesList, getStatsByRange, getInfo, isGlobalAdmin } from '../_lib'
+import { Challenge, SiteInfo } from '../_types'
 import { AuditLogList, StatsGraph } from '../_components'
-import { isGlobalAdmin } from '@/lib/admin'
 
 export default function AdminOverviewPage() {
+  const { BackButton } = customComponents
   const router = useRouter()
   const { user, loading } = useAuth()
   const [challenges, setChallenges] = useState<Challenge[]>([])
-  const [siteInfo, setSiteInfo] = useState<any | null>(null)
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null)
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d')
   const [activityData, setActivityData] = useState<{ date: string; solves: number; activeUsers: number; }[]>([])
 

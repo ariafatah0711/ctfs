@@ -1,10 +1,13 @@
 'use client'
 
+// React Imports
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Joyride, { Step, STATUS } from 'react-joyride'
-import { useAuth } from '@/contexts/AuthContext'
-import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/lib/settings'
+
+// Shared Imports
+import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/shared/lib'
+import { useAuth } from '@/shared/contexts'
 
 export default function ChallengeJoyride() {
   const pathname = usePathname()

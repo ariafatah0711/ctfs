@@ -1,16 +1,18 @@
 "use client"
 
+// React Imports
 import { motion } from "framer-motion"
-import { Loader } from '@/shared/components'
-import Footer from "@/components/custom/Footer"
-import { Button } from "@/components/ui/button"
 import { Flag } from 'lucide-react'
-import { ImageWithFallback } from '@/shared/components'
 import Link from "next/link"
+
+// Shared Imports
 import APP from '@/config'
+import { Loader, ImageWithFallback } from '@/shared/components'
+import { Footer } from "@/shared/components/custom"
+import { Button } from "@/shared/ui/button"
 
 export default function Home() {
-  const { user, loading } = require("@/contexts/AuthContext").useAuth();
+  const { user, loading } = require("@/shared/contexts").useAuth();
 
   if (loading) {
     return <Loader fullscreen color="text-orange-500" />

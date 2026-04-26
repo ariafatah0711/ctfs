@@ -1,8 +1,11 @@
+// React Imports
 import React from 'react';
-import { formatRelativeDate } from '@/lib/utils'
-import type { Solver } from '../_types'
 
-export type { Solver } from '../_types'
+// Shared Imports
+import { formatRelativeDate } from '@/shared/lib'
+
+// Local Imports
+import type { Solver } from '../_types'
 
 interface SolversListProps {
   solvers: Solver[];

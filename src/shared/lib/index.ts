@@ -1,1 +1,27 @@
-export {}
+export * from '@/shared/lib/activityStats'
+export * from '@/shared/lib/admin'
+export {
+	bindGoogleManual,
+	getCurrentAuthInfo,
+	getCurrentUser,
+	isAdmin as isAuthAdmin,
+	loginGoogle,
+	sendPasswordReset,
+	signIn,
+	signOut,
+	signUp,
+	unbindGoogleManual,
+	updatePassword,
+} from '@/shared/lib/auth'
+export type { AuthResponse } from '@/shared/lib/auth'
+export * from '@/shared/lib/challenges'
+export * from '@/shared/lib/crypto'
+export * from '@/shared/lib/events'
+export * from '@/shared/lib/log'
+export * from '@/shared/lib/preview'
+export * from '@/shared/lib/settings'
+export * from '@/shared/lib/supabase'
+export * from '@/shared/lib/teams'
+export * from '@/shared/lib/userState'
+export * from '@/shared/lib/users'
+export * from '@/shared/lib/utils'

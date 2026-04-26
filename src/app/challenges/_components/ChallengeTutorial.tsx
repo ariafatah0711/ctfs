@@ -1,12 +1,16 @@
 'use client'
+
+// React Imports
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MessageCircleQuestionMark, FileText, Play } from 'lucide-react';
-import { Dialog, DialogContent} from '@/components/ui/dialog'
-import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
-import { useAuth } from '@/contexts/AuthContext'
+
+// Shared Imports
 import APP from '@/config'
-import { setChallengeGuideSeenSetting } from '@/lib/settings'
+import { Dialog, DialogContent} from '@/shared/ui'
+import { setChallengeGuideSeenSetting } from '@/shared/lib'
+import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+import { useAuth } from '@/shared/contexts'
 
 interface ChallengeTutorialProps {}
 

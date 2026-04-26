@@ -1,15 +1,18 @@
 'use client'
 
+// React Imports
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
+
+// Shared Imports
 import { Loader, TitlePage } from '@/shared/components'
-import BackButton from '@/components/custom/BackButton'
-import TeamPageContent from '@/components/teams/TeamPageContent'
-import EventSelect from '@/components/custom/EventSelect'
-import { useAuth } from '@/contexts/AuthContext'
-import { useEventContext } from '@/contexts/EventContext'
-import { getTeamByName, getTeamChallengesByName, TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '@/lib/teams'
+import { BackButton, EventSelect } from '@/shared/components/custom'
+import { getTeamByName, getTeamChallengesByName, TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '@/shared/lib'
+import { useAuth, useEventContext } from '@/shared/contexts'
+
+// Local Imports
+import TeamPageContent from '@/app/teams/_components/TeamPageContent'
 
 export default function TeamDetailPage() {
   const { user, loading: authLoading } = useAuth()

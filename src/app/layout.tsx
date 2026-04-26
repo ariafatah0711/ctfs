@@ -1,31 +1,17 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Inter } from 'next/font/google'
 import 'react-medium-image-zoom/dist/styles.css'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
-import Navbar from '@/components/Navbar'
-import ScrollToggle from '@/components/custom/ScrollToggle'
-import { AuthProvider } from '@/contexts/AuthContext'
-import { ThemeProvider } from '@/contexts/ThemeContext'
-import { LogsProvider } from '@/contexts/LogsContext'
-import { ChatProvider } from '@/contexts/ChatContext'
-import { headers } from 'next/headers'
+import Navbar from '@/shared/components/Navbar'
+import { ScrollToggle, FloatingToolbar, ChatBotAI, ChatToggle }  from '@/shared/components/custom'
+import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider} from '@/shared/contexts'
 import APP from '@/config'
-import Script from 'next/script'
 
-import FloatingToolbar from '@/components/custom/FloatingToolbar'
-import ChatBotAI from '@/components/custom/ChatBotAI'
-// import ChallengeTutorial from '@/components/challenges/ChallengeTutorial'
-// import ChallengeJoyride from '@/components/challenges/ChallengeJoyride'
 import { ChallengeJoyride, ChallengeTutorial } from '@/app/challenges/_components'
-import ChatToggle from '@/components/custom/ChatToggle'
-import { EventProvider } from '@/contexts/EventContext'
-import { FilterProvider } from '@/contexts/FilterContext'
-
-import Live2DMaskotAnime from '@/components/custom/anime/Live2DMaskotAnime'
-// import Live2DInteractive from '@/components/custom/anime/Live2DInteractive'
-import Live2DPixi from '@/components/custom/anime/Live2DPixi'
+import { Live2DMaskotAnime } from '@/shared/components/custom/anime'
 
 const inter = Inter({ subsets: ['latin'] })
 

@@ -1,8 +1,8 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { DIALOG_CONTENT_CLASS } from "@/styles/dialog"
-import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog"
+import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+import { Button } from "@/shared/ui/button"
 import { useState } from "react"
 
 import { ReactNode } from "react"

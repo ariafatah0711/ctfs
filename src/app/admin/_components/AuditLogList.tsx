@@ -1,13 +1,14 @@
+// React Imports
 import React from 'react'
 import Link from 'next/link'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { motion } from 'framer-motion'
-import { AuditLogEntry } from '@/lib/log'
-import { getAuditLogs } from '@/lib/log'
-import { formatRelativeDate } from '@/lib/utils'
-import Loader from '@/components/custom/loading'
-import { getUsernameByEmail } from '@/lib/users'
 
+// Shared Imports
+import { Loader } from '@/shared/components'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+
+// Local Imports
+import { AuditLogEntry, getAuditLogs, formatRelativeDate, getUsernameByEmail } from '../_lib'
 interface AuditLogListProps {
   // If `logs` is provided by the parent, the component will display them.
   // If not provided, the component will fetch logs itself using `getAuditLogs`.
@@ -46,7 +47,7 @@ const EmailWithUsernameTooltip: React.FC<{
   const [isLoading, setIsLoading] = React.useState(false)
   const [showTooltip, setShowTooltip] = React.useState(false)
   const [tooltipPos, setTooltipPos] = React.useState({ x: 0, y: 0 })
-  const emailRef = React.useRef<HTMLSpanElement>(null)
+  const emailRef = React.useRef<HTMLElement | null>(null)
   const abortControllerRef = React.useRef<AbortController | null>(null)
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
 
@@ -131,7 +132,9 @@ const EmailWithUsernameTooltip: React.FC<{
     <div className="relative inline-block">
       {username ? (
         <Link
-          ref={emailRef as any}
+          ref={(node) => {
+            emailRef.current = node
+          }}
           href={`/user/${encodeURIComponent(username)}`}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -141,7 +144,9 @@ const EmailWithUsernameTooltip: React.FC<{
         </Link>
       ) : (
         <span
-          ref={emailRef}
+          ref={(node) => {
+            emailRef.current = node
+          }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           className="truncate text-sm text-gray-700 dark:text-gray-300 font-medium flex-1 cursor-help border-b border-dotted border-gray-400 dark:border-gray-600 hover:border-solid transition-all"

@@ -1,7 +1,10 @@
+// React Imports
 import React from 'react'
-import APP from '@/config'
 import { Zap, Search } from 'lucide-react'
-import { formatEventTimingLabel } from '@/lib/utils'
+
+// Shared Imports
+import APP from '@/config'
+import { formatEventTimingLabel } from '@/shared/lib'
 
 type EventItem = {
   id: string

@@ -1,4 +1,4 @@
-import type { ChallengeWithSolve } from '@/types'
+import type { ChallengeWithSolve } from '@/shared/types'
 
 export function normalizeChallengeHints(raw: unknown): string[] {
   let hints: string[] = []

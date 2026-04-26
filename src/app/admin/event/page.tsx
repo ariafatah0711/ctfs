@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
-import { useAuth } from '@/contexts/AuthContext'
-import { isGlobalAdmin, searchUsersByUsername, type UserLite } from '@/lib/admin'
+import { useAuth } from '@/shared/hooks'
+import { Loader, customComponents } from '@/shared/components'
+import { ChallengeFilterBarFloating as ChallengeFilterBar } from '@/shared/components/challenges'
 import {
   adminAddEventMember,
   adminRemoveEventMember,
@@ -20,24 +21,31 @@ import {
   setChallengesEvent,
   setEventJoinSettings,
   updateEvent,
-} from '@/lib/events'
-import { getChallengesLite } from '@/lib/challenges'
-import { Event, EventJoinRequestRow, EventMemberRow } from '@/types'
-// import ChallengeFilterBar from '@/components/challenges/ChallengeFilterBarFloating'
-import ChallengeFilterBar from '@/app/challenges/_components/ChallengeFilterBarFloating'
+  isGlobalAdmin,
+  searchUsersByUsername,
+  getChallengesLite,
+  type UserLite,
+} from '../_lib'
+import { Event, EventJoinRequestRow, EventMemberRow } from '../_types'
 import APP from '@/config'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Switch } from '@/components/ui/switch'
-import { DIALOG_CONTENT_CLASS } from '@/styles/dialog'
-import { Loader } from '@/shared/components'
-import ConfirmDialog from '@/components/custom/ConfirmDialog'
-import BackButton from '@/components/custom/BackButton'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Switch,
+  Textarea,
+} from '@/shared/ui'
+import { DIALOG_CONTENT_CLASS } from '@/shared/styles'
 
 const toInputValue = (value?: string | null) => {
   if (!value) return ''
@@ -57,7 +65,16 @@ const fromInputValue = (value: string) => {
   return isNaN(d.getTime()) ? null : d.toISOString()
 }
 
+const getErrorMessage = (err: unknown, fallback: string) => {
+  if (typeof err === 'object' && err !== null && 'message' in err) {
+    const message = (err as { message?: unknown }).message
+    if (typeof message === 'string' && message.trim()) return message
+  }
+  return fallback
+}
+
 export default function AdminEventPage() {
+  const { BackButton, ConfirmDialog } = customComponents
   const router = useRouter()
   const { user, loading } = useAuth()
   const [events, setEvents] = useState<Event[]>([])
@@ -354,7 +371,7 @@ export default function AdminEventPage() {
       toast.success('Member added to event')
     } catch (err) {
       console.error(err)
-      toast.error((err as any)?.message || 'Failed to add member')
+      toast.error(getErrorMessage(err, 'Failed to add member'))
     } finally {
       setMemberActionUserId(null)
     }
@@ -400,7 +417,7 @@ export default function AdminEventPage() {
       toast.success(`${selectedCandidateUserIds.length} member(s) added to event`)
     } catch (err) {
       console.error(err)
-      toast.error((err as any)?.message || 'Failed to add selected members')
+      toast.error(getErrorMessage(err, 'Failed to add selected members'))
     } finally {
       setMemberActionUserId(null)
     }
@@ -415,7 +432,7 @@ export default function AdminEventPage() {
       toast.success('Member removed from event')
     } catch (err) {
       console.error(err)
-      toast.error((err as any)?.message || 'Failed to remove member')
+      toast.error(getErrorMessage(err, 'Failed to remove member'))
     } finally {
       setMemberActionUserId(null)
     }

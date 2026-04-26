@@ -1,23 +1,14 @@
 ﻿"use client";
 
+// React Imports
 import { useState } from "react";
-import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/lib/users";
-import { bindGoogleManual, unbindGoogleManual } from '@/lib/auth'
-import { isValidUsername } from "@/lib/utils";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { DIALOG_CONTENT_CLASS } from "@/styles/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import AuthProviders from "@/components/custom/AuthProviders";
 import Link from "next/link";
+
+// Shared Imports
+import { AuthProviders } from "@/shared/components/custom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger, Input, Button } from "@/shared/ui";
+import { updateUsername, updateBio, updateSosmed, updateProfilePicture, bindGoogleManual, unbindGoogleManual, isValidUsername } from "@/shared/lib";
+import { DIALOG_CONTENT_CLASS } from "@/shared/styles";
 
 export default function EditProfileModal({
   userId,
@@ -280,4 +271,3 @@ export default function EditProfileModal({
     </Dialog>
   );
 }
-

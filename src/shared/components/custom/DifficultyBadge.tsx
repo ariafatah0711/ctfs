@@ -1,5 +1,5 @@
 import React from 'react'
-import CustomBadge from '@/components/ui/CustomBadge'
+import CustomBadge from '@/shared/ui/CustomBadge'
 import APP from '@/config'
 
 interface DifficultyBadgeProps {

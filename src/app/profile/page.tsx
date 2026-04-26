@@ -1,10 +1,13 @@
 'use client'
 
+// React Imports
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+
+// Shared Imports
 import { Loader } from '@/shared/components'
 import { UserProfile } from '@/shared/components/user'
+import { useAuth } from '@/shared/contexts'
 
 export default function ProfilePage() {
   const router = useRouter()

@@ -1,10 +1,14 @@
 "use client";
+
+// React Imports
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useLogs } from '@/contexts/LogsContext'
 import Link from "next/link";
+
+// Shared Imports
 import { Loader } from '@/shared/components';
-import { formatRelativeDate } from '@/lib/utils'
+import { useLogs } from '@/shared/contexts';
+import { formatRelativeDate } from '@/shared/lib'
 
 export type LogEntry = {
   log_type: "new_challenge" | "first_blood" | "solve";

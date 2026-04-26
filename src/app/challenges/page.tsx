@@ -1,45 +1,23 @@
 'use client'
+
+// React Imports
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge } from '@/lib/challenges'
-import { getMyTeamChallenges } from '@/lib/teams'
-import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/types'
-import { getMyEventMembership, joinEvent } from '@/lib/events'
-import { getAdminScope } from '@/lib/admin'
 import { motion } from 'framer-motion'
-import {
-  ChallengeCard,
-  ChallengeDetailDialog,
-  ChallengeFilterBar,
-  ChallengeFilterSidebar,
-  EventsTab,
-} from './_components'
-import {
-  buildFuzzyOrderedList,
-  getDifficultyOrder,
-  normalizeChallengeHints,
-  sortChallengesByDisplayPriority,
-  groupChallengesByCategory,
-} from './_lib'
-import type {
-  ChallengeDialogTab,
-  ChallengeFilterSettings,
-  ChallengesMainTab,
-  EventSelectorValue,
-  HintModalState,
-  KeyedBooleanMap,
-  KeyedFlagFeedbackMap,
-  KeyedStringMap,
-  Solver,
-} from './_types'
-import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
-import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
+import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide-react'
+
+// Shared Imports
 import APP from '@/config'
-import { useEventContext } from '@/contexts/EventContext'
-import { useFilterContext } from '@/contexts/FilterContext'
-import { getChallengeFilterSettings, setChallengeFilterSettings } from '@/lib/settings'
-import { formatEventDurationCompact } from '@/lib/utils'
+import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
+import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge, getMyTeamChallenges, getMyEventMembership, joinEvent, getAdminScope, getChallengeFilterSettings, setChallengeFilterSettings, formatEventDurationCompact  } from '@/shared/lib'
+import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/types'
+import { useEventContext, useFilterContext } from '@/shared/contexts'
+
+// Local Imports
+import { ChallengeCard, ChallengeDetailDialog, ChallengeFilterBar, ChallengeFilterSidebar, EventsTab } from './_components'
+import { buildFuzzyOrderedList, getDifficultyOrder, normalizeChallengeHints, sortChallengesByDisplayPriority, groupChallengesByCategory } from './_lib'
+import type { ChallengeDialogTab, ChallengeFilterSettings, ChallengesMainTab, EventSelectorValue, HintModalState, KeyedBooleanMap, KeyedFlagFeedbackMap, KeyedStringMap, Solver } from './_types'
 
 export default function ChallengesPage() {
   // Saat tab solvers dibuka, fetch solvers
@@ -80,7 +58,7 @@ export default function ChallengesPage() {
   const [joiningEvent, setJoiningEvent] = useState(false)
   const [joinKeyInput, setJoinKeyInput] = useState('')
   const [joinNoteInput, setJoinNoteInput] = useState('')
-  const { user, loading } = require('@/contexts/AuthContext').useAuth();
+  const { user, loading } = require('@/shared/contexts').useAuth();
 
   // In-memory caches to reduce repeated network usage
   const [challengeDetailCache] = useState(() => new Map<string, ChallengeWithSolve>())

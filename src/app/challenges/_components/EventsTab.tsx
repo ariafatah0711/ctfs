@@ -1,11 +1,14 @@
 'use client'
 
-import { Event } from '@/types'
-import { Card } from '@/components/ui/card'
+// React Imports
 import { Calendar, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
+
+// Shared Imports
 import APP from '@/config'
-import { formatEventDurationCompact } from '@/lib/utils'
+import { Card } from '@/shared/ui'
+import { Event } from '@/shared/types'
+import { formatEventDurationCompact } from '@/shared/lib'
 
 type Props = {
   events: Event[]

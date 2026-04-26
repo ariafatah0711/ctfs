@@ -1,8 +1,11 @@
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { motion } from "framer-motion";
-import { ChallengeWithSolve } from "@/types";
+// React Imports
 import React from "react";
+import { motion } from "framer-motion";
+
+// Shared Imports
 import APP from '@/config';
+import { Card, CardHeader, CardContent } from "@/shared/ui";
+import { ChallengeWithSolve } from '@/shared/types'
 
 interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {

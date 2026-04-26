@@ -1,31 +1,23 @@
 ﻿"use client"
 
-import { ChallengeWithSolve } from '@/types'
-import { getFirstBloodChallengeIds, getChallenges } from '@/lib/challenges'
+// React Imports
 import { useEffect, useState, Fragment } from 'react'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { DIALOG_CONTENT_CLASS_3XL } from "@/styles/dialog"
-import { getUserDetail, getCategoryTotals, getDifficultyTotals } from '@/lib/users'
-import { Event } from '@/types'
-import { getTeamByUserId } from '@/lib/teams'
-import { formatRelativeDate } from '@/lib/utils'
 import { motion } from "framer-motion"
 import { useRouter } from 'next/navigation'
 import { Award, Crown, Droplet, Flame, CheckCircle2, LayoutGrid, Grid2X2, Grid3X3, Layers, Medal, ShieldCheck, Swords, Target, Trophy, Zap, Users, ChartColumnDecreasing } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import EditProfileModal from './EditProfileModal'
-import { getCurrentAuthInfo, getCurrentUser } from '@/lib/auth'
-import { useAuth } from '@/contexts/AuthContext'
-import { useEventContext } from '@/contexts/EventContext'
-import Loader from '@/components/custom/loading'
+
+// Shared Imports
 import APP from '@/config'
+import { ImageWithFallback } from '@/shared/components'
+import { Loader, EventSelect, BackButton, DifficultyBadge, SocialIcon } from '@/shared/components/custom'
+import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, DialogContent, DialogTitle  } from "@/shared/ui"
+import { getCurrentAuthInfo, getCurrentUser, getUserDetail, getCategoryTotals, getDifficultyTotals, getTeamByUserId, formatRelativeDate, getFirstBloodChallengeIds, getChallenges } from '@/shared/lib'
+import { useAuth, useEventContext } from '@/shared/contexts'
+import { Event, ChallengeWithSolve } from '@/shared/types'
+import { DIALOG_CONTENT_CLASS_3XL } from "@/shared/styles"
+
 import UserStatsPlotly from './UserStats'
-import EventSelect from '@/components/custom/EventSelect'
-import ImageWithFallback from '../ImageWithFallback'
-import SocialIcon from '../custom/SocialIcon'
-import BackButton from '../custom/BackButton'
-import DifficultyBadge from '../custom/DifficultyBadge'
+import EditProfileModal from './EditProfileModal'
 
 type UserDetail = {
   id: string
@@ -956,4 +948,3 @@ export default function UserProfile({
     </div>
   )
 }
-

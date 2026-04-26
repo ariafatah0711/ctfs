@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { sendPasswordReset } from "@/lib/auth";
+import { sendPasswordReset } from "@/shared/lib/auth";
 import Link from "next/link";
 import { Turnstile } from '@marsidev/react-turnstile'
 import Config from '@/config'

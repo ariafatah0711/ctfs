@@ -4,8 +4,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
 import { Copy, Check } from 'lucide-react'
 import {
   ChallengeFormDialog,
@@ -14,22 +13,42 @@ import {
   RecentSolversList,
   ChallengeFilterBar
 } from './_components'
+import type { ChallengeFormData } from './_types'
 
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 
 import { Loader } from '@/shared/components'
-import ConfirmDialog from '@/components/custom/ConfirmDialog'
-
-import { useAuth } from '@/contexts/AuthContext'
-import { getAdminScope } from '@/lib/admin'
-import { getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll } from '@/lib/challenges'
-import { getEvents } from '@/lib/events'
-import { getInfo } from '@/lib/users'
-import { Challenge, Attachment, Event } from '@/types'
+import { customComponents } from '@/shared/components'
+import { useAuth } from '@/shared/hooks'
+import { getAdminScope, getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll, getEvents, getInfo } from './_lib'
+import { Attachment, Challenge, Event, SiteInfo, SolverRow } from './_types'
 import APP from '@/config'
 
+type ChallengeDetailLike = Challenge & {
+  hint?: string[] | string | null
+}
+
+type ChallengePayload = {
+  title: string
+  description: string
+  category: string
+  points: number
+  hint: string[] | null
+  difficulty: string
+  attachments: Attachment[]
+  is_maintenance: boolean
+  event_id: string | null
+  flag: string
+  is_active?: boolean
+  is_dynamic?: boolean
+  min_points?: number
+  decay_per_solve?: number
+  max_points?: number
+}
+
 export default function AdminPage() {
+  const { ConfirmDialog } = customComponents
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading } = useAuth()
@@ -37,8 +56,8 @@ export default function AdminPage() {
   const isGlobalAdmin = adminScope?.is_global_admin ?? false
 
   const [challenges, setChallenges] = useState<Challenge[]>([])
-  const [solvers, setSolvers] = useState<any[]>([])
-  const [siteInfo, setSiteInfo] = useState<any | null>(null)
+  const [solvers, setSolvers] = useState<SolverRow[]>([])
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null)
   const [events, setEvents] = useState<Event[]>([])
   const [eventId, setEventId] = useState<string | null | 'all'>('all')
 
@@ -63,7 +82,7 @@ export default function AdminPage() {
     setConfirmOpen(true)
   }
 
-  const emptyForm = {
+  const emptyForm: ChallengeFormData = {
     title: '',
     description: '',
     category: APP.challengeCategories?.[0] || 'Web',
@@ -99,7 +118,7 @@ export default function AdminPage() {
     })
   }
 
-  const [formData, setFormData] = useState(() => ({ ...emptyForm }))
+  const [formData, setFormData] = useState<ChallengeFormData>(() => ({ ...emptyForm }))
 
   useEffect(() => {
     const eventParam = searchParams.get('event')
@@ -189,18 +208,18 @@ export default function AdminPage() {
   const openEdit = async (c: Challenge) => {
     // Fetch full details on-demand (admin list is lightweight)
     const detail = await getChallengeDetail(c.id)
-    const full = (detail ? { ...c, ...(detail as any) } : c) as any
+    const full: ChallengeDetailLike = detail ? { ...c, ...detail } : c
 
     // normalize hint to array
     let parsedHint: string[] = []
-    if (Array.isArray(full.hint)) parsedHint = full.hint.filter((h: any) => typeof h === 'string')
+    if (Array.isArray(full.hint)) parsedHint = full.hint.filter((h): h is string => typeof h === 'string')
     else if (typeof full.hint === 'string' && full.hint.trim() !== '') {
       try {
-        const arr = JSON.parse(full.hint as unknown as string)
-        if (Array.isArray(arr)) parsedHint = arr.filter((h: any) => typeof h === 'string')
-        else parsedHint = [full.hint as unknown as string]
+        const arr: unknown = JSON.parse(full.hint)
+        if (Array.isArray(arr)) parsedHint = arr.filter((h): h is string => typeof h === 'string')
+        else parsedHint = [full.hint]
       } catch {
-        parsedHint = [full.hint as unknown as string]
+        parsedHint = [full.hint]
       }
     }
 
@@ -337,7 +356,7 @@ export default function AdminPage() {
     e?.preventDefault()
     setSubmitting(true)
     try {
-      const payload: any = {
+      const payload: ChallengePayload = {
         title: (formData.title || '').trim(),
         description: (formData.description || '').trim(),
         category: (formData.category || '').trim(),
@@ -347,13 +366,12 @@ export default function AdminPage() {
         attachments: (formData.attachments || []).filter((a) => (a.url || '').trim() !== ''),
         is_maintenance: !!formData.is_maintenance,
         event_id: formData.event_id ?? null,
+        flag: (formData.flag || '').trim(),
   }
     if (editing && typeof formData.is_active !== 'undefined') payload.is_active = !!formData.is_active;
   if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;
   if (typeof formData.min_points !== 'undefined') payload.min_points = Number(formData.min_points) || 0;
   if (typeof formData.decay_per_solve !== 'undefined') payload.decay_per_solve = Number(formData.decay_per_solve) || 0;
-
-      if ((formData.flag || '').trim()) payload.flag = formData.flag.trim()
 
       if (formData.is_dynamic) {
         payload.max_points = Number(formData.max_points) || Number(formData.points) || 0;
@@ -366,7 +384,6 @@ export default function AdminPage() {
           setSubmitting(false)
           return
         }
-        payload.flag = formData.flag.trim()
         await addChallenge(payload)
       }
 
@@ -671,7 +688,6 @@ export default function AdminPage() {
             setConfirmOpen(false)
           }
         }}
-        // @ts-ignore
         confirmDisabled={!!pendingDeleteDetail && deleteConfirmInput !== pendingDeleteDetail.title}
       />
     </div>
