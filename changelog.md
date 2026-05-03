@@ -1,9 +1,21 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## v[3.2.0]
+### Refactor
+- Refactored database structure and codebase.
+- Introduced shared library for better modularization and easier imports.
+
+### Added
+- Added support for joining events using: Event key, Request-based access
+
+### Fixed
+- Fixed various middleware-related issues.
+- Fixed notification-related bugs.
+
 ## v[3.1.7]
 ### Fixed
-fixed bug new chall in list challenges
+Fixed bug new chall in list challenges
 
 ## v[3.1.6]
 ### Fixed

@@ -126,6 +126,56 @@ SET search_path = public, auth;
 
 GRANT EXECUTE ON FUNCTION get_recent_solves(INT, INT) TO authenticated;
 
+CREATE OR REPLACE FUNCTION get_activity_stats(
+  p_start TIMESTAMPTZ,
+  p_end TIMESTAMPTZ
+)
+RETURNS TABLE (
+  date TEXT,
+  solves INTEGER,
+  active_users INTEGER
+) AS $$
+BEGIN
+  IF p_start IS NULL OR p_end IS NULL THEN
+    RAISE EXCEPTION 'start and end are required';
+  END IF;
+
+  IF p_start > p_end THEN
+    RETURN;
+  END IF;
+
+  RETURN QUERY
+  WITH days AS (
+    SELECT generate_series(
+      date_trunc('day', p_start),
+      date_trunc('day', p_end),
+      interval '1 day'
+    ) AS day
+  ),
+  agg AS (
+    SELECT
+      date_trunc('day', s.created_at) AS day,
+      COUNT(*)::int AS solves,
+      COUNT(DISTINCT s.user_id)::int AS active_users
+    FROM public.solves s
+    WHERE s.created_at >= p_start
+      AND s.created_at <= p_end
+    GROUP BY 1
+  )
+  SELECT
+    to_char(d.day::date, 'YYYY-MM-DD') AS date,
+    COALESCE(a.solves, 0) AS solves,
+    COALESCE(a.active_users, 0) AS active_users
+  FROM days d
+  LEFT JOIN agg a ON a.day = d.day
+  ORDER BY d.day ASC;
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION get_activity_stats(TIMESTAMPTZ, TIMESTAMPTZ) TO authenticated;
+
 CREATE OR REPLACE FUNCTION get_solvers_all(
   p_limit INT DEFAULT 250,
   p_offset INT DEFAULT 0

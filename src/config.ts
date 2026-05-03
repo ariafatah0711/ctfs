@@ -44,8 +44,11 @@ export const APP = {
   image_icon: 'favicon.ico',
   image_preview: 'og-image.png',
 
+  // Turnstile aktif otomatis kalau site key ada di env.
+  captchaEnabled: Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim()),
+  captchaSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() || '',
+
   /* Setting Config */
-  captchaToken: process.env.NEXT_PUBLIC_CAPTCHA_TOKEN || false, // enable / disable captcha token verification on create account
   notifSolves: true, // notifikasi global saat ada yang solve challenge
   ChallengeTutorial: true, // enable / disable Challenge Tutorial component
   ChatBotAI: false, // enable / disable ChatBot AI component

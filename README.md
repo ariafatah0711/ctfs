@@ -105,9 +105,12 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 NEXT_PUBLIC_SITE_URL=https://ctf.ariaf.my.id
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
 ```
 
-Get these values from your Supabase project dashboard.
+Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` only if you want CAPTCHA enabled. If it is empty or omitted, login/register/forgot-password will skip CAPTCHA automatically.
+
+Get the values from your Supabase project dashboard and Cloudflare Turnstile.
 
 
 ### 4. Deployment
@@ -266,6 +269,25 @@ Automate daily backup of your Supabase database to GitHub using [matheusbcprog/s
 
 4. **Restore:**
    - Backups are saved in your repo under `/backups`. Restore via Supabase SQL editor.
+
+```bash
+psql -U postgres.<project_ref> `
+  -h aws-1-ap-southeast-1.pooler.supabase.com `
+  -p 5432 `
+  -d postgres `
+  -f data.sql
+
+psql `
+  -U postgres.<project_ref> `
+  -h aws-1-ap-northeast-1.pooler.supabase.com `
+  -p 6543 `
+  -d postgres `
+  "sslmode=require" `
+  -f data.sql
+
+$env:PGPASSWORD="PASSWORD"
+psql "postgresql://postgres.zexedoprtmdgtjeqbzka@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require" -f data.sql
+```
 
 ---
 

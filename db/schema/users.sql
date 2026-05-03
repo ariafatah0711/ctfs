@@ -3,7 +3,7 @@
 -- ==============================================
 
 CREATE TABLE public.users (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT UNIQUE NOT NULL,
   is_admin BOOLEAN DEFAULT false,
   bio TEXT DEFAULT '',

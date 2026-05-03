@@ -55,13 +55,20 @@ async function checkMaintenance(): Promise<{ isActive: boolean; errorType: 'manu
     let hasConnectionError = false
 
     if (error) {
-      console.log('Maintenance check error:', error)
-
-      // Parse error message
       const errorCode = error.code || ''
       const errorMsg = error.message || 'Unknown database error'
       const errorDetails = error.details || ''
       const errorHint = error.hint || ''
+
+      // 👉 ignore permission error
+      const isIgnorable =
+        errorCode === '42501' ||
+        errorMsg.includes('permission denied')
+
+      // hanya log kalau bukan ignorable
+      if (!isIgnorable) {
+        console.log('Maintenance check error:', error)
+      }
 
       hasConnectionError = (
         errorMsg.includes('fetch') ||
@@ -72,9 +79,13 @@ async function checkMaintenance(): Promise<{ isActive: boolean; errorType: 'manu
         errorCode === 'PGRST204'
       )
 
-      // Build comprehensive error message
+      // kalau ignorable, paksa jadi bukan error koneksi
+      if (isIgnorable) {
+        hasConnectionError = false
+      }
+
+      // Build message cuma kalau beneran error koneksi
       if (hasConnectionError) {
-        // Extract error type from message if no code
         if (!errorCode && errorMsg.includes('TypeError')) {
           errorMessage = errorMsg
         } else if (!errorCode && errorMsg.includes('fetch failed')) {

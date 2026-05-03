@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (Config.captchaToken && !captchaToken) {
+    if (Config.captchaEnabled && !captchaToken) {
       setError('Please complete the CAPTCHA')
       setLoading(false)
       return
@@ -123,10 +123,10 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {Config.captchaToken && (
+          {Config.captchaEnabled && (
             <div className="w-full flex justify-center">
                 <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  siteKey={Config.captchaSiteKey}
                   onSuccess={(token) => setCaptchaToken(token)}
                   onExpire={() => setCaptchaToken(null)}
                   options={{

@@ -16,6 +16,7 @@ GRANT SELECT ON public.events TO authenticated;
 GRANT SELECT ON public.challenges TO authenticated;
 GRANT SELECT ON public.solves TO authenticated;
 GRANT SELECT ON public.event_admins TO authenticated;
+GRANT SELECT ON public.notifications TO authenticated;
 
 GRANT EXECUTE ON FUNCTION public.get_logs(INT, INT) TO anon;
 GRANT SELECT ON public.challenges TO anon;

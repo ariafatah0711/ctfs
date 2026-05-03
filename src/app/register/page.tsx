@@ -33,7 +33,7 @@ export default function RegisterPage() {
   }, [user, authLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    if (Config.captchaToken && !captchaToken) {
+    if (Config.captchaEnabled && !captchaToken) {
       setError('Please complete the CAPTCHA')
       setLoading(false)
       return
@@ -173,10 +173,10 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {Config.captchaToken && (
+          {Config.captchaEnabled && (
             <div className="w-full flex justify-center">
                 <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                  siteKey={Config.captchaSiteKey}
                   onSuccess={(token) => setCaptchaToken(token)}
                   onExpire={() => setCaptchaToken(null)}
                   options={{

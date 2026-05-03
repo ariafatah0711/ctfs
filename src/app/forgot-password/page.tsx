@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (Config.captchaToken && !captchaToken) {
+    if (Config.captchaEnabled && !captchaToken) {
       setError('Please complete the CAPTCHA')
       return setLoading(false)
     }
@@ -56,10 +56,10 @@ export default function ForgotPasswordPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          {Config.captchaToken && (
+          {Config.captchaEnabled && (
             <div className="w-full flex justify-center">
               <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                siteKey={Config.captchaSiteKey}
                 onSuccess={(token) => setCaptchaToken(token)}
                 onExpire={() => setCaptchaToken(null)}
                 options={{ theme: 'auto' }}
