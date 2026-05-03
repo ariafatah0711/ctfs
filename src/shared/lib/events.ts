@@ -157,6 +157,17 @@ export async function getMyEventMembership(eventId: string): Promise<EventMember
   return (data as EventMembershipStatus) || null
 }
 
+export async function getAllMyEventMemberships(): Promise<EventMembershipStatus[]> {
+  const { data, error } = await supabase.rpc('get_all_my_event_memberships')
+
+  if (error) {
+    console.error('Error fetching all event memberships:', error)
+    return []
+  }
+
+  return (data as EventMembershipStatus[]) || []
+}
+
 export async function joinEvent(eventId: string, joinKey?: string | null, note?: string | null) {
   const { data, error } = await supabase.rpc('join_event', {
     p_event_id: eventId,

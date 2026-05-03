@@ -1,7 +1,7 @@
 // React Imports
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Settings, LayoutGrid, List, Zap } from 'lucide-react';
+import { Settings, LayoutGrid, List, Zap, Lock } from 'lucide-react';
 
 // Shared Imports
 import APP from '@/config';
@@ -30,6 +30,7 @@ type EventItem = {
   start_time?: string | null;
   end_time?: string | null;
   always_show_challenges?: boolean | null;
+  isLocked?: boolean;
 };
 
 type Props = {
@@ -135,6 +136,10 @@ export default function ChallengeFilterBar({
     }
 
     return [...filteredUpcoming].sort((a, b) => {
+      if (a.isLocked !== b.isLocked) {
+        return a.isLocked ? 1 : -1
+      }
+
       const stateA = getState(a)
       const stateB = getState(b)
 
@@ -335,6 +340,7 @@ export default function ChallengeFilterBar({
                     <Zap size={12} className="text-purple-500" />
                   )}
 
+                  {evt.isLocked && <Lock size={12} className="opacity-70" />}
                   <span>{evt.name}</span>
 
                   {showEventState && isEndedButAlwaysVisible && !isSelected && (

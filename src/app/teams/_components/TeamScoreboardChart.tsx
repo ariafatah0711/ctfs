@@ -16,6 +16,11 @@ interface TeamScoreboardChartProps {
 
 const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDark, scoreLabel = 'Score' }) => {
   const truncate = (str: string, n: number) => (str.length > n ? `${str.slice(0, n)}...` : str)
+  const formatPointText = (shortName: string, score: number, title?: string | null, category?: string | null) => {
+    const base = `${shortName} - ${score} ${scoreLabel}`
+    if (!title) return base
+    return `${base} | ${title}${category ? ` (${category})` : ''}`
+  }
 
   const chartData = series.slice(0, 10).map((entry) => {
     const x = entry.history.map((p) => {
@@ -27,7 +32,7 @@ const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDar
     return {
       x,
       y: entry.history.map((p) => p.score),
-      text: entry.history.map((p) => `${shortName} - ${p.score} ${scoreLabel}`),
+      text: entry.history.map((p) => formatPointText(shortName, p.score, p.challenge_title, p.challenge_category)),
       hovertemplate: '%{x}<br>%{text}<extra></extra>',
       mode: 'lines+markers',
       name: shortName,

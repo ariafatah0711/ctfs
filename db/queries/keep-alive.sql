@@ -14,3 +14,4 @@ CREATE POLICY "Allow all users full access"
   WITH CHECK (true);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public."keep-alive" TO authenticated;

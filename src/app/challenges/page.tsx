@@ -9,29 +9,17 @@ import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide
 
 // Shared Imports
 import APP from '@/config'
-import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
-import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge, getMyTeamChallenges, getMyEventMembership, joinEvent, getAdminScope, getChallengeFilterSettings, setChallengeFilterSettings, formatEventDurationCompact  } from '@/shared/lib'
-import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/types'
+import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge, getMyTeamChallenges, getMyEventMembership, getAllMyEventMemberships, getAdminScope, getChallengeFilterSettings, setChallengeFilterSettings, formatEventDurationCompact  } from '@/shared/lib'
 import { useEventContext, useFilterContext } from '@/shared/contexts'
+import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
+import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/types'
 
 // Local Imports
-import { ChallengeCard, ChallengeDetailDialog, ChallengeFilterBar, ChallengeFilterSidebar, EventsTab } from './_components'
+import { ChallengeCard, ChallengeDetailDialog, ChallengeFilterBar, ChallengeFilterSidebar, EventsTab, JoinEventDialog } from './_components'
 import { buildFuzzyOrderedList, getDifficultyOrder, normalizeChallengeHints, sortChallengesByDisplayPriority, groupChallengesByCategory } from './_lib'
 import type { ChallengeDialogTab, ChallengeFilterSettings, ChallengesMainTab, EventSelectorValue, HintModalState, KeyedBooleanMap, KeyedFlagFeedbackMap, KeyedStringMap, Solver } from './_types'
 
 export default function ChallengesPage() {
-  // Saat tab solvers dibuka, fetch solvers
-  const handleTabChange = async (tab: ChallengeDialogTab, challengeId: string) => {
-    setChallengeTab(tab);
-    if (tab === 'solvers') {
-      try {
-        const data = await getSolversByChallenge(challengeId);
-        setSolvers(data);
-      } catch (err) {
-        setSolvers([]);
-      }
-    }
-  };
   const router = useRouter()
   const [currentTab, setCurrentTab] = useState<ChallengesMainTab>('challenges')
   const [challengeTab, setChallengeTab] = useState<ChallengeDialogTab>('challenge');
@@ -55,14 +43,50 @@ export default function ChallengesPage() {
   const [eventMembershipLoading, setEventMembershipLoading] = useState(false)
   const [isGlobalAdminUser, setIsGlobalAdminUser] = useState(false)
   const [eventAdminIds, setEventAdminIds] = useState<string[]>([])
-  const [joiningEvent, setJoiningEvent] = useState(false)
-  const [joinKeyInput, setJoinKeyInput] = useState('')
-  const [joinNoteInput, setJoinNoteInput] = useState('')
+  const [targetEventId, setTargetEventId] = useState<string | null>(null)
+  const [targetEventMembership, setTargetEventMembership] = useState<any>(null)
+  const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false)
   const { user, loading } = require('@/shared/contexts').useAuth();
+  const [isChallengesLoading, setIsChallengesLoading] = useState(true)
+  const [allMembershipsLoaded, setAllMembershipsLoaded] = useState(false)
 
   // In-memory caches to reduce repeated network usage
   const [challengeDetailCache] = useState(() => new Map<string, ChallengeWithSolve>())
   const [solversCache] = useState(() => new Map<string, Solver[]>())
+  const [eventMembershipCache] = useState(() => new Map<string, EventMembershipStatus | null>())
+
+  // Saat tab solvers dibuka, fetch solvers
+  const fetchSolversForChallenge = async (challengeId: string) => {
+    const cached = solversCache.get(challengeId)
+    if (cached) {
+      setSolvers(cached)
+      return
+    }
+
+    try {
+      const data = await getSolversByChallenge(challengeId)
+      solversCache.set(challengeId, data)
+      setSolvers(data)
+    } catch (err) {
+      setSolvers([])
+    }
+  }
+
+  const handleTabChange = async (tab: ChallengeDialogTab, challengeId: string) => {
+    setChallengeTab(tab)
+    if (tab === 'solvers') {
+      await fetchSolversForChallenge(challengeId)
+    }
+  }
+
+  const getCachedEventMembership = async (id: string, force = false) => {
+    if (!force && eventMembershipCache.has(id)) {
+      return eventMembershipCache.get(id)!
+    }
+    const data = await getMyEventMembership(id)
+    eventMembershipCache.set(id, data)
+    return data
+  }
 
   // Difficulty ranking available across the component so multiple sorts can use it
   const difficultyOrder = getDifficultyOrder((APP as any).difficultyStyles)
@@ -77,25 +101,30 @@ export default function ChallengesPage() {
   const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd);
   const loadChallenges = async () => {
     if (!user) return
-    const challengesData = await getChallengesList(user.id, false, 'all')
-    const sortedChallenges = sortChallengesByDisplayPriority(challengesData || [], difficultyOrder)
+    setIsChallengesLoading(true)
 
-    let teamSolvedIds = new Set<string>()
-    if (APP.teams.enabled) {
-      const { challenges: teamChallenges } = await getMyTeamChallenges()
-      teamSolvedIds = new Set((teamChallenges || []).map((c: any) => c.challenge_id))
+    try {
+      const [challengesData, teamChallengesResult] = await Promise.all([
+        getChallengesList(user.id, false, 'all'),
+        APP.teams.enabled ? getMyTeamChallenges() : Promise.resolve({ challenges: [] }),
+      ])
+
+      const sortedChallenges = sortChallengesByDisplayPriority(challengesData || [], difficultyOrder)
+      const teamSolvedIds = new Set((teamChallengesResult?.challenges || []).map((c: any) => c.challenge_id))
+
+      // List payload is intentionally lightweight: hint/attachments/description are empty here.
+      setChallenges(
+        sortedChallenges.map((challenge: any) => ({
+          ...challenge,
+          hint: [],
+          attachments: [],
+          description: typeof challenge.description === 'string' ? challenge.description : '',
+          is_team_solved: teamSolvedIds.has(challenge.id),
+        }))
+      )
+    } finally {
+      setIsChallengesLoading(false)
     }
-
-    // List payload is intentionally lightweight: hint/attachments/description are empty here.
-    setChallenges(
-      sortedChallenges.map((challenge: any) => ({
-        ...challenge,
-        hint: [],
-        attachments: [],
-        description: typeof challenge.description === 'string' ? challenge.description : '',
-        is_team_solved: teamSolvedIds.has(challenge.id),
-      }))
-    )
   }
   // Redirect ke /login jika user belum login dan sudah selesai loading
   useEffect(() => {
@@ -135,15 +164,47 @@ export default function ChallengesPage() {
 
   useEffect(() => {
     let mounted = true
+    const loadAllMemberships = async () => {
+      if (!user) return
+      try {
+        const allMemberships = await getAllMyEventMemberships()
+        if (!mounted) return
+        allMemberships.forEach(m => eventMembershipCache.set(m.event_id, m))
+        setAllMembershipsLoaded(true)
+
+        if (typeof eventId === 'string' && eventId !== 'all') {
+           const m = eventMembershipCache.get(eventId)
+           if (m) {
+             setEventMembership(m)
+             setEventMembershipLoading(false)
+           }
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    loadAllMemberships()
+    return () => { mounted = false }
+  }, [user, eventMembershipCache, eventId])
+
+  useEffect(() => {
+    let mounted = true
     const loadMembership = async () => {
       if (!user || typeof eventId !== 'string' || eventId === 'all') {
         if (mounted) setEventMembership(null)
         return
       }
 
+      if (eventMembership?.event_id === eventId) return
+
+      if (eventMembershipCache.has(eventId)) {
+        if (mounted) setEventMembership(eventMembershipCache.get(eventId) || null)
+        return
+      }
+
       setEventMembershipLoading(true)
       try {
-        const data = await getMyEventMembership(eventId)
+        const data = await getCachedEventMembership(eventId)
         if (!mounted) return
         setEventMembership(data)
       } finally {
@@ -160,23 +221,7 @@ export default function ChallengesPage() {
 
   // Events are loaded globally via EventProvider
 
-  // Tambahkan useEffect ini setelah deklarasi state
-  useEffect(() => {
-    if (selectedChallenge) {
-      // Fetch solvers setiap kali challenge detail dibuka (with cache)
-      const cached = solversCache.get(selectedChallenge.id)
-      if (cached) {
-        setSolvers(cached)
-        return
-      }
-      getSolversByChallenge(selectedChallenge.id)
-        .then((data) => {
-          solversCache.set(selectedChallenge.id, data)
-          setSolvers(data)
-        })
-        .catch(() => setSolvers([]))
-    }
-  }, [selectedChallenge]);
+  // Solvers are fetched on-demand when the Solvers tab is opened.
 
   const openChallenge = async (challenge: ChallengeWithSolve) => {
     setChallengeTab('challenge')
@@ -306,34 +351,53 @@ export default function ChallengesPage() {
     setFlagInputs(prev => ({ ...prev, [challengeId]: value }))
   }
 
-  const handleJoinSelectedEvent = async () => {
-    if (typeof eventId !== 'string' || eventId === 'all') return
-
-    const joinMode = eventMembership?.join_mode || 'open'
-    if (joinMode === 'key' && !joinKeyInput.trim()) {
-      toast.error('Join key is required')
+  const attemptEventSelect = async (id: string | null | 'all') => {
+    if (id === eventId) {
+      if (currentTab === 'events') setCurrentTab('challenges')
       return
     }
 
-    setJoiningEvent(true)
-    try {
-      const result = await joinEvent(
-        eventId,
-        joinMode === 'key' ? joinKeyInput.trim() : null,
-        joinMode === 'request' ? joinNoteInput.trim() : null
-      )
-      if (result?.success) {
-        toast.success(result.message || 'Join request submitted')
-        const updated = await getMyEventMembership(eventId)
-        setEventMembership(updated)
-        await loadChallenges()
-      } else {
-        toast.error(result?.message || 'Failed to join event')
+    if (id === null || id === 'all') {
+      setSelectedEvent(id === null ? 'main' : id)
+      if (currentTab === 'events') setCurrentTab('challenges')
+      return
+    }
+
+    const evt = events.find(e => e.id === id)
+    if (!evt) return
+
+    const joinMode = evt.join_mode || 'open'
+    const isSelectedEventAdmin = eventAdminIds.includes(id)
+    const canBypass = isGlobalAdminUser || isSelectedEventAdmin
+
+    if (canBypass || joinMode === 'open') {
+      setSelectedEvent(id)
+      if (currentTab === 'events') setCurrentTab('challenges')
+      return
+    }
+
+    let membership = eventMembershipCache.get(id)
+    if (membership === undefined) {
+      const toastId = toast.loading('Checking access...')
+      try {
+        membership = await getCachedEventMembership(id)
+      } catch (err) {
+        console.error(err)
+        toast.error('Failed to check access')
+        membership = null
+      } finally {
+        toast.dismiss(toastId)
       }
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to join event')
-    } finally {
-      setJoiningEvent(false)
+    }
+
+    if (membership?.is_member) {
+      setEventMembership(membership)
+      setSelectedEvent(id)
+      if (currentTab === 'events') setCurrentTab('challenges')
+    } else {
+      setTargetEventId(id)
+      setTargetEventMembership({ evt, joinMode, membership })
+      setIsJoinDialogOpen(true)
     }
   }
 
@@ -341,13 +405,6 @@ export default function ChallengesPage() {
   const isSelectedEventAdmin = typeof eventId === 'string' && eventId !== 'all' && eventAdminIds.includes(eventId)
   const canBypassEventJoin = isGlobalAdminUser || isSelectedEventAdmin
   const eventJoinBlocked =
-    typeof eventId === 'string' &&
-    eventId !== 'all' &&
-    selectedJoinMode !== 'open' &&
-    !eventMembership?.is_member &&
-    !canBypassEventJoin
-
-  const showJoinPanel =
     typeof eventId === 'string' &&
     eventId !== 'all' &&
     selectedJoinMode !== 'open' &&
@@ -451,6 +508,15 @@ export default function ChallengesPage() {
   if (loading) return <Loader fullscreen color="text-orange-500" />
   // Jangan render apapun jika belum login, biar redirect jalan
   if (!user) return null
+  const enrichedEvents = events.map(e => {
+    const isGlobalAdmin = isGlobalAdminUser
+    const isEventAdmin = eventAdminIds.includes(e.id)
+    const canBypass = isGlobalAdmin || isEventAdmin
+    const m = eventMembershipCache.get(e.id)
+    const isLocked = !allMembershipsLoaded ? false : (!canBypass && e.join_mode !== 'open' && !m?.is_member)
+    return { ...e, isLocked }
+  })
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Desktop fixed sidebar placed outside the centered container */}
@@ -515,86 +581,31 @@ export default function ChallengesPage() {
           <>
               <ChallengeFilterBar
               filters={filters}
+              events={enrichedEvents}
+              selectedEventId={eventId}
+              onEventChange={attemptEventSelect}
+              hideMainEventOption={APP.hideEventMain}
               settings={filterSettings}
               categories={categories}
               difficulties={difficulties}
               onFilterChange={setFilters}
-              onSettingsChange={setFilterSettings}
+              onSettingsChange={(newSettings) => {
+                setFilterSettings(newSettings)
+                setChallengeFilterSettings(newSettings)
+              }}
               onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
-              showStatusFilter={true}
-              events={events.map(e => ({ id: e.id, name: e.name, start_time: e.start_time, end_time: e.end_time, always_show_challenges: e.always_show_challenges }))}
-              selectedEventId={eventId}
-              onEventChange={(id) => setSelectedEvent(id === null ? 'main' : id)}
             />
-
-            {showJoinPanel && (
-              <div className="mt-4 max-w-2xl rounded-xl border border-orange-200 dark:border-orange-800 bg-white dark:bg-gray-800 p-5">
-                <h3 className="text-base font-semibold text-gray-900 dark:text-white">Join event dulu untuk buka challenge</h3>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                  Event: <span className="font-medium">{selectedEventObj?.name || 'Unknown Event'}</span>
-                </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Kamu bisa join sebelum event mulai atau saat event sedang berjalan.
-                </p>
-
-                {selectedJoinMode === 'key' && (
-                  <div className="mt-3">
-                    <label className="text-xs text-gray-500 dark:text-gray-400">Event key</label>
-                    <input
-                      type="text"
-                      value={joinKeyInput}
-                      onChange={(e) => setJoinKeyInput(e.target.value)}
-                      placeholder="Masukkan key event"
-                      className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                )}
-
-                {selectedJoinMode === 'request' && (
-                  <div className="mt-3">
-                    <label className="text-xs text-gray-500 dark:text-gray-400">Catatan request (opsional)</label>
-                    <textarea
-                      value={joinNoteInput}
-                      onChange={(e) => setJoinNoteInput(e.target.value)}
-                      placeholder="Tulis alasan singkat join event"
-                      rows={3}
-                      className="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100"
-                    />
-                  </div>
-                )}
-
-                {eventMembership?.request_status === 'pending' ? (
-                  <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">Request kamu masih pending approval admin.</p>
-                ) : eventMembership?.request_status === 'rejected' ? (
-                  <p className="mt-3 text-sm text-red-600 dark:text-red-400">Request sebelumnya ditolak. Kamu bisa kirim ulang.</p>
-                ) : null}
-
-                <button
-                  onClick={handleJoinSelectedEvent}
-                  disabled={joiningEvent || (selectedJoinMode === 'request' && eventMembership?.request_status === 'pending')}
-                  className="mt-4 inline-flex items-center justify-center rounded-md bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60"
-                >
-                  {joiningEvent
-                    ? 'Processing...'
-                    : selectedJoinMode === 'request'
-                      ? 'Kirim Join Request'
-                      : selectedJoinMode === 'key'
-                        ? 'Join Pakai Key'
-                        : 'Join Event'}
-                </button>
-              </div>
-            )}
 
             {/* Challenges Grid Grouped by Category */}
             <div>
-              {eventMembershipLoading ? (
+              {eventMembershipLoading && eventMembership?.event_id !== eventId ? (
                 <Loader fullscreen color="text-orange-500" />
               ) : eventJoinBlocked ? (
                 <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400">
                   Challenge dikunci sampai kamu join event.
                 </div>
               ) : (
-                !user || loading ? (
+                !user || loading || isChallengesLoading ? (
                   <Loader fullscreen color="text-orange-500" />
                 ) : filteredChallenges.length === 0 ? (
                   <div className="text-center py-16">
@@ -708,26 +719,35 @@ export default function ChallengesPage() {
 
         {/* EVENTS TAB */}
         {currentTab === 'events' && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <EventsTab
-              events={events}
-              selectedEventId={eventId}
-              onEventSelect={(selected) => {
-                setSelectedEvent(selected === null ? 'main' : selected)
-                setCurrentTab('challenges')
-              }}
-            />
-          </motion.div>
+          <EventsTab
+            events={enrichedEvents}
+            selectedEventId={eventId}
+            onEventSelect={attemptEventSelect}
+          />
         )}
       </div>
 
       {/* Dialog tetap bisa pakai !user cek */}
       {user && (
-        <ChallengeDetailDialog
+        <>
+          <JoinEventDialog
+            open={isJoinDialogOpen}
+            onOpenChange={setIsJoinDialogOpen}
+            event={targetEventMembership?.evt || null}
+            joinMode={targetEventMembership?.joinMode || 'open'}
+            membershipData={targetEventMembership?.membership || null}
+            onSuccess={async () => {
+              if (targetEventId) {
+                const membership = await getCachedEventMembership(targetEventId, true)
+                setEventMembership(membership)
+                setSelectedEvent(targetEventId)
+                if (currentTab === 'events') setCurrentTab('challenges')
+              }
+              setIsJoinDialogOpen(false)
+            }}
+          />
+
+          <ChallengeDetailDialog
           open={!!selectedChallenge}
           challenge={selectedChallenge}
           solvers={solvers}
@@ -754,6 +774,7 @@ export default function ChallengesPage() {
           setShowHintModal={setShowHintModal}
           events={events}
         />
+        </>
       )}
     </div>
   )

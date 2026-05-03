@@ -297,11 +297,19 @@ SET search_path = public, auth;
 
 GRANT EXECUTE ON FUNCTION get_team_solves_by_names(TEXT[], uuid, text) TO authenticated;
 
-CREATE OR REPLACE FUNCTION get_team_unique_solves_by_names(p_names TEXT[], p_event_id uuid DEFAULT NULL, p_event_mode text DEFAULT 'any')
+CREATE OR REPLACE FUNCTION get_team_unique_solves_by_names(
+  p_names TEXT[],
+  p_event_id uuid DEFAULT NULL,
+  p_event_mode text DEFAULT 'any',
+  p_show_name_chall boolean DEFAULT false
+)
 RETURNS TABLE (
   team_name TEXT,
   created_at TIMESTAMPTZ,
-  points INTEGER
+  points INTEGER,
+  challenge_id UUID,
+  challenge_title TEXT,
+  challenge_category TEXT
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -310,7 +318,9 @@ BEGIN
       t.name AS team_name,
       s.challenge_id,
       MIN(s.created_at) AS created_at,
-      MAX(c.points) AS points
+      MAX(c.points) AS points,
+      MAX(c.title) AS challenge_title,
+      MAX(c.category) AS challenge_category
     FROM public.teams t
     JOIN public.team_members tm ON tm.team_id = t.id
     JOIN public.solves s ON s.user_id = tm.user_id
@@ -328,7 +338,10 @@ BEGIN
   SELECT
     ts.team_name,
     ts.created_at,
-    ts.points
+    ts.points,
+    CASE WHEN p_show_name_chall THEN ts.challenge_id ELSE NULL::uuid END AS challenge_id,
+    CASE WHEN p_show_name_chall THEN ts.challenge_title ELSE NULL::text END AS challenge_title,
+    CASE WHEN p_show_name_chall THEN ts.challenge_category ELSE NULL::text END AS challenge_category
   FROM team_solves ts
   ORDER BY ts.team_name ASC, ts.created_at ASC;
 END;
@@ -336,7 +349,7 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_team_unique_solves_by_names(TEXT[], uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_team_unique_solves_by_names(TEXT[], uuid, text, boolean) TO authenticated;
 
 CREATE OR REPLACE FUNCTION get_team_solves(p_event_id uuid DEFAULT NULL, p_event_mode text DEFAULT 'any')
 RETURNS TABLE (

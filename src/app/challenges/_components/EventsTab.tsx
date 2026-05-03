@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { Calendar, Clock } from 'lucide-react'
+import { Calendar, Clock, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 // Shared Imports
@@ -10,8 +10,10 @@ import { Card } from '@/shared/ui'
 import { Event } from '@/shared/types'
 import { formatEventDurationCompact } from '@/shared/lib'
 
+type EnrichedEvent = Event & { isLocked?: boolean }
+
 type Props = {
-  events: Event[]
+  events: EnrichedEvent[]
   selectedEventId?: string | null | 'all'
   onEventSelect: (eventId: string | null | 'all') => void
 }
@@ -100,8 +102,14 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
     const aStart = a.start_time ? new Date(a.start_time) : null;
     const bStart = b.start_time ? new Date(b.start_time) : null;
     return (aStart?.getTime() ?? Infinity) - (bStart?.getTime() ?? Infinity);
+  }).sort((a, b) => {
+    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1
+    return 0
   });
-  const availableEvents = [...activeList, ...ongoingList];
+  const availableEvents = [...activeList, ...ongoingList].sort((a, b) => {
+    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1
+    return 0
+  });
   const endedEvents = events.filter(evt => {
     const end = evt.end_time ? new Date(evt.end_time) : null;
     return end && end <= now;
@@ -110,6 +118,9 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
     const bEnd = b.end_time ? new Date(b.end_time) : null;
     // Most recently ended first
     return (bEnd?.getTime() ?? 0) - (aEnd?.getTime() ?? 0);
+  }).sort((a, b) => {
+    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1
+    return 0
   });
 
   const hasAvailableSection = showMain || availableEvents.length > 0
@@ -231,9 +242,12 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                     <div className="flex-1 p-4 flex flex-col">
                       {/* Title & Status */}
                       <div className="mb-3">
-                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
-                          {evt.name}
-                        </h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">
+                            {evt.name}
+                          </h4>
+                          {evt.isLocked && <Lock size={16} className="text-gray-500" />}
+                        </div>
                         <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
                           {status.icon} {status.label}
                         </div>
@@ -315,9 +329,12 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
 
                     <div className="flex-1 p-4 flex flex-col">
                       <div className="mb-3">
-                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
-                          {evt.name}
-                        </h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">
+                            {evt.name}
+                          </h4>
+                          {evt.isLocked && <Lock size={16} className="text-gray-500" />}
+                        </div>
                         <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
                           {status.icon} {status.label}
                         </div>
@@ -400,9 +417,12 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                     <div className="flex-1 p-4 flex flex-col">
                       {/* Title & Status */}
                       <div className="mb-3">
-                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
-                          {evt.name}
-                        </h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">
+                            {evt.name}
+                          </h4>
+                          {evt.isLocked && <Lock size={16} className="text-gray-500" />}
+                        </div>
                         <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
                           {status.icon} {status.label}
                         </div>

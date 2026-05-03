@@ -8,6 +8,7 @@ export { default as SolversList } from './SolversList'
 export { default as ChallengeFilterBar } from './ChallengeFilterBar'
 export { default as ChallengeFilterBarFloating } from './ChallengeFilterBarFloating'
 export { default as ChallengeFilterSidebar } from './ChallengeFilterSidebar'
+export { default as JoinEventDialog } from './JoinEventDialog'
 // export { default as ChallengeFilterBarFloating } from '@/app/challenges/_components/ChallengeFilterBarFloating'
 // export { default as ChallengeFilterSidebar } from '@/app/challenges/_components/ChallengeFilterSidebar'
 

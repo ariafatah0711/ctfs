@@ -1,6 +1,46 @@
-import { layouts } from 'chart.js';
 import { supabase } from './supabase'
 import { Challenge, ChallengeWithSolve, Attachment } from '@/shared/types'
+
+type ChallengeListResult = (ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]
+
+const challengesListInflight = new Map<string, Promise<ChallengeListResult>>()
+
+const normalizeEventKey = (eventId?: string | null | 'all') => {
+  if (eventId === undefined) return 'any'
+  if (eventId === null) return 'main'
+  return String(eventId)
+}
+
+const buildChallengesListKey = (userId?: string, showAll: boolean = false, eventId?: string | null | 'all') => {
+  const uid = userId || 'anon'
+  const visibility = showAll ? 'all' : 'active'
+  return `${uid}|${visibility}|${normalizeEventKey(eventId)}`
+}
+
+const applyEventFilter = (query: any, eventId?: string | null | 'all') => {
+  if (eventId === 'all') return query
+  if (eventId) return query.eq('event_id', eventId)
+  return query.is('event_id', null)
+}
+
+const addComputedFields = <T extends { id: string; created_at?: string; total_solves?: number; is_maintenance?: boolean }>(
+  challenge: T,
+  solvedIds: Set<string>
+) => {
+  const createdAt = challenge.created_at ? new Date(challenge.created_at) : null
+  const isRecentlyCreated = createdAt ? Date.now() - createdAt.getTime() < 24 * 60 * 60 * 1000 : false
+  const hasFirstBlood = (challenge.total_solves || 0) > 0
+
+  return {
+    ...challenge,
+    is_solved: solvedIds.has(challenge.id),
+    has_first_blood: hasFirstBlood,
+    is_recently_created: isRecentlyCreated,
+    is_new: isRecentlyCreated && !hasFirstBlood,
+    total_solves: challenge.total_solves || 0,
+    is_maintenance: challenge.is_maintenance ?? false,
+  }
+}
 
 // Get user rank only (by username)
 export async function getUserRank(username: string, eventId?: string | null | 'all'): Promise<number | null> {
@@ -30,50 +70,27 @@ export async function getChallenges(
       .order('points', { ascending: true })        // poin terendah dulu
       .order('total_solves', { ascending: false }) // jika poin sama, paling banyak solves dulu
 
-    if (!showAll) query = query.eq('is_active', true);
+    if (!showAll) query = query.eq('is_active', true)
+    query = applyEventFilter(query, eventId)
 
-    // Default: only challenges without event (Main)
-    // If eventId === 'all', do not filter by event
-    if (eventId === 'all') {
-      // no filter
-    } else if (eventId) {
-      query = query.eq('event_id', eventId);
-    } else {
-      query = query.is('event_id', null);
-    }
+    const solvesPromise = userId
+      ? supabase
+          .from('solves')
+          .select('challenge_id')
+          .eq('user_id', userId)
+      : null
 
-    const { data: challenges, error } = await query;
+    const [{ data: challenges, error }, solvesResult] = await Promise.all([
+      query,
+      solvesPromise ?? Promise.resolve({ data: [] as any[] }),
+    ])
     if (error) throw new Error(error.message);
     if (!challenges) return [];
 
     // 🔹 Cek solved user (optional)
-    let solvedIds = new Set<string>();
-    if (userId) {
-      const { data: solves } = await supabase
-        .from('solves')
-        .select('challenge_id')
-        .eq('user_id', userId);
+    const solvedIds = new Set((solvesResult?.data || []).map((s: any) => s.challenge_id) || [])
 
-      solvedIds = new Set(solves?.map((s) => s.challenge_id) || []);
-    }
-
-    return challenges.map(ch => {
-      const createdAt = new Date(ch.created_at);
-      const isRecentlyCreated = (Date.now() - createdAt.getTime()) < 24 * 60 * 60 * 1000;
-      // Use total_solves to determine first blood instead of get_logs RPC
-      // which is limited to 500 rows and excludes ended events.
-      const hasFirstBlood = (ch.total_solves || 0) > 0;
-
-      return {
-        ...ch,
-        is_solved: solvedIds.has(ch.id),
-        has_first_blood: hasFirstBlood,
-        is_recently_created: isRecentlyCreated,
-        is_new: isRecentlyCreated && !hasFirstBlood,
-        total_solves: ch.total_solves || 0,
-        is_maintenance: ch.is_maintenance ?? false,
-      };
-    });
+    return challenges.map((ch: any) => addComputedFields(ch, solvedIds))
   } catch (err) {
     console.error('Error fetching challenges:', err);
     return [];
@@ -90,49 +107,43 @@ export async function getChallengesList(
   showAll: boolean = false,
   eventId?: string | null | 'all'
 ): Promise<(ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]> {
-  try {
-    let query = supabase
-      .from('challenges')
-      .select(
-        'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at'
-      )
-      .order('points', { ascending: true })
-      .order('total_solves', { ascending: false })
+  const cacheKey = buildChallengesListKey(userId, showAll, eventId)
+  const inflight = challengesListInflight.get(cacheKey)
+  if (inflight) return inflight
 
-    if (!showAll) query = query.eq('is_active', true)
+  const run = (async () => {
+    try {
+      let query = supabase
+        .from('challenges')
+        .select(
+          'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at'
+        )
+        .order('points', { ascending: true })
+        .order('total_solves', { ascending: false })
 
-    if (eventId === 'all') {
-      // no filter
-    } else if (eventId) {
-      query = query.eq('event_id', eventId)
-    } else {
-      query = query.is('event_id', null)
-    }
+      if (!showAll) query = query.eq('is_active', true)
+      query = applyEventFilter(query, eventId)
 
-    const { data: challenges, error } = await query
-    if (error) throw new Error(error.message)
-    if (!challenges) return []
+      const solvesPromise = userId
+        ? supabase
+            .from('solves')
+            .select('challenge_id')
+            .eq('user_id', userId)
+        : null
 
-    let solvedIds = new Set<string>()
-    if (userId) {
-      const { data: solves } = await supabase
-        .from('solves')
-        .select('challenge_id')
-        .eq('user_id', userId)
+      const [{ data: challenges, error }, solvesResult] = await Promise.all([
+        query,
+        solvesPromise ?? Promise.resolve({ data: [] as any[] }),
+      ])
 
-      solvedIds = new Set(solves?.map((s) => s.challenge_id) || [])
-    }
+      if (error) throw new Error(error.message)
+      if (!challenges) return []
 
-    return (challenges as any[]).map((ch) => {
-      const createdAt = new Date(ch.created_at)
-      const isRecentlyCreated = Date.now() - createdAt.getTime() < 24 * 60 * 60 * 1000
-      // Use total_solves to determine first blood instead of get_logs RPC
-      // which is limited to 500 rows and excludes ended events.
-      const hasFirstBlood = (ch.total_solves || 0) > 0
+      const solvedIds = new Set((solvesResult?.data || []).map((s: any) => s.challenge_id) || [])
 
-      return {
+      return (challenges as any[]).map((ch) => ({
         // lightweight fields from DB
-        ...ch,
+        ...addComputedFields(ch, solvedIds),
 
         // fill heavy / unused fields so existing UI types don't break
         description: '',
@@ -140,20 +151,17 @@ export async function getChallengesList(
         attachments: [],
         flag: '',
         flag_hash: '',
+      }))
+    } catch (err) {
+      console.error('Error fetching challenges (list):', err)
+      return []
+    }
+  })().finally(() => {
+    challengesListInflight.delete(cacheKey)
+  })
 
-        // computed flags
-        is_solved: solvedIds.has(ch.id),
-        has_first_blood: hasFirstBlood,
-        is_recently_created: isRecentlyCreated,
-        is_new: isRecentlyCreated && !hasFirstBlood,
-        total_solves: ch.total_solves || 0,
-        is_maintenance: ch.is_maintenance ?? false,
-      }
-    })
-  } catch (err) {
-    console.error('Error fetching challenges (list):', err)
-    return []
-  }
+  challengesListInflight.set(cacheKey, run)
+  return run
 }
 
 /**

@@ -78,6 +78,38 @@ SET search_path = public, auth;
 
 GRANT EXECUTE ON FUNCTION get_my_event_membership(UUID) TO authenticated;
 
+CREATE OR REPLACE FUNCTION get_all_my_event_memberships()
+RETURNS JSON AS $$
+DECLARE
+  v_user_id UUID := auth.uid()::uuid;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  RETURN (
+    SELECT COALESCE(json_agg(
+      json_build_object(
+        'success', true,
+        'event_id', e.id,
+        'join_mode', e.join_mode,
+        'is_member', ep.user_id IS NOT NULL,
+        'request_status', ejr.status
+      )
+    ), '[]'::json)
+    FROM public.events e
+    LEFT JOIN public.event_participants ep
+      ON ep.event_id = e.id AND ep.user_id = v_user_id
+    LEFT JOIN public.event_join_requests ejr
+      ON ejr.event_id = e.id AND ejr.user_id = v_user_id
+  );
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION get_all_my_event_memberships() TO authenticated;
+
 CREATE OR REPLACE FUNCTION list_event_members(p_event_id UUID)
 RETURNS TABLE (
   event_id UUID,

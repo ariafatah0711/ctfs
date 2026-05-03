@@ -110,11 +110,107 @@ export type TeamChallenge = {
 export type TeamProgressPoint = {
 	date: string
 	score: number
+	challenge_id?: string | null
+	challenge_title?: string | null
+	challenge_category?: string | null
 }
 
 export type TeamProgressSeries = {
 	team_name: string
 	history: TeamProgressPoint[]
+}
+
+export type TeamUniqueSolveRow = {
+	team_name: string
+	created_at: string
+	points: number
+	challenge_id?: string | null
+	challenge_title?: string | null
+	challenge_category?: string | null
+}
+
+type TeamProgressRow = {
+	team_name: string
+	created_at: string
+	points: number
+	challenge_id?: string | null
+	challenge_title?: string | null
+	challenge_category?: string | null
+}
+
+const chunkArray = <T>(items: T[], size: number): T[][] => {
+	if (size <= 0) return [items]
+	const chunks: T[][] = []
+	for (let i = 0; i < items.length; i += size) {
+		chunks.push(items.slice(i, i + size))
+	}
+	return chunks
+}
+
+const buildTeamProgress = (rows: TeamProgressRow[]): Record<string, TeamProgressSeries> => {
+	const progress: Record<string, TeamProgressSeries> = {}
+	for (const row of rows) {
+		const name = row.team_name
+		if (!name) continue
+		if (!progress[name]) {
+			progress[name] = { team_name: name, history: [] }
+		}
+		const prev = progress[name].history.at(-1)?.score || 0
+		progress[name].history.push({
+			date: row.created_at,
+			score: prev + (row.points || 0),
+			challenge_id: row.challenge_id ?? null,
+			challenge_title: row.challenge_title ?? null,
+			challenge_category: row.challenge_category ?? null,
+		})
+	}
+	return progress
+}
+
+const mergeTeamProgress = (
+	target: Record<string, TeamProgressSeries>,
+	incoming: Record<string, TeamProgressSeries>
+) => {
+	for (const [name, series] of Object.entries(incoming)) {
+		target[name] = series
+	}
+}
+
+const fetchTeamProgressByNames = async (
+	teamNames: string[],
+	rpcName: 'get_team_solves_by_names' | 'get_team_unique_solves_by_names',
+	p_event_id?: string | null,
+	p_event_mode: string = 'any',
+	includeChallengeDetails = false
+): Promise<Record<string, TeamProgressSeries>> => {
+	if (!teamNames || teamNames.length === 0) return {}
+
+	const uniqueNames = Array.from(
+		new Set(teamNames.map((name) => name.trim()).filter(Boolean))
+	)
+	const chunks = chunkArray(uniqueNames, 1)
+	const progress: Record<string, TeamProgressSeries> = {}
+
+	for (const chunk of chunks) {
+		try {
+			const params: Record<string, any> = {
+				p_names: chunk,
+				p_event_id: p_event_id ?? null,
+				p_event_mode,
+			}
+			if (rpcName === 'get_team_unique_solves_by_names') {
+				params.p_show_name_chall = includeChallengeDetails
+			}
+			const { data, error } = await supabase.rpc(rpcName, params)
+			if (error) throw error
+			const rows: TeamProgressRow[] = (data as TeamProgressRow[]) || []
+			mergeTeamProgress(progress, buildTeamProgress(rows))
+		} catch (err) {
+			console.error(`Error fetching team progress (${rpcName}):`, err)
+		}
+	}
+
+	return progress
 }
 
 export async function getMyTeamSummary(p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; stats: TeamSummary | null; error?: string }> {
@@ -179,60 +275,33 @@ export async function getTeamScoreboard(
 	}
 }
 
-export async function getTopTeamProgressByNames(teamNames: string[], p_event_id?: string | null, p_event_mode: string = 'any'): Promise<Record<string, TeamProgressSeries>> {
-	if (!teamNames || teamNames.length === 0) return {}
+export async function getTeamUniqueSolvesByNames(
+	teamNames: string[],
+	p_event_id?: string | null,
+	p_event_mode: string = 'any',
+	showNameChall = false
+): Promise<{ rows: TeamUniqueSolveRow[]; error?: string }> {
+	if (!teamNames || teamNames.length === 0) return { rows: [] }
 	try {
-		const { data, error } = await supabase.rpc('get_team_solves_by_names', { p_names: teamNames, p_event_id: p_event_id ?? null, p_event_mode })
-		if (error) throw error
-		const rows: Array<{ team_name: string; created_at: string; points: number }> = (data as any[]) || []
-
-		const progress: Record<string, TeamProgressSeries> = {}
-		for (const row of rows) {
-			const name = row.team_name
-			if (!name) continue
-			if (!progress[name]) {
-				progress[name] = { team_name: name, history: [] }
-			}
-			const prev = progress[name].history.at(-1)?.score || 0
-			progress[name].history.push({
-				date: row.created_at,
-				score: prev + (row.points || 0),
-			})
-		}
-
-		return progress
-	} catch (err) {
-		console.error('Error fetching team progress:', err)
-		return {}
+		const { data, error } = await supabase.rpc('get_team_unique_solves_by_names', {
+			p_names: teamNames,
+			p_event_id: p_event_id ?? null,
+			p_event_mode,
+			p_show_name_chall: showNameChall,
+		})
+		if (error) return { rows: [], error: error.message }
+		return { rows: (data as TeamUniqueSolveRow[]) || [] }
+	} catch (err: any) {
+		return { rows: [], error: err?.message || 'Failed to fetch team unique solves' }
 	}
 }
 
+export async function getTopTeamProgressByNames(teamNames: string[], p_event_id?: string | null, p_event_mode: string = 'any'): Promise<Record<string, TeamProgressSeries>> {
+	return fetchTeamProgressByNames(teamNames, 'get_team_solves_by_names', p_event_id, p_event_mode)
+}
+
 export async function getTopTeamUniqueProgressByNames(teamNames: string[], p_event_id?: string | null, p_event_mode: string = 'any'): Promise<Record<string, TeamProgressSeries>> {
-	if (!teamNames || teamNames.length === 0) return {}
-	try {
-		const { data, error } = await supabase.rpc('get_team_unique_solves_by_names', { p_names: teamNames, p_event_id: p_event_id ?? null, p_event_mode })
-		if (error) throw error
-		const rows: Array<{ team_name: string; created_at: string; points: number }> = (data as any[]) || []
-
-		const progress: Record<string, TeamProgressSeries> = {}
-		for (const row of rows) {
-			const name = row.team_name
-			if (!name) continue
-			if (!progress[name]) {
-				progress[name] = { team_name: name, history: [] }
-			}
-			const prev = progress[name].history.at(-1)?.score || 0
-			progress[name].history.push({
-				date: row.created_at,
-				score: prev + (row.points || 0),
-			})
-		}
-
-		return progress
-	} catch (err) {
-		console.error('Error fetching team unique progress:', err)
-		return {}
-	}
+	return fetchTeamProgressByNames(teamNames, 'get_team_unique_solves_by_names', p_event_id, p_event_mode, true)
 }
 
 // Fetch all teams' solves (single call). Optional event filters: p_event_id|null and p_event_mode ('any'|'main'|'event')
