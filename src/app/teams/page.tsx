@@ -37,6 +37,7 @@ export default function TeamsPage() {
   const [confirmExpected, setConfirmExpected] = useState<string | null>(null)
   const [confirmInput, setConfirmInput] = useState('')
   const confirmActionRef = useRef<() => Promise<void> | void>(() => {})
+  const [initialLoading, setInitialLoading] = useState(true)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -66,7 +67,7 @@ export default function TeamsPage() {
 
   const loadTeamData = async () => {
     if (!user) return
-    setLoading(true)
+    if (initialLoading) setLoading(true)
     setStatus(null)
 
     const p_event_id = effectiveSelectedEvent === 'all' ? null : effectiveSelectedEvent === 'main' ? null : effectiveSelectedEvent
@@ -87,6 +88,7 @@ export default function TeamsPage() {
       setHasMainSolved(!!teamRes.has_main_solved)
     } finally {
       setLoading(false)
+      setInitialLoading(false)
     }
   }
 
@@ -270,96 +272,123 @@ export default function TeamsPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        {/* <TitlePage icon={<Users size={30} className="text-blue-500 dark:text-blue-300" />}>Teams</TitlePage> */}
-
-        {team && (
-          <div className="mb-4 flex justify-between items-center">
-            <BackButton label="Go Back" className="mb-2" />
-            <EventSelect
-              value={effectiveSelectedEvent}
-              onChange={setSelectedEvent}
-              events={teamEvents as any}
-              showMain={showMainOption}
-              className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
-              getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
-            />
-          </div>
-        )}
-
-        {status && (
-          <div className={`rounded-md px-4 py-3 text-sm ${status.type === 'error'
-            ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200'
-            : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
-          }`}>
-            {status.message}
-          </div>
-        )}
-
-        {loading ? (
+        {/* INITIAL LOADING (FULL BLOCK) */}
+        {initialLoading ? (
           <div className="flex justify-center py-16">
-            <Loader fullscreen color="text-orange-500" />
-          </div>
-        ) : !team ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Users size={18} /> Create Team
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Input
-                  value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
-                  placeholder="Team name"
-                  disabled={busy}
-                />
-                <Button onClick={handleCreateTeam} disabled={busy || !teamName.trim()} className="w-full">
-                  Create
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <UserPlus size={18} /> Join Team
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Input
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                  placeholder="Invite code"
-                  disabled={busy}
-                />
-                <Button onClick={handleJoinTeam} disabled={busy || !inviteCode.trim()} className="w-full">
-                  Join
-                </Button>
-              </CardContent>
-            </Card>
+            <Loader color="text-orange-500" />
           </div>
         ) : (
-          <TeamPageContent
-            team={team}
-            members={members}
-            summary={summary}
-            challenges={challenges}
-            currentUserId={user.id}
-            canManage={canManage}
-            busy={busy}
-            showManageActions
-            onRenameTeam={handleRenameTeam}
-            onCopyInvite={handleCopyInvite}
-            onRegenerateInvite={handleRegenerateInvite}
-            onLeaveTeam={handleLeaveTeam}
-            onDeleteTeam={handleDeleteTeam}
-            onKickMember={handleKickMember}
-            onTransferCaptain={handleTransferCaptain}
-          />
+          <>
+            {/* SMALL LOADER (REFETCH, NO FLASH) */}
+            {loading && (
+              <div className="flex justify-center py-4 opacity-70">
+                <Loader color="text-orange-500" />
+              </div>
+            )}
+
+            {/* HEADER */}
+            {team && (
+              <div className="mb-4 flex justify-between items-center">
+                <BackButton label="Go Back" className="mb-2" />
+                <EventSelect
+                  value={effectiveSelectedEvent}
+                  onChange={setSelectedEvent}
+                  events={teamEvents as any}
+                  showMain={showMainOption}
+                  className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+                  getEventLabel={(ev: any) =>
+                    String(ev?.name ?? ev?.title ?? 'Untitled')
+                  }
+                />
+              </div>
+            )}
+
+            {/* STATUS */}
+            {status && (
+              <div
+                className={`rounded-md px-4 py-3 text-sm ${
+                  status.type === 'error'
+                    ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200'
+                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
+                }`}
+              >
+                {status.message}
+              </div>
+            )}
+
+            {/* CONTENT */}
+            {!team ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Users size={18} /> Create Team
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      placeholder="Team name"
+                      disabled={busy}
+                    />
+                    <Button
+                      onClick={handleCreateTeam}
+                      disabled={busy || !teamName.trim()}
+                      className="w-full"
+                    >
+                      Create
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <UserPlus size={18} /> Join Team
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Input
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      placeholder="Invite code"
+                      disabled={busy}
+                    />
+                    <Button
+                      onClick={handleJoinTeam}
+                      disabled={busy || !inviteCode.trim()}
+                      className="w-full"
+                    >
+                      Join
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <TeamPageContent
+                team={team}
+                members={members}
+                summary={summary}
+                challenges={challenges}
+                currentUserId={user.id}
+                canManage={canManage}
+                busy={busy}
+                showManageActions
+                onRenameTeam={handleRenameTeam}
+                onCopyInvite={handleCopyInvite}
+                onRegenerateInvite={handleRegenerateInvite}
+                onLeaveTeam={handleLeaveTeam}
+                onDeleteTeam={handleDeleteTeam}
+                onKickMember={handleKickMember}
+                onTransferCaptain={handleTransferCaptain}
+              />
+            )}
+          </>
         )}
       </div>
 
+      {/* CONFIRM DIALOG */}
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={(open) => {
@@ -374,9 +403,15 @@ export default function TeamsPage() {
         description={
           confirmExpected ? (
             <div className="space-y-2">
-              <p className="text-sm text-gray-700 dark:text-gray-300">{confirmMessage}</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {confirmMessage}
+              </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Type <span className="font-mono text-gray-900 dark:text-gray-100">{confirmExpected}</span> to continue.
+                Type{' '}
+                <span className="font-mono text-gray-900 dark:text-gray-100">
+                  {confirmExpected}
+                </span>{' '}
+                to continue.
               </p>
               <Input
                 value={confirmInput}
@@ -393,7 +428,10 @@ export default function TeamsPage() {
         }}
         confirmLabel="Yes"
         cancelLabel="Cancel"
-        confirmDisabled={!!confirmExpected && confirmInput.trim().toLowerCase() !== confirmExpected}
+        confirmDisabled={
+          !!confirmExpected &&
+          confirmInput.trim().toLowerCase() !== confirmExpected
+        }
       />
     </div>
   )

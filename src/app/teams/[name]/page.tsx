@@ -109,37 +109,43 @@ export default function TeamDetailPage() {
           {team?.name || teamName || 'Team'}
         </TitlePage> */}
 
-        {team && (
-          <div className="mb-4 flex justify-between items-center">
-            <BackButton label="Go Back" className="mb-2" />
-            <EventSelect
-              value={effectiveSelectedEvent}
-              onChange={setSelectedEvent}
-              events={teamEvents as any}
-              showMain={showMainOption}
-              className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
-              getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
-            />
+        {/* Loader kecil (optional, bukan full replace) */}
+        {loading && !team && (
+          <div className="flex justify-center py-16">
+            <Loader color="text-orange-500" />
           </div>
         )}
 
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Loader fullscreen color="text-orange-500" />
-          </div>
-        ) : error ? (
-          <div className="text-sm text-red-600 dark:text-red-300">{error}</div>
-        ) : !team ? (
-          <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
-        ) : (
-          <TeamPageContent
-            team={team}
-            members={members}
-            summary={summary}
-            challenges={challenges}
-            currentUserId={user?.id}
-          />
-        )}
+        {/* CONTENT TETAP RENDER */}
+        <>
+          {team && (
+            <div className="mb-4 flex justify-between items-center">
+              <BackButton label="Go Back" className="mb-2" />
+              <EventSelect
+                value={effectiveSelectedEvent}
+                onChange={setSelectedEvent}
+                events={teamEvents as any}
+                showMain={showMainOption}
+                className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+                getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
+              />
+            </div>
+          )}
+
+          {error ? (
+            <div className="text-sm text-red-600 dark:text-red-300">{error}</div>
+          ) : !team ? (
+            <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
+          ) : (
+            <TeamPageContent
+              team={team}
+              members={members}
+              summary={summary}
+              challenges={challenges}
+              currentUserId={user?.id}
+            />
+          )}
+        </>
       </div>
     </div>
   )

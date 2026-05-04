@@ -1,7 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-# v[3.3.4]
+# v[3.3.0]
+
+
+# v[3.2.4]
 - feat: 3.2.4 refactor event selection logic in TeamDetailPage and UserProfile components
 
 # v[3.2.3]

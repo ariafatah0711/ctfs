@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 // React Imports
 import React from "react"
@@ -214,47 +214,47 @@ export default function UserStatsPlotly({
 
       {/* ================= LINE ================= */}
       <motion.div variants={item}>
-      <Card className="bg-white dark:bg-gray-800">
-        <CardHeader>
-          <CardTitle className="text-sm text-center">
-            Solves Over Time
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Plot
-            key={`line-${isDarkMode}`}
-            data={[
-              {
-                type: "scatter",
-                mode: "lines+markers",
-                x: timeSeries.map(d => d.date),
-                y: timeSeries.map(d => d.count),
-                line: { width: 3, color: "#60a5fa" },
-                marker: {
-                  size: 6,
-                  color: "#93c5fd",
-                  line: { color: t.bg, width: 1 },
+        <Card className="bg-white dark:bg-gray-800">
+          <CardHeader>
+            <CardTitle className="text-sm text-center">
+              Solves Over Time
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Plot
+              key={`line-${isDarkMode}`}
+              data={[
+                {
+                  type: "scatter",
+                  mode: "lines+markers",
+                  x: timeSeries.map(d => d.date),
+                  y: timeSeries.map(d => d.count),
+                  line: { width: 3, color: "#60a5fa" },
+                  marker: {
+                    size: 6,
+                    color: "#93c5fd",
+                    line: { color: t.bg, width: 1 },
+                  },
+                  hovertemplate:
+                    "%{x}<br>%{y} solves<extra></extra>",
                 },
-                hovertemplate:
-                  "%{x}<br>%{y} solves<extra></extra>",
-              },
-            ]}
-            layout={{
-              ...baseLayout,
-              height: 300,
-              xaxis: { gridcolor: t.grid },
-              yaxis: {
-                title: { text: "Solves" },
-                gridcolor: t.grid,
-              },
-              showlegend: false,
-            }}
-            style={{ width: "100%" }}
-            useResizeHandler
-            config={{ scrollZoom: false, displayModeBar: false }}
-          />
-        </CardContent>
-      </Card>
+              ]}
+              layout={{
+                ...baseLayout,
+                height: 300,
+                xaxis: { gridcolor: t.grid },
+                yaxis: {
+                  title: { text: "Solves" },
+                  gridcolor: t.grid,
+                },
+                showlegend: false,
+              }}
+              style={{ width: "100%" }}
+              useResizeHandler
+              config={{ scrollZoom: false, displayModeBar: false }}
+            />
+          </CardContent>
+        </Card>
       </motion.div>
     </motion.div>
   )
