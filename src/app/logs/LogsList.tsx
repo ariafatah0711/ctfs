@@ -43,7 +43,7 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
   const solveLogs = notifications.filter(n => n.log_type === 'solve');
   const filteredNotifications = tabType === 'solves' ? solveLogs : challengeLogs;
 
-  if (loading) return <Loader fullscreen color="text-orange-500" />;
+  if (loading && notifications.length === 0) return <Loader fullscreen color="text-orange-500" />;
 
   if (filteredNotifications.length === 0)
     return (
@@ -75,14 +75,20 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
     );
 
   return (
-    <ul className="space-y-2">
+    <motion.ul
+      key={cacheKey}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: loading ? 0.6 : 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="space-y-2"
+    >
       {filteredNotifications.map((notif, idx) => (
         <motion.li
           key={idx}
           className="border rounded-lg px-4 py-3 shadow bg-white dark:bg-gray-800 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors duration-150 min-w-0"
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: idx * 0.0003 }}
+          transition={{ duration: 0.2 }}
         >
           {/* Icon */}
           <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 mr-2">
@@ -172,6 +178,6 @@ export default function LogsList({ tabType = 'challenges', eventId }: { tabType?
           </span>
         </motion.li>
       ))}
-    </ul>
+    </motion.ul>
   );
 }

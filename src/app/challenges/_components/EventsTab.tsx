@@ -134,11 +134,10 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => onEventSelect('all')}
-        className={`w-full p-4 rounded-lg border-2 transition ${
-          selectedEventId === 'all'
+        className={`w-full p-4 rounded-lg border-2 transition ${selectedEventId === 'all'
             ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
             : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-400'
-        }`}
+          }`}
       >
         <div className="text-left">
           <div className="font-bold text-blue-700 dark:text-blue-300">ALL Events</div>
@@ -163,11 +162,10 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                   className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
                 >
                   <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${
-                      isSelected
+                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
                         ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 dark:border-emerald-400 ring-2 ring-emerald-600 dark:ring-emerald-400'
                         : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-400'
-                    } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
                     {mainImageUrl ? (
                       <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -227,11 +225,10 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                   className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
                 >
                   <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${
-                      isSelected
+                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
                         ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-600 dark:border-indigo-400 ring-2 ring-indigo-600 dark:ring-indigo-400'
                         : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
-                    } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
                     {/* Image */}
                     {eventImageUrl ? (
@@ -322,11 +319,10 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                   className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
                 >
                   <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${
-                      isSelected
+                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
                         ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-600 dark:border-indigo-400 ring-2 ring-indigo-600 dark:ring-indigo-400'
                         : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
-                    } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
                     {eventImageUrl ? (
                       <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
@@ -412,11 +408,10 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                   className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
                 >
                   <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${
-                      isSelected
+                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
                         ? 'bg-gray-100 dark:bg-gray-900/20 border-gray-600 dark:border-gray-400 ring-2 ring-gray-600 dark:ring-gray-400'
                         : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-gray-400 dark:hover:border-gray-400'
-                    } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
                     {/* Image */}
                     {eventImageUrl ? (

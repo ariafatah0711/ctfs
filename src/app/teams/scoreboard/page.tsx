@@ -26,6 +26,11 @@ export default function TeamScoreboardPage() {
   const [entries, setEntries] = useState<TeamScoreboardEntry[]>([])
   const [series, setSeries] = useState<TeamProgressSeries[]>([])
   const [showTotalScore, setShowTotalScore] = useState(false)
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -36,7 +41,8 @@ export default function TeamScoreboardPage() {
   useEffect(() => {
     if (!user) return
     const fetchData = async () => {
-      setLoading(true)
+      const isFirstLoad = entries.length === 0
+      if (isFirstLoad) setLoading(true)
 
       // map selectedEvent to RPC params for scoreboard + progress
       const p_event_id = selectedEvent === 'all' ? null : selectedEvent === 'main' ? null : selectedEvent
@@ -47,7 +53,7 @@ export default function TeamScoreboardPage() {
         console.warn('Failed to fetch team scoreboard:', scoreboardError)
         setEntries([])
         setSeries([])
-        setLoading(false)
+        if (isFirstLoad) setLoading(false)
         return
       }
       const list = data || []
@@ -80,7 +86,7 @@ export default function TeamScoreboardPage() {
         .filter(Boolean) as TeamProgressSeries[]
       setSeries(orderedSeries)
 
-      setLoading(false)
+      if (isFirstLoad) setLoading(false)
     }
     fetchData()
   }, [user, showTotalScore, selectedEvent])
@@ -119,11 +125,10 @@ export default function TeamScoreboardPage() {
           <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setShowTotalScore(false)}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                !showTotalScore
-                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
+              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${!showTotalScore
+                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
             >
               <span
                 className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
@@ -138,15 +143,14 @@ export default function TeamScoreboardPage() {
             {!APP.teams.hidescoreboardTotal && (
               <button
                 onClick={() => setShowTotalScore(true)}
-                className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                  showTotalScore
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                }`}
+                className={`px-4 py-2 text-sm font-medium transition border-b-2 ${showTotalScore
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
               >
-              <span
-                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
-                title="Total Score"
+                <span
+                  className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
+                  title="Total Score"
                 >
                   <Coins size={16} className="shrink-0" />
                   <span className="truncate whitespace-nowrap block">
@@ -158,59 +162,61 @@ export default function TeamScoreboardPage() {
           </span>
         </div>
 
-        {!loading && series.length > 0 && !showTotalScore && (
-          <TeamScoreboardChart
-            series={series}
-            isDark={isDark}
-            scoreLabel={showTotalScore ? 'Total Score' : 'Unique Score'}
-          />
-        )}
+        <div className={`space-y-6 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
+          {series.length > 0 && !showTotalScore && (
+            <TeamScoreboardChart
+              series={series}
+              isDark={isDark}
+              scoreLabel={showTotalScore ? 'Total Score' : 'Unique Score'}
+            />
+          )}
 
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Users size={18} /> Teams Ranking
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-10">
-                <Loader fullscreen color="text-orange-500" />
-              </div>
-            ) : entries.length === 0 ? (
-              <div className="text-sm text-gray-500 dark:text-gray-300">No teams yet.</div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16 text-center">Rank</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead className="text-right">{showTotalScore ? 'Total Score' : 'Unique Score'}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {entries.map((entry, idx) => (
-                    <TableRow key={entry.team_id}>
-                      <TableCell className="text-center font-mono">{idx + 1}</TableCell>
-                      <TableCell className="font-medium">
-                        <Link href={`/teams/${encodeURIComponent(entry.team_name)}`} className="hover:underline text-gray-900 dark:text-white">
-                          {entry.team_name}
-                        </Link>
-                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm">
-                          <Users size={14} />
-                          {entry.member_count}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right font-semibold text-gray-900 dark:text-white">
-                        {showTotalScore ? entry.total_score : entry.unique_score}
-                      </TableCell>
+          <Card className="bg-white dark:bg-gray-800">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Users size={18} /> Teams Ranking
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading && entries.length === 0 ? (
+                <div className="flex justify-center py-10">
+                  <Loader color="text-orange-500" />
+                </div>
+              ) : entries.length === 0 ? (
+                <div className="text-sm text-gray-500 dark:text-gray-300">No teams yet.</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16 text-center">Rank</TableHead>
+                      <TableHead>Team</TableHead>
+                      <TableHead className="text-right">{showTotalScore ? 'Total Score' : 'Unique Score'}</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {entries.map((entry, idx) => (
+                      <TableRow key={entry.team_id}>
+                        <TableCell className="text-center font-mono">{idx + 1}</TableCell>
+                        <TableCell className="font-medium">
+                          <Link href={`/teams/${encodeURIComponent(entry.team_name)}`} className="hover:underline text-gray-900 dark:text-white">
+                            {entry.team_name}
+                          </Link>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm">
+                            <Users size={14} />
+                            {entry.member_count}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-gray-900 dark:text-white">
+                          {showTotalScore ? entry.total_score : entry.unique_score}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

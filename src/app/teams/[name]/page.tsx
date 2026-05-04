@@ -3,6 +3,7 @@
 // React Imports
 import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Users } from 'lucide-react'
 
 // Shared Imports
@@ -27,10 +28,30 @@ export default function TeamDetailPage() {
   const [summary, setSummary] = useState<TeamSummary | null>(null)
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
   const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
 
   const [solvedEventIds, setSolvedEventIds] = useState<string[]>([])
   const [hasMainSolved, setHasMainSolved] = useState<boolean>(false)
+
+  // Stable states to prevent DOM swap flicker
+  const [stableTeam, setStableTeam] = useState<TeamInfo | null>(null)
+  const [stableMembers, setStableMembers] = useState<TeamMember[]>([])
+  const [stableSummary, setStableSummary] = useState<TeamSummary | null>(null)
+  const [stableChallenges, setStableChallenges] = useState<TeamChallenge[]>([])
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setStableTeam(team)
+      setStableMembers(members)
+      setStableSummary(summary)
+      setStableChallenges(challenges)
+    })
+  }, [team, members, summary, challenges])
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -60,7 +81,8 @@ export default function TeamDetailPage() {
   useEffect(() => {
     if (!user || !teamName) return
     const fetchData = async () => {
-      setLoading(true)
+      const isFirstLoad = team === null
+      if (isFirstLoad) setLoading(true)
       setError(null)
 
       const p_event_id = effectiveSelectedEvent === 'all' ? null : effectiveSelectedEvent === 'main' ? null : effectiveSelectedEvent
@@ -87,7 +109,7 @@ export default function TeamDetailPage() {
       }
 
       setChallenges(challengesRes.challenges ?? [])
-      setLoading(false)
+      if (isFirstLoad) setLoading(false)
     }
     fetchData()
   }, [user, teamName, effectiveSelectedEvent])
@@ -109,9 +131,16 @@ export default function TeamDetailPage() {
           {team?.name || teamName || 'Team'}
         </TitlePage> */}
 
-        {/* Loader kecil (optional, bukan full replace) */}
+        {/* Loader kecil (hanya saat data kosong) */}
         {loading && !team && (
           <div className="flex justify-center py-16">
+            <Loader color="text-orange-500" />
+          </div>
+        )}
+
+        {/* Loader refetch (tanpa geser layout) */}
+        {loading && team && (
+          <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
             <Loader color="text-orange-500" />
           </div>
         )}
@@ -137,13 +166,25 @@ export default function TeamDetailPage() {
           ) : !team ? (
             <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
           ) : (
-            <TeamPageContent
-              team={team}
-              members={members}
-              summary={summary}
-              challenges={challenges}
-              currentUserId={user?.id}
-            />
+            <AnimatePresence mode="wait">
+              {team && (
+                <motion.div
+                  key={effectiveSelectedEvent}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <TeamPageContent
+                    team={stableTeam || team}
+                    members={stableMembers.length > 0 ? stableMembers : members}
+                    summary={stableSummary || summary}
+                    challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
+                    currentUserId={user?.id}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           )}
         </>
       </div>

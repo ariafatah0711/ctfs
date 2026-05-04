@@ -6,8 +6,8 @@ import './globals.css'
 
 import { Toaster } from "react-hot-toast"
 import Navbar from '@/shared/components/Navbar'
-import { ScrollToggle, FloatingToolbar, ChatBotAI, ChatToggle }  from '@/shared/components/custom'
-import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider} from '@/shared/contexts'
+import { ScrollToggle, FloatingToolbar, ChatBotAI, ChatToggle } from '@/shared/components/custom'
+import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider } from '@/shared/contexts'
 import APP from '@/config'
 
 import { ChallengeJoyride, ChallengeTutorial } from '@/app/challenges/_components'

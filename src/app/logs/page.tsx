@@ -1,9 +1,9 @@
 "use client";
 
 // React Imports
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Flag, Logs } from "lucide-react";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Shared Imports
@@ -70,16 +70,15 @@ export default function LogsPage() {
           <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setTabType('challenges')}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                tabType === 'challenges'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
+              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${tabType === 'challenges'
+                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
             >
               <span className="inline-flex items-center gap-2 w-full">
-               <span
-                className="flex items-center gap-1 max-w-[75px] md:max-w-none overflow-hidden"
-                title="Challenge Logs"
+                <span
+                  className="flex items-center gap-1 max-w-[75px] md:max-w-none overflow-hidden"
+                  title="Challenge Logs"
                 >
                   <Flag size={16} className="shrink-0" />
                   <span className="truncate whitespace-nowrap block">
@@ -95,35 +94,42 @@ export default function LogsPage() {
               </span>
             </button>
             <button
-                onClick={() => setTabType('solves')}
-                className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                  tabType === 'solves'
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              onClick={() => setTabType('solves')}
+              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${tabType === 'solves'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
-              >
+            >
               <span
                 className="flex items-center gap-1 max-w-[75px] md:max-w-none overflow-hidden"
                 title="Solve Logs"
-                >
-                  <Logs size={16} className="shrink-0" />
-                  <span className="truncate whitespace-nowrap block">
-                    Solve Logs
-                  </span>
+              >
+                <Logs size={16} className="shrink-0" />
+                <span className="truncate whitespace-nowrap block">
+                  Solve Logs
                 </span>
+              </span>
             </button>
           </span>
         </div>
       </div>
 
-      <Suspense fallback={<Loader fullscreen color="text-orange-500" />}>
-        {/* Map selectedEvent -> param accepted by LogsList/getChallenges
-            'main' -> null, 'all' -> 'all', otherwise event id string */}
-        {(() => {
-          const eventParam = selectedEvent === 'main' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
-          return <LogsList tabType={tabType} eventId={eventParam as any} />
-        })()}
-      </Suspense>
+      <div className="min-h-[400px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedEvent + tabType}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+          >
+            {(() => {
+              const eventParam = selectedEvent === 'main' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
+              return <LogsList tabType={tabType} eventId={eventParam as any} />
+            })()}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </main>
   );
 }

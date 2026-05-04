@@ -1,8 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-# v[3.3.0]
+# v[3.3.1]
+Refactor 3.3.1 loading states and improve animations across various components
 
+- Updated loading state handling in ChallengesPage, SetupClient, Scoreboard, and Team components to prevent layout shifts during data fetching.
+- Introduced framer-motion animations for smoother transitions in LogsList, Teams, and Scoreboard pages.
+- Enhanced user experience by displaying loaders conditionally based on data availability.
+- Cleaned up code formatting for better readability and consistency.
+
+# v[3.3.0]
+Refactor 3.3.0 UserStatsPlotly component for improved readability and structure
+
+- Adjusted indentation and formatting for better code clarity.
+- Ensured consistent structure in the JSX layout for the Plot component.
+- Maintained functionality while enhancing visual organization of the code.
 
 # v[3.2.4]
 - feat: 3.2.4 refactor event selection logic in TeamDetailPage and UserProfile components

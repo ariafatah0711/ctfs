@@ -29,6 +29,18 @@ export default function ScoreboardPage() {
   const [firstBloodMode, setFirstBloodMode] = useState(false)
   const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [hasMounted, setHasMounted] = useState(false)
+  const [stableLeaderboard, setStableLeaderboard] = useState<LeaderboardEntry[]>([])
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (leaderboard.length > 0) {
+      setStableLeaderboard(leaderboard)
+    }
+  }, [leaderboard])
 
   // 🔒 redirect if not logged in
   useEffect(() => {
@@ -39,9 +51,10 @@ export default function ScoreboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true)
+      const isFirstLoad = leaderboard.length === 0
+      if (isFirstLoad) setLoading(true)
       if (!user) {
-        setLoading(false)
+        if (isFirstLoad) setLoading(false)
         return
       }
       // Map selectedEvent string to parameter accepted by helpers
@@ -50,7 +63,7 @@ export default function ScoreboardPage() {
       if (firstBloodMode) {
         const fb = await getFirstBloodLeaderboard(100, 0, eventParam)
         setLeaderboard(fb)
-        setLoading(false)
+        if (isFirstLoad) setLoading(false)
         return
       }
 
@@ -89,7 +102,7 @@ export default function ScoreboardPage() {
 
       // 5) Set leaderboard: table will receive top 100, chart will use first entries with progress
       setLeaderboard(baseLeaderboard)
-      setLoading(false)
+      if (isFirstLoad) setLoading(false)
     }
     fetchData()
   }, [user, firstBloodMode, selectedEvent])
@@ -134,11 +147,10 @@ export default function ScoreboardPage() {
           <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setFirstBloodMode(false)}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                !firstBloodMode
-                  ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
+              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${!firstBloodMode
+                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
             >
               <span
                 className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
@@ -152,11 +164,10 @@ export default function ScoreboardPage() {
             </button>
             <button
               onClick={() => setFirstBloodMode(true)}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-                firstBloodMode
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-              }`}
+              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${firstBloodMode
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                }`}
             >
               <span
                 className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
@@ -171,37 +182,29 @@ export default function ScoreboardPage() {
           </span>
         </div>
 
-        {loading ? (
+        {/* Initial load state */}
+        {loading && leaderboard.length === 0 ? (
           <div className="flex justify-center py-16">
-            <Loader fullscreen color="text-orange-500" />
+            <Loader color="text-orange-500" />
           </div>
         ) : !user ? null : isEmpty ? (
           <ScoreboardEmptyState />
         ) : (
-          <>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ScoreboardChart leaderboard={leaderboard} isDark={isDark} />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
+          <div className={`space-y-8 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
+            <div>
+              <ScoreboardChart leaderboard={stableLeaderboard.length > 0 ? stableLeaderboard : leaderboard} isDark={isDark} />
+            </div>
+            <div>
               <ScoreboardTable
                 leaderboard={leaderboard}
                 currentUsername={user?.username}
                 eventId={eventParam}
-                // When in First Blood mode we reuse `score` as the FB count and relabel the column
                 scoreColumnLabel={firstBloodMode ? 'First Blood' : undefined}
                 scoreColumnRenderer={entry => entry.score}
                 showAllLink={!firstBloodMode}
               />
-            </motion.div>
-          </>
+            </div>
+          </div>
         )}
       </div>
     </div>

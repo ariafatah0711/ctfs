@@ -30,7 +30,7 @@ export default function ScoreboardAllPage() {
         return
       }
 
-      setLoading(true)
+      if (leaderboard.length === 0) setLoading(true)
 
       // Map selectedEvent string to param accepted by helper
       const eventParam = selectedEvent === 'main' ? null : selectedEvent === 'all' ? 'all' : selectedEvent
@@ -80,15 +80,16 @@ export default function ScoreboardAllPage() {
           </span>
         </div>
 
-        {loading ? (
+        {loading && leaderboard.length === 0 ? (
           <div className="flex justify-center py-16">
-            <Loader fullscreen color="text-orange-500" />
+            <Loader color="text-orange-500" />
           </div>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            className={loading ? 'opacity-70 transition-opacity' : 'opacity-100 transition-opacity'}
           >
             <ScoreboardTable
               leaderboard={leaderboard}

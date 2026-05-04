@@ -9,7 +9,7 @@ import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide
 
 // Shared Imports
 import APP from '@/config'
-import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge, getMyTeamChallenges, getMyEventMembership, getAllMyEventMemberships, getAdminScope, getChallengeFilterSettings, setChallengeFilterSettings, formatEventDurationCompact  } from '@/shared/lib'
+import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge, getMyTeamChallenges, getMyEventMembership, getAllMyEventMemberships, getAdminScope, getChallengeFilterSettings, setChallengeFilterSettings, formatEventDurationCompact } from '@/shared/lib'
 import { useEventContext, useFilterContext } from '@/shared/contexts'
 import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
 import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/types'
@@ -48,6 +48,7 @@ export default function ChallengesPage() {
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false)
   const { user, loading } = require('@/shared/contexts').useAuth();
   const [isChallengesLoading, setIsChallengesLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [allMembershipsLoaded, setAllMembershipsLoaded] = useState(false)
 
   // In-memory caches to reduce repeated network usage
@@ -101,7 +102,7 @@ export default function ChallengesPage() {
   const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd);
   const loadChallenges = async ({ showLoader = true }: { showLoader?: boolean } = {}) => {
     if (!user) return
-    if (showLoader) setIsChallengesLoading(true)
+    if (initialLoading) setIsChallengesLoading(true)
 
     try {
       const [challengesData, teamChallengesResult] = await Promise.all([
@@ -123,7 +124,10 @@ export default function ChallengesPage() {
         }))
       )
     } finally {
-      if (showLoader) setIsChallengesLoading(false)
+      if (initialLoading) {
+        setIsChallengesLoading(false)
+        setInitialLoading(false)
+      }
     }
   }
   // Redirect ke /login jika user belum login dan sudah selesai loading
@@ -173,11 +177,11 @@ export default function ChallengesPage() {
         setAllMembershipsLoaded(true)
 
         if (typeof eventId === 'string' && eventId !== 'all') {
-           const m = eventMembershipCache.get(eventId)
-           if (m) {
-             setEventMembership(m)
-             setEventMembershipLoading(false)
-           }
+          const m = eventMembershipCache.get(eventId)
+          if (m) {
+            setEventMembership(m)
+            setEventMembershipLoading(false)
+          }
         }
       } catch (err) {
         console.error(err)
@@ -305,7 +309,7 @@ export default function ChallengesPage() {
       if (result.success) {
         const audio = new Audio('/sounds/succes.wav')
         audio.volume = 0.3
-        audio.play().catch(() => {})
+        audio.play().catch(() => { })
 
         // 🎉 tampilkan confetti
         import('canvas-confetti').then((confetti) => {
@@ -334,7 +338,7 @@ export default function ChallengesPage() {
       } else {
         const audio = new Audio('/sounds/incorect.mp3')
         audio.volume = 0.3
-        audio.play().catch(() => {})
+        audio.play().catch(() => { })
       }
     } catch (error) {
       console.error('Error submitting flag:', error)
@@ -505,9 +509,14 @@ export default function ChallengesPage() {
     }
   }
 
-  if (loading) return <Loader fullscreen color="text-orange-500" />
+  // if (loading) return <Loader fullscreen color="text-orange-500" />
   // Jangan render apapun jika belum login, biar redirect jalan
+  if (loading) {
+    return <Loader fullscreen color="text-orange-500" />
+  }
+
   if (!user) return null
+
   const enrichedEvents = events.map(e => {
     const isGlobalAdmin = isGlobalAdminUser
     const isEventAdmin = eventAdminIds.includes(e.id)
@@ -540,11 +549,10 @@ export default function ChallengesPage() {
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setCurrentTab('challenges')}
-            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-              currentTab === 'challenges'
-                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'challenges'
+              ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Flag size={16} />
@@ -553,11 +561,10 @@ export default function ChallengesPage() {
           </button>
           <button
             onClick={() => setCurrentTab('events')}
-            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-              currentTab === 'events'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'events'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Zap size={16} />
@@ -568,7 +575,7 @@ export default function ChallengesPage() {
 
         {/* Subtle background logo watermark */}
         <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.08] dark:opacity-[0.06] z-0">
-        <ImageWithFallback
+          <ImageWithFallback
             src={APP.image_icon}
             alt={`${APP.shortName} watermark`}
             size={720}
@@ -579,7 +586,7 @@ export default function ChallengesPage() {
         {/* CHALLENGES TAB */}
         {currentTab === 'challenges' && (
           <>
-              <ChallengeFilterBar
+            <ChallengeFilterBar
               filters={filters}
               events={enrichedEvents}
               selectedEventId={eventId}
@@ -598,16 +605,20 @@ export default function ChallengesPage() {
 
             {/* Challenges Grid Grouped by Category */}
             <div>
-              {eventMembershipLoading && eventMembership?.event_id !== eventId ? (
-                <Loader fullscreen color="text-orange-500" />
+              {initialLoading ? (
+                <div className="flex justify-center py-16">
+                  <Loader color="text-orange-500" />
+                </div>
+              ) : eventMembershipLoading && eventMembership?.event_id !== eventId ? (
+                <div className="flex justify-center py-10">
+                  <Loader color="text-orange-500" />
+                </div>
               ) : eventJoinBlocked ? (
                 <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400">
                   Challenge dikunci sampai kamu join event.
                 </div>
               ) : (
-                !user || loading || isChallengesLoading ? (
-                  <Loader fullscreen color="text-orange-500" />
-                ) : filteredChallenges.length === 0 ? (
+                filteredChallenges.length === 0 ? (
                   <div className="text-center py-16">
                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                       {typeof eventId === 'string' && selectedEventNotStarted ? (
@@ -748,32 +759,32 @@ export default function ChallengesPage() {
           />
 
           <ChallengeDetailDialog
-          open={!!selectedChallenge}
-          challenge={selectedChallenge}
-          solvers={solvers}
-          challengeTab={challengeTab}
-          setChallengeTab={(tab, challengeId) => {
-            if (tab === 'solvers' && selectedChallenge) {
-              handleTabChange(tab, selectedChallenge.id)
-            } else {
-              setChallengeTab(tab)
-            }
-          }}
-          onClose={() => {
-            setSelectedChallenge(null)
-            setChallengeTab('challenge')
-          }}
-          flagInputs={flagInputs}
-          handleFlagInputChange={handleFlagInputChange}
-          handleFlagSubmit={handleFlagSubmit}
-          submitting={submitting}
-          flagFeedback={flagFeedback}
-          downloading={downloading}
-          downloadFile={downloadFile}
-          showHintModal={showHintModal}
-          setShowHintModal={setShowHintModal}
-          events={events}
-        />
+            open={!!selectedChallenge}
+            challenge={selectedChallenge}
+            solvers={solvers}
+            challengeTab={challengeTab}
+            setChallengeTab={(tab, challengeId) => {
+              if (tab === 'solvers' && selectedChallenge) {
+                handleTabChange(tab, selectedChallenge.id)
+              } else {
+                setChallengeTab(tab)
+              }
+            }}
+            onClose={() => {
+              setSelectedChallenge(null)
+              setChallengeTab('challenge')
+            }}
+            flagInputs={flagInputs}
+            handleFlagInputChange={handleFlagInputChange}
+            handleFlagSubmit={handleFlagSubmit}
+            submitting={submitting}
+            flagFeedback={flagFeedback}
+            downloading={downloading}
+            downloadFile={downloadFile}
+            showHintModal={showHintModal}
+            setShowHintModal={setShowHintModal}
+            events={events}
+          />
         </>
       )}
     </div>

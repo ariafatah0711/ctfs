@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowLeft, Loader2, Plus, Save, Settings2, X } from 'lucide-react'
 
@@ -189,7 +190,13 @@ export default function SetupClient() {
     }
   }
 
-  if (loading) return <Loader fullscreen color="text-orange-500" />
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <Loader color="text-orange-500" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">

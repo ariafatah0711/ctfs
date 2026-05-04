@@ -3,15 +3,17 @@
 // React Imports
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Users, UserPlus } from 'lucide-react'
 
 // Shared Imports
 import APP from '@/config'
 import { Loader, TitlePage } from '@/shared/components'
 import { BackButton, ConfirmDialog, EventSelect } from '@/shared/components/custom'
-import { Button, Input, Card, CardHeader, CardTitle, CardContent  } from '@/shared/ui'
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
 import { useAuth, useEventContext } from '@/shared/contexts'
-import { createTeam, joinTeam, leaveTeam, deleteTeam, regenerateTeamInviteCode, getMyTeam, getMyTeamSummary, getMyTeamChallenges, kickTeamMember, transferTeamCaptain, renameTeam, TeamMember, TeamInfo, TeamSummary, TeamChallenge,
+import {
+  createTeam, joinTeam, leaveTeam, deleteTeam, regenerateTeamInviteCode, getMyTeam, getMyTeamSummary, getMyTeamChallenges, kickTeamMember, transferTeamCaptain, renameTeam, TeamMember, TeamInfo, TeamSummary, TeamChallenge,
 } from '@/shared/lib'
 
 // Local Imports
@@ -29,6 +31,21 @@ export default function TeamsPage() {
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
   const [solvedEventIds, setSolvedEventIds] = useState<string[]>([])
   const [hasMainSolved, setHasMainSolved] = useState<boolean>(false)
+
+  // Stable states to prevent DOM swap flicker
+  const [stableTeam, setStableTeam] = useState<TeamInfo | null>(null)
+  const [stableMembers, setStableMembers] = useState<TeamMember[]>([])
+  const [stableSummary, setStableSummary] = useState<TeamSummary | null>(null)
+  const [stableChallenges, setStableChallenges] = useState<TeamChallenge[]>([])
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setStableTeam(team)
+      setStableMembers(members)
+      setStableSummary(summary)
+      setStableChallenges(challenges)
+    })
+  }, [team, members, summary, challenges])
   const [teamName, setTeamName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
   const [status, setStatus] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
@@ -36,8 +53,13 @@ export default function TeamsPage() {
   const [confirmMessage, setConfirmMessage] = useState('Are you sure?')
   const [confirmExpected, setConfirmExpected] = useState<string | null>(null)
   const [confirmInput, setConfirmInput] = useState('')
-  const confirmActionRef = useRef<() => Promise<void> | void>(() => {})
+  const confirmActionRef = useRef<() => Promise<void> | void>(() => { })
   const [initialLoading, setInitialLoading] = useState(true)
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,10 +86,10 @@ export default function TeamsPage() {
     return allowed.has(String(selectedEvent)) ? selectedEvent : 'all'
   }, [selectedEvent, showMainOption, teamEvents])
 
-
   const loadTeamData = async () => {
     if (!user) return
-    if (initialLoading) setLoading(true)
+    const isFirstLoad = team === null
+    if (isFirstLoad) setLoading(true)
     setStatus(null)
 
     const p_event_id = effectiveSelectedEvent === 'all' ? null : effectiveSelectedEvent === 'main' ? null : effectiveSelectedEvent
@@ -279,9 +301,9 @@ export default function TeamsPage() {
           </div>
         ) : (
           <>
-            {/* SMALL LOADER (REFETCH, NO FLASH) */}
-            {loading && (
-              <div className="flex justify-center py-4 opacity-70">
+            {/* SMALL LOADER (REFETCH, NO JUMP) */}
+            {loading && team && (
+              <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
                 <Loader color="text-orange-500" />
               </div>
             )}
@@ -306,11 +328,10 @@ export default function TeamsPage() {
             {/* STATUS */}
             {status && (
               <div
-                className={`rounded-md px-4 py-3 text-sm ${
-                  status.type === 'error'
-                    ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200'
-                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
-                }`}
+                className={`rounded-md px-4 py-3 text-sm ${status.type === 'error'
+                  ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200'
+                  : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
+                  }`}
               >
                 {status.message}
               </div>
@@ -366,23 +387,35 @@ export default function TeamsPage() {
                 </Card>
               </div>
             ) : (
-              <TeamPageContent
-                team={team}
-                members={members}
-                summary={summary}
-                challenges={challenges}
-                currentUserId={user.id}
-                canManage={canManage}
-                busy={busy}
-                showManageActions
-                onRenameTeam={handleRenameTeam}
-                onCopyInvite={handleCopyInvite}
-                onRegenerateInvite={handleRegenerateInvite}
-                onLeaveTeam={handleLeaveTeam}
-                onDeleteTeam={handleDeleteTeam}
-                onKickMember={handleKickMember}
-                onTransferCaptain={handleTransferCaptain}
-              />
+              <AnimatePresence mode="wait">
+                {team && (
+                  <motion.div
+                    key={effectiveSelectedEvent}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <TeamPageContent
+                      team={stableTeam || team}
+                      members={stableMembers.length > 0 ? stableMembers : members}
+                      summary={stableSummary || summary}
+                      challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
+                      currentUserId={user.id}
+                      canManage={canManage}
+                      busy={busy}
+                      showManageActions
+                      onRenameTeam={handleRenameTeam}
+                      onCopyInvite={handleCopyInvite}
+                      onRegenerateInvite={handleRegenerateInvite}
+                      onLeaveTeam={handleLeaveTeam}
+                      onDeleteTeam={handleDeleteTeam}
+                      onKickMember={handleKickMember}
+                      onTransferCaptain={handleTransferCaptain}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             )}
           </>
         )}
