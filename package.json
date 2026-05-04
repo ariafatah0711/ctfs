@@ -1,13 +1,14 @@
 {
   "name": "ctfs",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "private": true,
   "scripts": {
     "predev": "node src/scripts/gen-version.js",
     "prebuild": "node src/scripts/gen-version.js",
     "prestart": "node src/scripts/gen-version.js",
     "setup": "node db/build-init-sql.js",
-    "dev": "next dev",
+    "setting": "npm run dev",
+    "dev": "node src/scripts/setup-config.js && next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

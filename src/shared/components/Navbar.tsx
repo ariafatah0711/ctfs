@@ -2,7 +2,7 @@
 
 // React Imports
 import Link from 'next/link'
-import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Scale, Hammer, User } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Scale, Settings, User } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 
@@ -18,6 +18,7 @@ export default function Navbar() {
   const { user, setUser, loading } = useAuth()
   const { unreadCount: logsUnreadCount } = useLogs()
   const pathname = usePathname()
+  const showConfigLink = process.env.NODE_ENV !== 'production'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
   const [globalAdminStatus, setGlobalAdminStatus] = useState(false)
@@ -517,6 +518,17 @@ export default function Navbar() {
                   <Shield size={18} className="mr-1" /> Admin
                 </Link>
               )}
+
+              {showConfigLink && (
+                <Link
+                  href="/config"
+                  className={`hidden md:flex items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-medium transition-all duration-150 ${theme === 'dark' ? 'bg-orange-900/40 text-orange-200 hover:bg-orange-900/50' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
+                  title="Config"
+                  aria-label="Config"
+                >
+                  <Settings size={18} className="mr-1" /> Config
+                </Link>
+              )}
             </div>
           </div>
 
@@ -874,6 +886,15 @@ export default function Navbar() {
                   )}
                 </>
               )}
+              {!user && (
+                <Link
+                  href="/preview"
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <FileText size={18} className="mr-1" /> Preview
+                </Link>
+              )}
               {/* Info Menu (Info + Rules + Docs) - Mobile */}
               <details className="rounded-lg">
                 <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
@@ -915,6 +936,15 @@ export default function Navbar() {
                   </Link>
                 </div>
               </details>
+              {showConfigLink && (
+                <Link
+                  href="/config"
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800 focus:ring-2 focus:ring-orange-700' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50 focus:ring-2 focus:ring-orange-400'}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Settings size={18} className="mr-1" /> Config
+                </Link>
+              )}
               {user && (
                 <>
                   {adminStatus && (
@@ -937,13 +967,6 @@ export default function Navbar() {
               {/* Tampil jika belum login */}
               {!user && (
                 <>
-                  <Link
-                    href="/preview"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <FileText size={18} className="mr-1" /> Preview
-                  </Link>
                   <Link
                     href="/login"
                     className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}

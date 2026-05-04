@@ -1,22 +1,22 @@
 export const APP = {
-  shortName: 'FGTE',
-  fullName: 'CTFS Platform',
-  description: 'Aplikasi CTF minimalis dengan Next.js dan Supabase',
-  flagFormat: 'FGTE{your_flag_here}',
+  shortName: "FGTE",
+  fullName: "CTFS Platform",
+  description: "Aplikasi CTF minimalis dengan Next.js dan Supabase",
+  flagFormat: "FGTE{your_flag_here}",
   year: new Date().getFullYear(),
 
   challengeCategories: [
-    'Intro',
-    'Osint',
-    'Crypto',
-    'Forensics',
-    'Stegnography',
-    'Misc',
-    'Web',
-    'Reverse',
-    'Pwn',
-    'Boot To Root',
-    'Network'
+    "Intro",
+    "Osint",
+    "Crypto",
+    "Forensics",
+    "Stegnography",
+    "Misc",
+    "Web",
+    "Reverse",
+    "Pwn",
+    "Boot To Root",
+    "Network"
   ],
   links: {
     github: 'https://github.com/ariafatah0711/ctfs',
@@ -40,7 +40,7 @@ export const APP = {
 
   // Base URL (otomatis ambil dari env kalau ada)
   baseUrl:
-    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000', // opsional fallback
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000", // opsional fallback
   image_icon: 'favicon.ico',
   image_preview: 'og-image.png',
 
@@ -55,17 +55,17 @@ export const APP = {
   Live2DMaskotAnime: false, // enable / disable Live2D Maskot Anime component
 
   teams: {
-    enabled: true, // enable / disable teams feature
-    hideScoreboardIndividual: false, // enable / disable individual scoreboard when teams are enabled
-    hidescoreboardTotal: false, // enable / disable Total Score tab in team scoreboard
+    enabled: true,
+    hideScoreboardIndividual: false,
+    hidescoreboardTotal: false,
   },
   hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event CTFs)
   // Label untuk challenges tanpa event_id (event_id = NULL). Jika kosong, fallback ke "Main".
 
-  eventMainLabel: 'FGTE 2026',
+  eventMainLabel: "FGTE 2026",
   // Gambar untuk "Main/Featured" event (boleh URL external atau path public). Contoh:
   // 'https://example.com/banner.png' atau '/images/banner.png'
-  eventMainImageUrl: 'https://raw.githubusercontent.com/ariafatah0711/fgte_s1/refs/heads/main/img/FGTE_2026.png',
+  eventMainImageUrl: "https://raw.githubusercontent.com/ariafatah0711/fgte_s1/refs/heads/main/img/FGTE_2026.png",
 
   /* Maintenance configuration */
   // mode: 'no' | 'yes' | 'auto'
@@ -73,10 +73,9 @@ export const APP = {
   // 'yes'  -> forced maintenance (harus ubah ke 'no' untuk kembali normal)
   // 'auto' -> otomatis masuk maintenance jika Supabase error (koneksi / query gagal)
   maintenance: {
-    mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || 'no',
+    mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || "no",
     message:
-      process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE ||
-      'Platform sedang maintenance. Silakan kembali beberapa saat lagi.'
+      process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE || "Platform sedang maintenance. Silakan kembali beberapa saat lagi."
   },
 }
 
