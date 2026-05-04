@@ -99,9 +99,9 @@ export default function ChallengesPage() {
   const selectedEventEnd = selectedEventObj?.end_time ? new Date(selectedEventObj.end_time) : null;
   const selectedEventNotStarted = !!(selectedEventStart && nowDate < selectedEventStart);
   const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd);
-  const loadChallenges = async () => {
+  const loadChallenges = async ({ showLoader = true }: { showLoader?: boolean } = {}) => {
     if (!user) return
-    setIsChallengesLoading(true)
+    if (showLoader) setIsChallengesLoading(true)
 
     try {
       const [challengesData, teamChallengesResult] = await Promise.all([
@@ -123,7 +123,7 @@ export default function ChallengesPage() {
         }))
       )
     } finally {
-      setIsChallengesLoading(false)
+      if (showLoader) setIsChallengesLoading(false)
     }
   }
   // Redirect ke /login jika user belum login dan sudah selesai loading
@@ -293,7 +293,7 @@ export default function ChallengesPage() {
 
       // Only refresh challenge list when something actually changes (solve success).
       if (result?.success) {
-        await loadChallenges()
+        await loadChallenges({ showLoader: false })
       }
 
       // set feedback box
