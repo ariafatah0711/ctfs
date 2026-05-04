@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.3.4]
+- feat: 3.2.4 refactor event selection logic in TeamDetailPage and UserProfile components
+
 # v[3.2.3]
 - feat: 3.2.3 add event fallback image support and enhance team event handling
 

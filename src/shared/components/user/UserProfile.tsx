@@ -116,12 +116,6 @@ export default function UserProfile({
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [difficultyTotals, setDifficultyTotals] = useState<{ difficulty: string; total_challenges: number }[]>([])
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(() =>
-    selectedEvent === 'all' || selectedEvent === 'main' ? null : selectedEvent
-  )
-  const [selectedEventMode, setSelectedEventMode] = useState<'any'|'equals'|'is_null'>(() =>
-    selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'is_null' : 'equals'
-  )
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
   const [showAllModal, setShowAllModal] = useState(false)
   const [showUnsolvedModal, setShowUnsolvedModal] = useState(false)
@@ -130,24 +124,6 @@ export default function UserProfile({
   const [authInfo, setAuthInfo] = useState<Array<{ provider: string; email: string }>>([])
   const [teamInfo, setTeamInfo] = useState<{ team: any; members: any[] } | null>(null)
   const [activeTab, setActiveTab] = useState<'profile' | 'stats'>('profile')
-
-  const refreshUserDetail = async () => {
-    if (!userId) return
-    try {
-      const detail = await getUserDetail(
-        userId,
-        selectedEventMode === 'equals' ? selectedEventId : null,
-        selectedEventMode
-      )
-      setUserDetail(detail)
-      if (isCurrentUser) {
-        const freshUser = await getCurrentUser()
-        if (freshUser) setUser(freshUser)
-      }
-    } catch (err) {
-      console.error('Error refreshing user detail:', err)
-    }
-  }
 
   useEffect(() => {
     if (isCurrentUser) {
@@ -173,6 +149,37 @@ export default function UserProfile({
     }
   }, [userId])
 
+  const isLoading = loading || loadingDetail
+  const hasError = error || !userDetail
+  const solvedChallenges = userDetail?.solved_challenges || []
+  const solvedEventSet = useMemo(
+    () => new Set((solvedEventIds || []).map((id) => String(id))),
+    [solvedEventIds]
+  )
+  const profileEvents = useMemo(
+    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
+    [startedEvents, solvedEventSet]
+  )
+  const showMainOption = hasMainSolved && !APP.hideEventMain
+  const effectiveSelectedEvent = useMemo(() => {
+    const allowed = new Set<string>(['all'])
+    if (showMainOption) allowed.add('main')
+    for (const ev of profileEvents) allowed.add(String(ev.id))
+
+    return allowed.has(String(selectedEvent))
+      ? selectedEvent
+      : 'all'
+  }, [profileEvents, selectedEvent, showMainOption])
+  const effectiveSelectedEventId = useMemo(
+    () => (effectiveSelectedEvent === 'all' || effectiveSelectedEvent === 'main' ? null : effectiveSelectedEvent),
+    [effectiveSelectedEvent]
+  )
+  const effectiveSelectedEventMode = useMemo(
+    () => (effectiveSelectedEvent === 'all' ? 'any' : effectiveSelectedEvent === 'main' ? 'is_null' : 'equals'),
+    [effectiveSelectedEvent]
+  )
+  const avatarSrc = userDetail?.profile_picture_url || userDetail?.picture || null
+
   useEffect(() => {
     const fetchDetail = async () => {
       if (!userId) return
@@ -180,8 +187,8 @@ export default function UserProfile({
       try {
         const detail = await getUserDetail(
           userId,
-          selectedEventMode === 'equals' ? selectedEventId : null,
-          selectedEventMode
+          effectiveSelectedEventId,
+          effectiveSelectedEventMode
         )
         setUserDetail(detail)
 
@@ -191,14 +198,14 @@ export default function UserProfile({
           setFirstBloodIds(firstBlood.filter(id => solvedIds.has(id)))
 
           const totals = await getCategoryTotals(
-            selectedEventMode === 'equals' ? selectedEventId : null,
-            selectedEventMode
+            effectiveSelectedEventId,
+            effectiveSelectedEventMode
           )
           setCategoryTotals(totals)
 
           const diffTotals = await getDifficultyTotals(
-            selectedEventMode === 'equals' ? selectedEventId : null,
-            selectedEventMode
+            effectiveSelectedEventId,
+            effectiveSelectedEventMode
           )
           setDifficultyTotals(diffTotals)
 
@@ -213,47 +220,25 @@ export default function UserProfile({
       }
     }
     fetchDetail()
-  }, [userId, selectedEventId, selectedEventMode])
+  }, [userId, effectiveSelectedEventId, effectiveSelectedEventMode])
 
-  // Sync scoreboard-style `selectedEvent` with internal mode/id used for fetching
-  useEffect(() => {
-    if (selectedEvent === 'all') {
-      setSelectedEventMode('any')
-      setSelectedEventId(null)
-    } else if (selectedEvent === 'main') {
-      setSelectedEventMode('is_null')
-      setSelectedEventId(null)
-    } else {
-      setSelectedEventMode('equals')
-      setSelectedEventId(selectedEvent)
-    }
-  }, [selectedEvent])
-
-  const isLoading = loading || loadingDetail
-  const hasError = error || !userDetail
-  const solvedChallenges = userDetail?.solved_challenges || []
-  const solvedEventSet = useMemo(
-    () => new Set((solvedEventIds || []).map((id) => String(id))),
-    [solvedEventIds]
-  )
-  const profileEvents = useMemo(
-    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
-    [startedEvents, solvedEventSet]
-  )
-  const showMainOption = hasMainSolved && !APP.hideEventMain
-
-  useEffect(() => {
+  const refreshUserDetail = async () => {
     if (!userId) return
-    const allowed = new Set<string>(['all'])
-    if (showMainOption) allowed.add('main')
-    for (const ev of profileEvents) allowed.add(String(ev.id))
-
-    if (!allowed.has(String(selectedEvent))) {
-      const next = showMainOption ? 'main' : (profileEvents[0]?.id ? String(profileEvents[0].id) : 'all')
-      if (String(selectedEvent) !== next) setSelectedEvent(next as any)
+    try {
+      const detail = await getUserDetail(
+        userId,
+        effectiveSelectedEventId,
+        effectiveSelectedEventMode
+      )
+      setUserDetail(detail)
+      if (isCurrentUser) {
+        const freshUser = await getCurrentUser()
+        if (freshUser) setUser(freshUser)
+      }
+    } catch (err) {
+      console.error('Error refreshing user detail:', err)
     }
-  }, [userId, profileEvents, selectedEvent, setSelectedEvent, showMainOption])
-  const avatarSrc = userDetail?.profile_picture_url || userDetail?.picture || null
+  }
   const completedCategoryCount = categoryTotals.reduce((count, { category, total_challenges }) => {
     if (!total_challenges) return count
     const solvedInCategory = solvedChallenges.filter(c => c.category === category).length
@@ -270,7 +255,7 @@ export default function UserProfile({
     setShowUnsolvedModal(true)
     setLoadingUnsolved(true)
     try {
-      const challengeEventParam = selectedEventMode === 'any' ? 'all' : (selectedEventMode === 'equals' ? selectedEventId : null)
+      const challengeEventParam = effectiveSelectedEventMode === 'any' ? 'all' : (effectiveSelectedEventMode === 'equals' ? effectiveSelectedEventId : null)
       const allChallenges = await getChallenges(userId || undefined, false, challengeEventParam)
 
       const nowMs = Date.now()
@@ -449,7 +434,7 @@ export default function UserProfile({
                     {/* Scoreboard-style Event selector (placed below EditProfileModal) */}
                     <div className="w-full md:w-auto">
                       <EventSelect
-                        value={selectedEvent}
+                        value={effectiveSelectedEvent}
                         onChange={setSelectedEvent}
                         events={profileEvents as any}
                         showMain={showMainOption}

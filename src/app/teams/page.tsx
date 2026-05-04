@@ -46,14 +46,31 @@ export default function TeamsPage() {
 
   // Events are loaded globally via EventProvider
 
+  const solvedEventSet = useMemo(
+    () => new Set((solvedEventIds || []).map((id) => String(id))),
+    [solvedEventIds]
+  )
+  const teamEvents = useMemo(
+    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
+    [startedEvents, solvedEventSet]
+  )
+  const showMainOption = hasMainSolved && !APP.hideEventMain
+  const effectiveSelectedEvent = useMemo(() => {
+    const allowed = new Set<string>(['all'])
+    if (showMainOption) allowed.add('main')
+    for (const ev of teamEvents) allowed.add(String(ev.id))
+
+    return allowed.has(String(selectedEvent)) ? selectedEvent : 'all'
+  }, [selectedEvent, showMainOption, teamEvents])
+
 
   const loadTeamData = async () => {
     if (!user) return
     setLoading(true)
     setStatus(null)
 
-    const p_event_id = selectedEvent === 'all' ? null : selectedEvent === 'main' ? null : selectedEvent
-    const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
+    const p_event_id = effectiveSelectedEvent === 'all' ? null : effectiveSelectedEvent === 'main' ? null : effectiveSelectedEvent
+    const p_event_mode = effectiveSelectedEvent === 'all' ? 'any' : effectiveSelectedEvent === 'main' ? 'main' : 'event'
 
     try {
       const [teamRes, summaryRes, challengesRes] = await Promise.all([
@@ -76,29 +93,7 @@ export default function TeamsPage() {
   useEffect(() => {
     if (!user) return
     loadTeamData()
-  }, [user, selectedEvent])
-
-  const solvedEventSet = useMemo(
-    () => new Set((solvedEventIds || []).map((id) => String(id))),
-    [solvedEventIds]
-  )
-  const teamEvents = useMemo(
-    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
-    [startedEvents, solvedEventSet]
-  )
-  const showMainOption = hasMainSolved && !APP.hideEventMain
-
-  useEffect(() => {
-    if (!user || !team) return
-    const allowed = new Set<string>(['all'])
-    if (showMainOption) allowed.add('main')
-    for (const ev of teamEvents) allowed.add(String(ev.id))
-
-    if (!allowed.has(String(selectedEvent))) {
-      const next = showMainOption ? 'main' : (teamEvents[0]?.id ? String(teamEvents[0].id) : 'all')
-      if (String(selectedEvent) !== next) setSelectedEvent(next as any)
-    }
-  }, [user, team, teamEvents, selectedEvent, setSelectedEvent, showMainOption])
+  }, [user, effectiveSelectedEvent])
 
   const currentMember = useMemo(() => members.find(m => m.user_id === user?.id), [members, user])
   const isCaptain = currentMember?.role === 'captain'
@@ -281,7 +276,7 @@ export default function TeamsPage() {
           <div className="mb-4 flex justify-between items-center">
             <BackButton label="Go Back" className="mb-2" />
             <EventSelect
-              value={selectedEvent}
+              value={effectiveSelectedEvent}
               onChange={setSelectedEvent}
               events={teamEvents as any}
               showMain={showMainOption}

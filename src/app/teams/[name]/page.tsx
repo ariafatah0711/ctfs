@@ -38,14 +38,33 @@ export default function TeamDetailPage() {
     }
   }, [authLoading, user, router])
 
+  const solvedEventSet = useMemo(
+    () => new Set((solvedEventIds || []).map((id) => String(id))),
+    [solvedEventIds]
+  )
+  const teamEvents = useMemo(
+    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
+    [startedEvents, solvedEventSet]
+  )
+  const showMainOption = hasMainSolved && !APP.hideEventMain
+  const effectiveSelectedEvent = useMemo(() => {
+    const allowed = new Set<string>(['all'])
+    if (showMainOption) allowed.add('main')
+    for (const ev of teamEvents) allowed.add(String(ev.id))
+
+    return allowed.has(String(selectedEvent))
+      ? selectedEvent
+      : 'all'
+  }, [selectedEvent, showMainOption, teamEvents])
+
   useEffect(() => {
     if (!user || !teamName) return
     const fetchData = async () => {
       setLoading(true)
       setError(null)
 
-      const p_event_id = selectedEvent === 'all' ? null : selectedEvent === 'main' ? null : selectedEvent
-      const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
+      const p_event_id = effectiveSelectedEvent === 'all' ? null : effectiveSelectedEvent === 'main' ? null : effectiveSelectedEvent
+      const p_event_mode = effectiveSelectedEvent === 'all' ? 'any' : effectiveSelectedEvent === 'main' ? 'main' : 'event'
 
       const [teamRes, challengesRes] = await Promise.all([
         getTeamByName(teamName, p_event_id, p_event_mode),
@@ -71,29 +90,7 @@ export default function TeamDetailPage() {
       setLoading(false)
     }
     fetchData()
-  }, [user, teamName, selectedEvent])
-
-  const solvedEventSet = useMemo(
-    () => new Set((solvedEventIds || []).map((id) => String(id))),
-    [solvedEventIds]
-  )
-  const teamEvents = useMemo(
-    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
-    [startedEvents, solvedEventSet]
-  )
-  const showMainOption = hasMainSolved && !APP.hideEventMain
-
-  useEffect(() => {
-    if (!user || !teamName) return
-    const allowed = new Set<string>(['all'])
-    if (showMainOption) allowed.add('main')
-    for (const ev of teamEvents) allowed.add(String(ev.id))
-
-    if (!allowed.has(String(selectedEvent))) {
-      const next = showMainOption ? 'main' : (teamEvents[0]?.id ? String(teamEvents[0].id) : 'all')
-      if (String(selectedEvent) !== next) setSelectedEvent(next as any)
-    }
-  }, [user, teamName, teamEvents, selectedEvent, setSelectedEvent, showMainOption])
+  }, [user, teamName, effectiveSelectedEvent])
 
   if (authLoading) {
     return (
@@ -116,7 +113,7 @@ export default function TeamDetailPage() {
           <div className="mb-4 flex justify-between items-center">
             <BackButton label="Go Back" className="mb-2" />
             <EventSelect
-              value={selectedEvent}
+              value={effectiveSelectedEvent}
               onChange={setSelectedEvent}
               events={teamEvents as any}
               showMain={showMainOption}
