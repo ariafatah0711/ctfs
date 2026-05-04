@@ -1,11 +1,12 @@
 'use client'
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Users } from 'lucide-react'
 
 // Shared Imports
+import APP from '@/config'
 import { Loader, TitlePage } from '@/shared/components'
 import { BackButton, EventSelect } from '@/shared/components/custom'
 import { getTeamByName, getTeamChallengesByName, TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '@/shared/lib'
@@ -27,6 +28,9 @@ export default function TeamDetailPage() {
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
   const [error, setError] = useState<string | null>(null)
   const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
+
+  const [solvedEventIds, setSolvedEventIds] = useState<string[]>([])
+  const [hasMainSolved, setHasMainSolved] = useState<boolean>(false)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -53,10 +57,14 @@ export default function TeamDetailPage() {
         setTeam(null)
         setMembers([])
         setSummary(null)
+        setSolvedEventIds([])
+        setHasMainSolved(false)
       } else {
         setTeam(teamRes.team ?? null)
         setMembers(teamRes.members ?? [])
         setSummary(teamRes.stats ?? null)
+        setSolvedEventIds(teamRes.solved_event_ids ?? [])
+        setHasMainSolved(!!teamRes.has_main_solved)
       }
 
       setChallenges(challengesRes.challenges ?? [])
@@ -64,6 +72,28 @@ export default function TeamDetailPage() {
     }
     fetchData()
   }, [user, teamName, selectedEvent])
+
+  const solvedEventSet = useMemo(
+    () => new Set((solvedEventIds || []).map((id) => String(id))),
+    [solvedEventIds]
+  )
+  const teamEvents = useMemo(
+    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
+    [startedEvents, solvedEventSet]
+  )
+  const showMainOption = hasMainSolved && !APP.hideEventMain
+
+  useEffect(() => {
+    if (!user || !teamName) return
+    const allowed = new Set<string>(['all'])
+    if (showMainOption) allowed.add('main')
+    for (const ev of teamEvents) allowed.add(String(ev.id))
+
+    if (!allowed.has(String(selectedEvent))) {
+      const next = showMainOption ? 'main' : (teamEvents[0]?.id ? String(teamEvents[0].id) : 'all')
+      if (String(selectedEvent) !== next) setSelectedEvent(next as any)
+    }
+  }, [user, teamName, teamEvents, selectedEvent, setSelectedEvent, showMainOption])
 
   if (authLoading) {
     return (
@@ -88,7 +118,8 @@ export default function TeamDetailPage() {
             <EventSelect
               value={selectedEvent}
               onChange={setSelectedEvent}
-              events={startedEvents}
+              events={teamEvents as any}
+              showMain={showMainOption}
               className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
               getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
             />

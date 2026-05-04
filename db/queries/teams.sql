@@ -46,7 +46,10 @@ DECLARE
   v_unique_challenges INT := 0;
   v_total_solves BIGINT := 0;
   v_can_view_invite BOOLEAN := FALSE;
+  v_solved_event_ids UUID[];
+  v_has_main_solved BOOLEAN := FALSE;
 BEGIN
+  -- ambil team id
   SELECT id INTO v_team_id
   FROM public.teams
   WHERE lower(name) = lower(p_name)
@@ -56,13 +59,16 @@ BEGIN
     RETURN json_build_object('success', false, 'message', 'Team not found');
   END IF;
 
+  -- cek akses invite
   IF v_user_id IS NOT NULL THEN
     SELECT EXISTS(
-      SELECT 1 FROM public.team_members WHERE team_id = v_team_id AND user_id = v_user_id
+      SELECT 1 FROM public.team_members
+      WHERE team_id = v_team_id AND user_id = v_user_id
     ) OR is_admin()
     INTO v_can_view_invite;
   END IF;
 
+  -- info team
   SELECT json_build_object(
     'id', t.id,
     'name', t.name,
@@ -73,6 +79,19 @@ BEGIN
   FROM public.teams t
   WHERE t.id = v_team_id;
 
+  -- 🔥 NEW: ambil solved event ids (INI YANG PENTING)
+  SELECT COALESCE(
+    array_agg(DISTINCT c.event_id) FILTER (WHERE c.event_id IS NOT NULL),
+    '{}'::uuid[]
+  ),
+  COALESCE(bool_or(c.event_id IS NULL), FALSE)
+  INTO v_solved_event_ids, v_has_main_solved
+  FROM public.solves s
+  JOIN public.challenges c ON c.id = s.challenge_id
+  JOIN public.team_members tm ON tm.user_id = s.user_id
+  WHERE tm.team_id = v_team_id;
+
+  -- members + stats per user
   WITH team_users AS (
     SELECT tm.user_id, tm.joined_at
     FROM public.team_members tm
@@ -136,6 +155,7 @@ BEGIN
   LEFT JOIN first_stats fs ON fs.user_id = tm.user_id
   WHERE tm.team_id = v_team_id;
 
+  -- stats team
   WITH team_users AS (
     SELECT user_id FROM public.team_members WHERE team_id = v_team_id
   ), solves_filtered AS (
@@ -172,10 +192,13 @@ BEGIN
   FROM unique_calc uc
   CROSS JOIN totals t;
 
+  -- 🔥 RETURN FINAL
   RETURN json_build_object(
     'success', true,
     'team', v_team,
     'members', v_members,
+    'solved_event_ids', v_solved_event_ids, -- ✅ NEW
+    'has_main_solved', v_has_main_solved,
     'stats', json_build_object(
       'unique_score', v_unique_score,
       'total_score', v_total_score,

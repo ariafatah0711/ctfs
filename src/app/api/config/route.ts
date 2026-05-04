@@ -25,6 +25,7 @@ type SetupConfig = {
   hideEventMain: boolean
   eventMainLabel: string
   eventMainImageUrl: string
+  eventFallbackImageUrl: string
   maintenanceMode: 'no' | 'yes' | 'auto'
   maintenanceMessage: string
 }
@@ -75,6 +76,7 @@ function readConfig(source: string): SetupConfig {
     hideEventMain: readBoolean(source, /hideEventMain:\s*(true|false)/),
     eventMainLabel: readString(source, /eventMainLabel:\s*['"]([^'"]*)['"]/),
     eventMainImageUrl: readString(source, /eventMainImageUrl:\s*['"]([^'"]*)['"]/),
+    eventFallbackImageUrl: readString(source, /eventFallbackImageUrl:\s*['"]([^'"]*)['"]/),
     maintenanceMode: (readString(
       maintenanceBlock?.[1] || '',
       /mode:\s*process\.env\.NEXT_PUBLIC_MAINTENANCE_MODE \|\| ['"]([^'"]*)['"]/,
@@ -129,6 +131,7 @@ function updateConfig(source: string, config: SetupConfig) {
   updated = replaceFirst(updated, /hideEventMain:\s*(true|false)/, `hideEventMain: ${config.hideEventMain}`)
   updated = replaceFirst(updated, /eventMainLabel:\s*['"][^'"]*['"]/, `eventMainLabel: ${toJsonString(config.eventMainLabel)}`)
   updated = replaceFirst(updated, /eventMainImageUrl:\s*['"][^'"]*['"]/, `eventMainImageUrl: ${toJsonString(config.eventMainImageUrl)}`)
+  updated = replaceFirst(updated, /eventFallbackImageUrl:\s*['"][^'"]*['"]/, `eventFallbackImageUrl: ${toJsonString(config.eventFallbackImageUrl)}`)
   updated = replaceFirst(
     updated,
     /mode:\s*process\.env\.NEXT_PUBLIC_MAINTENANCE_MODE \|\| ['"][^'"]*['"]/,
@@ -163,6 +166,7 @@ function normalizeConfig(input: Partial<SetupConfig>): SetupConfig {
     hideEventMain: Boolean(input.hideEventMain),
     eventMainLabel: input.eventMainLabel?.trim() || '',
     eventMainImageUrl: input.eventMainImageUrl?.trim() || '',
+    eventFallbackImageUrl: input.eventFallbackImageUrl?.trim() || '',
     maintenanceMode: input.maintenanceMode === 'yes' || input.maintenanceMode === 'auto' ? input.maintenanceMode : 'no',
     maintenanceMessage: input.maintenanceMessage?.trim() || '',
   }

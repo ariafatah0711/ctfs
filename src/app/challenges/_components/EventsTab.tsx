@@ -72,7 +72,8 @@ function formatEventDateTime(value?: string | null) {
 
 export default function EventsTab({ events, selectedEventId, onEventSelect }: Props) {
   const mainLabel = String(APP.eventMainLabel || 'Main')
-  const mainImageUrl = normalizeImageUrl((APP as any).eventMainImageUrl)
+  const fallbackImageUrl = normalizeImageUrl((APP as any).eventFallbackImageUrl)
+  const mainImageUrl = normalizeImageUrl((APP as any).eventMainImageUrl) || fallbackImageUrl
   const showMain = !APP.hideEventMain
   // Split events into ongoing/upcoming and ended
   const now = new Date();
@@ -168,13 +169,17 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                         : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-400'
                     } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
-                    {mainImageUrl && (
+                    {mainImageUrl ? (
                       <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                         <img
                           src={mainImageUrl}
                           alt={mainLabel}
                           className="w-full h-full object-cover"
                         />
+                      </div>
+                    ) : (
+                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
+                        No image
                       </div>
                     )}
 
@@ -207,6 +212,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
               const status = getEventStatus(evt);
               const timeRemaining = getTimeRemaining(evt);
               const isSelected = selectedEventId === evt.id;
+              const eventImageUrl = normalizeImageUrl(evt.image_url) || fallbackImageUrl
               const startText = formatEventDateTime(evt.start_time)
               const endText = formatEventDateTime(evt.end_time)
               const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
@@ -228,13 +234,17 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                     } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
                     {/* Image */}
-                    {evt.image_url && (
+                    {eventImageUrl ? (
                       <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                         <img
-                          src={evt.image_url}
+                          src={eventImageUrl}
                           alt={evt.name}
                           className="w-full h-full object-cover"
                         />
+                      </div>
+                    ) : (
+                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
+                        No image
                       </div>
                     )}
 
@@ -297,6 +307,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
               const status = getEventStatus(evt);
               const timeRemaining = getTimeRemaining(evt);
               const isSelected = selectedEventId === evt.id;
+              const eventImageUrl = normalizeImageUrl(evt.image_url) || fallbackImageUrl
               const startText = formatEventDateTime(evt.start_time)
               const endText = formatEventDateTime(evt.end_time)
               const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
@@ -317,13 +328,17 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                         : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
                     } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
-                    {evt.image_url && (
+                    {eventImageUrl ? (
                       <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                         <img
-                          src={evt.image_url}
+                          src={eventImageUrl}
                           alt={evt.name}
                           className="w-full h-full object-cover"
                         />
+                      </div>
+                    ) : (
+                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
+                        No image
                       </div>
                     )}
 
@@ -382,6 +397,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
               const status = getEventStatus(evt);
               const timeRemaining = getTimeRemaining(evt);
               const isSelected = selectedEventId === evt.id;
+              const eventImageUrl = normalizeImageUrl(evt.image_url) || fallbackImageUrl
               const startText = formatEventDateTime(evt.start_time)
               const endText = formatEventDateTime(evt.end_time)
               const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
@@ -403,13 +419,17 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
                     } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
                   >
                     {/* Image */}
-                    {evt.image_url && (
+                    {eventImageUrl ? (
                       <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                         <img
-                          src={evt.image_url}
+                          src={eventImageUrl}
                           alt={evt.name}
                           className="w-full h-full object-cover"
                         />
+                      </div>
+                    ) : (
+                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
+                        No image
                       </div>
                     )}
 

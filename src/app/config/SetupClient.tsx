@@ -32,6 +32,7 @@ type SetupConfig = {
   hideEventMain: boolean
   eventMainLabel: string
   eventMainImageUrl: string
+  eventFallbackImageUrl: string
   maintenanceMode: 'no' | 'yes' | 'auto'
   maintenanceMessage: string
 }
@@ -53,6 +54,7 @@ const emptyConfig: SetupConfig = {
   hideEventMain: false,
   eventMainLabel: '',
   eventMainImageUrl: '',
+  eventFallbackImageUrl: '',
   maintenanceMode: 'no',
   maintenanceMessage: '',
 }
@@ -367,6 +369,9 @@ export default function SetupClient() {
                 </Field>
                 <Field label="Event main image URL">
                   <Input value={config.eventMainImageUrl} onChange={(event) => updateField('eventMainImageUrl', event.target.value)} placeholder="https://..." />
+                </Field>
+                <Field label="Event fallback image URL">
+                  <Input value={config.eventFallbackImageUrl} onChange={(event) => updateField('eventFallbackImageUrl', event.target.value)} placeholder="https://..." />
                 </Field>
               </div>
             </CardContent>

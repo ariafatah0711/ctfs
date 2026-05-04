@@ -15,6 +15,8 @@ DECLARE
   v_team_id UUID;
   v_team JSON;
   v_members JSON;
+  v_solved_event_ids UUID[];
+  v_has_main_solved BOOLEAN := FALSE;
 BEGIN
   IF v_user_id IS NULL THEN
     RAISE EXCEPTION 'Not authenticated';
@@ -101,7 +103,24 @@ BEGIN
   LEFT JOIN first_stats fs ON fs.user_id = tm.user_id
   WHERE tm.team_id = v_team_id;
 
-  RETURN json_build_object('success', true, 'team', v_team, 'members', v_members);
+  SELECT COALESCE(
+    array_agg(DISTINCT c.event_id) FILTER (WHERE c.event_id IS NOT NULL),
+    '{}'::uuid[]
+  ),
+  COALESCE(bool_or(c.event_id IS NULL), FALSE)
+  INTO v_solved_event_ids, v_has_main_solved
+  FROM public.solves s
+  JOIN public.challenges c ON c.id = s.challenge_id
+  JOIN public.team_members tm ON tm.user_id = s.user_id
+  WHERE tm.team_id = v_team_id;
+
+  RETURN json_build_object(
+    'success', true,
+    'team', v_team,
+    'members', v_members,
+    'solved_event_ids', v_solved_event_ids,
+    'has_main_solved', v_has_main_solved
+  );
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER

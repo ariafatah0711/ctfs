@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Users, UserPlus } from 'lucide-react'
 
 // Shared Imports
+import APP from '@/config'
 import { Loader, TitlePage } from '@/shared/components'
 import { BackButton, ConfirmDialog, EventSelect } from '@/shared/components/custom'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent  } from '@/shared/ui'
@@ -26,6 +27,8 @@ export default function TeamsPage() {
   const [members, setMembers] = useState<TeamMember[]>([])
   const [summary, setSummary] = useState<TeamSummary | null>(null)
   const [challenges, setChallenges] = useState<TeamChallenge[]>([])
+  const [solvedEventIds, setSolvedEventIds] = useState<string[]>([])
+  const [hasMainSolved, setHasMainSolved] = useState<boolean>(false)
   const [teamName, setTeamName] = useState('')
   const [inviteCode, setInviteCode] = useState('')
   const [status, setStatus] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
@@ -63,6 +66,8 @@ export default function TeamsPage() {
       setMembers(teamRes.members ?? [])
       setSummary(summaryRes.stats ?? null)
       setChallenges(challengesRes.challenges ?? [])
+      setSolvedEventIds(teamRes.solved_event_ids ?? [])
+      setHasMainSolved(!!teamRes.has_main_solved)
     } finally {
       setLoading(false)
     }
@@ -72,6 +77,28 @@ export default function TeamsPage() {
     if (!user) return
     loadTeamData()
   }, [user, selectedEvent])
+
+  const solvedEventSet = useMemo(
+    () => new Set((solvedEventIds || []).map((id) => String(id))),
+    [solvedEventIds]
+  )
+  const teamEvents = useMemo(
+    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
+    [startedEvents, solvedEventSet]
+  )
+  const showMainOption = hasMainSolved && !APP.hideEventMain
+
+  useEffect(() => {
+    if (!user || !team) return
+    const allowed = new Set<string>(['all'])
+    if (showMainOption) allowed.add('main')
+    for (const ev of teamEvents) allowed.add(String(ev.id))
+
+    if (!allowed.has(String(selectedEvent))) {
+      const next = showMainOption ? 'main' : (teamEvents[0]?.id ? String(teamEvents[0].id) : 'all')
+      if (String(selectedEvent) !== next) setSelectedEvent(next as any)
+    }
+  }, [user, team, teamEvents, selectedEvent, setSelectedEvent, showMainOption])
 
   const currentMember = useMemo(() => members.find(m => m.user_id === user?.id), [members, user])
   const isCaptain = currentMember?.role === 'captain'
@@ -256,7 +283,8 @@ export default function TeamsPage() {
             <EventSelect
               value={selectedEvent}
               onChange={setSelectedEvent}
-              events={startedEvents}
+              events={teamEvents as any}
+              showMain={showMainOption}
               className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
               getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
             />

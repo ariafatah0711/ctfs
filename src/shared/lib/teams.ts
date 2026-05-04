@@ -67,7 +67,7 @@ export async function regenerateTeamInviteCode(teamId: string): Promise<{ invite
 	}
 }
 
-export async function getMyTeam(p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; members: TeamMember[]; error?: string }> {
+export async function getMyTeam(p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; members: TeamMember[]; solved_event_ids?: string[]; has_main_solved?: boolean; error?: string }> {
 	try {
 		const { data, error } = await supabase.rpc('get_my_team', { p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { team: null, members: [], error: error.message }
@@ -75,7 +75,12 @@ export async function getMyTeam(p_event_id?: string | null, p_event_mode: string
 		const team = data?.team ?? null
 		const members = (data?.members ?? []) as TeamMember[]
 
-		return { team, members }
+		return {
+            team,
+            members,
+            solved_event_ids: data?.solved_event_ids ?? [],
+            has_main_solved: !!data?.has_main_solved,
+        }
 	} catch (err: any) {
 		return { team: null, members: [], error: err?.message || 'Failed to fetch team' }
 	}
@@ -233,7 +238,7 @@ export async function getMyTeamChallenges(p_event_id?: string | null, p_event_mo
 	}
 }
 
-export async function getTeamByName(name: string, p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; members: TeamMember[]; stats: TeamSummary | null; error?: string }> {
+export async function getTeamByName(name: string, p_event_id?: string | null, p_event_mode: string = 'any'): Promise<{ team: TeamInfo | null; members: TeamMember[]; stats: TeamSummary | null; solved_event_ids?: string[]; has_main_solved?: boolean; error?: string }> {
 	try {
 		const { data, error } = await supabase.rpc('get_team_by_name', { p_name: name, p_event_id: p_event_id ?? null, p_event_mode })
 		if (error) return { team: null, members: [], stats: null, error: error.message }
@@ -242,6 +247,8 @@ export async function getTeamByName(name: string, p_event_id?: string | null, p_
 			team: data?.team ?? null,
 			members: (data?.members ?? []) as TeamMember[],
 			stats: data?.stats ?? null,
+			solved_event_ids: data?.solved_event_ids ?? [],
+			has_main_solved: !!data?.has_main_solved,
 		}
 	} catch (err: any) {
 		return { team: null, members: [], stats: null, error: err?.message || 'Failed to fetch team' }

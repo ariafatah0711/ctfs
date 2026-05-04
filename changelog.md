@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.2.3]
+- feat: 3.2.3 add event fallback image support and enhance team event handling
+
 # v[3.2.2]
 ### Feat
 feat 3.2.2: enhance user profile and logs functionality with event filtering and additional user data
