@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.2.2]
+### Feat
+feat 3.2.2: enhance user profile and logs functionality with event filtering and additional user data
+
+# v[3.2.1]
+-
+
 ## v[3.2.0]
 ### Refactor
 - Refactored database structure and codebase.

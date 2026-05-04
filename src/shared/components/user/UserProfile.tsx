@@ -1,7 +1,7 @@
 ﻿"use client"
 
 // React Imports
-import { useEffect, useState, Fragment } from 'react'
+import { useEffect, useMemo, useState, Fragment } from 'react'
 import { motion } from "framer-motion"
 import { useRouter } from 'next/navigation'
 import { Award, Crown, Droplet, Flame, CheckCircle2, LayoutGrid, Grid2X2, Grid3X3, Layers, Medal, ShieldCheck, Swords, Target, Trophy, Zap, Users, ChartColumnDecreasing } from 'lucide-react'
@@ -11,7 +11,7 @@ import APP from '@/config'
 import { ImageWithFallback } from '@/shared/components'
 import { Loader, EventSelect, BackButton, DifficultyBadge, SocialIcon } from '@/shared/components/custom'
 import { Card, CardContent, CardHeader, CardTitle, Button, Dialog, DialogContent, DialogTitle  } from "@/shared/ui"
-import { getCurrentAuthInfo, getCurrentUser, getUserDetail, getCategoryTotals, getDifficultyTotals, getTeamByUserId, formatRelativeDate, getFirstBloodChallengeIds, getChallenges } from '@/shared/lib'
+import { getCurrentAuthInfo, getCurrentUser, getUserDetail, getUserProfileLite, getCategoryTotals, getDifficultyTotals, getTeamByUserId, formatRelativeDate, getFirstBloodChallengeIds, getChallenges } from '@/shared/lib'
 import { useAuth, useEventContext } from '@/shared/contexts'
 import { Event, ChallengeWithSolve } from '@/shared/types'
 import { DIALOG_CONTENT_CLASS_3XL } from "@/shared/styles"
@@ -111,6 +111,8 @@ export default function UserProfile({
   const { setUser } = useAuth()
   const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [userDetail, setUserDetail] = useState<UserDetail | null>(null)
+  const [solvedEventIds, setSolvedEventIds] = useState<string[]>([])
+  const [hasMainSolved, setHasMainSolved] = useState(false)
   const [firstBloodIds, setFirstBloodIds] = useState<string[]>([])
   const [categoryTotals, setCategoryTotals] = useState<{ category: string; total_challenges: number }[]>([])
   const [difficultyTotals, setDifficultyTotals] = useState<{ difficulty: string; total_challenges: number }[]>([])
@@ -152,6 +154,24 @@ export default function UserProfile({
       getCurrentAuthInfo().then(setAuthInfo)
     }
   }, [isCurrentUser])
+
+  useEffect(() => {
+    if (!userId) return
+    let mounted = true
+    ;(async () => {
+      try {
+        const profile = await getUserProfileLite(userId)
+        if (!mounted || !profile) return
+        setSolvedEventIds(profile.solved_event_ids || [])
+        setHasMainSolved(!!profile.has_main_solved)
+      } catch (err) {
+        console.error('Error fetching profile events:', err)
+      }
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [userId])
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -212,6 +232,27 @@ export default function UserProfile({
   const isLoading = loading || loadingDetail
   const hasError = error || !userDetail
   const solvedChallenges = userDetail?.solved_challenges || []
+  const solvedEventSet = useMemo(
+    () => new Set((solvedEventIds || []).map((id) => String(id))),
+    [solvedEventIds]
+  )
+  const profileEvents = useMemo(
+    () => startedEvents.filter((ev) => solvedEventSet.has(String(ev.id))),
+    [startedEvents, solvedEventSet]
+  )
+  const showMainOption = hasMainSolved && !APP.hideEventMain
+
+  useEffect(() => {
+    if (!userId) return
+    const allowed = new Set<string>(['all'])
+    if (showMainOption) allowed.add('main')
+    for (const ev of profileEvents) allowed.add(String(ev.id))
+
+    if (!allowed.has(String(selectedEvent))) {
+      const next = showMainOption ? 'main' : (profileEvents[0]?.id ? String(profileEvents[0].id) : 'all')
+      if (String(selectedEvent) !== next) setSelectedEvent(next as any)
+    }
+  }, [userId, profileEvents, selectedEvent, setSelectedEvent, showMainOption])
   const avatarSrc = userDetail?.profile_picture_url || userDetail?.picture || null
   const completedCategoryCount = categoryTotals.reduce((count, { category, total_challenges }) => {
     if (!total_challenges) return count
@@ -410,7 +451,8 @@ export default function UserProfile({
                       <EventSelect
                         value={selectedEvent}
                         onChange={setSelectedEvent}
-                        events={startedEvents as any}
+                        events={profileEvents as any}
+                        showMain={showMainOption}
                         className="w-full md:min-w-[150px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
                         getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
                       />

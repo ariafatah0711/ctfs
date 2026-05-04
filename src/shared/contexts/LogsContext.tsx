@@ -116,10 +116,18 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
         ? (isRefresh ? REFRESH_CHALLENGE_LOGS : MAX_CHALLENGE_LOGS)
         : (isRefresh ? REFRESH_SOLVE_LOGS : MAX_SOLVE_LOGS)
 
+      const eventMode: 'any' | 'main' | 'event' =
+        eventId === undefined || eventId === 'all'
+          ? 'any'
+          : eventId === null
+            ? 'main'
+            : 'event'
+      const eventParam = eventMode === 'event' ? String(eventId) : null
+
       // Fetch latest rows only (offset 0). For refresh, keep it small.
       const fetched = tabType === 'challenges'
         ? await getLogs(limit, 0)
-        : await getRecentSolves(limit, 0)
+        : await getRecentSolves(limit, 0, eventParam, eventMode)
 
       // Apply event filter if specified and not 'all'.
       let allowedSet: Set<string> | null = null

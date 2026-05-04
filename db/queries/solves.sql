@@ -43,7 +43,6 @@ BEGIN
         c.event_id IS NULL
         OR (
           (e.start_time IS NULL OR now() >= e.start_time)
-          AND (e.end_time IS NULL OR now() <= e.end_time)
         )
       )
 
@@ -71,7 +70,6 @@ BEGIN
         c.event_id IS NULL
         OR (
           (e.start_time IS NULL OR now() >= e.start_time)
-          AND (e.end_time IS NULL OR now() <= e.end_time)
         )
       )
   ) t
@@ -85,7 +83,9 @@ GRANT EXECUTE ON FUNCTION get_logs(INT, INT) TO authenticated;
 
 CREATE OR REPLACE FUNCTION get_recent_solves(
   p_limit INT DEFAULT 50,
-  p_offset INT DEFAULT 0
+  p_offset INT DEFAULT 0,
+  p_event_id UUID DEFAULT NULL,
+  p_event_mode TEXT DEFAULT 'any'
 )
 RETURNS TABLE (
   log_type TEXT,
@@ -111,10 +111,14 @@ BEGIN
   JOIN public.challenges c ON c.id = s.challenge_id
   LEFT JOIN public.events e ON e.id = c.event_id
   WHERE (
+    p_event_mode = 'any'
+    OR (p_event_mode = 'main' AND c.event_id IS NULL)
+    OR (p_event_mode = 'event' AND c.event_id = p_event_id)
+  )
+  AND (
     c.event_id IS NULL
     OR (
       (e.start_time IS NULL OR now() >= e.start_time)
-      AND (e.end_time IS NULL OR now() <= e.end_time)
     )
   )
   ORDER BY s.created_at DESC
@@ -124,7 +128,7 @@ $$ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, auth;
 
-GRANT EXECUTE ON FUNCTION get_recent_solves(INT, INT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_recent_solves(INT, INT, UUID, TEXT) TO authenticated;
 
 CREATE OR REPLACE FUNCTION get_activity_stats(
   p_start TIMESTAMPTZ,

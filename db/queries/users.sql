@@ -81,7 +81,9 @@ RETURNS TABLE (
   id UUID,
   username TEXT,
   picture TEXT,
-  profile_picture_url TEXT
+  profile_picture_url TEXT,
+  solved_event_ids UUID[],
+  has_main_solved BOOLEAN
 ) AS $$
 BEGIN
   RETURN QUERY
@@ -93,7 +95,23 @@ BEGIN
       au.raw_user_meta_data->>'avatar_url',
       u.profile_picture_url
     ) AS picture,
-    u.profile_picture_url
+    u.profile_picture_url,
+    COALESCE(
+      (
+        SELECT array_agg(DISTINCT c.event_id) FILTER (WHERE c.event_id IS NOT NULL)
+        FROM public.solves s
+        JOIN public.challenges c ON c.id = s.challenge_id
+        WHERE s.user_id = u.id
+      ),
+      '{}'::uuid[]
+    ) AS solved_event_ids,
+    EXISTS (
+      SELECT 1
+      FROM public.solves s
+      JOIN public.challenges c ON c.id = s.challenge_id
+      WHERE s.user_id = u.id
+        AND c.event_id IS NULL
+    ) AS has_main_solved
   FROM public.users u
   LEFT JOIN auth.users au ON au.id = u.id
   WHERE u.id = p_id;

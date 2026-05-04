@@ -17,6 +17,15 @@ export type UserDetail = {
   solved_challenges: ChallengeWithSolve[]
 }
 
+export type UserProfileLite = {
+  id: string
+  username: string
+  picture?: string | null
+  profile_picture_url?: string | null
+  solved_event_ids: string[]
+  has_main_solved: boolean
+}
+
 const normalizeTimestamp = (value?: string | null): string | null => {
   if (!value) return null
   let normalized = value.trim()
@@ -65,6 +74,34 @@ export async function getUserDetail(userId: string, eventId?: string | null, eve
     }
   } catch (error) {
     console.error('Error fetching user detail:', error)
+    return null
+  }
+}
+
+export async function getUserProfileLite(userId: string): Promise<UserProfileLite | null> {
+  try {
+    const { data, error } = await supabase.rpc('get_user_profile', { p_id: userId })
+    if (error) {
+      console.error('Error fetching user profile:', error)
+      return null
+    }
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) return null
+
+    const solvedIds = Array.isArray(row.solved_event_ids)
+      ? row.solved_event_ids.filter(Boolean).map((id: any) => String(id))
+      : []
+
+    return {
+      id: row.id,
+      username: row.username,
+      picture: row.picture ?? null,
+      profile_picture_url: row.profile_picture_url ?? null,
+      solved_event_ids: solvedIds,
+      has_main_solved: !!row.has_main_solved,
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error)
     return null
   }
 }

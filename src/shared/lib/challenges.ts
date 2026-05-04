@@ -887,10 +887,17 @@ export async function getLogs(limit = 100, offset = 0) {
 /**
  * Get recent solves formatted as notifications
  */
-export async function getRecentSolves(limit = 100, offset = 0) {
+export async function getRecentSolves(
+  limit = 100,
+  offset = 0,
+  eventId?: string | null,
+  eventMode: 'any' | 'main' | 'event' = 'any'
+) {
   const { data, error } = await supabase.rpc('get_recent_solves', {
     p_limit: limit,
     p_offset: offset,
+    p_event_id: eventId ?? null,
+    p_event_mode: eventMode,
   });
 
   if (error) {
