@@ -634,7 +634,7 @@ export default function UserProfile({
                     >
 
                       {/* Category Progress */}
-                      <div className="space-y-4 mt-4">
+                      <div className="space-y-4 mt-4 overflow-y-auto pr-2">
                         {categoryTotals.map(({ category, total_challenges }) => {
                           const solvedInCategory = solvedChallenges.filter(c => c.category === category)
                           if (solvedInCategory.length === 0) return null
