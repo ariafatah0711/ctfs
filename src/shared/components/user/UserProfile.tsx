@@ -125,21 +125,6 @@ export default function UserProfile({
   const [teamInfo, setTeamInfo] = useState<{ team: any; members: any[] } | null>(null)
   const [activeTab, setActiveTab] = useState<'profile' | 'stats'>('profile')
   const [initialLoading, setInitialLoading] = useState(true)
-  const [profileScopeReady, setProfileScopeReady] = useState(false)
-
-  useEffect(() => {
-    if (!userId) return
-
-    setProfileScopeReady(false)
-    setSolvedEventIds([])
-    setHasMainSolved(false)
-    setFirstBloodIds([])
-    setCategoryTotals([])
-    setDifficultyTotals([])
-    setTeamInfo(null)
-    setLoadingDetail(true)
-    setInitialLoading(true)
-  }, [userId])
 
   useEffect(() => {
     if (isCurrentUser) {
@@ -158,8 +143,6 @@ export default function UserProfile({
           setHasMainSolved(!!profile.has_main_solved)
         } catch (err) {
           console.error('Error fetching profile events:', err)
-        } finally {
-          if (mounted) setProfileScopeReady(true)
         }
       })()
     return () => {
@@ -167,8 +150,8 @@ export default function UserProfile({
     }
   }, [userId])
 
-  const isLoading = loading || loadingDetail || !profileScopeReady
-  const hasError = !isLoading && (error || !userDetail)
+  const isLoading = loading || loadingDetail
+  const hasError = error || !userDetail
   const solvedChallenges = userDetail?.solved_challenges || []
   const solvedEventSet = useMemo(
     () => new Set((solvedEventIds || []).map((id) => String(id))),
@@ -199,24 +182,19 @@ export default function UserProfile({
   const avatarSrc = userDetail?.profile_picture_url || userDetail?.picture || null
 
   useEffect(() => {
-    if (!userId || !profileScopeReady) return
-
-    let mounted = true
-
     const fetchDetail = async () => {
-      setLoadingDetail(true)
+      if (!userId) return
+      if (initialLoading) setLoadingDetail(true)
       try {
         const detail = await getUserDetail(
           userId,
           effectiveSelectedEventId,
           effectiveSelectedEventMode
         )
-        if (!mounted) return
         setUserDetail(detail)
 
         if (detail) {
           const firstBlood = await getFirstBloodChallengeIds(detail.id)
-          if (!mounted) return
           const solvedIds = new Set((detail.solved_challenges || []).map(c => c.id))
           setFirstBloodIds(firstBlood.filter(id => solvedIds.has(id)))
 
@@ -224,37 +202,27 @@ export default function UserProfile({
             effectiveSelectedEventId,
             effectiveSelectedEventMode
           )
-          if (!mounted) return
           setCategoryTotals(totals)
 
           const diffTotals = await getDifficultyTotals(
             effectiveSelectedEventId,
             effectiveSelectedEventMode
           )
-          if (!mounted) return
           setDifficultyTotals(diffTotals)
 
           if (APP.teams.enabled) {
             const { team, members } = await getTeamByUserId(detail.id)
-            if (!mounted) return
             if (team) setTeamInfo({ team, members })
             else setTeamInfo(null)
           }
         }
       } finally {
-        if (mounted) {
-          setLoadingDetail(false)
-          setInitialLoading(false)
-        }
+        setLoadingDetail(false)
+        setInitialLoading(false)
       }
     }
-
     fetchDetail()
-
-    return () => {
-      mounted = false
-    }
-  }, [userId, profileScopeReady, effectiveSelectedEventId, effectiveSelectedEventMode])
+  }, [userId, effectiveSelectedEventId, effectiveSelectedEventMode])
 
   const refreshUserDetail = async () => {
     if (!userId) return
