@@ -552,8 +552,8 @@ export default function UserProfile({
 
                 {/* Stats Grid */}
                 <motion.div
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
+                            layout="position"
+                            initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                   className={`grid grid-cols-1 ${APP.teams.enabled && teamInfo ? 'md:grid-cols-4' : 'md:grid-cols-3'} gap-6`}
@@ -626,8 +626,7 @@ export default function UserProfile({
                 <AnimatePresence mode="wait">
                   {activeTab === 'profile' && (
                     <motion.div
-                      key={effectiveSelectedEvent} // 🔥 INI KUNCI NYA
-                      layout
+                      key={effectiveSelectedEvent}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
@@ -655,6 +654,7 @@ export default function UserProfile({
                               </div>
                               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
                                 <motion.div
+                                  layout={false}
                                   initial={{ width: 0 }}
                                   animate={{ width: `${progress}%` }}
                                   transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -760,6 +760,7 @@ export default function UserProfile({
                                     title={`${difficulty}: ${solvedInDifficulty.length}/${total_challenges}`}
                                   >
                                     <motion.div
+                                      layout={false}
                                       initial={{ width: 0 }}
                                       animate={{ width: `${segmentProgress}%` }}
                                       transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
