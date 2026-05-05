@@ -41,13 +41,8 @@ export default function LogsPage() {
     }
   }, [tabType, user, selectedEvent, markAllRead])
 
-  if (authLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-orange-500" />
-      </div>
-    );
-  }
+  // if (authLoading) return null
+  if (authLoading) return <Loader fullscreen color="text-orange-500" />
   if (!user) return null;
 
   return (
@@ -117,7 +112,7 @@ export default function LogsPage() {
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
           <motion.div
-            key={selectedEvent + tabType}
+            // key={selectedEvent + tabType}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
