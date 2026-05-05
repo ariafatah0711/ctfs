@@ -17,6 +17,7 @@ const orderedFiles = [
   "schema/event_join_requests.sql",
   "schema/challenges.sql",
   "schema/challenge_flags.sql",
+  "schema/sub_challenges.sql",
   "schema/solves.sql",
   "schema/solves_nonactive.sql",
   "schema/notifications.sql",
@@ -31,6 +32,7 @@ const orderedFiles = [
   "queries/challenge_flags.sql",
   "queries/events.sql",
   "queries/challenges.sql",
+  "queries/sub_challenges.sql",
   "queries/solves.sql",
   "queries/teams.sql",
   "queries/team_members.sql",
@@ -41,6 +43,9 @@ const orderedFiles = [
 
   // 4) Seed / maintenance last
   "seed/bootstrap.sql",
+
+  // 5) Optional: test data (comment out if not needed)
+  // "queries/_cron_job_audit.sql",
 ];
 
 function normalizeSql(content) {

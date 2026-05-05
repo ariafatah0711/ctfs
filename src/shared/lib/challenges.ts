@@ -229,7 +229,7 @@ export async function addChallenge(challengeData: {
   min_points?: number
   decay_per_solve?: number
   event_id?: string | null
-}): Promise<void> {
+}): Promise<string | null> {
   try {
     let hintValue: any = null;
     if (Array.isArray(challengeData.hint)) {
@@ -237,7 +237,7 @@ export async function addChallenge(challengeData: {
     } else if (typeof challengeData.hint === 'string' && challengeData.hint.trim() !== '') {
       hintValue = JSON.stringify([challengeData.hint]);
     }
-    const { error } = await supabase.rpc('add_challenge', {
+    const { data, error } = await supabase.rpc('add_challenge', {
       p_title: challengeData.title,
       p_description: challengeData.description,
       p_category: challengeData.category,
@@ -256,6 +256,7 @@ export async function addChallenge(challengeData: {
     if (error) {
       throw new Error(error.message)
     }
+    return data ? String(data) : null
   } catch (error) {
     console.error('Error adding challenge:', error)
     throw error

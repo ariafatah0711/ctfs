@@ -7,7 +7,7 @@ import './globals.css'
 import { Toaster } from "react-hot-toast"
 import Navbar from '@/shared/components/Navbar'
 import { ScrollToggle, FloatingToolbar, ChatBotAI, ChatToggle } from '@/shared/components/custom'
-import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider } from '@/shared/contexts'
+import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
 import APP from '@/config'
 
 import { ChallengeJoyride, ChallengeTutorial } from '@/app/challenges/_components'
@@ -95,22 +95,24 @@ export default async function RootLayout({
             <FilterProvider>
               <AuthProvider>
                 <EventProvider>
-                  <ChatProvider>
-                    <LogsProvider>
-                      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                        <Navbar />
-                        <div className="pt-14">{children}</div>
-                        <Toaster position="top-right" reverseOrder={false} />
-                        <ChallengeJoyride />
-                        <FloatingToolbar position="right">
-                          {APP.ChallengeTutorial && <ChallengeTutorial />}
-                          {APP.ChatBotAI && <ChatToggle />}
-                        </FloatingToolbar>
-                        {APP.ChatBotAI && <ChatBotAI />}
-                        <ScrollToggle />
-                      </div>
-                    </LogsProvider>
-                  </ChatProvider>
+                  <SubChallengesProvider>
+                    <ChatProvider>
+                      <LogsProvider>
+                        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                          <Navbar />
+                          <div className="pt-14">{children}</div>
+                          <Toaster position="top-right" reverseOrder={false} />
+                          <ChallengeJoyride />
+                          <FloatingToolbar position="right">
+                            {APP.ChallengeTutorial && <ChallengeTutorial />}
+                            {APP.ChatBotAI && <ChatToggle />}
+                          </FloatingToolbar>
+                          {APP.ChatBotAI && <ChatBotAI />}
+                          <ScrollToggle />
+                        </div>
+                      </LogsProvider>
+                    </ChatProvider>
+                  </SubChallengesProvider>
                 </EventProvider>
               </AuthProvider>
             </FilterProvider>

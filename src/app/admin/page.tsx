@@ -21,8 +21,8 @@ import toast from 'react-hot-toast'
 import { Loader } from '@/shared/components'
 import { customComponents } from '@/shared/components'
 import { useAuth } from '@/shared/hooks'
-import { getAdminScope, getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll, getEvents, getInfo } from './_lib'
-import { Attachment, Challenge, Event, SiteInfo, SolverRow } from './_types'
+import { getAdminScope, getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll, getEvents, getInfo, getAdminSubChallenges, addAdminSubChallenge, deleteAdminSubChallenge } from './_lib'
+import { Attachment, Challenge, Event, SiteInfo, SolverRow, SubChallengeFormRow } from './_types'
 import APP from '@/config'
 
 type ChallengeDetailLike = Challenge & {
@@ -73,6 +73,8 @@ export default function AdminPage() {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [pendingDeleteDetail, setPendingDeleteDetail] = useState<Challenge | null>(null)
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("")
+  const [subChallenges, setSubChallenges] = useState<SubChallengeFormRow[]>([])
+  const [subChallengesSequential, setSubChallengesSequential] = useState(false)
 
   const askDelete = (id: string) => {
     setPendingDelete(id)
@@ -98,6 +100,20 @@ export default function AdminPage() {
     min_points: 0,
     decay_per_solve: 0,
     event_id: null as string | null,
+  }
+
+  const normalizeSubChallenges = (rows: any[]): SubChallengeFormRow[] => {
+    const normalized = (rows || [])
+      .map((row) => ({
+        id: row?.id ? String(row.id) : undefined,
+        question: String(row?.question ?? ''),
+        answer: String(row?.answer ?? ''),
+        order_number: row?.order_number === null || typeof row?.order_number === 'undefined' ? 0 : Number(row.order_number),
+        is_sequential: !!row?.is_sequential,
+      }))
+      .sort((a, b) => Number(a.order_number || 0) - Number(b.order_number || 0))
+      .map((row, idx) => ({ ...row, order_number: idx + 1 })) as SubChallengeFormRow[]
+    return normalized.length > 0 ? normalized : []
   }
 
   const [filters, setFilters] = useState({
@@ -201,6 +217,8 @@ export default function AdminPage() {
     setEditing(null)
     const defaultEventId = !isGlobalAdmin && typeof eventId === 'string' ? eventId : null
     setFormData({ ...emptyForm, event_id: defaultEventId })
+    setSubChallenges([])
+    setSubChallengesSequential(false)
     setOpenForm(true)
     setShowPreview(false)
   }
@@ -224,6 +242,8 @@ export default function AdminPage() {
     }
 
     setEditing(full)
+    const subChallengeRows = await getAdminSubChallenges(c.id)
+    const normalizedSubChallenges = normalizeSubChallenges(subChallengeRows)
     setFormData({
       title: full.title,
       description: full.description || '',
@@ -241,6 +261,8 @@ export default function AdminPage() {
       decay_per_solve: full.decay_per_solve ?? 0,
       event_id: full.event_id ?? null,
     })
+    setSubChallenges(normalizedSubChallenges)
+    setSubChallengesSequential(normalizedSubChallenges.length > 0 ? !!normalizedSubChallenges[0].is_sequential : false)
     setOpenForm(true)
     setShowPreview(false)
   }
@@ -352,6 +374,67 @@ export default function AdminPage() {
     }
   }
 
+  const renumberSubChallenges = (rows: SubChallengeFormRow[]) => {
+    return rows.map((row, idx) => ({ ...row, order_number: idx + 1 }))
+  }
+
+  const handleAddSubChallenge = () => {
+    setSubChallenges(prev => renumberSubChallenges([
+      ...prev,
+      {
+        question: '',
+        answer: '',
+        order_number: prev.length + 1,
+        is_sequential: false,
+      },
+    ]))
+  }
+
+  const handleUpdateSubChallenge = (index: number, field: keyof SubChallengeFormRow, value: string | number | boolean) => {
+    setSubChallenges(prev => prev.map((row, idx) => idx === index ? { ...row, [field]: value } : row))
+  }
+
+  const handleRemoveSubChallenge = (index: number) => {
+    setSubChallenges(prev => renumberSubChallenges(prev.filter((_, idx) => idx !== index)))
+  }
+
+  const handleReorderSubChallenge = (fromIndex: number, toIndex: number) => {
+    setSubChallenges(prev => {
+      if (fromIndex === toIndex) return prev
+      if (fromIndex < 0 || toIndex < 0 || fromIndex >= prev.length || toIndex >= prev.length) return prev
+      const next = [...prev]
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved)
+      return renumberSubChallenges(next)
+    })
+  }
+
+  const syncSubChallenges = async (challengeId: string) => {
+    const existing = await getAdminSubChallenges(challengeId)
+    for (const row of existing) {
+      await deleteAdminSubChallenge(row.id)
+    }
+
+    const normalizedRows = subChallenges
+      .map((row, idx) => ({
+        question: String(row.question || '').trim(),
+        answer: String(row.answer || '').trim(),
+        order_number: idx + 1,
+        is_sequential: subChallengesSequential,
+      }))
+      .filter((row) => row.question !== '' && row.answer !== '')
+      .map((row, idx) => ({ ...row, order_number: idx + 1 }))
+
+    for (const row of normalizedRows) {
+      await addAdminSubChallenge(challengeId, {
+        question: row.question,
+        answer: row.answer,
+        order_number: row.order_number,
+        is_sequential: row.is_sequential,
+      })
+    }
+  }
+
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
     setSubmitting(true)
@@ -376,6 +459,7 @@ export default function AdminPage() {
       if (formData.is_dynamic) {
         payload.max_points = Number(formData.max_points) || Number(formData.points) || 0;
       }
+      const isEditing = !!editing
       if (editing) {
         await updateChallenge(editing.id, payload)
       } else {
@@ -384,7 +468,14 @@ export default function AdminPage() {
           setSubmitting(false)
           return
         }
-        await addChallenge(payload)
+        const createdChallengeId = await addChallenge(payload)
+        if (createdChallengeId) {
+          await syncSubChallenges(createdChallengeId)
+        }
+      }
+
+      if (isEditing) {
+        await syncSubChallenges(editing.id)
       }
 
       const data = await getChallengesList(undefined, true, 'all')
@@ -392,6 +483,8 @@ export default function AdminPage() {
       setOpenForm(false)
       setEditing(null)
       setFormData({ ...emptyForm })
+      setSubChallenges([])
+      setSubChallengesSequential(false)
       toast.success('Challenge saved successfully')
     } catch (err) {
       console.error(err)
@@ -629,7 +722,7 @@ export default function AdminPage() {
             formData={formData}
             submitting={submitting}
             showPreview={showPreview}
-            onOpenChange={(v) => { if (!v) { setOpenForm(false); setEditing(null) } else setOpenForm(true) }}
+            onOpenChange={(v) => { if (!v) { setOpenForm(false); setEditing(null); setSubChallenges([]); setSubChallengesSequential(false) } else setOpenForm(true) }}
             onSubmit={(e) => { e?.preventDefault(); handleSubmit(e) }}
             onChange={setFormData}
             onAddHint={addHint}
@@ -638,6 +731,13 @@ export default function AdminPage() {
             onAddAttachment={addAttachment}
             onUpdateAttachment={updateAttachment}
             onRemoveAttachment={removeAttachment}
+            subChallenges={subChallenges}
+            subChallengesSequential={subChallengesSequential}
+            onAddSubChallenge={handleAddSubChallenge}
+            onUpdateSubChallenge={handleUpdateSubChallenge}
+            onRemoveSubChallenge={handleRemoveSubChallenge}
+            onReorderSubChallenge={handleReorderSubChallenge}
+            onToggleSubChallengesSequential={setSubChallengesSequential}
             setShowPreview={setShowPreview}
             categories={APP.challengeCategories || []}
             events={events}

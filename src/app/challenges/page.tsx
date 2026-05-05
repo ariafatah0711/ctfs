@@ -10,7 +10,7 @@ import { Flag, Zap, Search, CalendarClock, CalendarX, CircleAlert } from 'lucide
 // Shared Imports
 import APP from '@/config'
 import { getChallengesList, getChallengeDetail, submitFlag, getSolversByChallenge, getMyTeamChallenges, getMyEventMembership, getAllMyEventMemberships, getAdminScope, getChallengeFilterSettings, setChallengeFilterSettings, formatEventDurationCompact } from '@/shared/lib'
-import { useEventContext, useFilterContext } from '@/shared/contexts'
+import { useAuth, useEventContext, useFilterContext, useSubChallenges } from '@/shared/contexts'
 import { ImageWithFallback, Loader, TitlePage } from '@/shared/components'
 import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/types'
 
@@ -33,6 +33,15 @@ export default function ChallengesPage() {
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
   const { filters, setFilters, layoutMode } = useFilterContext()
   const { events, selectedEvent, setSelectedEvent } = useEventContext()
+  const {
+    getState: getSubChallengeState,
+    getAnswers: getSubChallengeAnswers,
+    setAnswer: setSubChallengeAnswer,
+    ensureLoaded: ensureSubChallengesLoaded,
+    refresh: refreshSubChallenges,
+    submit: submitSubChallengeAnswers,
+    resetAnswers: resetSubChallengeAnswers,
+  } = useSubChallenges();
   const eventId: EventSelectorValue = selectedEvent === 'main' ? null : (selectedEvent as any)
   const [filterSettings, setFilterSettings] = useState<ChallengeFilterSettings>({
     hideMaintenance: false,
@@ -46,7 +55,7 @@ export default function ChallengesPage() {
   const [targetEventId, setTargetEventId] = useState<string | null>(null)
   const [targetEventMembership, setTargetEventMembership] = useState<any>(null)
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false)
-  const { user, loading } = require('@/shared/contexts').useAuth();
+  const { user, loading } = useAuth();
   const [isChallengesLoading, setIsChallengesLoading] = useState(true)
   const [initialLoading, setInitialLoading] = useState(true)
   const [allMembershipsLoaded, setAllMembershipsLoaded] = useState(false)
@@ -77,6 +86,11 @@ export default function ChallengesPage() {
     setChallengeTab(tab)
     if (tab === 'solvers') {
       await fetchSolversForChallenge(challengeId)
+      return
+    }
+
+    if (tab === 'question') {
+      await ensureSubChallengesLoaded(challengeId)
     }
   }
 
@@ -230,6 +244,7 @@ export default function ChallengesPage() {
   const openChallenge = async (challenge: ChallengeWithSolve) => {
     setChallengeTab('challenge')
     setSolvers([])
+    void refreshSubChallenges(challenge.id)
     const cached = challengeDetailCache.get(challenge.id)
     if (cached) {
       setSelectedChallenge({
@@ -353,6 +368,14 @@ export default function ChallengesPage() {
 
   const handleFlagInputChange = (challengeId: string, value: string) => {
     setFlagInputs(prev => ({ ...prev, [challengeId]: value }))
+  }
+
+  const handleSubChallengeAnswerChange = (challengeId: string, orderNumber: number, value: string) => {
+    setSubChallengeAnswer(challengeId, orderNumber, value)
+  }
+
+  const handleSubChallengeSubmit = async (challengeId: string, orderNumber?: number) => {
+    await submitSubChallengeAnswers(challengeId, orderNumber)
   }
 
   const attemptEventSelect = async (id: string | null | 'all') => {
@@ -525,6 +548,13 @@ export default function ChallengesPage() {
     const isLocked = !allMembershipsLoaded ? false : (!canBypass && e.join_mode !== 'open' && !m?.is_member)
     return { ...e, isLocked }
   })
+
+  const selectedSubChallengeState = selectedChallenge
+    ? getSubChallengeState(selectedChallenge.id)
+    : null
+  const selectedSubChallengeAnswers = selectedChallenge
+    ? getSubChallengeAnswers(selectedChallenge.id)
+    : {}
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -763,8 +793,9 @@ export default function ChallengesPage() {
             challenge={selectedChallenge}
             solvers={solvers}
             challengeTab={challengeTab}
+            showQuestionTab={!!selectedSubChallengeState?.hasQuestions}
             setChallengeTab={(tab, challengeId) => {
-              if (tab === 'solvers' && selectedChallenge) {
+              if ((tab === 'solvers' || tab === 'question') && selectedChallenge) {
                 handleTabChange(tab, selectedChallenge.id)
               } else {
                 setChallengeTab(tab)
@@ -784,6 +815,29 @@ export default function ChallengesPage() {
             showHintModal={showHintModal}
             setShowHintModal={setShowHintModal}
             events={events}
+            subChallengeLoaded={!!selectedSubChallengeState?.loaded}
+            subChallengeLoading={!!selectedSubChallengeState?.loading}
+            subChallengeSubmitting={!!selectedSubChallengeState?.submitting}
+            subChallengeMode={selectedSubChallengeState?.mode || 'none'}
+            subChallengeQuestions={selectedSubChallengeState?.questions || []}
+            subChallengeNextQuestion={selectedSubChallengeState?.nextQuestion || null}
+            subChallengeAnswers={selectedSubChallengeAnswers}
+            subChallengeResults={selectedSubChallengeState?.results || {}}
+            subChallengeCompleted={!!selectedSubChallengeState?.completed}
+            subChallengeFlag={selectedSubChallengeState?.flag || null}
+            subChallengeMessage={selectedSubChallengeState?.message || null}
+            onSubChallengeAnswerChange={(orderNumber, value) => {
+              if (!selectedChallenge) return
+              handleSubChallengeAnswerChange(selectedChallenge.id, orderNumber, value)
+            }}
+            onSubChallengeSubmit={(orderNumber) => {
+              if (!selectedChallenge) return
+              handleSubChallengeSubmit(selectedChallenge.id, orderNumber)
+            }}
+            onSubChallengeReset={() => {
+              if (!selectedChallenge) return
+              resetSubChallengeAnswers(selectedChallenge.id)
+            }}
           />
         </>
       )}

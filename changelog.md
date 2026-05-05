@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.4.0]
+feat: add sub-challenges functionality with context and database integration
+
+- Introduced SubChallengesProvider to manage sub-challenge state and interactions.
+- Implemented getSubChallenges and submitSubChallenges functions for fetching and submitting answers.
+- Created database functions for handling sub-challenges, including adding, updating, and deleting.
+- Added SQL schema for sub_challenges table and related functions.
+- Updated layout to include SubChallengesProvider in context providers.
+- Enhanced error handling and data normalization for sub-challenges.
+
 # v[3.3.1]
 Refactor 3.3.1 loading states and improve animations across various components
 

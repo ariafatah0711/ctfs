@@ -1,7 +1,7 @@
 import type { ChallengeWithSolve } from '@/shared/types'
 
 export type ChallengesMainTab = 'challenges' | 'events'
-export type ChallengeDialogTab = 'challenge' | 'solvers'
+export type ChallengeDialogTab = 'challenge' | 'question' | 'solvers'
 export type EventSelectorValue = string | null | 'all'
 
 export type Solver = {

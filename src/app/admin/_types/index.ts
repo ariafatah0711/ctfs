@@ -34,3 +34,11 @@ export type ChallengeFormData = {
   decay_per_solve: number | ''
   event_id: string | null
 }
+
+export type SubChallengeFormRow = {
+  id?: string
+  question: string
+  answer: string
+  order_number: number | ''
+  is_sequential: boolean
+}
