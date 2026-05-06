@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import { Challenge, ChallengeWithSolve, Attachment } from '@/shared/types'
 
-type ChallengeListResult = (ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]
+type ChallengeListResult = (ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean; has_questions: boolean })[]
 
 const challengesListInflight = new Map<string, Promise<ChallengeListResult>>()
 
@@ -106,7 +106,7 @@ export async function getChallengesList(
   userId?: string,
   showAll: boolean = false,
   eventId?: string | null | 'all'
-): Promise<(ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean })[]> {
+): Promise<(ChallengeWithSolve & { has_first_blood: boolean; is_new: boolean; has_questions: boolean })[]> {
   const cacheKey = buildChallengesListKey(userId, showAll, eventId)
   const inflight = challengesListInflight.get(cacheKey)
   if (inflight) return inflight
@@ -131,8 +131,10 @@ export async function getChallengesList(
             .eq('user_id', userId)
         : null
 
+      const challengesPromise = query
+
       const [{ data: challenges, error }, solvesResult] = await Promise.all([
-        query,
+        challengesPromise,
         solvesPromise ?? Promise.resolve({ data: [] as any[] }),
       ])
 
@@ -140,10 +142,27 @@ export async function getChallengesList(
       if (!challenges) return []
 
       const solvedIds = new Set((solvesResult?.data || []).map((s: any) => s.challenge_id) || [])
+      const challengeIds = (challenges as any[]).map((ch) => String(ch.id)).filter(Boolean)
+      const hasQuestionIds = new Set<string>()
+
+      if (challengeIds.length > 0) {
+        const { data: subChallenges, error: subError } = await supabase.rpc('get_challenges_with_sub_challenges', {
+          p_challenge_ids: challengeIds,
+        })
+
+        if (subError) {
+          console.error('Error fetching sub-challenges for challenge list:', subError)
+        } else {
+          for (const row of (subChallenges || []) as any[]) {
+            if (row?.challenge_id) hasQuestionIds.add(String(row.challenge_id))
+          }
+        }
+      }
 
       return (challenges as any[]).map((ch) => ({
         // lightweight fields from DB
         ...addComputedFields(ch, solvedIds),
+        has_questions: hasQuestionIds.has(String(ch.id)),
 
         // fill heavy / unused fields so existing UI types don't break
         description: '',

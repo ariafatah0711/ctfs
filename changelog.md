@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.4.1]
+feat 3.4.1: add sorting by newest and sub-challenges support
+
 # v[3.4.0]
 feat: add sub-challenges functionality with context and database integration
 

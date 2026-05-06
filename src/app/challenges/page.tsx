@@ -16,7 +16,7 @@ import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/
 
 // Local Imports
 import { ChallengeCard, ChallengeDetailDialog, ChallengeFilterBar, ChallengeFilterSidebar, EventsTab, JoinEventDialog } from './_components'
-import { buildFuzzyOrderedList, getDifficultyOrder, normalizeChallengeHints, sortChallengesByDisplayPriority, groupChallengesByCategory } from './_lib'
+import { buildFuzzyOrderedList, getDifficultyOrder, normalizeChallengeHints, sortChallengesByDisplayPriority, sortChallengesByNewest, groupChallengesByCategory } from './_lib'
 import type { ChallengeDialogTab, ChallengeFilterSettings, ChallengesMainTab, EventSelectorValue, HintModalState, KeyedBooleanMap, KeyedFlagFeedbackMap, KeyedStringMap, Solver } from './_types'
 
 export default function ChallengesPage() {
@@ -31,7 +31,7 @@ export default function ChallengesPage() {
   const [showHintModal, setShowHintModal] = useState<HintModalState>({ challenge: null })
   const [downloading, setDownloading] = useState<KeyedBooleanMap>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
-  const { filters, setFilters, layoutMode } = useFilterContext()
+  const { filters, setFilters, layoutMode, sortMode, setSortMode } = useFilterContext()
   const { events, selectedEvent, setSelectedEvent } = useEventContext()
   const {
     getState: getSubChallengeState,
@@ -124,12 +124,11 @@ export default function ChallengesPage() {
         APP.teams.enabled ? getMyTeamChallenges() : Promise.resolve({ challenges: [] }),
       ])
 
-      const sortedChallenges = sortChallengesByDisplayPriority(challengesData || [], difficultyOrder)
       const teamSolvedIds = new Set((teamChallengesResult?.challenges || []).map((c: any) => c.challenge_id))
 
       // List payload is intentionally lightweight: hint/attachments/description are empty here.
       setChallenges(
-        sortedChallenges.map((challenge: any) => ({
+        (challengesData || []).map((challenge: any) => ({
           ...challenge,
           hint: [],
           attachments: [],
@@ -498,7 +497,11 @@ export default function ChallengesPage() {
   const difficulties = Array.from(new Set(challenges.map(c => c.difficulty))).sort()
 
   // Pre-compute grouping and ordering for rendering to avoid JSX IIFE parsing issues
-  const grouped = groupChallengesByCategory(filteredChallenges)
+  const sortedFilteredChallenges = sortMode === 'newest'
+    ? sortChallengesByNewest(filteredChallenges)
+    : sortChallengesByDisplayPriority(filteredChallenges, difficultyOrder)
+
+  const grouped = groupChallengesByCategory(sortedFilteredChallenges)
 
   const groupKeys = Object.keys(grouped)
   const orderedKeys = buildFuzzyOrderedList(preferredOrder, groupKeys)
@@ -621,6 +624,8 @@ export default function ChallengesPage() {
               events={enrichedEvents}
               selectedEventId={eventId}
               onEventChange={attemptEventSelect}
+              sortMode={sortMode}
+              onSortModeChange={() => setSortMode(prev => prev === 'default' ? 'newest' : 'default')}
               hideMainEventOption={APP.hideEventMain}
               settings={filterSettings}
               categories={categories}
@@ -712,7 +717,7 @@ export default function ChallengesPage() {
                     transition={{ duration: 0.5 }}
                     className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
                   >
-                    {sortChallengesByDisplayPriority(filteredChallenges, difficultyOrder)
+                    {sortedFilteredChallenges
                       .map((challenge) => (
                         <div key={challenge.id} className="relative">
                           <ChallengeCard

@@ -11,6 +11,7 @@ interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {
     has_first_blood?: boolean;
     is_new?: boolean;
+    has_questions?: boolean;
     is_team_solved?: boolean;
   };
   highlightTeamSolves?: boolean;
@@ -23,6 +24,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
   const noFirstBlood = !challenge.has_first_blood;
   const isMaintenance = !!challenge.is_maintenance;
   const isTeamSolved = !!challenge.is_team_solved && highlightTeamSolves;
+  const hasQuestions = !!challenge.has_questions;
 
   let ribbonLabel: string | null = null;
   if (isMaintenance) ribbonLabel = "MAINTENANCE";
@@ -54,6 +56,14 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px] z-20">
           <div className={`text-white text-[10px] font-bold px-8 py-1 shadow-md ${isMaintenance ? 'bg-amber-800' : 'bg-green-500'}`}>
             {ribbonLabel}
+          </div>
+        </div>
+      )}
+
+      {hasQuestions && (
+        <div className="absolute top-2 right-2 z-20" title="Has sub-questions">
+          <div className={`min-w-6 h-6 px-2 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow ring-2 ring-white/20 ${isMaintenance ? 'bg-amber-900' : 'bg-indigo-600'}`}>
+            T
           </div>
         </div>
       )}

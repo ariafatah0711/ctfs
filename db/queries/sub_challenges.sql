@@ -32,6 +32,24 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 
 GRANT EXECUTE ON FUNCTION is_sub_answer_correct(TEXT, TEXT) TO authenticated;
 
+CREATE OR REPLACE FUNCTION get_challenges_with_sub_challenges(
+  p_challenge_ids UUID[]
+)
+RETURNS TABLE (
+  challenge_id UUID
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT DISTINCT sc.challenge_id
+  FROM public.sub_challenges sc
+  WHERE sc.challenge_id = ANY(p_challenge_ids);
+END;
+$$ LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth;
+
+GRANT EXECUTE ON FUNCTION get_challenges_with_sub_challenges(UUID[]) TO authenticated;
+
 CREATE OR REPLACE FUNCTION get_sub_challenges(
   p_challenge_id UUID,
   p_answers JSONB DEFAULT '{}'::jsonb

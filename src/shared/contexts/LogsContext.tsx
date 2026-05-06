@@ -35,9 +35,9 @@ const LOGS_SIGNAL_MIN_REFRESH_MS = 5_000
 // Feed cache: keep results across tab switches and even component remounts.
 const FEED_CACHE_TTL_MS = 15_000
 const MAX_CHALLENGE_LOGS = 2000
-const MAX_SOLVE_LOGS = 500
+const MAX_SOLVE_LOGS = 50
 const REFRESH_CHALLENGE_LOGS = 250
-const REFRESH_SOLVE_LOGS = 150
+const REFRESH_SOLVE_LOGS = 50
 
 export function LogsProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()

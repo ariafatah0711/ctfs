@@ -56,6 +56,19 @@ export function sortChallengesByDisplayPriority<T extends Pick<ChallengeWithSolv
   })
 }
 
+export function sortChallengesByNewest<T extends Pick<ChallengeWithSolve, 'created_at' | 'title'>>(
+  list: T[]
+): T[] {
+  return [...list].sort((a, b) => {
+    const createdA = a.created_at ? new Date(a.created_at).getTime() : 0
+    const createdB = b.created_at ? new Date(b.created_at).getTime() : 0
+
+    if (createdA !== createdB) return createdB - createdA
+
+    return String(a.title || '').localeCompare(String(b.title || ''))
+  })
+}
+
 export function buildFuzzyOrderedList(preferredOrder: string[], values: string[]): string[] {
   const matchedValues = new Set<string>()
 

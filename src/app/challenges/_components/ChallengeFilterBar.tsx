@@ -1,7 +1,7 @@
 // React Imports
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Settings, LayoutGrid, List, Zap, Lock } from 'lucide-react';
+import { Settings, LayoutGrid, List, Zap, Lock, Clock3 } from 'lucide-react';
 
 // Shared Imports
 import APP from '@/config';
@@ -11,15 +11,40 @@ import { useFilterContext } from '@/shared/contexts';
 
 function LayoutToggle() {
   const { layoutMode, setLayoutMode } = useFilterContext()
+  const isDefaultLayout = layoutMode === 'grouped'
 
   return (
     <button
       type="button"
       onClick={() => setLayoutMode(layoutMode === 'compact' ? 'grouped' : 'compact')}
       title={layoutMode === 'compact' ? 'Switch to grouped view' : 'Switch to compact view'}
-      className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+      className={`inline-flex items-center gap-2 px-3 py-2 text-sm border rounded transition ${
+        isDefaultLayout
+          ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+          : 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-500 dark:bg-orange-950/40 dark:text-orange-200 hover:bg-orange-100 dark:hover:bg-orange-950/60'
+      }`}
     >
       {layoutMode === 'compact' ? <LayoutGrid size={16} /> : <List size={16} />}
+    </button>
+  )
+}
+
+function SortToggle({ sortMode, onToggle }: { sortMode: 'default' | 'newest'; onToggle: () => void }) {
+  const isDefaultSort = sortMode === 'default'
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      title={sortMode === 'default' ? 'Switch to newest first' : 'Switch to default sort'}
+      aria-label="Toggle challenge sorting"
+      className={`inline-flex items-center justify-center gap-2 px-3 py-2 text-sm border rounded transition ${
+        isDefaultSort
+          ? 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+          : 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-500 dark:bg-orange-950/40 dark:text-orange-200 hover:bg-orange-100 dark:hover:bg-orange-950/60'
+      }`}
+    >
+      <Clock3 size={16} className={isDefaultSort ? 'opacity-70' : 'animate-pulse'} />
     </button>
   )
 }
@@ -62,6 +87,8 @@ type Props = {
   onSettingsChange?: (settings: { hideMaintenance: boolean; highlightTeamSolves: boolean }) => void;
   onClear: () => void;
   showStatusFilter?: boolean;
+  sortMode?: 'default' | 'newest';
+  onSortModeChange?: () => void;
 };
 
 export default function ChallengeFilterBar({
@@ -81,6 +108,8 @@ export default function ChallengeFilterBar({
   onSettingsChange,
   onClear,
   showStatusFilter = true,
+  sortMode = 'default',
+  onSortModeChange,
 }: Props) {
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const resolvedSettings = settings ?? { hideMaintenance: false, highlightTeamSolves: true }
@@ -355,6 +384,9 @@ export default function ChallengeFilterBar({
                 </button>
               );
             })}
+            {/* <div className='ml-auto shrink-0'>
+              <span>Nama</span>
+            </div> */}
           </div>
 
           {/* Selected event timing (mobile) */}
@@ -442,6 +474,7 @@ export default function ChallengeFilterBar({
         {/* Settings + Layout toggle */}
         {onSettingsChange && (
           <div className="relative flex-none ml-auto flex items-center gap-2">
+            {onSortModeChange && <SortToggle sortMode={sortMode} onToggle={onSortModeChange} />}
             <LayoutToggle />
 
             <div className="relative">

@@ -18,6 +18,7 @@ const defaultFilters: ChallengeFilters = {
 }
 
 type LayoutMode = 'grouped' | 'compact'
+type SortMode = 'default' | 'newest'
 
 type FilterContextValue = {
   filters: ChallengeFilters
@@ -25,22 +26,25 @@ type FilterContextValue = {
   resetFilters: () => void
   layoutMode: LayoutMode
   setLayoutMode: (m: LayoutMode | ((prev: LayoutMode) => LayoutMode)) => void
+  sortMode: SortMode
+  setSortMode: (m: SortMode | ((prev: SortMode) => SortMode)) => void
 }
 
 const FilterContext = React.createContext<FilterContextValue | null>(null)
 
-function readStored(): { filters: ChallengeFilters; layoutMode: LayoutMode } {
+function readStored(): { filters: ChallengeFilters; layoutMode: LayoutMode; sortMode: SortMode } {
   try {
-    if (typeof window === 'undefined') return { filters: defaultFilters, layoutMode: 'grouped' }
+    if (typeof window === 'undefined') return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { filters: defaultFilters, layoutMode: 'grouped' }
+    if (!raw) return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
     const parsed = JSON.parse(raw)
     return {
       filters: { ...defaultFilters, ...(parsed.filters || parsed) },
-      layoutMode: (parsed.layoutMode as LayoutMode) || 'grouped'
+      layoutMode: (parsed.layoutMode as LayoutMode) || 'grouped',
+      sortMode: (parsed.sortMode as SortMode) || 'default'
     }
   } catch {
-    return { filters: defaultFilters, layoutMode: 'grouped' }
+    return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
   }
 }
 
@@ -48,6 +52,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const stored = React.useMemo(() => readStored(), [])
   const [filters, setFiltersState] = React.useState<ChallengeFilters>(() => stored.filters)
   const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>(() => stored.layoutMode)
+  const [sortMode, setSortModeState] = React.useState<SortMode>(() => stored.sortMode)
 
   const setFilters = React.useCallback((v: any) => {
     setFiltersState((prev) => {
@@ -64,12 +69,23 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     setLayoutModeState((prev) => {
       const next = typeof v === 'function' ? v(prev) : v
       try {
-        const raw = JSON.stringify({ filters, layoutMode: next })
+        const raw = JSON.stringify({ filters, layoutMode: next, sortMode })
         localStorage.setItem(STORAGE_KEY, raw)
       } catch {}
       return next
     })
-  }, [filters])
+  }, [filters, sortMode])
+
+  const setSortMode = React.useCallback((v: any) => {
+    setSortModeState((prev) => {
+      const next = typeof v === 'function' ? v(prev) : v
+      try {
+        const raw = JSON.stringify({ filters, layoutMode, sortMode: next })
+        localStorage.setItem(STORAGE_KEY, raw)
+      } catch {}
+      return next
+    })
+  }, [filters, layoutMode])
 
   const resetFilters = React.useCallback(() => {
     try {
@@ -78,7 +94,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     setFiltersState(defaultFilters)
   }, [])
 
-  const value: FilterContextValue = React.useMemo(() => ({ filters, setFilters, resetFilters, layoutMode, setLayoutMode }), [filters, setFilters, resetFilters, layoutMode, setLayoutMode])
+  const value: FilterContextValue = React.useMemo(() => ({ filters, setFilters, resetFilters, layoutMode, setLayoutMode, sortMode, setSortMode }), [filters, setFilters, resetFilters, layoutMode, setLayoutMode, sortMode, setSortMode])
 
   return <FilterContext.Provider value={value}>{children}</FilterContext.Provider>
 }
