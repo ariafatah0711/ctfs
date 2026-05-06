@@ -127,7 +127,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className={DIALOG_CONTENT_CLASS + " rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto scroll-hidden [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"}
+        className={DIALOG_CONTENT_CLASS + " min-w-0 overflow-x-hidden rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto scroll-hidden [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"}
         onClick={e => e.stopPropagation()}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
@@ -379,7 +379,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
         {/* Content: Questions */}
         {challengeTab === 'question' && (
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0 overflow-x-hidden">
             {subChallengeLoading && !hasSubChallengeQuestions && (
               <div className="text-sm text-gray-300">Loading questions...</div>
             )}
@@ -397,7 +397,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                     const isCompleted = subChallengeResults[String(q.order_number)] === true
 
                     return (
-                    <div key={q.order_number} className={`space-y-2 rounded-md p-2.5 ${isCompleted ? 'border border-[#35355e] bg-[#1a1a33]/50 opacity-90' : 'border border-pink-500/10 bg-[#1a1a33]'}`}>
+                    <div key={q.order_number} className={`min-w-0 overflow-x-hidden space-y-2 rounded-md p-2.5 ${isCompleted ? 'border border-[#35355e] bg-[#1a1a33]/50 opacity-90' : 'border border-pink-500/10 bg-[#1a1a33]'}`}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
@@ -406,7 +406,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                               {isCompleted ? 'Completed' : 'Pending'}
                             </span>
                           </div>
-                          <div className={`mt-1 max-w-full overflow-hidden break-words text-sm font-semibold [&_p]:m-0 [&_p]:text-sm [&_p]:leading-snug [&_ul]:my-0 [&_ol]:my-0 [&_li]:my-0 ${isCompleted ? 'text-gray-200' : 'text-white'}`}>
+                          <div className={`mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold ${isCompleted ? 'text-gray-200' : 'text-white'}`}>
                             <MarkdownRenderer content={normalizeQuestionMarkdown(q.question)} className="max-w-full break-words" />
                           </div>
                         </div>
@@ -449,14 +449,14 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                   /* Sequential Mode Current Question */
                   <>
                     {subChallengeQuestions.filter(q => subChallengeResults[String(q.order_number)] === true).map((q) => (
-                      <div key={q.order_number} className="space-y-2 rounded-md border border-[#35355e] bg-[#1a1a33]/50 p-2.5 opacity-90">
+                      <div key={q.order_number} className="min-w-0 overflow-x-hidden space-y-2 rounded-md border border-[#35355e] bg-[#1a1a33]/50 p-2.5 opacity-90">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">Question #{q.order_number}</p>
                               <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border bg-green-900/50 text-green-400 border-green-800">Completed</span>
                             </div>
-                            <div className="mt-1 max-w-full overflow-hidden break-words text-sm font-semibold text-gray-200 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-snug [&_ul]:my-0 [&_ol]:my-0 [&_li]:my-0">
+                            <div className="mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold text-gray-200">
                               <MarkdownRenderer content={normalizeQuestionMarkdown(q.question)} className="max-w-full break-words" />
                             </div>
                           </div>
@@ -473,10 +473,10 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                     ))}
 
                     {!subChallengeCompleted && subChallengeNextQuestion && (
-                      <div className="space-y-2 rounded-md border border-pink-500/30 bg-[#1a1a33] p-2.5 shadow-lg shadow-pink-500/5">
+                      <div className="min-w-0 overflow-x-hidden space-y-2 rounded-md border border-pink-500/30 bg-[#1a1a33] p-2.5 shadow-lg shadow-pink-500/5">
                         <div className="min-w-0">
                           <p className="text-[10px] uppercase tracking-[0.18em] text-pink-300/70">Question #{subChallengeNextQuestion.order_number}</p>
-                          <div className="mt-1 max-w-full overflow-hidden break-words text-sm font-semibold text-white [&_p]:m-0 [&_p]:text-sm [&_p]:leading-snug [&_ul]:my-0 [&_ol]:my-0 [&_li]:my-0">
+                          <div className="mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold text-white">
                             <MarkdownRenderer content={normalizeQuestionMarkdown(subChallengeNextQuestion.question)} className="max-w-full break-words" />
                           </div>
                         </div>
