@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.5.0]
+### Added
+refactor: remove ctfc table and related functions; integrate services into challenges
+
+- Deleted the ctfc table and all associated SQL functions for managing CTFC services.
+- Updated the challenges table to include a services array to store service names.
+- Refactored the ChallengeFormDialog component to manage services instead of ctfc_names.
+- Adjusted the ChallengeDetailDialog to display services using a new ChallengeServicesPanel component.
+- Modified API routes to handle service actions and fetching service details.
+- Updated challenge-related types and data fetching logic to accommodate the new services structure.
+
 # v[3.4.1]
 feat 3.4.1: add sorting by newest and sub-challenges support
 

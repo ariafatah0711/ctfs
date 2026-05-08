@@ -22,6 +22,7 @@ import { Loader } from '@/shared/components'
 import { customComponents } from '@/shared/components'
 import { useAuth } from '@/shared/hooks'
 import { getAdminScope, getChallengesList, getChallengeDetail, addChallenge, updateChallenge, setChallengeActive, setChallengeMaintenance, deleteChallenge, getFlag, getSolversAll, getEvents, getInfo, getAdminSubChallenges, addAdminSubChallenge, deleteAdminSubChallenge } from './_lib'
+import { getChallengeById } from '@/shared/lib'
 import { Attachment, Challenge, Event, SiteInfo, SolverRow, SubChallengeFormRow } from './_types'
 import APP from '@/config'
 
@@ -46,7 +47,7 @@ type ChallengePayload = {
   decay_per_solve?: number
   max_points?: number
   flag_placeholder?: boolean
-  ctfc_names?: string[]
+  services?: string[]
 }
 
 export default function AdminPage() {
@@ -103,7 +104,7 @@ export default function AdminPage() {
     decay_per_solve: 0,
     event_id: null as string | null,
     flag_placeholder: false,
-    ctfc_names: [] as string[],
+    services: [] as string[],
   }
 
   const normalizeSubChallenges = (rows: any[]): SubChallengeFormRow[] => {
@@ -229,7 +230,7 @@ export default function AdminPage() {
 
   const openEdit = async (c: Challenge) => {
     // Fetch full details on-demand (admin list is lightweight)
-    const detail = await getChallengeDetail(c.id)
+    const detail = await getChallengeById(c.id)
     const full: ChallengeDetailLike = detail ? { ...c, ...detail } : c
 
     // normalize hint to array
@@ -265,7 +266,7 @@ export default function AdminPage() {
       decay_per_solve: full.decay_per_solve ?? 0,
       event_id: full.event_id ?? null,
       flag_placeholder: (full as any).flag_placeholder ?? false,
-      ctfc_names: (full as any).ctfc_names || [],
+      services: (full as any).services || [],
     })
     setSubChallenges(normalizedSubChallenges)
     setSubChallengesSequential(normalizedSubChallenges.length > 0 ? !!normalizedSubChallenges[0].is_sequential : false)
@@ -457,7 +458,7 @@ export default function AdminPage() {
         event_id: formData.event_id ?? null,
         flag: (formData.flag || '').trim(),
         flag_placeholder: !!formData.flag_placeholder,
-        ctfc_names: (formData.ctfc_names || []).filter(n => n.trim() !== ''),
+        services: (formData.services || []).filter(n => n.trim() !== ''),
       }
       if (editing && typeof formData.is_active !== 'undefined') payload.is_active = !!formData.is_active;
       if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;

@@ -1,5 +1,6 @@
 export { default as ChallengeCard } from './ChallengeCard'
 export { default as ChallengeDetailDialog } from './ChallengeDetailDialog'
+export { default as ChallengeServicesPanel } from './ChallengeServicesPanel'
 export { default as ChallengeJoyride } from './ChallengeJoyride'
 export { default as ChallengeTutorial } from './ChallengeTutorial'
 export { default as EventsTab } from './EventsTab'

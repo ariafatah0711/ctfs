@@ -25,6 +25,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
   const isMaintenance = !!challenge.is_maintenance;
   const isTeamSolved = !!challenge.is_team_solved && highlightTeamSolves;
   const hasQuestions = !!challenge.has_questions;
+  const hasServices = Array.isArray((challenge as any).services) && (challenge as any).services.length > 0;
+  const featureBadge = hasQuestions && hasServices ? 'TS' : hasQuestions ? 'T' : hasServices ? 'S' : null;
 
   let ribbonLabel: string | null = null;
   if (isMaintenance) ribbonLabel = "MAINTENANCE";
@@ -60,10 +62,10 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         </div>
       )}
 
-      {hasQuestions && (
-        <div className="absolute top-2 right-2 z-20" title="Has sub-questions">
+      {featureBadge && (
+        <div className="absolute top-2 right-2 z-20" title={featureBadge === 'TS' ? 'Has tasks and services' : featureBadge === 'T' ? 'Has tasks' : 'Has services'}>
           <div className={`min-w-6 h-6 px-2 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow ring-2 ring-white/20 ${isMaintenance ? 'bg-amber-900' : 'bg-indigo-600'}`}>
-            T
+            {featureBadge}
           </div>
         </div>
       )}

@@ -29,7 +29,6 @@ export default function ChallengesPage() {
   const [flagFeedback, setFlagFeedback] = useState<KeyedFlagFeedbackMap>({})
   const [submitting, setSubmitting] = useState<KeyedBooleanMap>({})
   const [placeholders, setPlaceholders] = useState<KeyedStringMap>({})
-  const [challengeServices, setChallengeServices] = useState<Record<string, string[]>>({})
   const [showHintModal, setShowHintModal] = useState<HintModalState>({ challenge: null })
   const [downloading, setDownloading] = useState<KeyedBooleanMap>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
@@ -254,14 +253,6 @@ export default function ChallengesPage() {
         })
       })
     }
-
-    import('@/shared/lib/challenges').then(({ getChallengeServices }) => {
-      getChallengeServices(challenge.id).then(services => {
-        if (services && services.length > 0) {
-          setChallengeServices(prev => ({ ...prev, [challenge.id]: services }))
-        }
-      })
-    })
 
     const cached = challengeDetailCache.get(challenge.id)
     if (cached) {
@@ -851,7 +842,7 @@ export default function ChallengesPage() {
             subChallengeFlag={selectedSubChallengeState?.flag || null}
             subChallengeMessage={selectedSubChallengeState?.message || null}
             placeholders={placeholders}
-            services={selectedChallenge ? challengeServices[selectedChallenge.id] : []}
+            services={selectedChallenge?.services || []}
             onSubChallengeAnswerChange={(orderNumber, value) => {
               if (!selectedChallenge) return
               handleSubChallengeAnswerChange(selectedChallenge.id, orderNumber, value)

@@ -86,6 +86,7 @@ export interface Challenge {
   min_points: number
   decay_per_solve: number
   flag_placeholder?: boolean
+  services?: string[]
   created_at: string
   updated_at: string
 }

@@ -13,6 +13,7 @@ CREATE TABLE public.challenges (
   hint JSONB DEFAULT NULL,
   difficulty TEXT,
   attachments JSONB DEFAULT '[]'::jsonb,
+  services TEXT[] DEFAULT ARRAY[]::TEXT[],
   is_active BOOLEAN DEFAULT true,
   is_maintenance BOOLEAN DEFAULT false,
   is_dynamic BOOLEAN DEFAULT false,
@@ -28,3 +29,6 @@ CREATE INDEX IF NOT EXISTS idx_challenges_event_id ON public.challenges(event_id
 
 -- ALTER TABLE public.challenges
 -- ADD COLUMN flag_placeholder BOOLEAN DEFAULT false;
+
+-- ALTER TABLE public.challenges
+-- ADD COLUMN services TEXT[] DEFAULT ARRAY[]::TEXT[];

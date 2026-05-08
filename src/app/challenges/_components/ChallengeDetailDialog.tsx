@@ -17,6 +17,7 @@ import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
 // Local Imports
 import SolversList from './SolversList';
 import HintDialog from './HintDialog';
+import ChallengeServicesPanel from './ChallengeServicesPanel';
 import type {
   ChallengeDialogTab,
   HintModalState,
@@ -99,6 +100,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 }) => {
   const [copiedAll, setCopiedAll] = useState<{ [key: string]: boolean }>({});
   const overlayRef = React.useRef<HTMLDivElement>(null);
+
   if (!challenge) return null;
 
   const normalizeQuestionMarkdown = (value: string) => {
@@ -133,7 +135,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className={DIALOG_CONTENT_CLASS + " min-w-0 overflow-x-hidden rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-8 font-mono max-h-[90vh] overflow-y-auto scroll-hidden [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"}
+        className={DIALOG_CONTENT_CLASS + " min-w-0 overflow-x-hidden rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-4 md:p-6 font-mono max-h-[90vh] overflow-y-auto scroll-hidden [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"}
         onClick={e => e.stopPropagation()}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
@@ -194,44 +196,23 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             </div>
 
             {/* Description */}
-            <div className="max-w-full overflow-x-auto break-words mb-4">
-              <MarkdownRenderer content={challenge.description} className="max-w-full break-words" />
+            <div className="max-w-full overflow-x-auto break-words">
+              <MarkdownRenderer
+                content={challenge.description}
+                className="max-w-full break-words [&_p:last-child]:mb-0 [&_ul:last-child]:mb-0 [&_ol:last-child]:mb-0 [&_blockquote:last-child]:my-0"
+              />
             </div>
 
             {/* Services */}
-            {services && services.length > 0 && (
-              <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-2 inline-flex items-center gap-1 uppercase tracking-wider">
-                  <span className="h-3.5 w-3.5">🌐</span> CTFC Services
-                </p>
-                <div className="grid grid-cols-1 gap-2">
-                  {services.map((service, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-[#1a1a33]/80 p-3 rounded border border-[#35355e] group hover:border-cyan-500/50 transition-colors shadow-sm">
-                      <code className="text-sm font-mono text-cyan-300 break-all flex-1">{service}</code>
-                      <button
-                        type="button"
-                        className="p-1.5 bg-[#232344] hover:bg-[#35355e] rounded text-gray-400 hover:text-white transition shadow-sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(service);
-                          toast.success('Copied service name');
-                        }}
-                        title="Copy to clipboard"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <ChallengeServicesPanel open={open} services={services} />
 
             {/* Attachments */}
             {challenge.attachments && challenge.attachments.length > 0 && (
-              <div className="mb-1 space-y-3">
+              <div className="space-y-3">
                 {/* File Attachments */}
                 {challenge.attachments.some(att => att.type === 'file') && (
                   <div>
-                    <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1">
+                    <p className="text-xs text-gray-400 inline-flex items-center gap-1">
                       <FileText className="h-3.5 w-3.5" /> Files
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -301,7 +282,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 {/* URL Attachments */}
                 {challenge.attachments.some(att => att.type !== 'file') && (
                   <div>
-                    <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1">
+                    <p className="text-xs text-gray-400 inline-flex items-center gap-1">
                       <LinkIcon className="h-3.5 w-3.5" /> Links
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -328,8 +309,8 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
             {/* Sub-challenge Tasks */}
             {showQuestionTab && (
-              <div className="mb-4">
-                <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1">
+              <div>
+                <p className="text-xs text-gray-400 inline-flex items-center gap-1">
                   <ClipboardList className="h-3.5 w-3.5" /> Tasks
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -347,7 +328,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
             {/* Hint buttons */}
             {Array.isArray(challenge.hint) && challenge.hint.length > 0 && (
-              <div className="mb-1 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 {(challenge.hint ?? []).map((hint: string, idx: number) => (
                   <button
                     key={idx}

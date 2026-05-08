@@ -116,7 +116,7 @@ export async function getChallengesList(
       let query = supabase
         .from('challenges')
         .select(
-          'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at, flag_placeholder'
+          'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at, flag_placeholder, services'
         )
         .order('points', { ascending: true })
         .order('total_solves', { ascending: false })
@@ -192,7 +192,7 @@ export async function getChallengeDetail(challengeId: string): Promise<Challenge
     const { data, error } = await supabase
       .from('challenges')
       .select(
-        'id, event_id, title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at, flag_placeholder'
+        'id, event_id, title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at, flag_placeholder, services'
       )
       .eq('id', challengeId)
       .single()
@@ -231,17 +231,21 @@ export async function getChallengePlaceholder(challengeId: string): Promise<stri
 
 /**
  * Get CTFC service names for a challenge
+ * (Services are now stored in challenges.services column, not in ctfc table)
  */
 export async function getChallengeServices(challengeId: string): Promise<string[]> {
   try {
-    const { data, error } = await supabase.rpc('get_ctfcs', {
-      p_challenge_id: challengeId
-    });
-    if (error) throw new Error(error.message);
-    return (data as any[]).map(s => s.name);
+    const { data, error } = await supabase
+      .from('challenges')
+      .select('services')
+      .eq('id', challengeId)
+      .single()
+
+    if (error) throw new Error(error.message)
+    return (data?.services || []) as string[]
   } catch (err) {
-    console.error('Error fetching challenge services:', err);
-    return [];
+    console.error('Error fetching challenge services:', err)
+    return []
   }
 }
 
@@ -282,7 +286,7 @@ export async function addChallenge(challengeData: {
   decay_per_solve?: number
   event_id?: string | null
   flag_placeholder?: boolean
-  ctfc_names?: string[]
+  services?: string[]
 }): Promise<string | null> {
   try {
     let hintValue: any = null;
@@ -307,7 +311,7 @@ export async function addChallenge(challengeData: {
       p_decay_per_solve: challengeData.decay_per_solve ?? 0,
       p_event_id: challengeData.event_id ?? null,
       p_flag_placeholder: challengeData.flag_placeholder ?? false,
-      p_ctfc_names: challengeData.ctfc_names || []
+      p_services: challengeData.services || []
     });
     if (error) {
       throw new Error(error.message)
@@ -339,7 +343,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
   decay_per_solve?: number
   event_id?: string | null
   flag_placeholder?: boolean
-  ctfc_names?: string[]
+  services?: string[]
 }): Promise<void> {
   try {
     let hintValue: any = null;
@@ -366,7 +370,7 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_decay_per_solve: challengeData.decay_per_solve ?? 0,
       p_event_id: challengeData.event_id ?? null,
       p_flag_placeholder: challengeData.flag_placeholder,
-      p_ctfc_names: challengeData.ctfc_names
+      p_services: challengeData.services
     });
     if (error) {
       throw new Error(error.message)
@@ -409,15 +413,7 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
       throw new Error(error.message)
     }
 
-    const { data: ctfcData } = await supabase
-      .from('ctfc')
-      .select('name')
-      .eq('challenge_id', challengeId)
-
-    return {
-      ...data,
-      ctfc_names: (ctfcData || []).map((c: any) => c.name)
-    } as any
+    return data as any
   } catch (error) {
     console.error('Error fetching challenge:', error)
     return null

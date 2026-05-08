@@ -100,7 +100,7 @@ CREATE OR REPLACE FUNCTION add_challenge(
   p_max_points INTEGER DEFAULT NULL,
   p_event_id UUID DEFAULT NULL,
   p_flag_placeholder BOOLEAN DEFAULT false,
-  p_ctfc_names TEXT[] DEFAULT ARRAY[]::TEXT[]
+  p_services TEXT[] DEFAULT ARRAY[]::TEXT[]
 )
 RETURNS UUID AS $$
 DECLARE
@@ -111,17 +111,12 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add challenge';
   END IF;
 
-  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, event_id, flag_placeholder)
-  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve, p_event_id, p_flag_placeholder)
+  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, event_id, flag_placeholder, services)
+  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve, p_event_id, p_flag_placeholder, p_services)
   RETURNING id INTO v_challenge_id;
 
   INSERT INTO public.challenge_flags(challenge_id, flag)
   VALUES (v_challenge_id, p_flag);
-
-  IF p_ctfc_names IS NOT NULL AND array_length(p_ctfc_names, 1) > 0 THEN
-    INSERT INTO public.ctfc (challenge_id, name)
-    SELECT v_challenge_id, unnest(p_ctfc_names);
-  END IF;
 
   RETURN v_challenge_id;
 END;
@@ -276,7 +271,7 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_max_points INTEGER DEFAULT NULL,
   p_event_id UUID DEFAULT NULL,
   p_flag_placeholder BOOLEAN DEFAULT NULL,
-  p_ctfc_names TEXT[] DEFAULT NULL
+  p_services TEXT[] DEFAULT NULL
 )
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -308,6 +303,7 @@ BEGIN
       decay_per_solve = p_decay_per_solve,
       event_id = p_event_id,
       flag_placeholder = COALESCE(p_flag_placeholder, flag_placeholder),
+      services = COALESCE(p_services, services),
       updated_at = now()
   WHERE id = p_challenge_id;
 
@@ -328,12 +324,6 @@ BEGIN
     UPDATE public.challenge_flags
     SET flag = p_flag
     WHERE challenge_id = p_challenge_id;
-  END IF;
-
-  IF p_ctfc_names IS NOT NULL THEN
-    DELETE FROM public.ctfc WHERE challenge_id = p_challenge_id;
-    INSERT INTO public.ctfc (challenge_id, name)
-    SELECT p_challenge_id, unnest(p_ctfc_names);
   END IF;
 
   RETURN TRUE;

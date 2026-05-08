@@ -467,21 +467,21 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
               <div className="md:col-span-2">
                 <div className="flex items-center justify-between">
                   <Label>CTFC Services</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => onChange({ ...formData, ctfc_names: [...formData.ctfc_names, ''] })}>+ Add Service</Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => onChange({ ...formData, services: [...formData.services, ''] })}>+ Add Service</Button>
                 </div>
-                {formData.ctfc_names.length === 0 && <p className="text-xs text-muted-foreground">No CTFC services added</p>}
+                {formData.services.length === 0 && <p className="text-xs text-muted-foreground">No CTFC services added</p>}
                 <div className="space-y-2 mt-2">
-                  {formData.ctfc_names.map((name: string, idx: number) => (
+                  {formData.services.map((name: string, idx: number) => (
                     <div key={idx} className="flex items-center gap-2">
                       <Input value={name} onChange={e => {
-                        const newNames = [...formData.ctfc_names];
+                        const newNames = [...formData.services];
                         newNames[idx] = e.target.value;
-                        onChange({ ...formData, ctfc_names: newNames });
+                        onChange({ ...formData, services: newNames });
                       }} placeholder="service-name" />
                       <Button type="button" variant="ghost" onClick={() => {
-                        const newNames = [...formData.ctfc_names];
+                        const newNames = [...formData.services];
                         newNames.splice(idx, 1);
-                        onChange({ ...formData, ctfc_names: newNames });
+                        onChange({ ...formData, services: newNames });
                       }}>✕</Button>
                     </div>
                   ))}
