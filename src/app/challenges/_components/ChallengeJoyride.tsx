@@ -64,11 +64,26 @@ export default function ChallengeJoyride() {
           {
             target: '[data-tour="challenge-tutorial"]',
             content: '📚 Open the CTF tutorial PDF here.',
-            placement: 'top',
+            placement: 'left',
           },
           {
             target: '[data-tour="challenge-filter-bar"]',
             content: '🔎 Use this filter bar to quickly find challenges by status, category, difficulty, and search.',
+            placement: 'bottom',
+          },
+          {
+            target: '[data-tour="challenge-feature-filter"]',
+            content: '🧩 Feature filter cycles between N / T / S. N = all challenges, T = challenges with tasks/questions, S = challenges with services.',
+            placement: 'bottom',
+          },
+          {
+            target: '[data-tour="challenge-sort-toggle"]',
+            content: '🕒 Toggle sorting mode. Default keeps challenge display priority, while newest shows latest challenges first.',
+            placement: 'bottom',
+          },
+          {
+            target: '[data-tour="challenge-layout-toggle"]',
+            content: '🗂️ Switch challenge layout between grouped view and compact grid view.',
             placement: 'bottom',
           },
           {
@@ -135,10 +150,12 @@ export default function ChallengeJoyride() {
       run={runTour}
       continuous
       showProgress={false}
-      showSkipButton={true}
+      showSkipButton={false}
+      hideCloseButton={true}
       hideBackButton={false}
       disableCloseOnEsc={true}
       disableOverlayClose={true}
+      disableScrolling={true}
       scrollDuration={500}
       getHelpers={(helpers) => {
         storeRef.current = helpers
@@ -157,10 +174,10 @@ export default function ChallengeJoyride() {
       callback={handleTourStatus}
       locale={{
         back: 'Back',
-        close: 'Close',
+        close: '',
         last: 'Finish',
         next: 'Next',
-        skip: 'Skip',
+        skip: '',
       }}
     />
   )

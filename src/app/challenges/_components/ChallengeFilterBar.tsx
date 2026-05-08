@@ -16,6 +16,7 @@ function LayoutToggle() {
   return (
     <button
       type="button"
+      data-tour="challenge-layout-toggle"
       onClick={() => setLayoutMode(layoutMode === 'compact' ? 'grouped' : 'compact')}
       title={layoutMode === 'compact' ? 'Switch to grouped view' : 'Switch to compact view'}
       className={`inline-flex items-center gap-2 px-3 py-2 text-sm border rounded transition ${
@@ -35,6 +36,7 @@ function SortToggle({ sortMode, onToggle }: { sortMode: 'default' | 'newest'; on
   return (
     <button
       type="button"
+      data-tour="challenge-sort-toggle"
       onClick={onToggle}
       title={sortMode === 'default' ? 'Switch to newest first' : 'Switch to default sort'}
       aria-label="Toggle challenge sorting"
@@ -474,6 +476,7 @@ export default function ChallengeFilterBar({
         <div className="flex-none">
           <button
             type="button"
+            data-tour="challenge-feature-filter"
             onClick={() => onFilterChange({ ...filters, feature: nextFeatureMode })}
             title={featureButtonTitle}
             aria-label={featureButtonTitle}
