@@ -85,6 +85,7 @@ export interface Challenge {
   is_dynamic: boolean
   min_points: number
   decay_per_solve: number
+  flag_placeholder?: boolean
   created_at: string
   updated_at: string
 }

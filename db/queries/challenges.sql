@@ -98,7 +98,9 @@ CREATE OR REPLACE FUNCTION add_challenge(
   p_min_points INTEGER DEFAULT 0,
   p_decay_per_solve INTEGER DEFAULT 0,
   p_max_points INTEGER DEFAULT NULL,
-  p_event_id UUID DEFAULT NULL
+  p_event_id UUID DEFAULT NULL,
+  p_flag_placeholder BOOLEAN DEFAULT false,
+  p_ctfc_names TEXT[] DEFAULT ARRAY[]::TEXT[]
 )
 RETURNS UUID AS $$
 DECLARE
@@ -109,19 +111,24 @@ BEGIN
     RAISE EXCEPTION 'Only admin can add challenge';
   END IF;
 
-  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, event_id)
-  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve, p_event_id)
+  INSERT INTO public.challenges(title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, event_id, flag_placeholder)
+  VALUES (p_title, p_description, p_category, p_points, p_max_points, p_hint, p_attachments, p_difficulty, true, p_is_maintenance, p_is_dynamic, p_min_points, p_decay_per_solve, p_event_id, p_flag_placeholder)
   RETURNING id INTO v_challenge_id;
 
   INSERT INTO public.challenge_flags(challenge_id, flag)
   VALUES (v_challenge_id, p_flag);
+
+  IF p_ctfc_names IS NOT NULL AND array_length(p_ctfc_names, 1) > 0 THEN
+    INSERT INTO public.ctfc (challenge_id, name)
+    SELECT v_challenge_id, unnest(p_ctfc_names);
+  END IF;
 
   RETURN v_challenge_id;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB, BOOLEAN, BOOLEAN, INTEGER, INTEGER, INTEGER, UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION add_challenge(TEXT, TEXT, TEXT, INTEGER, TEXT, TEXT, JSONB, JSONB, BOOLEAN, BOOLEAN, INTEGER, INTEGER, INTEGER, UUID, BOOLEAN, TEXT[]) TO authenticated;
 
 CREATE OR REPLACE FUNCTION submit_flag(
   p_challenge_id uuid,
@@ -267,7 +274,9 @@ CREATE OR REPLACE FUNCTION update_challenge(
   p_min_points INTEGER DEFAULT 0,
   p_decay_per_solve INTEGER DEFAULT 0,
   p_max_points INTEGER DEFAULT NULL,
-  p_event_id UUID DEFAULT NULL
+  p_event_id UUID DEFAULT NULL,
+  p_flag_placeholder BOOLEAN DEFAULT NULL,
+  p_ctfc_names TEXT[] DEFAULT NULL
 )
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -298,6 +307,7 @@ BEGIN
       min_points = p_min_points,
       decay_per_solve = p_decay_per_solve,
       event_id = p_event_id,
+      flag_placeholder = COALESCE(p_flag_placeholder, flag_placeholder),
       updated_at = now()
   WHERE id = p_challenge_id;
 
@@ -320,13 +330,19 @@ BEGIN
     WHERE challenge_id = p_challenge_id;
   END IF;
 
+  IF p_ctfc_names IS NOT NULL THEN
+    DELETE FROM public.ctfc WHERE challenge_id = p_challenge_id;
+    INSERT INTO public.ctfc (challenge_id, name)
+    SELECT p_challenge_id, unnest(p_ctfc_names);
+  END IF;
+
   RETURN TRUE;
 END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
 GRANT EXECUTE ON FUNCTION update_challenge(
-  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, boolean, text, boolean, integer, integer, integer, uuid
+  uuid, text, text, text, integer, text, jsonb, jsonb, boolean, boolean, text, boolean, integer, integer, integer, uuid, boolean, text[]
 ) TO authenticated;
 
 CREATE OR REPLACE FUNCTION set_challenge_active(
@@ -467,6 +483,31 @@ CREATE TRIGGER trigger_handle_challenge_activation
 AFTER UPDATE OF is_active ON public.challenges
 FOR EACH ROW
 EXECUTE FUNCTION handle_challenge_activation();
+
+CREATE OR REPLACE FUNCTION public.get_challenge_placeholder(p_challenge_id UUID)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_flag TEXT;
+    v_show_placeholder BOOLEAN;
+BEGIN
+    SELECT c.flag_placeholder, cf.flag
+    INTO v_show_placeholder, v_flag
+    FROM public.challenges c
+    JOIN public.challenge_flags cf ON cf.challenge_id = c.id
+    WHERE c.id = p_challenge_id;
+
+    IF v_show_placeholder THEN
+        RETURN public.get_flag_placeholder(v_flag);
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_challenge_placeholder(UUID) TO authenticated;
 
 -- DELETE
 CREATE OR REPLACE FUNCTION delete_challenge(

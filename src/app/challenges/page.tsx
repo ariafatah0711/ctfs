@@ -28,6 +28,8 @@ export default function ChallengesPage() {
   const [flagInputs, setFlagInputs] = useState<KeyedStringMap>({})
   const [flagFeedback, setFlagFeedback] = useState<KeyedFlagFeedbackMap>({})
   const [submitting, setSubmitting] = useState<KeyedBooleanMap>({})
+  const [placeholders, setPlaceholders] = useState<KeyedStringMap>({})
+  const [challengeServices, setChallengeServices] = useState<Record<string, string[]>>({})
   const [showHintModal, setShowHintModal] = useState<HintModalState>({ challenge: null })
   const [downloading, setDownloading] = useState<KeyedBooleanMap>({})
   const [selectedChallenge, setSelectedChallenge] = useState<ChallengeWithSolve | null>(null)
@@ -244,6 +246,23 @@ export default function ChallengesPage() {
     setChallengeTab('challenge')
     setSolvers([])
     void refreshSubChallenges(challenge.id)
+
+    if (challenge.flag_placeholder && !placeholders[challenge.id]) {
+      import('@/shared/lib/challenges').then(({ getChallengePlaceholder }) => {
+        getChallengePlaceholder(challenge.id).then(ph => {
+          if (ph) setPlaceholders(prev => ({ ...prev, [challenge.id]: ph }))
+        })
+      })
+    }
+
+    import('@/shared/lib/challenges').then(({ getChallengeServices }) => {
+      getChallengeServices(challenge.id).then(services => {
+        if (services && services.length > 0) {
+          setChallengeServices(prev => ({ ...prev, [challenge.id]: services }))
+        }
+      })
+    })
+
     const cached = challengeDetailCache.get(challenge.id)
     if (cached) {
       setSelectedChallenge({
@@ -831,6 +850,8 @@ export default function ChallengesPage() {
             subChallengeCompleted={!!selectedSubChallengeState?.completed}
             subChallengeFlag={selectedSubChallengeState?.flag || null}
             subChallengeMessage={selectedSubChallengeState?.message || null}
+            placeholders={placeholders}
+            services={selectedChallenge ? challengeServices[selectedChallenge.id] : []}
             onSubChallengeAnswerChange={(orderNumber, value) => {
               if (!selectedChallenge) return
               handleSubChallengeAnswerChange(selectedChallenge.id, orderNumber, value)

@@ -116,7 +116,7 @@ export async function getChallengesList(
       let query = supabase
         .from('challenges')
         .select(
-          'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at'
+          'id, event_id, title, category, points, max_points, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at, flag_placeholder'
         )
         .order('points', { ascending: true })
         .order('total_solves', { ascending: false })
@@ -192,7 +192,7 @@ export async function getChallengeDetail(challengeId: string): Promise<Challenge
     const { data, error } = await supabase
       .from('challenges')
       .select(
-        'id, event_id, title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at'
+        'id, event_id, title, description, category, points, max_points, hint, attachments, difficulty, is_active, is_maintenance, is_dynamic, min_points, decay_per_solve, total_solves, created_at, updated_at, flag_placeholder'
       )
       .eq('id', challengeId)
       .single()
@@ -209,6 +209,39 @@ export async function getChallengeDetail(challengeId: string): Promise<Challenge
   } catch (error) {
     console.error('Error fetching challenge detail:', error)
     return null
+  }
+}
+
+/**
+ * Get challenge placeholder string (e.g. ctf{x0xx_xx_x})
+ */
+export async function getChallengePlaceholder(challengeId: string): Promise<string | null> {
+  try {
+    const { data, error } = await supabase.rpc('get_challenge_placeholder', {
+      p_challenge_id: challengeId
+    });
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (err) {
+    console.error('Error fetching challenge placeholder:', err);
+    return null;
+  }
+}
+
+
+/**
+ * Get CTFC service names for a challenge
+ */
+export async function getChallengeServices(challengeId: string): Promise<string[]> {
+  try {
+    const { data, error } = await supabase.rpc('get_ctfcs', {
+      p_challenge_id: challengeId
+    });
+    if (error) throw new Error(error.message);
+    return (data as any[]).map(s => s.name);
+  } catch (err) {
+    console.error('Error fetching challenge services:', err);
+    return [];
   }
 }
 
@@ -248,6 +281,8 @@ export async function addChallenge(challengeData: {
   min_points?: number
   decay_per_solve?: number
   event_id?: string | null
+  flag_placeholder?: boolean
+  ctfc_names?: string[]
 }): Promise<string | null> {
   try {
     let hintValue: any = null;
@@ -270,7 +305,9 @@ export async function addChallenge(challengeData: {
       p_is_maintenance: challengeData.is_maintenance ?? false,
       p_min_points: challengeData.min_points ?? 0,
       p_decay_per_solve: challengeData.decay_per_solve ?? 0,
-      p_event_id: challengeData.event_id ?? null
+      p_event_id: challengeData.event_id ?? null,
+      p_flag_placeholder: challengeData.flag_placeholder ?? false,
+      p_ctfc_names: challengeData.ctfc_names || []
     });
     if (error) {
       throw new Error(error.message)
@@ -301,6 +338,8 @@ export async function updateChallenge(challengeId: string, challengeData: {
   min_points?: number
   decay_per_solve?: number
   event_id?: string | null
+  flag_placeholder?: boolean
+  ctfc_names?: string[]
 }): Promise<void> {
   try {
     let hintValue: any = null;
@@ -325,7 +364,9 @@ export async function updateChallenge(challengeId: string, challengeData: {
       p_is_dynamic: challengeData.is_dynamic ?? false,
       p_min_points: challengeData.min_points ?? 0,
       p_decay_per_solve: challengeData.decay_per_solve ?? 0,
-      p_event_id: challengeData.event_id ?? null
+      p_event_id: challengeData.event_id ?? null,
+      p_flag_placeholder: challengeData.flag_placeholder,
+      p_ctfc_names: challengeData.ctfc_names
     });
     if (error) {
       throw new Error(error.message)
@@ -368,7 +409,15 @@ export async function getChallengeById(challengeId: string): Promise<Challenge |
       throw new Error(error.message)
     }
 
-    return data
+    const { data: ctfcData } = await supabase
+      .from('ctfc')
+      .select('name')
+      .eq('challenge_id', challengeId)
+
+    return {
+      ...data,
+      ctfc_names: (ctfcData || []).map((c: any) => c.name)
+    } as any
   } catch (error) {
     console.error('Error fetching challenge:', error)
     return null

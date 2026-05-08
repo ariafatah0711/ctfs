@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import APP from '@/config';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, CustomBadge } from "@/shared/ui";
 import { MarkdownRenderer } from '@/shared/components'
+import { formatSmartFlag } from "../_lib/utils";
 import { DifficultyBadge } from '@/shared/components/custom';
 import { Attachment, ChallengeWithSolve } from '@/shared/types';
 import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
@@ -57,6 +58,8 @@ interface ChallengeDetailDialogProps {
   onSubChallengeAnswerChange: (orderNumber: number, value: string) => void;
   onSubChallengeSubmit: (orderNumber?: number) => void;
   onSubChallengeReset: () => void;
+  placeholders: KeyedStringMap;
+  services?: string[];
 }
 
 const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
@@ -91,8 +94,11 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   subChallengeMessage,
   onSubChallengeAnswerChange,
   onSubChallengeSubmit,
+  placeholders,
+  services = [],
 }) => {
   const [copiedAll, setCopiedAll] = useState<{ [key: string]: boolean }>({});
+  const overlayRef = React.useRef<HTMLDivElement>(null);
   if (!challenge) return null;
 
   const normalizeQuestionMarkdown = (value: string) => {
@@ -188,9 +194,36 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             </div>
 
             {/* Description */}
-            <div className="max-w-full overflow-x-auto break-words">
+            <div className="max-w-full overflow-x-auto break-words mb-4">
               <MarkdownRenderer content={challenge.description} className="max-w-full break-words" />
             </div>
+
+            {/* Services */}
+            {services && services.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-gray-400 mb-2 inline-flex items-center gap-1 uppercase tracking-wider">
+                  <span className="h-3.5 w-3.5">🌐</span> CTFC Services
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {services.map((service, idx) => (
+                    <div key={idx} className="flex items-center gap-3 bg-[#1a1a33]/80 p-3 rounded border border-[#35355e] group hover:border-cyan-500/50 transition-colors shadow-sm">
+                      <code className="text-sm font-mono text-cyan-300 break-all flex-1">{service}</code>
+                      <button
+                        type="button"
+                        className="p-1.5 bg-[#232344] hover:bg-[#35355e] rounded text-gray-400 hover:text-white transition shadow-sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(service);
+                          toast.success('Copied service name');
+                        }}
+                        title="Copy to clipboard"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Attachments */}
             {challenge.attachments && challenge.attachments.length > 0 && (
@@ -340,17 +373,44 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 handleFlagSubmit(challenge.id);
               }}
             >
-              <input
-                type="text"
-                value={flagInputs[challenge.id] || ''}
-                onChange={e => handleFlagInputChange(challenge.id, e.target.value)}
-                placeholder="Flag"
-                className="flex-1 px-3 py-2 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
-                autoFocus
-              />
+              <div className="relative flex-1 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-pink-400">
+                {challenge.flag_placeholder && placeholders[challenge.id] && (
+                  <div
+                    ref={overlayRef}
+                    className="absolute inset-0 pl-3 pr-6 py-2 pointer-events-none text-gray-500 dark:text-gray-600 opacity-70 font-mono font-medium overflow-hidden whitespace-pre flex items-center"
+                  >
+                    <span className="invisible">{flagInputs[challenge.id] || ''}</span>
+                    <span>{placeholders[challenge.id].slice((flagInputs[challenge.id] || '').length)}</span>
+                  </div>
+                )}
+                <input
+                  type="text"
+                  onScroll={(e) => {
+                    if (overlayRef.current) overlayRef.current.scrollLeft = e.currentTarget.scrollLeft;
+                  }}
+                  value={flagInputs[challenge.id] || ''}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const mask = placeholders[challenge.id];
+                    if (challenge.flag_placeholder && mask) {
+                      handleFlagInputChange(challenge.id, formatSmartFlag(val, mask));
+                    } else {
+                      handleFlagInputChange(challenge.id, val);
+                    }
+                  }}
+                  maxLength={challenge.flag_placeholder && placeholders[challenge.id] ? placeholders[challenge.id].length : undefined}
+                  placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : "Flag"}
+                  className="w-full h-full pl-3 pr-6 py-2 bg-transparent text-white focus:outline-none relative z-10 font-mono font-medium"
+                  autoFocus
+                />
+              </div>
               <button
                 type="submit"
-                disabled={submitting[challenge.id] || !flagInputs[challenge.id]?.trim()}
+                disabled={
+                  submitting[challenge.id] ||
+                  !flagInputs[challenge.id]?.trim() ||
+                  (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
+                }
                 className="px-5 py-2 rounded bg-gradient-to-br from-pink-500 to-pink-400 text-white font-bold shadow hover:from-pink-400 hover:to-pink-500 transition disabled:opacity-50"
               >
                 {submitting[challenge.id] ? '...' : 'Submit'}
@@ -397,52 +457,52 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                     const isCompleted = subChallengeResults[String(q.order_number)] === true
 
                     return (
-                    <div key={q.order_number} className={`min-w-0 overflow-x-hidden space-y-2 rounded-md p-2.5 ${isCompleted ? 'border border-[#35355e] bg-[#1a1a33]/50 opacity-90' : 'border border-pink-500/10 bg-[#1a1a33]'}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className={`text-[10px] uppercase tracking-[0.18em] ${isCompleted ? 'text-gray-500' : 'text-pink-300/70'}`}>Question #{q.order_number}</p>
+                      <div key={q.order_number} className={`min-w-0 overflow-x-hidden space-y-2 rounded-md p-2.5 ${isCompleted ? 'border border-[#35355e] bg-[#1a1a33]/50 opacity-90' : 'border border-pink-500/10 bg-[#1a1a33]'}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className={`text-[10px] uppercase tracking-[0.18em] ${isCompleted ? 'text-gray-500' : 'text-pink-300/70'}`}>Question #{q.order_number}</p>
                               <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded border ${isCompleted ? 'bg-green-900/50 text-green-400 border-green-800' : 'bg-pink-900/30 text-pink-200 border-pink-700/40'}`}>
-                              {isCompleted ? 'Completed' : 'Pending'}
-                            </span>
-                          </div>
-                          <div className={`mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold ${isCompleted ? 'text-gray-200' : 'text-white'}`}>
-                            <MarkdownRenderer content={normalizeQuestionMarkdown(q.question)} className="max-w-full break-words" />
+                                {isCompleted ? 'Completed' : 'Pending'}
+                              </span>
+                            </div>
+                            <div className={`mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold ${isCompleted ? 'text-gray-200' : 'text-white'}`}>
+                              <MarkdownRenderer content={normalizeQuestionMarkdown(q.question)} className="max-w-full break-words" />
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={subChallengeAnswers[String(q.order_number)] || ''}
-                          onChange={isCompleted ? undefined : (e) => onSubChallengeAnswerChange(q.order_number, e.target.value)}
-                          placeholder={isCompleted ? 'Answer saved' : 'Type your answer...'}
-                          readOnly={isCompleted}
-                          className={`flex-1 px-3 py-2 rounded border text-sm focus:outline-none ${isCompleted ? 'border-[#35355e] bg-[#1a1a33] text-gray-400 cursor-not-allowed' : 'border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:ring-2 focus:ring-pink-400'}`}
-                          onKeyDown={(e) => {
-                            if (!isCompleted && e.key === 'Enter') {
-                              e.preventDefault();
-                              onSubChallengeSubmit(q.order_number);
-                            }
-                          }}
-                        />
-                        {!isCompleted && (
-                          <button
-                            type="button"
-                            onClick={() => onSubChallengeSubmit(q.order_number)}
-                            disabled={subChallengeSubmitting || !subChallengeAnswers[String(q.order_number)]?.trim()}
-                            className="px-4 py-2 rounded bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition disabled:opacity-50"
-                          >
-                            {subChallengeSubmitting ? '...' : 'Check'}
-                          </button>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={subChallengeAnswers[String(q.order_number)] || ''}
+                            onChange={isCompleted ? undefined : (e) => onSubChallengeAnswerChange(q.order_number, e.target.value)}
+                            placeholder={isCompleted ? 'Answer saved' : 'Type your answer...'}
+                            readOnly={isCompleted}
+                            className={`flex-1 px-3 py-2 rounded border text-sm focus:outline-none ${isCompleted ? 'border-[#35355e] bg-[#1a1a33] text-gray-400 cursor-not-allowed' : 'border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:ring-2 focus:ring-pink-400'}`}
+                            onKeyDown={(e) => {
+                              if (!isCompleted && e.key === 'Enter') {
+                                e.preventDefault();
+                                onSubChallengeSubmit(q.order_number);
+                              }
+                            }}
+                          />
+                          {!isCompleted && (
+                            <button
+                              type="button"
+                              onClick={() => onSubChallengeSubmit(q.order_number)}
+                              disabled={subChallengeSubmitting || !subChallengeAnswers[String(q.order_number)]?.trim()}
+                              className="px-4 py-2 rounded bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition disabled:opacity-50"
+                            >
+                              {subChallengeSubmitting ? '...' : 'Check'}
+                            </button>
+                          )}
+                        </div>
+
+                        {!isCompleted && typeof subChallengeResults[String(q.order_number)] === 'boolean' && subChallengeResults[String(q.order_number)] === false && subChallengeAnswers[String(q.order_number)]?.trim() && (
+                          <p className="text-xs font-semibold text-red-300">✗ Incorrect</p>
                         )}
                       </div>
-
-                      {!isCompleted && typeof subChallengeResults[String(q.order_number)] === 'boolean' && subChallengeResults[String(q.order_number)] === false && subChallengeAnswers[String(q.order_number)]?.trim() && (
-                        <p className="text-xs font-semibold text-red-300">✗ Incorrect</p>
-                      )}
-                    </div>
                     )
                   })
                 ) : (

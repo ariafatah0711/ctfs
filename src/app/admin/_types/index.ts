@@ -33,6 +33,8 @@ export type ChallengeFormData = {
   min_points: number | ''
   decay_per_solve: number | ''
   event_id: string | null
+  flag_placeholder: boolean
+  ctfc_names: string[]
 }
 
 export type SubChallengeFormRow = {

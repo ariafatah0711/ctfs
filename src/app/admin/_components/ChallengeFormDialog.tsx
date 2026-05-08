@@ -232,6 +232,19 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   />
                   Maintenance
                 </Label>
+                <Label className="flex items-center gap-2">
+                  <Switch
+                    checked={!!formData.flag_placeholder}
+                    onCheckedChange={v => {
+                      onChange({
+                        ...formData,
+                        flag_placeholder: v,
+                      });
+                    }}
+                    className="mr-2 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 bg-gray-200 border-gray-300 dark:bg-gray-700 dark:border-gray-500 transition-colors"
+                  />
+                  Flag Placeholder
+                </Label>
               </div>
               <div>
                 <Label>Title</Label>
@@ -449,6 +462,29 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = ({
                   >
                     {flagLoading ? <span className="animate-pulse">…</span> : <Flag size={18} />}
                   </Button>
+                </div>
+              </div>
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between">
+                  <Label>CTFC Services</Label>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => onChange({ ...formData, ctfc_names: [...formData.ctfc_names, ''] })}>+ Add Service</Button>
+                </div>
+                {formData.ctfc_names.length === 0 && <p className="text-xs text-muted-foreground">No CTFC services added</p>}
+                <div className="space-y-2 mt-2">
+                  {formData.ctfc_names.map((name: string, idx: number) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input value={name} onChange={e => {
+                        const newNames = [...formData.ctfc_names];
+                        newNames[idx] = e.target.value;
+                        onChange({ ...formData, ctfc_names: newNames });
+                      }} placeholder="service-name" />
+                      <Button type="button" variant="ghost" onClick={() => {
+                        const newNames = [...formData.ctfc_names];
+                        newNames.splice(idx, 1);
+                        onChange({ ...formData, ctfc_names: newNames });
+                      }}>✕</Button>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="md:col-span-2">

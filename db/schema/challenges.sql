@@ -20,7 +20,11 @@ CREATE TABLE public.challenges (
   decay_per_solve INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  total_solves INTEGER DEFAULT 0
+  total_solves INTEGER DEFAULT 0,
+  flag_placeholder BOOLEAN DEFAULT false
 );
 
 CREATE INDEX IF NOT EXISTS idx_challenges_event_id ON public.challenges(event_id);
+
+-- ALTER TABLE public.challenges
+-- ADD COLUMN flag_placeholder BOOLEAN DEFAULT false;

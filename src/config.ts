@@ -79,6 +79,12 @@ export const APP = {
     message:
       process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE || "Platform sedang maintenance. Silakan kembali beberapa saat lagi."
   },
+
+  // CTF Container (CTFC) Orchestrator Config
+  ctfc: {
+    apiUrl: process.env.CTFC_API_URL || "http://127.0.0.1:8000",
+    apiToken: process.env.CTFC_API_TOKEN || "default_secret_token_change_me",
+  },
 }
 
 export default APP

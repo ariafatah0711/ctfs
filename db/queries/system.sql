@@ -47,3 +47,40 @@ as $$
 $$;
 
 grant execute on function public.get_auth_audit_logs(int, int) to authenticated;
+
+CREATE OR REPLACE FUNCTION public.get_flag_placeholder(p_flag TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+    v_result TEXT := '';
+    v_char TEXT;
+    i INT;
+BEGIN
+    IF p_flag IS NULL THEN RETURN NULL; END IF;
+
+    FOR i IN 1..length(p_flag) LOOP
+        v_char := substr(p_flag, i, 1);
+        IF v_char ~ '[a-z]' THEN
+            v_result := v_result || 'x';
+        ELSIF v_char ~ '[A-Z]' THEN
+            v_result := v_result || 'X';
+        ELSIF v_char ~ '[0-9]' THEN
+            v_result := v_result || '0';
+        ELSIF v_char = '_' THEN
+            v_result := v_result || '_';
+        ELSIF v_char = '{' THEN
+            v_result := v_result || '{';
+        ELSIF v_char = '}' THEN
+            v_result := v_result || '}';
+        ELSE
+            v_result := v_result || '?';
+        END IF;
+    END LOOP;
+
+    RETURN v_result;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_flag_placeholder(TEXT) TO authenticated;

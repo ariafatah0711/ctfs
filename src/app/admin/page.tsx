@@ -45,6 +45,8 @@ type ChallengePayload = {
   min_points?: number
   decay_per_solve?: number
   max_points?: number
+  flag_placeholder?: boolean
+  ctfc_names?: string[]
 }
 
 export default function AdminPage() {
@@ -100,6 +102,8 @@ export default function AdminPage() {
     min_points: 0,
     decay_per_solve: 0,
     event_id: null as string | null,
+    flag_placeholder: false,
+    ctfc_names: [] as string[],
   }
 
   const normalizeSubChallenges = (rows: any[]): SubChallengeFormRow[] => {
@@ -145,70 +149,70 @@ export default function AdminPage() {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      if (loading) return
+      ; (async () => {
+        if (loading) return
 
-      // if not logged in, redirect to challenges listing
-      if (!user) {
-        router.push('/challenges')
-        return
-      }
-
-      const scope = await getAdminScope()
-      if (!mounted) return
-
-      const canAccess = scope.is_global_admin || (scope.event_ids && scope.event_ids.length > 0)
-      setAdminScope(scope)
-      if (!canAccess) {
-        router.push('/challenges')
-        return
-      }
-
-      const [data, info, eventList] = await Promise.all([
-        getChallengesList(undefined, true, 'all'),
-        getInfo(),
-        getEvents(),
-      ])
-
-      fetchSolvers(0)
-      if (!mounted) return
-
-      setChallenges(data)
-      setSiteInfo(info)
-
-      const allowedSet = new Set(scope.event_ids || [])
-      const visibleEvents = scope.is_global_admin
-        ? eventList
-        : eventList.filter((e) => allowedSet.has(String(e.id)))
-      setEvents(visibleEvents)
-
-      // Resolve selected event based on scope
-      if (scope.is_global_admin) {
-        if (urlEventParam === 'all') setEventId('all')
-        else if (urlEventParam) setEventId(urlEventParam)
-      } else {
-        const desired = urlEventParam && allowedSet.has(urlEventParam)
-          ? urlEventParam
-          : (scope.event_ids?.[0] ?? null)
-        if (!desired) {
+        // if not logged in, redirect to challenges listing
+        if (!user) {
           router.push('/challenges')
           return
         }
-        setEventId(desired)
-      }
 
-      // Auto-open add dialog from URL
-      if (urlAddParam) {
-        const prefillEventId = scope.is_global_admin
-          ? (urlEventParam && urlEventParam !== 'all' ? urlEventParam : null)
-          : (scope.event_ids?.[0] ?? null)
-        setEditing(null)
-        setFormData({ ...emptyForm, event_id: prefillEventId })
-        setOpenForm(true)
-        setShowPreview(false)
-        setUrlAddParam(false)
-      }
-    })()
+        const scope = await getAdminScope()
+        if (!mounted) return
+
+        const canAccess = scope.is_global_admin || (scope.event_ids && scope.event_ids.length > 0)
+        setAdminScope(scope)
+        if (!canAccess) {
+          router.push('/challenges')
+          return
+        }
+
+        const [data, info, eventList] = await Promise.all([
+          getChallengesList(undefined, true, 'all'),
+          getInfo(),
+          getEvents(),
+        ])
+
+        fetchSolvers(0)
+        if (!mounted) return
+
+        setChallenges(data)
+        setSiteInfo(info)
+
+        const allowedSet = new Set(scope.event_ids || [])
+        const visibleEvents = scope.is_global_admin
+          ? eventList
+          : eventList.filter((e) => allowedSet.has(String(e.id)))
+        setEvents(visibleEvents)
+
+        // Resolve selected event based on scope
+        if (scope.is_global_admin) {
+          if (urlEventParam === 'all') setEventId('all')
+          else if (urlEventParam) setEventId(urlEventParam)
+        } else {
+          const desired = urlEventParam && allowedSet.has(urlEventParam)
+            ? urlEventParam
+            : (scope.event_ids?.[0] ?? null)
+          if (!desired) {
+            router.push('/challenges')
+            return
+          }
+          setEventId(desired)
+        }
+
+        // Auto-open add dialog from URL
+        if (urlAddParam) {
+          const prefillEventId = scope.is_global_admin
+            ? (urlEventParam && urlEventParam !== 'all' ? urlEventParam : null)
+            : (scope.event_ids?.[0] ?? null)
+          setEditing(null)
+          setFormData({ ...emptyForm, event_id: prefillEventId })
+          setOpenForm(true)
+          setShowPreview(false)
+          setUrlAddParam(false)
+        }
+      })()
 
     return () => { mounted = false }
   }, [user, loading, router, urlEventParam, urlAddParam])
@@ -260,6 +264,8 @@ export default function AdminPage() {
       min_points: full.min_points ?? 0,
       decay_per_solve: full.decay_per_solve ?? 0,
       event_id: full.event_id ?? null,
+      flag_placeholder: (full as any).flag_placeholder ?? false,
+      ctfc_names: (full as any).ctfc_names || [],
     })
     setSubChallenges(normalizedSubChallenges)
     setSubChallengesSequential(normalizedSubChallenges.length > 0 ? !!normalizedSubChallenges[0].is_sequential : false)
@@ -268,8 +274,8 @@ export default function AdminPage() {
   }
 
   const fetchSolvers = async (offset = 0) => {
-  const data = await getSolversAll(50, offset)
-  setSolvers(prev => offset === 0 ? data : [...prev, ...data])
+    const data = await getSolversAll(50, offset)
+    setSolvers(prev => offset === 0 ? data : [...prev, ...data])
   }
 
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
@@ -450,11 +456,13 @@ export default function AdminPage() {
         is_maintenance: !!formData.is_maintenance,
         event_id: formData.event_id ?? null,
         flag: (formData.flag || '').trim(),
-  }
-    if (editing && typeof formData.is_active !== 'undefined') payload.is_active = !!formData.is_active;
-  if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;
-  if (typeof formData.min_points !== 'undefined') payload.min_points = Number(formData.min_points) || 0;
-  if (typeof formData.decay_per_solve !== 'undefined') payload.decay_per_solve = Number(formData.decay_per_solve) || 0;
+        flag_placeholder: !!formData.flag_placeholder,
+        ctfc_names: (formData.ctfc_names || []).filter(n => n.trim() !== ''),
+      }
+      if (editing && typeof formData.is_active !== 'undefined') payload.is_active = !!formData.is_active;
+      if (typeof formData.is_dynamic !== 'undefined') payload.is_dynamic = formData.is_dynamic;
+      if (typeof formData.min_points !== 'undefined') payload.min_points = Number(formData.min_points) || 0;
+      if (typeof formData.decay_per_solve !== 'undefined') payload.decay_per_solve = Number(formData.decay_per_solve) || 0;
 
       if (formData.is_dynamic) {
         payload.max_points = Number(formData.max_points) || Number(formData.points) || 0;
