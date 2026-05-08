@@ -87,6 +87,7 @@ export default function AdminEventPage() {
     category: 'all',
     difficulty: 'all',
     search: '',
+    feature: 'N' as 'T' | 'S' | 'N',
   })
 
   const [openForm, setOpenForm] = useState(false)
@@ -465,6 +466,13 @@ export default function AdminEventPage() {
       if (q && !c.title.toLowerCase().includes(q)) return false
       if (filters.category !== 'all' && c.category !== filters.category) return false
       if (filters.difficulty !== 'all' && c.difficulty !== filters.difficulty) return false
+
+      const hasQuestions = !!(c as any).has_questions
+      const hasServices = Array.isArray((c as any).services) && (c as any).services.length > 0
+      const featureType = hasQuestions && hasServices ? 'TS' : hasQuestions ? 'T' : hasServices ? 'S' : 'N'
+      if (filters.feature === 'T' && !(featureType === 'T' || featureType === 'TS')) return false
+      if (filters.feature === 'S' && !(featureType === 'S' || featureType === 'TS')) return false
+
       return true
     })
   }, [filters, challenges])
@@ -769,7 +777,7 @@ export default function AdminEventPage() {
                 categories={categories}
                 difficulties={difficulties}
                 onFilterChange={setFilters}
-                onClear={() => setFilters({ category: 'all', difficulty: 'all', search: '' })}
+                onClear={() => setFilters({ category: 'all', difficulty: 'all', search: '', feature: 'N' })}
                 showStatusFilter={false}
               />
             </div>

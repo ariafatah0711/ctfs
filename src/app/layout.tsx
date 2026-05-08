@@ -6,6 +6,7 @@ import './globals.css'
 
 import { Toaster } from "react-hot-toast"
 import Navbar from '@/shared/components/Navbar'
+import SmartRefresh from '@/shared/components/SmartRefresh'
 import { ScrollToggle, FloatingToolbar, ChatBotAI, ChatToggle } from '@/shared/components/custom'
 import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
 import APP from '@/config'
@@ -98,6 +99,7 @@ export default async function RootLayout({
                   <SubChallengesProvider>
                     <ChatProvider>
                       <LogsProvider>
+                        {/* <SmartRefresh /> */}
                         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                           <Navbar />
                           <div className="pt-14">{children}</div>
