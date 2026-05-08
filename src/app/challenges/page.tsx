@@ -16,7 +16,7 @@ import { ChallengeWithSolve, Attachment, EventMembershipStatus } from '@/shared/
 
 // Local Imports
 import { ChallengeCard, ChallengeDetailDialog, ChallengeFilterBar, ChallengeFilterSidebar, EventsTab, JoinEventDialog } from './_components'
-import { buildFuzzyOrderedList, getDifficultyOrder, normalizeChallengeHints, sortChallengesByDisplayPriority, sortChallengesByNewest, groupChallengesByCategory } from './_lib'
+import { buildFuzzyOrderedList, getDifficultyOrder, normalizeChallengeHints, sortChallengesByDisplayPriority, sortChallengesByNewest, groupChallengesByCategory, persistSelectedChallenge, getStoredSelectedChallengeId } from './_lib'
 import type { ChallengeDialogTab, ChallengeFilterSettings, ChallengesMainTab, EventSelectorValue, HintModalState, KeyedBooleanMap, KeyedFlagFeedbackMap, KeyedStringMap, Solver } from './_types'
 
 export default function ChallengesPage() {
@@ -155,6 +155,24 @@ export default function ChallengesPage() {
     loadChallenges()
   }, [user])
 
+  // Auto-restore previously opened challenge after challenges are loaded
+  useEffect(() => {
+    // Only restore after initial loading is complete
+    if (initialLoading || challenges.length === 0 || selectedChallenge) return
+
+    const storedChallengeId = getStoredSelectedChallengeId()
+    if (!storedChallengeId) return
+
+    const challengeToRestore = challenges.find(c => c.id === storedChallengeId)
+    if (challengeToRestore) {
+      // Silently restore without showing toast
+      void openChallenge(challengeToRestore)
+    } else {
+      // Challenge no longer exists, clean up
+      persistSelectedChallenge(null)
+    }
+  }, [initialLoading, challenges.length, selectedChallenge])
+
   useEffect(() => {
     let mounted = true
 
@@ -241,7 +259,15 @@ export default function ChallengesPage() {
 
   // Solvers are fetched on-demand when the Solvers tab is opened.
 
+  const closeChallenge = () => {
+    persistSelectedChallenge(null)
+    setSelectedChallenge(null)
+  }
+
   const openChallenge = async (challenge: ChallengeWithSolve) => {
+    // Persist the challenge ID so it survives page refresh
+    persistSelectedChallenge(challenge.id)
+
     setChallengeTab('challenge')
     setSolvers([])
     void refreshSubChallenges(challenge.id)
@@ -825,7 +851,7 @@ export default function ChallengesPage() {
               }
             }}
             onClose={() => {
-              setSelectedChallenge(null)
+              closeChallenge()
               setChallengeTab('challenge')
             }}
             flagInputs={flagInputs}
