@@ -7,15 +7,15 @@ export const APP = {
 
   challengeCategories: [
     "Intro",
+    "Boot To Root",
+    "Web",
+    "Forensics",
     "Osint",
     "Crypto",
-    "Forensics",
-    "Stegnography",
-    "Misc",
-    "Web",
     "Reverse",
     "Pwn",
-    "Boot To Root",
+    "Stegnography",
+    "Misc",
     "Network"
   ],
   links: {

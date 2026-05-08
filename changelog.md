@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+# v[3.5.1]
+feat 3.5.1: add feature filtering to challenges
+
 # v[3.5.0]
 ### Added
 refactor: remove ctfc table and related functions; integrate services into challenges

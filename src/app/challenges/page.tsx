@@ -475,6 +475,14 @@ export default function ChallengesPage() {
       if (!matchMain && !matchEvent) return false;
     }
     if (filterSettings.hideMaintenance && challenge.is_maintenance) return false;
+
+    const hasQuestions = !!(challenge as any).has_questions
+    const hasServices = Array.isArray((challenge as any).services) && (challenge as any).services.length > 0
+    const featureType = hasQuestions && hasServices ? 'TS' : hasQuestions ? 'T' : hasServices ? 'S' : 'N'
+    if (filters.feature === 'T' && !(featureType === 'T' || featureType === 'TS')) return false;
+    if (filters.feature === 'S' && !(featureType === 'S' || featureType === 'TS')) return false;
+    // N means no feature filtering, so keep all challenges visible.
+
     // Status filter
     if (filters.status === 'solved' && !challenge.is_solved) return false;
     if (filters.status === 'unsolved' && challenge.is_solved) return false;
@@ -645,7 +653,7 @@ export default function ChallengesPage() {
                 setFilterSettings(newSettings)
                 setChallengeFilterSettings(newSettings)
               }}
-              onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '' })}
+              onClear={() => setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '', feature: 'N' })}
             />
 
             {/* Challenges Grid Grouped by Category */}

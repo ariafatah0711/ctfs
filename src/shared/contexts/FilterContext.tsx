@@ -6,6 +6,7 @@ export type ChallengeFilters = {
   category: string
   difficulty: string
   search: string
+  feature: 'T' | 'S' | 'N'
 }
 
 const STORAGE_KEY = 'ctfs:challengeFilters'
@@ -14,7 +15,8 @@ const defaultFilters: ChallengeFilters = {
   status: 'all',
   category: 'all',
   difficulty: 'all',
-  search: ''
+  search: '',
+  feature: 'N'
 }
 
 type LayoutMode = 'grouped' | 'compact'
@@ -38,8 +40,10 @@ function readStored(): { filters: ChallengeFilters; layoutMode: LayoutMode; sort
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
     const parsed = JSON.parse(raw)
+    const storedFeature = parsed?.filters?.feature ?? parsed?.feature
+    const normalizedFeature = storedFeature === 'T' || storedFeature === 'S' || storedFeature === 'N' ? storedFeature : 'N'
     return {
-      filters: { ...defaultFilters, ...(parsed.filters || parsed) },
+      filters: { ...defaultFilters, ...(parsed.filters || parsed), feature: normalizedFeature },
       layoutMode: (parsed.layoutMode as LayoutMode) || 'grouped',
       sortMode: (parsed.sortMode as SortMode) || 'default'
     }

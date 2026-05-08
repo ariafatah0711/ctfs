@@ -64,6 +64,7 @@ type Props = {
     category: string;
     difficulty: string;
     search: string;
+    feature?: 'T' | 'S' | 'N';
   };
   events?: EventItem[];
   selectedEventId?: string | null | 'all';
@@ -268,14 +269,15 @@ export default function ChallengeFilterBar({
   };
 
   // Dirty indicators: whether a control differs from default
-  const defaultFilters = { status: 'all', category: 'all', difficulty: 'all', search: '' }
+  const defaultFilters = { status: 'all', category: 'all', difficulty: 'all', search: '', feature: 'N' as const }
   const isStatusDirty = (filters.status || 'all') !== defaultFilters.status
   const isCategoryDirty = (filters.category || 'all') !== defaultFilters.category
   const isDifficultyDirty = (filters.difficulty || 'all') !== defaultFilters.difficulty
   const isSearchDirty = (String(filters.search || '').trim() !== defaultFilters.search)
+  const isFeatureDirty = (filters.feature || 'all') !== defaultFilters.feature
   const isEventDirty = selectedEventId !== 'all' && selectedEventId !== undefined && selectedEventId !== null
   // `anyFilterDirty` should only reflect challenge filters (not event selection)
-  const anyFilterDirty = isStatusDirty || isCategoryDirty || isDifficultyDirty || isSearchDirty
+  const anyFilterDirty = isStatusDirty || isCategoryDirty || isDifficultyDirty || isSearchDirty || isFeatureDirty
 
   // Sort categories sesuai order di config
   const sortedCategories = [
@@ -290,6 +292,15 @@ export default function ChallengeFilterBar({
     ...difficultyOrder.filter(diff => normalizedDifficulties.includes(diff)),
     ...normalizedDifficulties.filter(diff => !difficultyOrder.includes(diff))
   ];
+
+  const featureMode = filters.feature || 'N'
+  const nextFeatureMode = featureMode === 'N' ? 'T' : featureMode === 'T' ? 'S' : 'N'
+  const featureButtonTitle =
+    featureMode === 'N'
+      ? 'Feature filter: N. Click to switch to T'
+      : featureMode === 'T'
+        ? 'Feature filter: T. Click to switch to S'
+        : 'Feature filter: S. Click to switch to N'
 
   return (
     <motion.div
@@ -460,6 +471,23 @@ export default function ChallengeFilterBar({
           </select>
         </div>
 
+        <div className="flex-none">
+          <button
+            type="button"
+            onClick={() => onFilterChange({ ...filters, feature: nextFeatureMode })}
+            title={featureButtonTitle}
+            aria-label={featureButtonTitle}
+            className={`inline-flex h-9 w-9 items-center justify-center rounded border text-[11px] font-bold transition ${featureMode === 'N'
+              ? 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+              : featureMode === 'T'
+                ? 'bg-orange-500 border-orange-500 text-white'
+                : 'bg-blue-500 border-blue-500 text-white'
+            }`}
+          >
+            {featureMode}
+          </button>
+        </div>
+
         <div className="flex-none min-w-[100px]">
           <button
             type="button"
@@ -475,6 +503,7 @@ export default function ChallengeFilterBar({
         {onSettingsChange && (
           <div className="relative flex-none ml-auto flex items-center gap-2">
             {onSortModeChange && <SortToggle sortMode={sortMode} onToggle={onSortModeChange} />}
+
             <LayoutToggle />
 
             <div className="relative">
