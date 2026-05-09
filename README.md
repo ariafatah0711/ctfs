@@ -1,310 +1,252 @@
+# NXCTF - Next CTF
+> 🚩 **Modern Capture The Flag (CTF) Platform** — Built for security competitions, workshops, and training. Features real-time scoring, team management, and admin controls. Deploy to Vercel + Supabase in minutes.
 
-# CTFS (Capture The Flag Simple)
+## 🎯 What is NXCTF?
+NXCTF is a **full-featured CTF (Capture The Flag) competition platform** designed to host security challenges. Whether you're running a college competition, corporate training event, or online CTF, NXCTF provides everything you need:
 
-> 🚩 **Free & Simple CTF Platform** — Deploy seamlessly with **Vercel** + **Supabase**. Perfect for individuals or teams who want a free and lightweight CTF platform.
+- 🏆 **Live Scoreboard** — Real-time leaderboards (individual & team-based)
+- 🎮 **Challenge System** — 11+ challenge categories (Web, Crypto, Reverse, Pwn, etc.)
+- 👥 **Team Support** — Create teams, manage members, team scoring
+- 📊 **Multi-Event** — Host multiple CTF events simultaneously
+- ⚡ **Real-time Notifications** — Instant solve alerts across all users
+- 🛠️ **Admin Dashboard** — Full control over challenges, events, and users
+- 🔐 **Secure** — User authentication, Google OAuth, CAPTCHA support
+- 🌙 **Dark Mode** — Beautiful responsive UI with theme support
+- 🚀 **Service Integration** — Connect to NXCTL for dynamic challenge infrastructure
 
----
+## ⚡ Quick Start
+### Prerequisites
+- Node.js 18+ and npm 9+
+- Supabase account (free tier works)
+- (Optional) Vercel account for deployment
 
-## 🎬 Quick Demo
-
-[https://ctf.ariaf.my.id](https://ctf.ariaf.my.id)
-
-### Page Screenshot
-<!-- ![Root Page](.github/images/README/image-18.png) -->
-![Home Page](.github/images/README/image-9.png)
-![Scoreboard](.github/images/README/image-10.png)
-![Admin Dashboard](.github/images/README/image-11.png)
-![Admin Overview](.github/images/README/image-17.png)
-![Notifications](.github/images/README/image-12.png)
-
-<details>
-<summary>📸 More Screenshot Demo (Click to expand)</summary>
-
-### User Features
-![Profile Page](.github/images/README/image-13.png)
-![Admin Solves](.github/images/README/image-16.png)
-![Login](.github/images/README/image-14.png)
-![Signup](.github/images/README/image-15.png)
-
-</details>
-
-## 📖 Deployment Guide
-
-### 1. Clone Repository
-
+### 1. Clone & Install
+Clone the repo and install dependencies:
 ```bash
-git clone https://github.com/ariafatah0711/ctfs
-cd ctfs
+git clone https://github.com/nxctf/nxctf
+cd nxctf
+```
+
+Install dependencies and generate the initial SQL file:
+```bash
+npm install                                  # Install dependencies
+npm run setup                                # Generate db/init.sql from schema
+# This creates db/init.sql with all tables, functions, and RLS policies
 ```
 
 ### 2. Supabase Setup
+1. Create a project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor**
+3. Open `db/init.sql` from this repo and run it
 
-#### Required
+Schema is now initialized with all tables, functions, and RLS policies.
 
-1. **Create Supabase Project**
-   Log in to [Supabase](https://supabase.com/) and create a new project.
-
-2. **Import Schema**
-   Upload `sql/schema.sql` into the **Supabase SQL editor** and run it to set up the database schema.
-
-3. **Disable Email Confirmation (Opsional)**
-   Go to **Authentication** in Supabase and disable email confirmation.
-   ![Disable Email Confirmation](.github/images/README/image-3.png)
-
-4. **Enable Allow manual linking (Opsional)**
-   Go to **Authentication → Settings → External OAuth Providers** and enable the option. (jika ingin ingin bisa bind google ketika sudah login manual)
-   ![1766862561984](.github/images/README/1766862561984.png)
-
-5. **Enable Realtime public.solves**
-   Go to **Database → Table** and enable Realtime for the `public.solves` table.
-  ![1766920400738](.github/images/README/1766920400738.png)
-
-#### Optional
-
-4. **Optional Testing Data**
-
-    - Testing challenges → `sql/testing_challenges.sql`
-    - Dummy scoreboard → `sql/dummy_scoreboard/`
-       - Dummy challenges → `dummy_user_challenges.sql`
-       - Dummy solves → `dummy_solves.sql` (can be generated using `create_solves.py` or use the pre-generated file)
-       - Reset dummy data → `dummy_reset.sql`
-
-### 3. Application Configuration
-
-The application can be customized through `src/config.ts`:
-
-```typescript
-export const APP = {
-  shortName: 'FGTE',              // Short name for your CTF platform
-  fullName: 'CTFS Platform',      // Full name of your platform
-  description: 'Your description', // Platform description
-  flagFormat: 'FGTE{your_flag_here}', // Flag format for challenges
-  challengeCategories: [          // Available challenge categories
-    'Intro',
-    'Misc',
-    'Osint',
-    'Crypto',
-    'Forensics',
-    'Web',
-    'Reverse',
-  ],
-  links: {                        // Platform-related links
-    github: 'your_github_repo',
-    discord: 'your_discord_invite',
-    // ... other links
-  },
-}
-```
-
-### 4. Environment Configuration
-
-Create a `.env.local` file at the project root:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-NEXT_PUBLIC_SITE_URL=https://ctf.ariaf.my.id
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
-```
-
-Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` only if you want CAPTCHA enabled. If it is empty or omitted, login/register/forgot-password will skip CAPTCHA automatically.
-
-Get the values from your Supabase project dashboard and Cloudflare Turnstile.
-
-
-### 4. Deployment
-
-#### 1. Generate Version Otomatis (Wajib sebelum build)
-
+### 3. Run Dev (For Automatic Env Setup)
+lets run and automatic create `.env.local` file with the required variables. Just run the command below and follow the prompts:
 ```bash
-# Generate file src/version.ts dari package.json & waktu build
-node scripts/gen-version.js
-```
-
-#### 2. Local Development & Testing
-
-```bash
-# Install dependencies (requires Node.js 18+ and npm 9+)
-npm install
-
-# Generate version info (WAJIB sebelum build)
-node scripts/gen-version.js
-
-# Start development server
 npm run dev
 ```
 
-Untuk test production build:
+after that, your `.env.local` file should look like this:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-```bash
-# Generate version info (WAJIB sebelum build)
-node scripts/gen-version.js
-
-# Build for production
-npm run build
-
-# (Optional) Preview production build
-npm run start
+# NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_cloudflare_turnstile_site_key
+# NXCTL_API_URL=http://localhost:8000
+# NXCTL_API_TOKEN=your_api_token
+# NEXT_PUBLIC_MAINTENANCE_MODE=no
 ```
 
-> **Tip:**
-> After registering a user, you can make them an administrator by setting `admin` to `true` in the Supabase `users` table via the dashboard.
+the only required variables are `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 
-![Set Admin](.github/images/README/image.png)
+and the optional variables are `NEXT_PUBLIC_TURNSTILE_SITE_KEY` for Cloudflare Turnstile CAPTCHA and `NXCTL_API_URL` and `NXCTL_API_TOKEN` for NXCTL service integration, and `NEXT_PUBLIC_MAINTENANCE_MODE` for maintenance mode if you want to maintain the platform for a while.
 
----
+Get these from Supabase dashboard → **Settings → API**.
 
-#### 2. Deploy to Vercel
+### 4. Setting your platform
+After your running the development server, you can open `http://localhost:3000` and you will see the Icon Seting on the navbar, click on it and you will see the config dialog, from there you can set your platform name, description, flag format, challenge categories, team settings, event settings, and more.
 
-##### Using Vercel CLI
 
-```bash
-# Install Vercel CLI globally
-npm i -g vercel
 
-# Log in to Vercel
-vercel login
+### 5. Make Yourself Admin
 
-# Link your project
-vercel link
+1. Register your account on the platform
+2. Open Supabase Dashboard → **users** table
+3. Find your user and set `admin = true`
+4. Refresh the page → Admin menu appears in navbar
 
-# Set environment variables (can also be done in Vercel dashboard)
-vercel env add
+## 🚀 Deploy to Vercel
 
-# Deploy to production
-vercel --prod
-```
-
-##### Using Vercel Dashboard
-
-1. Push the project to GitHub.
-2. Log in to [Vercel](https://vercel.com/) and import the repository.
-3. Set environment variables in Vercel (from `.env.local`).
+1. Push to GitHub
+2. Import repo in [Vercel Dashboard](https://vercel.com)
+3. Add environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (your Vercel domain)
 4. Deploy!
 
-### 5. Authentication Setup (Google Login)
+## 📱 Main Features
 
-1. **Enable Google Provider in Supabase**
-   Dashboard → Authentication → Providers → Google → Enable.
-   Enter **Client ID** and **Client Secret** from Google Cloud Console.
+### For Users
+- **Browse Challenges** — Filter by category, difficulty, points
+- **Submit Flags** — Real-time validation
+- **Track Progress** — See solved challenges and score
+- **Team Collaboration** — Join/create teams, team scoreboard
+- **View Leaderboard** — Compete individually or as a team
+- **Profile** — View your stats, solves, and achievements
 
-2. **Create OAuth Client in Google Cloud Console**
+### For Admins
+- **Challenge Management** — Create, edit, delete challenges
+- **Dynamic Scoring** — Adjust points based on solver count
+- **Event Management** — Host multiple CTF events
+- **Service Integration** — Connect NXCTL for ephemeral challenge services
+- **User Management** — Manage admins and users
+- **Analytics** — View solves, audit logs, first bloods
+- **Notifications** — Send broadcast messages to all users
 
-   * APIs & Services → Credentials → Create OAuth Client ID.
-   * Application type: **Web**.
-   * Authorized redirect URIs:
+### For Developers
+- **Dev Config Dialog** — In development mode, edit all settings from UI (no file editing needed)
+- **Real-time Updates** — Supabase subscriptions for live data
+- **Extensible** — Easy to add custom features
+- **Mobile Responsive** — Works on all devices
 
-     ```
-     https://<YOUR_PROJECT_REF>.supabase.co/auth/v1/callback
-     ```
+## ⚙️ Customization
 
-   ![Google OAuth](.github/images/README/image-1.png)
+Edit `src/config.ts` to customize your platform:
 
-3. **Configure Redirect URL**
-   Dashboard → Authentication → URL Configuration → Site URL.
-   Set this to your domain, for example:
+```typescript
+export const APP = {
+  shortName: "NXCTF",                    // Platform name
+  fullName: "Next CTF",                  // Full name
+  description: "...",                    // Description
+  flagFormat: "NXCTF{...}",             // Expected flag format
+  challengeCategories: [...],            // Available challenge types
 
-   ```
-   https://ctf.ariaf.my.id
-   ```
+  // Team settings
+  teams: {
+    enabled: true,                       // Enable team mode
+    hideScoreboardIndividual: false,     // Hide personal scores
+    hidescoreboardTotal: false,       nxctl   // Hide team scores
+  },
 
-   ![Site URL](.github/images/README/image-2.png)
-
-## 6. Opsional Supabase Reset Emils
-```html
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-   <tr>
-      <td style="padding: 32px; text-align: center;">
-      <h2 style="color: #111827; margin-bottom: 16px;">Reset Password</h2>
-      <p style="color: #374151; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
-         Kamu menerima email ini karena ada permintaan untuk reset password akunmu.
-         Klik tombol di bawah untuk membuat password baru.
-      </p>
-      <a href="{{ .ConfirmationURL }}"
-         style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; font-size: 15px;">
-         Reset Password
-      </a>
-      <p style="color: #6b7280; font-size: 13px; line-height: 1.6; margin-top: 24px;">
-         Jika kamu tidak meminta reset password, abaikan email ini.
-      </p>
-      </td>
-   </tr>
-</table>
-<p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 16px;">{{ .SiteURL }}
-   © {{ .SiteURL }} - Semua hak dilindungi
-</p>
+  // Event configuration
+  hideEventMain: false,                  // Hide "Main" event
+  eventMainLabel: "main",                // Label for main event
+  eventMainImageUrl: "...",              // Banner image URL
+}
 ```
 
-## Security
-### Added Rate Limit in Vercel
-![1769265568619](.github/images/README/1769265568619.png)
+## 🔗 Optional Features
 
-### Added cloudflare in supabase
-![1769265616464](.github/images/README/1769265616464.png)
+### NXCTL Service Integration
 
-![1769265666794](.github/images/README/1769265666794.png)
+If you have [NXCTL](https://github.com/nxctf/nxctl) running, add to `.env.local`:
 
-![1769265704498](.github/images/README/1769265704498.png)
+```env
+NXCTL_API_URL=http://localhost:8000
+NXCTL_API_TOKEN=your_secret_token
+```
 
----
+Services will auto-appear in challenge panels for users to start/restart/extend instances.
 
-## 🗄️ Supabase Backup (GitHub Actions)
+### Cloudflare Turnstile (CAPTCHA)
 
-Automate daily backup of your Supabase database to GitHub using [matheusbcprog/supabase-backup](https://github.com/matheusbcprog/supabase-backup).
+```env
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_site_key
+```
 
-### Setup Steps
+Leave empty to skip CAPTCHA on login/register.
 
-1. **Fork or copy the workflow:**
-   - Go to [supabase-backup](https://github.com/matheusbcprog/supabase-backup).
-   - Copy `.github/workflows/backup.yml` into your repo.
+### Google OAuth
 
-2. **Add required secrets in your GitHub repository:**
-   - `SUPABASE_URL` — your Supabase project URL
-   - `SUPABASE_SERVICE_ROLE_KEY` — service role key (from Supabase dashboard)
-   - `GITHUB_TOKEN` — default GitHub Actions token
+1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com)
+2. Add to Supabase → **Authentication → Providers → Google**
+3. Set Site URL to `https://your-domain`
 
-3. **Customize schedule (optional):**
-   - Edit the `cron` in `backup.yml` to set backup frequency.
+## 📁 Project Structure
 
-4. **Restore:**
-   - Backups are saved in your repo under `/backups`. Restore via Supabase SQL editor.
+```
+src/
+├── app/                    # Next.js pages & API routes
+│   ├── admin/             # Admin dashboard pages
+│   ├── challenges/        # Challenge listing & detail
+│   ├── scoreboard/        # Leaderboards
+│   ├── teams/             # Team management
+│   ├── profile/           # User profiles
+│   ├── api/nxctl/         # NXCTL API integration
+│   └── ...other pages
+├── shared/
+│   ├── components/        # Reusable React components
+│   ├── contexts/          # React contexts (Auth, Events, etc.)
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Business logic & utilities
+│   ├── types/             # TypeScript interfaces
+│   └── ui/                # Shadcn UI components
+├── config.ts              # App configuration
+├── secret.ts              # Server-only secrets
+└── middleware.ts          # Maintenance mode detection
+
+db/
+├── init.sql               # Generated from schema + queries
+├── schema/                # PostgreSQL table definitions
+├── queries/               # Stored procedures & RPC functions
+└── seed/                  # Initial data
+```
+
+## 🛠️ Available Scripts
 
 ```bash
-psql -U postgres.<project_ref> `
-  -h aws-1-ap-southeast-1.pooler.supabase.com `
-  -p 5432 `
-  -d postgres `
-  -f data.sql
-
-psql `
-  -U postgres.<project_ref> `
-  -h aws-1-ap-northeast-1.pooler.supabase.com `
-  -p 6543 `
-  -d postgres `
-  "sslmode=require" `
-  -f data.sql
-
-$env:PGPASSWORD="PASSWORD"
-psql "postgresql://postgres.zexedoprtmdgtjeqbzka@aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require" -f data.sql
+npm run dev      # Start development server (localhost:3000)
+npm run build    # Build for production
+npm run start    # Start production server
+npm run lint     # Run ESLint
+npm run setup    # Generate db/init.sql from schema
 ```
+
+## ✨ Key Technologies
+
+| Tech | Purpose |
+|------|---------|
+| **Next.js 14** | React framework with API routes |
+| **Supabase** | PostgreSQL + Auth + Real-time |
+| **Tailwind CSS** | Styling |
+| **Framer Motion** | Smooth animations |
+| **Chart.js** | Score analytics & graphs |
+| **dnd-kit** | Drag-and-drop sorting |
+| **Markdown** | Challenge descriptions |
+| **Lucide Icons** | Beautiful icons |
+
+## 🔒 Security Considerations
+
+- ✅ Row-level security (RLS) on database tables
+- ✅ Server-side secrets in `secret.ts` (never exposed to client)
+- ✅ CAPTCHA optional anti-bot protection
+- ✅ User authentication required
+- ✅ Admin-only sensitive endpoints
+- ⚠️ Enable HTTPS in production
+- ⚠️ Use strong Supabase JWT tokens
+
+## 📊 How It Works
+
+1. **Users register** → Automatically added to database
+2. **Browse challenges** → Filtered by difficulty/category/event
+3. **Submit flag** → Backend validates in real-time
+4. **Points awarded** → Dynamic scoring or static points
+5. **Leaderboard updates** → Real-time via Supabase subscriptions
+6. **Admins manage** → Create challenges, events, manage users
+
+## 🤝 Support & Contributing
+
+- 📖 [Supabase Docs](https://supabase.com/docs)
+- 🐛 Report issues on GitHub
+- 💬 Questions? Open a discussion
+
+## 📝 License
+
+MIT - Feel free to use and modify for your competitions!
 
 ---
 
-## ⚠️ Notes
-
-* If you modify the schema, re-run the Supabase SQL setup and redeploy to Vercel.
-* **Warning:** Schema changes may wipe existing data.
-* **Backup regularly!**
-
----
-
-```bash
--- Recalculate points untuk SEMUA challenge dynamic
-UPDATE public.challenges c
-SET points = GREATEST(
-    COALESCE(c.min_points, 0),
-    COALESCE(c.max_points, 0) - COALESCE(c.decay_per_solve, 0) * GREATEST(c.total_solves - 1, 0)
-)
-WHERE c.is_dynamic = true;
-```
+Built with ❤️ by the CTF community. Good luck with your challenges! 🚩

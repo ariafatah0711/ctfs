@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import APP from '@/config';
+import { NXCTL_API_URL, NXCTL_API_TOKEN } from '@/secret';
 
-const { apiUrl, apiToken } = APP.ctfc;
+const apiUrl = NXCTL_API_URL.replace(/\/$/, '');
+const apiToken = NXCTL_API_TOKEN;
 
 async function safeFetch(url: string, options?: RequestInit) {
   try {
@@ -54,6 +55,7 @@ export async function GET(request: Request) {
       `${apiUrl}/inspect/${name}`,
       {
         headers: {
+        //   'X-NXCTL-Token': apiToken
           'X-CTFC-Token': apiToken
         }
       }
@@ -75,6 +77,7 @@ export async function GET(request: Request) {
     `${apiUrl}/status`,
     {
       headers: {
+        // `X-NXCTL-Token`: apiToken
         'X-CTFC-Token': apiToken
       }
     }
@@ -110,6 +113,7 @@ export async function POST(request: Request) {
       {
         method: 'POST',
         headers: {
+          // `X-NXCTL-Token`: apiToken
           'X-CTFC-Token': apiToken
         }
       }

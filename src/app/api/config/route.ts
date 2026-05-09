@@ -128,7 +128,7 @@ function hasEnvKey(source: string, key: string) {
 
 function readSecretConfig(source: string): SecretConfig {
   const supabaseUrl = readEnvEntry(source, 'NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL || '')
-  const supabaseAnonKey = readEnvEntry(source, 'NEXT_PUBLIC_SUPABASE_ANON_KEY', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '')
+  const supabaseAnonKey = readEnvEntry(source, 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '')
   const turnstileSiteKey = readEnvEntry(source, 'NEXT_PUBLIC_TURNSTILE_SITE_KEY', process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '')
   const nxctlApiUrl = readEnvEntry(source, 'NXCTL_API_URL', process.env.NXCTL_API_URL || '')
   const nxctlApiToken = readEnvEntry(source, 'NXCTL_API_TOKEN', process.env.NXCTL_API_TOKEN || '')
@@ -240,7 +240,7 @@ function updateSecret(source: string, secret: SecretConfig) {
   }
 
   updateIfExists('NEXT_PUBLIC_SUPABASE_URL', secret.supabaseUrl, true)
-  updateIfExists('NEXT_PUBLIC_SUPABASE_ANON_KEY', secret.supabaseAnonKey, true)
+  updateIfExists('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', secret.supabaseAnonKey, true)
   updateIfExists('NEXT_PUBLIC_TURNSTILE_SITE_KEY', secret.turnstileSiteKey, secret.turnstileSiteKeyEnabled)
   // Ensure NXCTL entries are explicitly set or commented when toggled.
   // Preserve existing values if the client payload doesn't include them (avoid erasing real values).

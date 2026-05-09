@@ -24,7 +24,7 @@ export function getSupabaseConfigStatus(): SupabaseConfigStatus {
   return {
     isConfigured: false,
     message:
-      'Supabase belum dikonfigurasi atau URL-nya tidak valid. Isi NEXT_PUBLIC_SUPABASE_URL dengan URL http/https yang valid dan NEXT_PUBLIC_SUPABASE_ANON_KEY di .env.local.',
+      'Supabase belum dikonfigurasi atau URL-nya tidak valid. Isi NEXT_PUBLIC_SUPABASE_URL dengan URL http/https yang valid dan NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY di .env.local.',
   }
 }
 

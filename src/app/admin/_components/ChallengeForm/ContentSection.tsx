@@ -85,7 +85,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
       </div>
       <div className="md:col-span-2">
         <div className="flex items-center justify-between">
-          <Label>CTFC Services</Label>
+          <Label>NXCTL Services</Label>
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange({ ...formData, services: [...formData.services, ''] })}>+ Add Service</Button>
         </div>
         {formData.services.length === 0 && <p className="text-xs text-muted-foreground">No CTFC services added</p>}

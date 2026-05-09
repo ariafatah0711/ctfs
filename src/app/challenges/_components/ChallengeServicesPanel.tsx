@@ -25,7 +25,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
 
     services.forEach(async (service) => {
       try {
-        const res = await fetch(`/api/ctfc?action=inspect&name=${service}`)
+        const res = await fetch(`/api/nxctl?action=inspect&name=${service}`)
         const data = await res.json()
         if (res.ok) {
           setServiceDetails((prev) => ({ ...prev, [service]: data }))
@@ -46,7 +46,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
 
   const inspectService = async (service: string) => {
     try {
-      const resInspect = await fetch(`/api/ctfc?action=inspect&name=${service}`)
+      const resInspect = await fetch(`/api/nxctl?action=inspect&name=${service}`)
       if (resInspect.ok) {
         const dataInspect = await resInspect.json()
         setServiceDetails((prev) => ({ ...prev, [service]: dataInspect }))
@@ -62,7 +62,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
     const toastId = toast.loading(`${action}ing ${service}...`)
 
     try {
-      const res = await fetch('/api/ctfc', {
+      const res = await fetch('/api/nxctl', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, name: service }),
@@ -97,7 +97,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
   return (
     <div>
       <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1 uppercase tracking-wider">
-        <span className="h-3.5 w-3.5">🌐</span> CTFC Services
+        <span className="h-3.5 w-3.5">🌐</span> NXCTL Services
       </p>
       <div className="grid grid-cols-1 gap-1.5">
         {services.map((service, idx) => {

@@ -230,8 +230,8 @@ export async function getChallengePlaceholder(challengeId: string): Promise<stri
 
 
 /**
- * Get CTFC service names for a challenge
- * (Services are now stored in challenges.services column, not in ctfc table)
+ * Get NXCTL service names for a challenge
+ * (Services are now stored in challenges.services column, not in nxctl table)
  */
 export async function getChallengeServices(challengeId: string): Promise<string[]> {
   try {
