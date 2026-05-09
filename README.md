@@ -20,6 +20,7 @@ NXCTF is a **full-featured CTF (Capture The Flag) competition platform** designe
 - Supabase account (free tier works)
 - (Optional) Vercel account for deployment
 
+## 🚀 Development Setup
 ### 1. Clone & Install
 Clone the repo and install dependencies:
 ```bash
@@ -42,12 +43,12 @@ npm run setup                                # Generate db/init.sql from schema
 Schema is now initialized with all tables, functions, and RLS policies.
 
 ### 3. Run Dev (For Automatic Env Setup)
-lets run and automatic create `.env.local` file with the required variables. Just run the command below and follow the prompts:
+Let's run the dev server and automatically create a `.env.local` file with the required variables. Just run the command below and follow the prompts:
 ```bash
 npm run dev
 ```
 
-after that, your `.env.local` file should look like this:
+After that, your `.env.local` file should look like this:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
@@ -59,26 +60,27 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 # NEXT_PUBLIC_MAINTENANCE_MODE=no
 ```
 
-the only required variables are `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
+The only required variables are `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 
-and the optional variables are `NEXT_PUBLIC_TURNSTILE_SITE_KEY` for Cloudflare Turnstile CAPTCHA and `NXCTL_API_URL` and `NXCTL_API_TOKEN` for NXCTL service integration, and `NEXT_PUBLIC_MAINTENANCE_MODE` for maintenance mode if you want to maintain the platform for a while.
+You can find `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in your Supabase dashboard → Connect. Copy the URL and the publishable key (anon key), then paste them into your `.env.local` file.
 
-Get these from Supabase dashboard → **Settings → API**.
+The optional variables are `NEXT_PUBLIC_TURNSTILE_SITE_KEY` for Cloudflare Turnstile CAPTCHA, `NXCTL_API_URL` and `NXCTL_API_TOKEN` for NXCTL service integration, and `NEXT_PUBLIC_MAINTENANCE_MODE` for maintenance mode.
 
 ### 4. Setting your platform
-After your running the development server, you can open `http://localhost:3000` and you will see the Icon Seting on the navbar, click on it and you will see the config dialog, from there you can set your platform name, description, flag format, challenge categories, team settings, event settings, and more.
+After running the development server, you can open `http://localhost:3000` and see the Icon Setting in the navbar. Click it to open the config dialog, then set your platform name, description, flag format, challenge categories, team settings, event settings, and more.
 
+### 5. Setting the Supabase authentication settings
+Go to Dashboard → Authentication → Sign in / Providers
+- Enable "Allow manual linking" (Opsional)
+- Disable "Confirm Email" (Opsional)
 
+Go to your Supabase dashboard → Authentication → Settings → Site URL and add `http://localhost:3000` (or your Vercel domain if you deployed) and save.
 
-### 5. Make Yourself Admin
+### 6. Create an Admin Account
+To create an admin account, register a new account on the platform, then go to Supabase Dashboard → **users** table, find your user, and set `admin = true`. After that, refresh the page and you will see the Admin menu in the navbar.
 
-1. Register your account on the platform
-2. Open Supabase Dashboard → **users** table
-3. Find your user and set `admin = true`
-4. Refresh the page → Admin menu appears in navbar
-
-## 🚀 Deploy to Vercel
-
+## 🚀 Production Setup
+### Deploy to Vercel
 1. Push to GitHub
 2. Import repo in [Vercel Dashboard](https://vercel.com)
 3. Add environment variables:
@@ -87,8 +89,16 @@ After your running the development server, you can open `http://localhost:3000` 
    - `NEXT_PUBLIC_SITE_URL` (your Vercel domain)
 4. Deploy!
 
-## 📱 Main Features
+### Deploy to Vercel with CI/CD GitHub
+1. Push to GitHub
+2. Create a new Project in Vercel and get the `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, and `VERCEL_TOKEN` from the Vercel dashboard
+3. Add the following secrets in your GitHub repository:
+   - `VERCEL_ORG_ID`
+   - `VERCEL_PROJECT_ID`
+   - `VERCEL_TOKEN`
+4. Go to your GitHub repository → Actions, choose the "Vercel Production Deployment", and click on "Run workflow". This will trigger the deployment to Vercel.
 
+## 📱 Main Features
 ### For Users
 - **Browse Challenges** — Filter by category, difficulty, points
 - **Submit Flags** — Real-time validation
@@ -113,9 +123,7 @@ After your running the development server, you can open `http://localhost:3000` 
 - **Mobile Responsive** — Works on all devices
 
 ## ⚙️ Customization
-
 Edit `src/config.ts` to customize your platform:
-
 ```typescript
 export const APP = {
   shortName: "NXCTF",                    // Platform name
@@ -128,7 +136,7 @@ export const APP = {
   teams: {
     enabled: true,                       // Enable team mode
     hideScoreboardIndividual: false,     // Hide personal scores
-    hidescoreboardTotal: false,       nxctl   // Hide team scores
+    hideScoreboardTotal: false,          // Hide team scores
   },
 
   // Event configuration
@@ -139,9 +147,7 @@ export const APP = {
 ```
 
 ## 🔗 Optional Features
-
 ### NXCTL Service Integration
-
 If you have [NXCTL](https://github.com/nxctf/nxctl) running, add to `.env.local`:
 
 ```env
@@ -152,7 +158,6 @@ NXCTL_API_TOKEN=your_secret_token
 Services will auto-appear in challenge panels for users to start/restart/extend instances.
 
 ### Cloudflare Turnstile (CAPTCHA)
-
 ```env
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_site_key
 ```
@@ -160,13 +165,11 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_site_key
 Leave empty to skip CAPTCHA on login/register.
 
 ### Google OAuth
-
 1. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com)
 2. Add to Supabase → **Authentication → Providers → Google**
 3. Set Site URL to `https://your-domain`
 
 ## 📁 Project Structure
-
 ```
 src/
 ├── app/                    # Next.js pages & API routes
@@ -196,17 +199,15 @@ db/
 ```
 
 ## 🛠️ Available Scripts
-
 ```bash
+npm run setup    # Generate db/init.sql from schema
 npm run dev      # Start development server (localhost:3000)
 npm run build    # Build for production
 npm run start    # Start production server
 npm run lint     # Run ESLint
-npm run setup    # Generate db/init.sql from schema
 ```
 
 ## ✨ Key Technologies
-
 | Tech | Purpose |
 |------|---------|
 | **Next.js 14** | React framework with API routes |
@@ -218,35 +219,15 @@ npm run setup    # Generate db/init.sql from schema
 | **Markdown** | Challenge descriptions |
 | **Lucide Icons** | Beautiful icons |
 
-## 🔒 Security Considerations
-
-- ✅ Row-level security (RLS) on database tables
-- ✅ Server-side secrets in `secret.ts` (never exposed to client)
-- ✅ CAPTCHA optional anti-bot protection
-- ✅ User authentication required
-- ✅ Admin-only sensitive endpoints
-- ⚠️ Enable HTTPS in production
-- ⚠️ Use strong Supabase JWT tokens
-
 ## 📊 How It Works
 
-1. **Users register** → Automatically added to database
-2. **Browse challenges** → Filtered by difficulty/category/event
-3. **Submit flag** → Backend validates in real-time
-4. **Points awarded** → Dynamic scoring or static points
-5. **Leaderboard updates** → Real-time via Supabase subscriptions
-6. **Admins manage** → Create challenges, events, manage users
-
 ## 🤝 Support & Contributing
-
-- 📖 [Supabase Docs](https://supabase.com/docs)
-- 🐛 Report issues on GitHub
+- 📖 [NXCTL Documentation](https://docs.nxctf.my.id)
+- 🐛 Report issues on GitHub or your repository issue tracker
 - 💬 Questions? Open a discussion
 
 ## 📝 License
 
-MIT - Feel free to use and modify for your competitions!
-
----
+Apache License 2.0 - Feel free to use and modify for your competitions!
 
 Built with ❤️ by the CTF community. Good luck with your challenges! 🚩
