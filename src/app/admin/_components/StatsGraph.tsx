@@ -159,11 +159,11 @@ const StatsGraph = ({ data, range, onRangeChange }: StatsGraphProps) => {
           <SelectTrigger className="w-[140px] h-8">
             <SelectValue placeholder="Select timeframe" />
           </SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border">
-              <SelectItem value="7d">7 Days</SelectItem>
-              <SelectItem value="30d">30 Days</SelectItem>
-              <SelectItem value="90d">90 Days</SelectItem>
-            </SelectContent>
+          <SelectContent className="bg-white dark:bg-gray-800 border">
+            <SelectItem value="7d">7 Days</SelectItem>
+            <SelectItem value="30d">30 Days</SelectItem>
+            <SelectItem value="90d">90 Days</SelectItem>
+          </SelectContent>
         </Select>
       </div>
       <div className="pt-6">

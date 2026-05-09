@@ -44,3 +44,30 @@ export type SubChallengeFormRow = {
   order_number: number | ''
   is_sequential: boolean
 }
+
+export type AdminScope = {
+  is_global_admin: boolean
+  event_ids: string[]
+}
+
+export type ChallengePayload = {
+  title: string
+  description: string
+  category: string
+  points: number
+  hint: string[] | null
+  difficulty: string
+  attachments: Attachment[]
+  is_maintenance: boolean
+  event_id: string | null
+  flag: string
+  is_active?: boolean
+  is_dynamic?: boolean
+  min_points?: number
+  decay_per_solve?: number
+  max_points?: number
+  flag_placeholder?: boolean
+  services?: string[]
+}
+
+export type ActionType = 'login' | 'logout' | 'user_signedup' | 'user_deleted' | 'token_refreshed'

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+import { SUPABASE_URL, SUPABASE_ANON_KEY, MAINTENANCE_MODE } from './const'
 
 // Cache untuk menyimpan status maintenance
 let maintenanceCache: {
@@ -21,19 +19,15 @@ let maintenanceCache: {
 const CACHE_TTL = 30000 // 30 detik
 
 async function checkMaintenance(): Promise<{ isActive: boolean; errorType: 'manual' | 'database' | null; errorMessage: string }> {
-  const mode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE || 'no'
+  const mode = MAINTENANCE_MODE
 
-  // Mode manual
+  // Mode manual (Force Maintenance)
   if (mode === 'yes') {
     return { isActive: true, errorType: 'manual', errorMessage: 'Manual maintenance mode enabled' }
   }
 
-  // Mode normal
-  if (mode !== 'auto') {
-    return { isActive: false, errorType: null, errorMessage: '' }
-  }
-
-  // Mode auto - check cache dulu
+  // Jika tidak 'yes', kita selalu cek koneksi database (Auto Mode)
+  // Check cache dulu
   const now = Date.now()
   if (now - maintenanceCache.lastCheck < CACHE_TTL) {
     return {
@@ -45,7 +39,7 @@ async function checkMaintenance(): Promise<{ isActive: boolean; errorType: 'manu
 
   // Check database connection
   try {
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     const { error } = await supabase
       .from('keep-alive')
       .select('id')

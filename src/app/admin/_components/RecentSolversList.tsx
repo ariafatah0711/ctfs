@@ -24,18 +24,18 @@ const RecentSolversList: React.FC<RecentSolversListProps> = ({ solvers, onViewAl
         ) : (
           <div className="space-y-2">
             {solvers.slice(0, 15).map(s => (
-                <div key={s.solve_id} className="flex items-center justify-between border-b dark:border-gray-700 pb-1">
-                  <div>
-                    <Link href={`/user/${encodeURIComponent(s.username)}`} className="font-medium text-blue-600 dark:text-blue-300 hover:underline" title={s.username}>
-                      {s.username.length > 12 ? `${s.username.slice(0, 12)}...` : s.username}
-                    </Link>
-                    <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
-                    <span className="text-xs text-gray-700 dark:text-gray-200 max-w-[100px] truncate block">{s.challenge_title}</span>
-                  </div>
-                  <span className="text-xs text-gray-400 dark:text-gray-300">
-                    {formatRelativeDate(s.solved_at)}
-                  </span>
+              <div key={s.solve_id} className="flex items-center justify-between border-b dark:border-gray-700 pb-1">
+                <div>
+                  <Link href={`/user/${encodeURIComponent(s.username)}`} className="font-medium text-blue-600 dark:text-blue-300 hover:underline" title={s.username}>
+                    {s.username.length > 12 ? `${s.username.slice(0, 12)}...` : s.username}
+                  </Link>
+                  <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
+                  <span className="text-xs text-gray-700 dark:text-gray-200 max-w-[100px] truncate block">{s.challenge_title}</span>
                 </div>
+                <span className="text-xs text-gray-400 dark:text-gray-300">
+                  {formatRelativeDate(s.solved_at)}
+                </span>
+              </div>
             ))}
           </div>
         )}

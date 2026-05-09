@@ -1,144 +1,214 @@
-import { cookies } from 'next/headers'
-import APP from '@/config'
+"use client"
 
-// Disable caching untuk maintenance page
-export const revalidate = 0
-export const dynamic = 'force-dynamic'
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Database, Settings, ShieldAlert, MessageCircle, RefreshCw, Key, Wifi, WifiOff, Loader2 } from 'lucide-react'
+import { Button } from '@/shared/ui'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, MAINTENANCE_MODE, LINKS } from '@/const'
+import { cn } from '@/shared/lib/utils'
+import dynamic from 'next/dynamic'
 
-export default async function MaintenancePage() {
-  const cookieStore = await cookies()
-  const errorType = (cookieStore.get('maintenance-type')?.value || 'unknown') as 'manual' | 'database' | 'unknown'
-  const rawErrorMessage = cookieStore.get('maintenance-error')?.value || ''
-  const errorMessage = rawErrorMessage
-    ? decodeURIComponent(rawErrorMessage)
-    : 'No error details available'
+// Dynamically import DevConfigDialog
+const DevConfigDialog = dynamic(() => import('@/shared/components/custom/DevConfigDialog'), { ssr: false })
 
-  // Get Supabase info for debugging
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not configured'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'Not configured'
-  const anonKeyStatus = supabaseAnonKey !== 'Not configured' ? 'Configured' : 'Not configured'
+function getCookie(name: string) {
+  if (typeof document === 'undefined') return ''
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || ''
+  return ''
+}
+
+export default function MaintenancePage() {
+  const [mounted, setMounted] = useState(false)
+  const [devConfigOpen, setDevConfigOpen] = useState(false)
+  const [cookieError, setCookieError] = useState('')
+  const [healthStatus, setHealthStatus] = useState<'checking' | 'online' | 'offline' | 'idle'>('idle')
+  const isDev = process.env.NODE_ENV === 'development'
+
+  useEffect(() => {
+    setMounted(true)
+    const rawError = getCookie('maintenance-error')
+    if (rawError) {
+      try {
+        let decoded = decodeURIComponent(rawError)
+        if (decoded.includes('%')) decoded = decodeURIComponent(decoded)
+        setCookieError(decoded)
+      } catch {
+        setCookieError(rawError)
+      }
+    }
+  }, [])
+
+  // Live Connectivity Check
+  useEffect(() => {
+    if (!mounted || !isDev || !SUPABASE_URL) return
+
+    const checkHealth = async () => {
+      setHealthStatus('checking')
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
+
+        // Ping the health check endpoint or just the base URL
+        const res = await fetch(SUPABASE_URL, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        setHealthStatus('online')
+      } catch (err) {
+        setHealthStatus('offline')
+      }
+    }
+
+    checkHealth()
+  }, [mounted, isDev])
+
+  if (!mounted) return null
+
+  // Error Detection Logic
+  const isManual = MAINTENANCE_MODE === 'yes'
+  const isConfigMissing = !SUPABASE_URL || !SUPABASE_ANON_KEY
+
+  let errorType: 'maintenance' | 'config' | 'database' | 'unknown' = 'unknown'
+  if (isManual) errorType = 'maintenance'
+  else if (isConfigMissing) errorType = 'config'
+  else errorType = 'database'
+
+  const messageMap = {
+    maintenance: "The platform is currently under scheduled maintenance. We'll be back shortly.",
+    config: "System configuration is incomplete. Supabase environment variables are missing.",
+    database: cookieError || "Failed to establish a secure connection to the database engine.",
+    unknown: "An unexpected system interruption has occurred."
+  }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 px-4 overflow-hidden">
-      <div className="max-w-2xl w-full">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 dark:from-orange-600 dark:to-red-600 p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white dark:bg-gray-800 shadow-lg mb-4">
-              <svg className="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+    <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center p-4 font-sans antialiased relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-orange-600/5 rounded-full blur-[100px] pointer-events-none" />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="max-w-md w-full relative z-10"
+      >
+        <div className="bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl">
+          <div className={cn(
+            "h-1.5 w-full",
+            errorType === 'maintenance' ? "bg-orange-500" : "bg-red-500"
+          )} />
+
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center gap-4">
+              <div className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                errorType === 'maintenance' ? "bg-orange-500/20 text-orange-500" : "bg-red-500/20 text-red-500"
+              )}>
+                {errorType === 'maintenance' ? <ShieldAlert size={24} /> :
+                  errorType === 'config' ? <Settings size={24} /> : <Database size={24} />}
+              </div>
+              <div>
+                <h1 className="font-bold text-lg leading-tight">
+                  {errorType === 'maintenance' ? 'System Maintenance' : 'System Unavailable'}
+                </h1>
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mt-0.5">
+                  ID: {errorType.toUpperCase()}
+                </p>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Under Maintenance
-            </h1>
-            <p className="text-white/90 text-sm">
-              We&apos;re working to improve your experience
-            </p>
-          </div>
 
-          {/* Content */}
-          <div className="p-8 space-y-6">
-            <p className="text-lg text-gray-700 dark:text-gray-200 text-center">
-              {APP.maintenance.message}
-            </p>
+            <div className="space-y-5">
+              <div className="bg-black/20 border border-white/5 rounded-xl p-4">
+                <p className="text-sm text-gray-300 leading-relaxed font-medium">
+                  {messageMap[errorType]}
+                </p>
+              </div>
 
-            {/* Status */}
-            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-              {errorType === 'database' ? (
-                <>
-                  <div className="flex items-center justify-center space-x-2 mb-3">
-                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                      <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-red-600 dark:text-red-400">
-                      Database Connection Error
-                    </h2>
-                  </div>
-
-                  {/* Debug Info */}
-                  <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-lg p-4 mb-4 space-y-3">
-                    <div className="flex items-start space-x-2">
-                      <svg className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-red-700 dark:text-red-300 mb-2">Error Details:</p>
-                        <div className="space-y-2">
-                          <div className="bg-red-100 dark:bg-red-900/40 rounded px-2 py-1.5">
-                            <p className="text-xs text-red-700 dark:text-red-300 font-mono break-all">
-                              {errorMessage}
-                            </p>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="bg-red-100 dark:bg-red-900/40 rounded px-2 py-1.5">
-                              <p className="text-xs text-red-600 dark:text-red-400 font-mono break-all">
-                                <span className="opacity-75">URL:</span> {supabaseUrl}
-                              </p>
-                            </div>
-                            <div className="bg-red-100 dark:bg-red-900/40 rounded px-2 py-1.5">
-                              <p className="text-xs text-red-600 dark:text-red-400 font-mono break-all">
-                                <span className="opacity-75">Anon Key:</span> {anonKeyStatus}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <a
-                      href="https://status.supabase.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors font-medium"
-                    >
-                      <span>Check Database Status</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex items-center justify-center space-x-2 mb-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      Scheduled Maintenance
-                    </h2>
-                  </div>
-                  <p className="text-center text-gray-600 dark:text-gray-400 text-sm">
-                    Platform sedang dalam maintenance terjadwal. Kami akan segera kembali.
+              {/* Diagnostic Panel (Dev Only) */}
+              {isDev && (
+                <div className="bg-black/40 border border-white/5 rounded-xl p-4 space-y-3 font-mono text-[11px]">
+                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest flex items-center justify-between">
+                    Dev Diagnostics
+                    <span className="flex items-center gap-1.5">
+                      {healthStatus === 'checking' && <Loader2 size={10} className="animate-spin" />}
+                      {healthStatus === 'online' && <Wifi size={10} className="text-emerald-500" />}
+                      {healthStatus === 'offline' && <WifiOff size={10} className="text-red-500" />}
+                      <span className={cn(
+                        "text-[8px]",
+                        healthStatus === 'online' ? "text-emerald-500" :
+                          healthStatus === 'offline' ? "text-red-500" : "text-gray-500"
+                      )}>
+                        {healthStatus.toUpperCase()}
+                      </span>
+                    </span>
                   </p>
-                </>
+
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center text-gray-400">
+                      <span>SUPABASE_URL</span>
+                      <span className={cn("font-bold", SUPABASE_URL ? "text-emerald-500" : "text-red-500")}>
+                        {SUPABASE_URL ? (healthStatus === 'offline' ? 'UNREACHABLE' : 'CONNECTED') : 'MISSING'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-400">
+                      <span>ANON_KEY</span>
+                      <span className={cn("font-bold", SUPABASE_ANON_KEY ? "text-emerald-500" : "text-red-500")}>
+                        {SUPABASE_ANON_KEY ? 'LOADED' : 'MISSING'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
-          </div>
 
-          {/* Footer */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-8 py-6 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                Terima kasih atas kesabaran Anda 🙏
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Need help? Contact us at{' '}
-                <a href={APP.links.discord} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                  Discord
+            {/* Actions */}
+            <div className="flex items-center gap-2 pt-2">
+              <Button
+                onClick={() => window.location.reload()}
+                size="sm"
+                className="bg-white hover:bg-gray-200 text-black font-black uppercase tracking-widest h-10 px-4 rounded-xl flex-1 transition-all active:scale-95"
+              >
+                <RefreshCw size={14} className="mr-2" /> Retry
+              </Button>
+
+              {isDev && (
+                <Button
+                  onClick={() => setDevConfigOpen(true)}
+                  size="sm"
+                  className="bg-transparent hover:bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest h-10 px-4 rounded-xl transition-all active:scale-95"
+                >
+                  <Key size={14} className="mr-2" /> Fix
+                </Button>
+              )}
+
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-white font-black h-10 px-3 rounded-xl transition-all"
+              >
+                <a href={LINKS.discord} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle size={16} />
                 </a>
-              </p>
+              </Button>
             </div>
           </div>
+
+          <div className="px-6 py-4 bg-white/5 border-t border-white/5 text-center">
+            <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em]">
+              &copy; {new Date().getFullYear()} SOC &bull; Automated Failover System
+            </p>
+          </div>
         </div>
-      </div>
+      </motion.div>
+
+      {isDev && (
+        <DevConfigDialog
+          open={devConfigOpen}
+          onOpenChange={setDevConfigOpen}
+        />
+      )}
     </div>
   )
 }

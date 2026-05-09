@@ -1,17 +1,16 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { Inter } from 'next/font/google'
+import { Settings } from 'lucide-react'
 import 'react-medium-image-zoom/dist/styles.css'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
 import Navbar from '@/shared/components/Navbar'
-import { ScrollToggle, FloatingToolbar, ChatBotAI, ChatToggle } from '@/shared/components/custom'
-import { AuthProvider, ThemeProvider, LogsProvider, ChatProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
+import { ScrollToggle } from '@/shared/components/custom'
+import { AuthProvider, ThemeProvider, LogsProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
 import APP from '@/config'
-
-import { ChallengeJoyride, ChallengeTutorial } from '@/app/challenges/_components'
-import { Live2DMaskotAnime } from '@/shared/components/custom/anime'
+import ChallengeJoyride from '@/app/challenges/_components/ChallengeJoyride'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -96,31 +95,21 @@ export default async function RootLayout({
               <AuthProvider>
                 <EventProvider>
                   <SubChallengesProvider>
-                    <ChatProvider>
-                      <LogsProvider>
-                        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                          <Navbar />
-                          <div className="pt-14">{children}</div>
-                          <Toaster position="top-right" reverseOrder={false} />
-                          <ChallengeJoyride />
-                          <FloatingToolbar position="right">
-                            {APP.ChallengeTutorial && <ChallengeTutorial />}
-                            {APP.ChatBotAI && <ChatToggle />}
-                          </FloatingToolbar>
-                          {APP.ChatBotAI && <ChatBotAI />}
-                          <ScrollToggle />
-                        </div>
-                      </LogsProvider>
-                    </ChatProvider>
+                    <LogsProvider>
+                      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                        <Navbar />
+                        <div className="pt-14">{children}</div>
+                        <Toaster position="top-right" reverseOrder={false} />
+                        <ChallengeJoyride />
+                        <ScrollToggle />
+                      </div>
+                    </LogsProvider>
                   </SubChallengesProvider>
                 </EventProvider>
               </AuthProvider>
             </FilterProvider>
           </ThemeProvider>
         )}
-        {APP.Live2DMaskotAnime && <Live2DMaskotAnime />}
-        {/* {APP.Live2DMaskotAnime && <Live2DInteractive />} */}
-        {/* {APP.Live2DMaskotAnime && <Live2DPixi />} */}
       </body>
     </html>
   )

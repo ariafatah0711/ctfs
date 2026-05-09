@@ -1,98 +1,39 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import React from "react"
 
 import { customComponents, Loader } from '@/shared/components'
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
-import { Trash2 } from "lucide-react"
-import { useAuth } from '@/shared/hooks'
-import { isAdmin, getSolversAll, getSolversByUsername, getSolversByChallengeTitle, deleteSolver, formatRelativeDate } from '../_lib'
-import { SolverRow } from '../_types'
-
-import { motion } from "framer-motion"
-import toast from "react-hot-toast"
+import { SolversListCard } from '../_components'
+import { useAdminSolversData } from '../_hooks'
 
 export default function AdminSolversPage() {
   const { BackButton, ConfirmDialog } = customComponents
-  const router = useRouter()
-  const { user, loading } = useAuth()
-  const [isAdminUser, setIsAdminUser] = useState(false)
+  const {
+    user,
+    authLoading,
+    isLoading,
+    isAdminUser,
+    solvers,
+    offset,
+    hasMore,
+    loadingMore,
+    searchQuery,
+    setSearchQuery,
+    searching,
+    confirmOpen,
+    setConfirmOpen,
+    pendingDelete,
+    setPendingDelete,
+    pendingDeleteDetail,
+    setPendingDeleteDetail,
+    fetchSolvers,
+    searchSolvers,
+    resetSearch,
+    askDelete,
+    doDelete,
+  } = useAdminSolversData()
 
-  const [solvers, setSolvers] = useState<SolverRow[]>([])
-  const [offset, setOffset] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searching, setSearching] = useState(false)
-
-  // delete state
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null)
-  const [pendingDeleteDetail, setPendingDeleteDetail] = useState<{username: string, challenge_title: string} | null>(null)
-
-  useEffect(() => {
-    let mounted = true
-    ;(async () => {
-      if (loading) return
-
-      if (!user) {
-        router.push("/challenges")
-        return
-      }
-
-      const adminCheck = await isAdmin()
-      if (!mounted) return
-      setIsAdminUser(adminCheck)
-      if (!adminCheck) {
-        router.push("/challenges")
-        return
-      }
-
-      fetchSolvers(0)
-    })()
-
-    return () => {
-      mounted = false
-    }
-  }, [user, loading, router])
-
-  const fetchSolvers = async (startOffset = 0) => {
-    try {
-      const data = await getSolversAll(100, startOffset)
-      setSolvers((prev) => (startOffset === 0 ? data : [...prev, ...data]))
-      setOffset(startOffset + 100)
-      setHasMore(data.length === 100)
-    } catch (err) {
-      console.error(err)
-      toast.error("Failed to fetch solvers")
-    }
-  }
-
-  const askDelete = (id: string) => {
-    const solver = solvers.find((s) => s.solve_id === id)
-    setPendingDelete(id)
-    if (solver) {
-      setPendingDeleteDetail({ username: solver.username, challenge_title: solver.challenge_title })
-    } else {
-      setPendingDeleteDetail(null)
-    }
-    setConfirmOpen(true)
-  }
-
-  const doDelete = async (id: string) => {
-    try {
-      await deleteSolver(id) // implementasikan di lib/challenges
-      setSolvers((prev) => prev.filter((s) => s.solve_id !== id))
-      toast.success("Solver deleted successfully")
-    } catch (err) {
-      console.error(err)
-      toast.error("Failed to delete solver")
-    }
-  }
-
-  if (loading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
   if (!user || !isAdminUser) return null
 
   return (
@@ -103,129 +44,19 @@ export default function AdminSolversPage() {
           <BackButton href="/admin" label="Go Back" />
         </div>
 
-        <Card className="bg-white dark:bg-gray-800">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <CardTitle>All Solvers</CardTitle>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Search by username or challenge..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  document.getElementById("search-btn")?.click()
-                }
-              }}
-              className="px-3 py-1 text-sm rounded border dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <Button
-              id="search-btn"
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                if (!searchQuery.trim()) {
-                  fetchSolvers(0)
-                  return
-                }
-                setSearching(true)
-                try {
-                  // Nyari di username dan challenge sekaligus
-                  const [userResults, challengeResults] = await Promise.all([
-                    getSolversByUsername(searchQuery.trim()),
-                    getSolversByChallengeTitle(searchQuery.trim())
-                  ])
-
-                  // Gabungin hasil dan remove duplicates berdasarkan solve_id
-                  const combined = [...userResults, ...challengeResults]
-                  const unique = combined.filter((item, index, self) =>
-                    index === self.findIndex((t) => t.solve_id === item.solve_id)
-                  )
-
-                  setSolvers(unique)
-                  setHasMore(false)
-                } catch (err) {
-                  toast.error("Failed to search solvers")
-                  console.error(err)
-                } finally {
-                  setSearching(false)
-                }
-              }}
-            >
-              {searching ? "Searching..." : "Search"}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchQuery("")
-                fetchSolvers(0)
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </CardHeader>
-          <CardContent>
-            {solvers.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-300">No solvers found</div>
-            ) : (
-              <motion.div
-                className="divide-y border dark:border-gray-700 rounded-md overflow-hidden"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                {solvers.map((s) => (
-                  <div
-                    key={s.solve_id}
-                    className="flex items-center justify-between px-4 py-3 transition-colors border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    <div className="truncate">
-                      <Link
-                        href={`/user/${encodeURIComponent(s.username)}`}
-                        className="font-medium text-blue-600 dark:text-blue-300 hover:underline"
-                        title={s.username}
-                      >
-                        {s.username.length > 20 ? `${s.username.slice(0, 30)}...` : s.username}
-                      </Link>
-                      <span className="text-xs text-gray-500 dark:text-gray-300"> solved </span>
-                      <span className="text-xs text-gray-700 dark:text-gray-200 font-semibold">{s.challenge_title}</span>
-                      <span className="ml-2 text-xs text-gray-400 dark:text-gray-300">
-                        {formatRelativeDate(s.solved_at)}
-                      </span>
-                    </div>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => askDelete(s.solve_id)}
-                      aria-label="Delete Solver"
-                      title="Delete Solver"
-                      className="text-red-600 dark:text-red-400"
-                    >
-                      <Trash2 size={16} />
-                    </Button>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-
-            {hasMore && (
-              <div className="flex justify-center mt-4">
-                <Button
-                  onClick={() => fetchSolvers(offset)}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? "Loading..." : "Load More"}
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <SolversListCard
+          solvers={solvers}
+          searchQuery={searchQuery}
+          searching={searching}
+          loadingMore={loadingMore}
+          hasMore={hasMore}
+          offset={offset}
+          onSearchQueryChange={setSearchQuery}
+          onSearch={() => void searchSolvers()}
+          onReset={() => void resetSearch()}
+          onAskDelete={askDelete}
+          onLoadMore={fetchSolvers}
+        />
       </main>
 
       <ConfirmDialog

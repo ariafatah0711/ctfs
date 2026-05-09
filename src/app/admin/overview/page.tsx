@@ -1,57 +1,24 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/shared/hooks'
 import { Loader, customComponents } from '@/shared/components'
 import { Card, CardContent } from '@/shared/ui'
-import { getChallengesList, getStatsByRange, getInfo, isGlobalAdmin } from '../_lib'
-import { Challenge, SiteInfo } from '../_types'
-import { AuditLogList, StatsGraph } from '../_components'
+import { AuditLogList, OverviewStatsCards, StatsGraph } from '../_components'
+import { useAdminOverviewData } from '../_hooks'
 
 export default function AdminOverviewPage() {
   const { BackButton } = customComponents
-  const router = useRouter()
-  const { user, loading } = useAuth()
-  const [challenges, setChallenges] = useState<Challenge[]>([])
-  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null)
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('7d')
-  const [activityData, setActivityData] = useState<{ date: string; solves: number; activeUsers: number; }[]>([])
+  const {
+    user,
+    authLoading,
+    isLoading,
+    challenges,
+    siteInfo,
+    timeRange,
+    activityData,
+    refreshStats,
+  } = useAdminOverviewData()
 
-  useEffect(() => {
-    let mounted = true
-    ;(async () => {
-      if (loading) return
-
-      // if not logged in, redirect to challenges listing
-      if (!user) {
-        router.push('/challenges')
-        return
-      }
-
-      const adminCheck = await isGlobalAdmin()
-      if (!mounted) return
-      if (!adminCheck) {
-        router.push('/challenges')
-        return
-      }
-
-      const [data, info, stats] = await Promise.all([
-        getChallengesList(undefined, true),
-        getInfo(),
-        getStatsByRange(timeRange),
-      ])
-
-      if (!mounted) return
-      setChallenges(data)
-      setSiteInfo(info)
-      setActivityData(stats)
-    })()
-
-    return () => { mounted = false }
-  }, [user, loading, router])
-
-  if (loading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
   if (!user) return null
 
   return (
@@ -63,37 +30,14 @@ export default function AdminOverviewPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="bg-white dark:bg-gray-800">
-              <CardContent className="pt-6">
-                <div className="text-2xl font-semibold mb-1">{siteInfo?.total_users || 0}</div>
-                <div className="text-sm text-muted-foreground">Total Users</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white dark:bg-gray-800">
-              <CardContent className="pt-6">
-                <div className="text-2xl font-semibold mb-1">{siteInfo?.total_solves || 0}</div>
-                <div className="text-sm text-muted-foreground">Total Solves</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-white dark:bg-gray-800">
-              <CardContent className="pt-6">
-                <div className="text-2xl font-semibold mb-1">{challenges.length}</div>
-                <div className="text-sm text-muted-foreground">Total Challenges</div>
-              </CardContent>
-            </Card>
-          </div>
+          <OverviewStatsCards siteInfo={siteInfo} challengeCount={challenges.length} />
 
           <Card className="bg-white dark:bg-gray-800 pt-5">
             <CardContent>
               <StatsGraph
                 data={activityData}
                 range={timeRange}
-                onRangeChange={async (newRange: '7d' | '30d' | '90d') => {
-                  setTimeRange(newRange)
-                  const stats = await getStatsByRange(newRange)
-                  setActivityData(stats)
-                }}
+                onRangeChange={refreshStats}
               />
             </CardContent>
           </Card>

@@ -2,13 +2,13 @@
 
 // React Imports
 import Link from 'next/link'
-import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Scale, Settings, User } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, FileText, Bell, Users, Scale, User, Settings2 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 
 // Shared Imports
 import APP from '@/config'
-import { MarkdownRenderer, ImageWithFallback } from '@/shared/components'
+import { MarkdownRenderer, ImageWithFallback, DevConfigDialog } from '@/shared/components'
 import { Switch } from '@/shared/ui'
 import { signOut, isAdmin, isGlobalAdmin, getSolveSoundEnabledSetting, setSolveSoundEnabledSetting, subscribeToSolves, getNotifications, createNotification, deleteNotification, subscribeToNotifications, addNotifSeenIds, getNotifSeenIds, formatRelativeDate } from '@/shared/lib'
 import { useTheme, useAuth, useLogs } from '@/shared/contexts'
@@ -18,7 +18,6 @@ export default function Navbar() {
   const { user, setUser, loading } = useAuth()
   const { unreadCount: logsUnreadCount } = useLogs()
   const pathname = usePathname()
-  const showConfigLink = process.env.NODE_ENV !== 'production'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [adminStatus, setAdminStatus] = useState(false)
   const [globalAdminStatus, setGlobalAdminStatus] = useState(false)
@@ -41,8 +40,9 @@ export default function Navbar() {
   const [docsOpen, setDocsOpen] = useState(false)
   const docsMenuRef = useRef<HTMLDivElement | null>(null)
   const { theme, toggleTheme } = useTheme()
-  const avatarSrc =  user?.profile_picture_url || user?.picture || null
+  const avatarSrc = user?.profile_picture_url || user?.picture || null
   const [solveSoundEnabled, setSolveSoundEnabled] = useState(true)
+  const [devConfigOpen, setDevConfigOpen] = useState(false)
 
   const mergeNotifications = (
     existing: Array<{ id: string; title: string; message: string; level: string; created_at: string }>,
@@ -107,7 +107,7 @@ export default function Navbar() {
         const audio = new Audio('/sounds/notif.mp3')
         audio.volume = 0.5
         audio.play()
-      } catch {}
+      } catch { }
 
       const seen = getSeenNotifIds()
       if (!seen.has(id)) {
@@ -124,7 +124,7 @@ export default function Navbar() {
       setNotifUnreadCount(0)
       return
     }
-    ;(async () => {
+    ; (async () => {
       const items = await getNotifications(50, 0)
       const seen = getSeenNotifIds()
       const unread = (items || []).filter((n: any) => !seen.has(n.id)).length
@@ -137,7 +137,7 @@ export default function Navbar() {
     if (typeof window === 'undefined') return
     try {
       setSolveSoundEnabled(getSolveSoundEnabledSetting())
-    } catch {}
+    } catch { }
   }, [])
 
   // Persist notification sound setting
@@ -145,7 +145,7 @@ export default function Navbar() {
     if (typeof window === 'undefined') return
     try {
       setSolveSoundEnabledSetting(solveSoundEnabled)
-    } catch {}
+    } catch { }
   }, [solveSoundEnabled])
 
   // Real-time solves subscription (aktif hanya jika APP.notifSolves true)
@@ -159,7 +159,7 @@ export default function Navbar() {
           const audio = new Audio('/sounds/notif_solves.mp3')
           audio.volume = 0.5
           audio.play()
-        } catch {}
+        } catch { }
       }
       // Auto-hide after 6s
       if (notifTimeout.current) clearTimeout(notifTimeout.current)
@@ -307,7 +307,7 @@ export default function Navbar() {
       {/* Real-time solve notification (marquee style) */}
       {notifVisible && (
         <div className="fixed top-16 right-2 z-[5000] flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-in-left" style={{ minWidth: 220, maxWidth: 350 }}>
-          <svg className="mr-2" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg className="mr-2" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
           <span className="flex-1 min-w-0" aria-label={`${solveNotif.username} just solved ${solveNotif.challenge}`}>
             <div
               className="font-semibold truncate"
@@ -358,500 +358,63 @@ export default function Navbar() {
           </button>
         </div>
       )}
-    <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-0">
-        <div className="flex justify-between h-14 items-center">
-          {/* Logo */}
-          <div className="flex items-center space-x-8">
-            <Link href="/" className="flex items-center gap-2 group" data-tour="navbar-logo">
-             <ImageWithFallback
-                src={APP.image_icon}
-                alt={`${APP.shortName} logo`}
-                size={42}
-                className="rounded-full"
-              />
-              <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
-            </Link>
+      <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-0">
+          <div className="flex justify-between h-14 items-center">
+            {/* Logo */}
+            <div className="flex items-center space-x-8">
+              <Link href="/" className="flex items-center gap-2 group" data-tour="navbar-logo">
+                <ImageWithFallback
+                  src={APP.image_logo}
+                  alt={`${APP.shortName} logo`}
+                  size={42}
+                  className="rounded-full"
+                />
+                <span className={`text-[1.35rem] font-extrabold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-200 group-hover:text-blue-500 dark:group-hover:text-blue-400`}>{APP.shortName}</span>
+              </Link>
 
-            {/* Desktop menu (show some items only when logged in) */}
-            <div className="hidden md:flex space-x-2">
+              {/* Desktop menu (show some items only when logged in) */}
+              <div className="hidden md:flex space-x-2">
 
-              {user && (
-                <Link
-                  href="/challenges"
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                  data-tour="navbar-challenges"
-                >
-                  <Flag size={18} className="mr-1" /> Challenges
-                </Link>
-              )}
-
-              {user && scoreboardOptionCount > 0 && (
-                scoreboardOptionCount === 1 ? (
-                  <Link
-                    href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                    data-tour="navbar-scoreboard"
-                  >
-                    <Trophy size={18} className="mr-1" /> Scoreboard
-                  </Link>
-                ) : (
-                  <div ref={scoreboardMenuRef} className="relative">
-                    <button
-                      type="button"
-                      data-tour="navbar-scoreboard"
-                      onClick={() => setScoreboardOpen((v) => !v)}
-                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                    >
-                      <Trophy size={18} className="mr-1" /> Scoreboard
-                      <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${scoreboardOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
-                      </svg>
-                    </button>
-                    {scoreboardOpen && (
-                      <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
-                        {showUserScoreboard && (
-                          <Link
-                            href="/scoreboard"
-                            onClick={() => setScoreboardOpen(false)}
-                            className={`block px-3 py-2 text-sm ${showTeamScoreboard ? 'rounded-t-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                          >
-                            <span className="flex items-center">
-                              <User size={18} className="mr-1" />
-                              User Scoreboard
-                            </span>
-                          </Link>
-                        )}
-                        {showTeamScoreboard && (
-                          <Link
-                            href="/teams/scoreboard"
-                            onClick={() => setScoreboardOpen(false)}
-                            className={`block px-3 py-2 text-sm ${showUserScoreboard ? 'rounded-b-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                          >
-                            <span className="flex items-center">
-                              <Users size={18} className="mr-1" />
-                              Team Scoreboard
-                            </span>
-                          </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )
-              )}
-
-              {user && APP.teams.enabled && (
-                <Link
-                  href="/teams"
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                >
-                  <Users size={18} className="mr-1" /> Teams
-                </Link>
-              )}
-
-              {!user && (
-                <Link
-                  href="/preview"
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                >
-                  <FileText size={18} className="mr-1" /> Preview
-                </Link>
-              )}
-
-              {/* Info Dropdown (Rules + Info + Docs) */}
-              <div ref={docsMenuRef} className="relative">
-                <button
-                  type="button"
-                  data-tour="navbar-docs"
-                  onClick={() => setDocsOpen((v) => !v)}
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                >
-                  <Info size={18} className="mr-1" /> Info
-                  <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
-                  </svg>
-                </button>
-                {docsOpen && (
-                  <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
-                    <Link
-                      href="/info"
-                      onClick={() => setDocsOpen(false)}
-                      className={`block px-3 py-2 text-sm rounded-t-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                      data-tour="navbar-info"
-                    >
-                      <span className="flex items-center">
-                        <Info size={18} className="mr-1" />
-                        Info
-                      </span>
-                    </Link>
-                    <Link
-                      href="/rules"
-                      onClick={() => setDocsOpen(false)}
-                      className={`block px-3 py-2 text-sm ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                      data-tour="navbar-rules"
-                    >
-                      <span className="flex items-center">
-                        <Scale size={18} className="mr-1" />
-                        Rules
-                      </span>
-                    </Link>
-                    <Link
-                      href="/docs"
-                      onClick={() => setDocsOpen(false)}
-                      className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                      data-tour="navbar-docs"
-                    >
-                      <span className="flex items-center">
-                        <BookOpen size={18} className="mr-1" />
-                        Docs
-                      </span>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {adminStatus && user && (
-                <Link
-                  href="/admin"
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                >
-                  <Shield size={18} className="mr-1" /> Admin
-                </Link>
-              )}
-
-              {showConfigLink && (
-                <Link
-                  href="/config"
-                  className={`hidden md:flex items-center gap-1 rounded-lg px-2 py-1 text-[14px] font-medium transition-all duration-150 ${theme === 'dark' ? 'bg-orange-900/40 text-orange-200 hover:bg-orange-900/50' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
-                  title="Config"
-                  aria-label="Config"
-                >
-                  <Settings size={18} className="mr-1" /> Config
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Right section */}
-          <div className="flex items-center space-x-5">
-            <div className="hidden sm:flex items-center space-x-3">
-              {user ? (
-                <>
-                  <Link href="/profile" className="flex items-center gap-2 group" data-tour="navbar-profile">
-                    <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
-                    <span
-                      className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[100px] md:max-w-[160px] block`}
-                      title={user.username}
-                    >
-                      {user.username}
-                    </span>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className={`px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    href="/register"
-                    className={`px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
-                  >
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-
-            {/* Notifications Icon (realtime + history) */}
-            {user && (
-            <div className="relative mr-2" data-tour="navbar-notifications">
-              <button
-                ref={notifButtonRef}
-                className={`rounded-full p-1 transition-colors duration-150 ${notifOpen ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
-                title="Notifications"
-                aria-label="Notifications"
-                onClick={openNotifPanel}
-              >
-                <Bell size={22} className="text-blue-500" />
-              </button>
-
-              {notifUnreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
-                  {notifUnreadCount > 99 ? '99+' : String(notifUnreadCount)}
-                </span>
-              )}
-
-              {notifOpen && (
-                <div
-                  ref={notifPanelRef}
-                  className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[520px] sm:max-w-[95vw] max-w-[95vw] rounded-xl shadow-xl border overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
-                >
-                  <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
-                    <span>Notifications</span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={markAllNotificationsRead}
-                        className="text-xs text-blue-500 hover:underline"
-                      >
-                        Mark all read
-                      </button>
-                      <button
-                        onClick={() => setNotifOpen(false)}
-                        className="text-xs text-gray-500 hover:underline sm:hidden"
-                        aria-label="Close notifications"
-                      >
-                        Close
-                      </button>
-                    </div>
-                  </div>
-                  <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-medium">Solve sound</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Play sound for solve notifications</div>
-                    </div>
-                    <Switch
-                      checked={solveSoundEnabled}
-                      onCheckedChange={setSolveSoundEnabled}
-                    />
-                  </div>
-                  {globalAdminStatus && (
-                    <div className="p-3 border-b border-gray-200 dark:border-gray-800">
-                      <input
-                        value={notifTitle}
-                        onChange={(e) => setNotifTitle(e.target.value)}
-                        placeholder="Title"
-                        className={`w-full mb-2 px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-                      />
-                      <textarea
-                        value={notifMessage}
-                        onChange={(e) => setNotifMessage(e.target.value)}
-                        placeholder="Message"
-                        className={`w-full mb-2 px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-                        rows={2}
-                      />
-                      <div className="flex items-center justify-between gap-2">
-                        <select
-                          value={notifLevel}
-                          onChange={(e) => setNotifLevel(e.target.value as any)}
-                          className={`px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
-                        >
-                          <option value="info">Info</option>
-                          <option value="info_platform">Info Platform</option>
-                          <option value="info_challenges">Info Challenges</option>
-                        </select>
-                        <button
-                          onClick={handleSendNotif}
-                          className="px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700"
-                        >
-                          Send
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <div className="max-h-[70vh] sm:max-h-80 overflow-auto">
-                    {notifLoading ? (
-                      <div className="p-3 text-sm text-gray-500">Loading...</div>
-                    ) : notifItems.length === 0 ? (
-                      <div className="p-3 text-sm text-gray-500">No notifications</div>
-                    ) : (
-                      notifItems.map((n) => (
-                        <div
-                          key={n.id}
-                          className={`group relative px-3 py-2 border-b border-gray-200 dark:border-gray-800 ${isNotifRead(n.id) ? 'opacity-70' : ''} ${theme === 'dark' ? 'hover:bg-gray-800/40' : 'hover:bg-gray-50'} transition-colors`}
-                        >
-                          <div className={`min-w-0`}>
-                            <div className="flex items-start gap-2 min-w-0 pr-10">
-                              <div className="text-sm font-semibold truncate flex-1 min-w-0" title={n.title}>
-                                {n.title}
-                              </div>
-                              <div className="flex items-center gap-1 shrink-0">
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getLevelBadgeClass(n.level)}`}>
-                                  {n.level === 'info_platform'
-                                    ? 'Info Platform'
-                                    : n.level === 'info_challenges'
-                                    ? 'Info Challenges'
-                                    : 'Info'}
-                                </span>
-                                {!isNotifRead(n.id) && (
-                                  <span className="text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
-                                    New
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="mt-1 text-gray-600 dark:text-gray-300">
-                              <MarkdownRenderer
-                                content={n.message}
-                                variant="compact"
-                                className="break-words [&_a]:text-blue-600 dark:[&_a]:text-blue-400"
-                              />
-                            </div>
-                            <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
-                              {n.created_at ? formatRelativeDate(n.created_at) : ''}
-                            </div>
-                          </div>
-                          {globalAdminStatus && (
-                            <button
-                              onClick={() => handleDeleteNotif(n.id)}
-                              className="absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            )}
-
-            {/* Logs Icon */}
-            {user && (
-            <div className="relative mr-2" data-tour="navbar-logs">
-              <button
-                className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/logs' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
-                title="Logs"
-                aria-label="Logs"
-                onClick={() => {
-                  if (pathname === '/logs') {
-                    if (window.history.length > 1) {
-                      router.back()
-                    } else {
-                      router.push('/')
-                    }
-                  } else {
-                    router.push('/logs')
-                  }
-                }}
-              >
-                <FileText size={22} className="text-blue-500" />
-              </button>
-
-              {logsUnreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
-                  {logsUnreadCount > 99 ? '99+' : String(logsUnreadCount)}
-                </span>
-              )}
-            </div>
-            )}
-
-            {/* Theme Switcher Icon Only - moved right */}
-            <button
-              onClick={toggleTheme}
-              className="focus:outline-none transition-colors duration-150 ml-1"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fde047" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-moon transition-all duration-150">
-                  <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-sun transition-all duration-150">
-                  <circle cx="12" cy="12" r="5" />
-                  <line x1="12" y1="1" x2="12" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="23" />
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                  <line x1="1" y1="12" x2="3" y2="12" />
-                  <line x1="21" y1="12" x2="23" y2="12" />
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                </svg>
-              )}
-            </button>
-
-            {/* Mobile toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className={`md:hidden fixed inset-0 z-60 ${theme === 'dark' ? 'bg-gray-950/95' : 'bg-white/95'} transition-all duration-200 backdrop-blur-sm`}>
-            <div className={`flex items-center justify-between px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
-              <span className={`text-lg font-bold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Menu</span>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="px-4 pt-4 pb-6 space-y-2 animate-fade-in">
-              {/* Profile */}
-              {user && (
-                <>
-                  <Link
-                    href="/profile"
-                    className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
-                    <span
-                      className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[120px] block`}
-                      title={user.username}
-                    >
-                      {user.username}
-                    </span>
-                  </Link>
-                </>
-              )}
-              {/* Tampil jika sudah login */}
-              {user && (
-                <>
+                {user && (
                   <Link
                     href="/challenges"
                     className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    data-tour="navbar-challenges"
                   >
                     <Flag size={18} className="mr-1" /> Challenges
                   </Link>
-                  {scoreboardOptionCount > 0 && (
-                    scoreboardOptionCount === 1 ? (
-                      <Link
-                        href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
+                )}
+
+                {user && scoreboardOptionCount > 0 && (
+                  scoreboardOptionCount === 1 ? (
+                    <Link
+                      href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
+                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                      data-tour="navbar-scoreboard"
+                    >
+                      <Trophy size={18} className="mr-1" /> Scoreboard
+                    </Link>
+                  ) : (
+                    <div ref={scoreboardMenuRef} className="relative">
+                      <button
+                        type="button"
+                        data-tour="navbar-scoreboard"
+                        onClick={() => setScoreboardOpen((v) => !v)}
                         className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                        onClick={() => setMobileMenuOpen(false)}
                       >
                         <Trophy size={18} className="mr-1" /> Scoreboard
-                      </Link>
-                    ) : (
-                      <details className="rounded-lg">
-                        <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
-                          <Trophy size={18} className="mr-1" /> Scoreboard
-                        </summary>
-                        <div className="mt-1 ml-6 flex flex-col gap-1">
+                        <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${scoreboardOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
+                        </svg>
+                      </button>
+                      {scoreboardOpen && (
+                        <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
                           {showUserScoreboard && (
                             <Link
                               href="/scoreboard"
-                              className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                              onClick={() => setMobileMenuOpen(false)}
+                              onClick={() => setScoreboardOpen(false)}
+                              className={`block px-3 py-2 text-sm ${showTeamScoreboard ? 'rounded-t-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                             >
                               <span className="flex items-center">
                                 <User size={18} className="mr-1" />
@@ -862,8 +425,8 @@ export default function Navbar() {
                           {showTeamScoreboard && (
                             <Link
                               href="/teams/scoreboard"
-                              className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                              onClick={() => setMobileMenuOpen(false)}
+                              onClick={() => setScoreboardOpen(false)}
+                              className={`block px-3 py-2 text-sm ${showUserScoreboard ? 'rounded-b-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                             >
                               <span className="flex items-center">
                                 <Users size={18} className="mr-1" />
@@ -872,122 +435,555 @@ export default function Navbar() {
                             </Link>
                           )}
                         </div>
-                      </details>
-                    )
-                  )}
-                  {APP.teams.enabled && (
-                    <Link
-                      href="/teams"
-                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Users size={18} className="mr-1" /> Teams
-                    </Link>
-                  )}
-                </>
-              )}
-              {!user && (
-                <Link
-                  href="/preview"
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <FileText size={18} className="mr-1" /> Preview
-                </Link>
-              )}
-              {/* Info Menu (Info + Rules + Docs) - Mobile */}
-              <details className="rounded-lg">
-                <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
-                  <BookOpen size={18} className="mr-1" /> Info
-                </summary>
-                <div className="mt-1 ml-6 flex flex-col gap-1">
+                      )}
+                    </div>
+                  )
+                )}
+
+                {user && APP.teams.enabled && (
                   <Link
-                    href="/info"
-                    className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    data-tour="navbar-info"
+                    href="/teams"
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                   >
-                    <span className="flex items-center">
-                      <Info size={18} className="mr-1" />
-                      Info
-                    </span>
+                    <Users size={18} className="mr-1" /> Teams
                   </Link>
+                )}
+
+                {!user && (
                   <Link
-                    href="/rules"
-                    className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    data-tour="navbar-rules"
+                    href="/preview"
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                   >
-                    <span className="flex items-center">
-                      <Scale size={18} className="mr-1" />
-                      Rules
-                    </span>
+                    <FileText size={18} className="mr-1" /> Preview
                   </Link>
-                  <Link
-                    href="/docs"
-                    className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    data-tour="navbar-docs"
-                  >
-                    <span className="flex items-center">
-                      <BookOpen size={18} className="mr-1" />
-                      Docs
-                    </span>
-                  </Link>
-                </div>
-              </details>
-              {showConfigLink && (
-                <Link
-                  href="/config"
-                  className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-orange-300 hover:bg-gray-800 focus:ring-2 focus:ring-orange-700' : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50 focus:ring-2 focus:ring-orange-400'}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Settings size={18} className="mr-1" /> Config
-                </Link>
-              )}
-              {user && (
-                <>
-                  {adminStatus && (
-                    <Link
-                      href="/admin"
-                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Shield size={18} className="mr-1" /> Admin
-                    </Link>
-                  )}
+                )}
+
+                {/* Info Dropdown (Rules + Info + Docs) */}
+                <div ref={docsMenuRef} className="relative">
                   <button
-                    onClick={handleLogout}
-                    className="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150"
+                    type="button"
+                    data-tour="navbar-docs"
+                    onClick={() => setDocsOpen((v) => !v)}
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                   >
-                    Logout
+                    <Info size={18} className="mr-1" /> Info
+                    <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
+                    </svg>
                   </button>
-                </>
-              )}
-              {/* Tampil jika belum login */}
-              {!user && (
-                <>
+                  {docsOpen && (
+                    <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+                      <Link
+                        href="/info"
+                        onClick={() => setDocsOpen(false)}
+                        className={`block px-3 py-2 text-sm rounded-t-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                        data-tour="navbar-info"
+                      >
+                        <span className="flex items-center">
+                          <Info size={18} className="mr-1" />
+                          Info
+                        </span>
+                      </Link>
+                      <Link
+                        href="/rules"
+                        onClick={() => setDocsOpen(false)}
+                        className={`block px-3 py-2 text-sm ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                        data-tour="navbar-rules"
+                      >
+                        <span className="flex items-center">
+                          <Scale size={18} className="mr-1" />
+                          Rules
+                        </span>
+                      </Link>
+                      <Link
+                        href={APP.links.docs}
+                        target="_blank"
+                        onClick={() => setDocsOpen(false)}
+                        className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                        data-tour="navbar-docs"
+                      >
+                        <span className="flex items-center">
+                          <BookOpen size={18} className="mr-1" />
+                          Docs
+                        </span>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {adminStatus && user && (
                   <Link
-                    href="/login"
-                    className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                    href="/admin"
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                   >
-                    Login
+                    <Shield size={18} className="mr-1" /> Admin
                   </Link>
-                  <Link
-                    href="/register"
-                    className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
-                    onClick={() => setMobileMenuOpen(false)}
+                )}
+
+              </div>
+            </div>
+
+            {/* Right section */}
+            <div className="flex items-center space-x-5">
+              <div className="hidden sm:flex items-center space-x-3">
+                {user ? (
+                  <>
+                    <Link href="/profile" className="flex items-center gap-2 group" data-tour="navbar-profile">
+                      <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
+                      <span
+                        className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[100px] md:max-w-[160px] block`}
+                        title={user.username}
+                      >
+                        {user.username}
+                      </span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="hidden md:block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className={`px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      className={`px-4 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
+              </div>
+
+              {/* Notifications Icon (realtime + history) */}
+              {user && (
+                <div className="relative mr-2" data-tour="navbar-notifications">
+                  <button
+                    ref={notifButtonRef}
+                    className={`rounded-full p-1 transition-colors duration-150 ${notifOpen ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
+                    title="Notifications"
+                    aria-label="Notifications"
+                    onClick={openNotifPanel}
                   >
-                    Register
-                  </Link>
-                </>
+                    <Bell size={22} className="text-blue-500" />
+                  </button>
+
+                  {notifUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
+                      {notifUnreadCount > 99 ? '99+' : String(notifUnreadCount)}
+                    </span>
+                  )}
+
+                  {notifOpen && (
+                    <div
+                      ref={notifPanelRef}
+                      className={`fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-[520px] sm:max-w-[95vw] max-w-[95vw] rounded-xl shadow-xl border overflow-hidden ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'} z-40`}
+                    >
+                      <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 font-semibold flex items-center justify-between">
+                        <span>Notifications</span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={markAllNotificationsRead}
+                            className="text-xs text-blue-500 hover:underline"
+                          >
+                            Mark all read
+                          </button>
+                          <button
+                            onClick={() => setNotifOpen(false)}
+                            className="text-xs text-gray-500 hover:underline sm:hidden"
+                            aria-label="Close notifications"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                      <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium">Solve sound</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Play sound for solve notifications</div>
+                        </div>
+                        <Switch
+                          checked={solveSoundEnabled}
+                          onCheckedChange={setSolveSoundEnabled}
+                        />
+                      </div>
+                      {globalAdminStatus && (
+                        <div className="p-3 border-b border-gray-200 dark:border-gray-800">
+                          <input
+                            value={notifTitle}
+                            onChange={(e) => setNotifTitle(e.target.value)}
+                            placeholder="Title"
+                            className={`w-full mb-2 px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                          />
+                          <textarea
+                            value={notifMessage}
+                            onChange={(e) => setNotifMessage(e.target.value)}
+                            placeholder="Message"
+                            className={`w-full mb-2 px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                            rows={2}
+                          />
+                          <div className="flex items-center justify-between gap-2">
+                            <select
+                              value={notifLevel}
+                              onChange={(e) => setNotifLevel(e.target.value as any)}
+                              className={`px-2 py-1 rounded border text-sm ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}
+                            >
+                              <option value="info">Info</option>
+                              <option value="info_platform">Info Platform</option>
+                              <option value="info_challenges">Info Challenges</option>
+                            </select>
+                            <button
+                              onClick={handleSendNotif}
+                              className="px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700"
+                            >
+                              Send
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      <div className="max-h-[70vh] sm:max-h-80 overflow-auto">
+                        {notifLoading ? (
+                          <div className="p-3 text-sm text-gray-500">Loading...</div>
+                        ) : notifItems.length === 0 ? (
+                          <div className="p-3 text-sm text-gray-500">No notifications</div>
+                        ) : (
+                          notifItems.map((n) => (
+                            <div
+                              key={n.id}
+                              className={`group relative px-3 py-2 border-b border-gray-200 dark:border-gray-800 ${isNotifRead(n.id) ? 'opacity-70' : ''} ${theme === 'dark' ? 'hover:bg-gray-800/40' : 'hover:bg-gray-50'} transition-colors`}
+                            >
+                              <div className={`min-w-0`}>
+                                <div className="flex items-start gap-2 min-w-0 pr-10">
+                                  <div className="text-sm font-semibold truncate flex-1 min-w-0" title={n.title}>
+                                    {n.title}
+                                  </div>
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${getLevelBadgeClass(n.level)}`}>
+                                      {n.level === 'info_platform'
+                                        ? 'Info Platform'
+                                        : n.level === 'info_challenges'
+                                          ? 'Info Challenges'
+                                          : 'Info'}
+                                    </span>
+                                    {!isNotifRead(n.id) && (
+                                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                                        New
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="mt-1 text-gray-600 dark:text-gray-300">
+                                  <MarkdownRenderer
+                                    content={n.message}
+                                    variant="compact"
+                                    className="break-words [&_a]:text-blue-600 dark:[&_a]:text-blue-400"
+                                  />
+                                </div>
+                                <div className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
+                                  {n.created_at ? formatRelativeDate(n.created_at) : ''}
+                                </div>
+                              </div>
+                              {globalAdminStatus && (
+                                <button
+                                  onClick={() => handleDeleteNotif(n.id)}
+                                  className="absolute top-2 right-2 text-xs text-red-500 hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
+
+              {/* Logs Icon */}
+              {user && (
+                <div className="relative mr-2" data-tour="navbar-logs">
+                  <button
+                    className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/logs' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
+                    title="Logs"
+                    aria-label="Logs"
+                    onClick={() => {
+                      if (pathname === '/logs') {
+                        if (window.history.length > 1) {
+                          router.back()
+                        } else {
+                          router.push('/')
+                        }
+                      } else {
+                        router.push('/logs')
+                      }
+                    }}
+                  >
+                    <FileText size={22} className="text-blue-500" />
+                  </button>
+
+                  {logsUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
+                      {logsUnreadCount > 99 ? '99+' : String(logsUnreadCount)}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Dev Config (Development only) */}
+              {process.env.NODE_ENV === 'development' && (
+                <button
+                  onClick={() => setDevConfigOpen(true)}
+                  className="p-1 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors mr-1"
+                  title="Platform Setup (Dev Only)"
+                >
+                  <Settings2 size={22} className="text-orange-500" />
+                </button>
+              )}
+
+              {/* Theme Switcher Icon Only - moved right */}
+              <button
+                onClick={toggleTheme}
+                className="focus:outline-none transition-colors duration-150 ml-1"
+                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fde047" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-moon transition-all duration-150">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-sun transition-all duration-150">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Mobile toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {mobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </nav>
-  </>
+
+          {/* Mobile menu */}
+          {mobileMenuOpen && (
+            <div className={`md:hidden fixed inset-0 z-60 ${theme === 'dark' ? 'bg-gray-950/95' : 'bg-white/95'} transition-all duration-200 backdrop-blur-sm`}>
+              <div className={`flex items-center justify-between px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+                <span className={`text-lg font-bold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Menu</span>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="px-4 pt-4 pb-6 space-y-2 animate-fade-in">
+                {/* Profile */}
+                {user && (
+                  <>
+                    <Link
+                      href="/profile"
+                      className="flex items-center space-x-3 px-3 py-2 border-b border-gray-200 mb-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
+                      <span
+                        className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[120px] block`}
+                        title={user.username}
+                      >
+                        {user.username}
+                      </span>
+                    </Link>
+                  </>
+                )}
+                {/* Tampil jika sudah login */}
+                {user && (
+                  <>
+                    <Link
+                      href="/challenges"
+                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Flag size={18} className="mr-1" /> Challenges
+                    </Link>
+                    {scoreboardOptionCount > 0 && (
+                      scoreboardOptionCount === 1 ? (
+                        <Link
+                          href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
+                          className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Trophy size={18} className="mr-1" /> Scoreboard
+                        </Link>
+                      ) : (
+                        <details className="rounded-lg">
+                          <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
+                            <Trophy size={18} className="mr-1" /> Scoreboard
+                          </summary>
+                          <div className="mt-1 ml-6 flex flex-col gap-1">
+                            {showUserScoreboard && (
+                              <Link
+                                href="/scoreboard"
+                                className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <span className="flex items-center">
+                                  <User size={18} className="mr-1" />
+                                  User Scoreboard
+                                </span>
+                              </Link>
+                            )}
+                            {showTeamScoreboard && (
+                              <Link
+                                href="/teams/scoreboard"
+                                className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <span className="flex items-center">
+                                  <Users size={18} className="mr-1" />
+                                  Team Scoreboard
+                                </span>
+                              </Link>
+                            )}
+                          </div>
+                        </details>
+                      )
+                    )}
+                    {APP.teams.enabled && (
+                      <Link
+                        href="/teams"
+                        className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Users size={18} className="mr-1" /> Teams
+                      </Link>
+                    )}
+                  </>
+                )}
+                {!user && (
+                  <Link
+                    href="/preview"
+                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <FileText size={18} className="mr-1" /> Preview
+                  </Link>
+                )}
+                {/* Info Menu (Info + Rules + Docs) - Mobile */}
+                <details className="rounded-lg">
+                  <summary className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 cursor-pointer ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}>
+                    <BookOpen size={18} className="mr-1" /> Info
+                  </summary>
+                  <div className="mt-1 ml-6 flex flex-col gap-1">
+                    <Link
+                      href="/info"
+                      className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-tour="navbar-info"
+                    >
+                      <span className="flex items-center">
+                        <Info size={18} className="mr-1" />
+                        Info
+                      </span>
+                    </Link>
+                    <Link
+                      href="/rules"
+                      className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-tour="navbar-rules"
+                    >
+                      <span className="flex items-center">
+                        <Scale size={18} className="mr-1" />
+                        Rules
+                      </span>
+                    </Link>
+                    <Link
+                      href="/docs"
+                      className={`px-3 py-2 rounded-lg text-sm ${theme === 'dark' ? 'text-gray-300 hover:text-blue-400 hover:bg-gray-800' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-tour="navbar-docs"
+                    >
+                      <span className="flex items-center">
+                        <BookOpen size={18} className="mr-1" />
+                        Docs
+                      </span>
+                    </Link>
+                  </div>
+                </details>
+                {user && (
+                  <>
+                    {adminStatus && (
+                      <Link
+                        href="/admin"
+                        className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Shield size={18} className="mr-1" /> Admin
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150"
+                    >
+                      Logout
+                    </button>
+                  </>
+                )}
+                {/* Tampil jika belum login */}
+                {!user && (
+                  <>
+                    <Link
+                      href="/login"
+                      className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      className={`flex px-3 py-2 rounded-lg text-[15px] font-medium shadow transition-all duration-150 ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+      {process.env.NODE_ENV === 'development' && (
+        <DevConfigDialog open={devConfigOpen} onOpenChange={setDevConfigOpen} />
+      )}
+    </>
   )
 }

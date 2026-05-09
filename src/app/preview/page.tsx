@@ -69,13 +69,13 @@ export default function PreviewPage() {
 
   useEffect(() => {
     let mounted = true
-    ;(async () => {
-      setLoading(true)
-      const res = await getPreviewData({ leaderboardLimit: 25, eventsLimit: 10, eventId: 'all' })
-      if (!mounted) return
-      setData(res)
-      setLoading(false)
-    })()
+      ; (async () => {
+        setLoading(true)
+        const res = await getPreviewData({ leaderboardLimit: 25, eventsLimit: 10, eventId: 'all' })
+        if (!mounted) return
+        setData(res)
+        setLoading(false)
+      })()
 
     return () => {
       mounted = false
@@ -193,11 +193,10 @@ export default function PreviewPage() {
         <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
           <button
             onClick={() => setCurrentTab('scoreboard')}
-            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-              currentTab === 'scoreboard'
-                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'scoreboard'
+              ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Trophy size={16} />
@@ -206,11 +205,10 @@ export default function PreviewPage() {
           </button>
           <button
             onClick={() => setCurrentTab('events')}
-            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-              currentTab === 'events'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'events'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
           >
             <div className="flex items-center gap-2">
               <Zap size={16} />
@@ -219,11 +217,10 @@ export default function PreviewPage() {
           </button>
           <button
             onClick={() => setCurrentTab('solves')}
-            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${
-              currentTab === 'solves'
-                ? 'border-green-500 text-green-600 dark:text-green-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-            }`}
+            className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'solves'
+              ? 'border-green-500 text-green-600 dark:text-green-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              }`}
           >
             <div className="flex items-center gap-2">
               <CheckCircle2 size={16} />

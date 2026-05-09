@@ -12,8 +12,8 @@ interface ChallengeOverviewCardProps {
 
 const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenges, info, showViewAll = true }) => {
   return (
-  // <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-  <Card className="shrink-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+    // <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+    <Card className="shrink-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-gray-900 dark:text-white">Overview</CardTitle>
         {showViewAll && (

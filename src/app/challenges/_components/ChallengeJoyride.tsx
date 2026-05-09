@@ -62,11 +62,6 @@ export default function ChallengeJoyride() {
             placement: 'top',
           },
           {
-            target: '[data-tour="challenge-tutorial"]',
-            content: '📚 Open the CTF tutorial PDF here.',
-            placement: 'left',
-          },
-          {
             target: '[data-tour="challenge-filter-bar"]',
             content: '🔎 Use this filter bar to quickly find challenges by status, category, difficulty, and search.',
             placement: 'bottom',

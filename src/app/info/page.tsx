@@ -95,7 +95,7 @@ export default function InfoPage() {
           if (!data) return
           setRepoStats({ stars: data.stargazers_count || 0, forks: data.forks_count || 0 })
         })
-        .catch(() => {})
+        .catch(() => { })
     } catch (e) {
       // ignore
     }
@@ -130,7 +130,7 @@ export default function InfoPage() {
             if (link.name === 'GitHub') icon = <Github size={18} className="mr-1" />;
             if (link.name === 'Docs') icon = <BookOpen size={18} className="mr-1" />;
             if (link.name === 'Discord')
-                icon = <DiscordIcon size={18} className="mr-1" />;
+              icon = <DiscordIcon size={18} className="mr-1" />;
             return link.href !== "#" ? (
               <a
                 key={i}
@@ -211,7 +211,7 @@ export default function InfoPage() {
         <div className="my-10 w-24 border-t border-gray-700" />
 
         {/* VERSION & LICENSE */}
-          <div className="flex flex-col items-center gap-1 mt-2">
+        <div className="flex flex-col items-center gap-1 mt-2">
           <div className="flex items-center gap-3">
             <div className="text-xs font-mono text-gray-500 flex items-center gap-1">
               <Info size={15} className="mr-1" /> v{VERSION} · build {BUILD_TIME}

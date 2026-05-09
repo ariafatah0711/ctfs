@@ -1,33 +1,11 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import toast from 'react-hot-toast'
-
-import { useAuth } from '@/shared/hooks'
+import React from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { Loader, customComponents } from '@/shared/components'
-import { ChallengeFilterBarFloating as ChallengeFilterBar } from '@/shared/components/challenges'
-import {
-  adminAddEventMember,
-  adminRemoveEventMember,
-  addEvent,
-  deleteEvent,
-  getEvents,
-  listEventMembers,
-  listEventJoinRequests,
-  regenerateEventJoinKey,
-  reviewEventJoinRequest,
-  setChallengesEvent,
-  setEventJoinSettings,
-  updateEvent,
-  isGlobalAdmin,
-  searchUsersByUsername,
-  getChallengesLite,
-  type UserLite,
-} from '../_lib'
-import { Event, EventJoinRequestRow, EventMemberRow } from '../_types'
-import APP from '@/config'
+import { EventFormDialog, EventListCard } from '../_components'
+import { useAdminEventData } from '../_hooks'
+import { ChallengeFilterBar } from '@/shared/components/challenges'
 
 import {
   Button,
@@ -35,527 +13,72 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   Input,
   Label,
-  Switch,
-  Textarea,
 } from '@/shared/ui'
-import { DIALOG_CONTENT_CLASS } from '@/shared/styles'
-
-const toInputValue = (value?: string | null) => {
-  if (!value) return ''
-  const d = new Date(value)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const yyyy = d.getFullYear()
-  const mm = pad(d.getMonth() + 1)
-  const dd = pad(d.getDate())
-  const hh = pad(d.getHours())
-  const mi = pad(d.getMinutes())
-  return `${yyyy}-${mm}-${dd}T${hh}:${mi}`
-}
-
-const fromInputValue = (value: string) => {
-  if (!value) return null
-  const d = new Date(value)
-  return isNaN(d.getTime()) ? null : d.toISOString()
-}
-
-const getErrorMessage = (err: unknown, fallback: string) => {
-  if (typeof err === 'object' && err !== null && 'message' in err) {
-    const message = (err as { message?: unknown }).message
-    if (typeof message === 'string' && message.trim()) return message
-  }
-  return fallback
-}
 
 export default function AdminEventPage() {
   const { BackButton, ConfirmDialog } = customComponents
-  const router = useRouter()
-  const { user, loading } = useAuth()
-  const [events, setEvents] = useState<Event[]>([])
-  const [isAdminUser, setIsAdminUser] = useState(false)
-  const [challenges, setChallenges] = useState<Array<{ id: string; title: string; category?: string; difficulty?: string; event_id?: string | null; is_active?: boolean }>>([])
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [bulkEventId, setBulkEventId] = useState<string>('')
-  const [bulkSubmitting, setBulkSubmitting] = useState(false)
-  const [filters, setFilters] = useState({
-    category: 'all',
-    difficulty: 'all',
-    search: '',
-    feature: 'N' as 'T' | 'S' | 'N',
-  })
+  const {
+    user,
+    authLoading,
+    isLoading,
+    isAdminUser,
+    sortedEvents,
+    manageEventId,
+    setManageEventId,
+    openForm,
+    setOpenForm,
+    editing,
+    formData,
+    setFormData,
+    submitting,
+    handleSubmit,
+    handleRegenerateJoinKey,
+    openAdd,
+    openEdit,
+    askDelete,
+    confirmOpen,
+    setConfirmOpen,
+    pendingDelete,
+    doDelete,
+    assignUserQuery,
+    setAssignUserQuery,
+    loadingUserSearch,
+    candidateUsers,
+    selectedCandidateUserIds,
+    toggleCandidateSelection,
+    selectAllCandidates,
+    clearCandidateSelection,
+    handleQuickAddSelectedMembers,
+    memberActionUserId,
+    handleQuickAddMember,
+    memberQuery,
+    setMemberQuery,
+    loadingEventMembers,
+    filteredEventMembers,
+    handleRemoveMember,
+    filters,
+    setFilters,
+    categories,
+    difficulties,
+    selectAllFiltered,
+    clearSelection,
+    bulkEventId,
+    setBulkEventId,
+    handleBulkAssign,
+    handleBulkRemove,
+    bulkSubmitting,
+    filteredChallenges,
+    selectedIds,
+    toggleSelect,
+    joinRequests,
+    loadingJoinRequests,
+    reviewingRequestId,
+    handleReviewRequest,
+  } = useAdminEventData()
 
-  const [openForm, setOpenForm] = useState(false)
-  const [editing, setEditing] = useState<Event | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [pendingDelete, setPendingDelete] = useState<Event | null>(null)
-  const [manageEventId, setManageEventId] = useState('')
-  const [joinRequests, setJoinRequests] = useState<EventJoinRequestRow[]>([])
-  const [loadingJoinRequests, setLoadingJoinRequests] = useState(false)
-  const [reviewingRequestId, setReviewingRequestId] = useState<string | null>(null)
-  const [eventMembers, setEventMembers] = useState<EventMemberRow[]>([])
-  const [loadingEventMembers, setLoadingEventMembers] = useState(false)
-  const [memberActionUserId, setMemberActionUserId] = useState<string | null>(null)
-  const [assignUserQuery, setAssignUserQuery] = useState('')
-  const [searchedUsers, setSearchedUsers] = useState<UserLite[]>([])
-  const [loadingUserSearch, setLoadingUserSearch] = useState(false)
-  const [memberQuery, setMemberQuery] = useState('')
-  const [selectedCandidateUserIds, setSelectedCandidateUserIds] = useState<string[]>([])
-
-  const emptyForm = {
-    name: '',
-    description: '',
-    join_mode: 'open' as 'open' | 'request' | 'key',
-    join_key: '',
-    start_time: '',
-    end_time: '',
-    always_show_challenges: false,
-    image_url: '',
-  }
-
-  const [formData, setFormData] = useState<typeof emptyForm>(() => ({ ...emptyForm }))
-
-  const loadEvents = async () => {
-    const data = await getEvents()
-    setEvents(data)
-    if (!manageEventId && data.length > 0) {
-      setManageEventId(data[0].id)
-    }
-  }
-
-  const loadJoinRequests = async (eventId: string) => {
-    if (!eventId) {
-      setJoinRequests([])
-      return
-    }
-    setLoadingJoinRequests(true)
-    try {
-      const data = await listEventJoinRequests(eventId, 'pending')
-      setJoinRequests(data)
-    } finally {
-      setLoadingJoinRequests(false)
-    }
-  }
-
-  const loadChallenges = async () => {
-    const data = await getChallengesLite(true)
-    setChallenges(data)
-  }
-
-  const loadEventMembers = async (eventId: string) => {
-    if (!eventId) {
-      setEventMembers([])
-      return
-    }
-    setLoadingEventMembers(true)
-    try {
-      const data = await listEventMembers(eventId)
-      setEventMembers(data)
-    } finally {
-      setLoadingEventMembers(false)
-    }
-  }
-
-  useEffect(() => {
-    let mounted = true
-    ;(async () => {
-      if (loading) return
-
-      if (!user) {
-        router.push('/challenges')
-        return
-      }
-
-      const adminCheck = await isGlobalAdmin()
-      if (!mounted) return
-      setIsAdminUser(adminCheck)
-      if (!adminCheck) {
-        router.push('/challenges')
-        return
-      }
-
-      await loadEvents()
-      await loadChallenges()
-    })()
-
-    return () => {
-      mounted = false
-    }
-  }, [user, loading, router])
-
-  const openAdd = () => {
-    setEditing(null)
-    setFormData({ ...emptyForm })
-    setOpenForm(true)
-  }
-
-  const openEdit = (evt: Event) => {
-    setEditing(evt)
-    setFormData({
-      name: evt.name || '',
-      description: evt.description || '',
-      join_mode: evt.join_mode || 'open',
-      join_key: evt.join_key || '',
-      start_time: toInputValue(evt.start_time || null),
-      end_time: toInputValue(evt.end_time || null),
-      always_show_challenges: Boolean(evt.always_show_challenges),
-      image_url: evt.image_url || '',
-    })
-    setOpenForm(true)
-  }
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault()
-    if (!formData.name.trim()) {
-      toast.error('Event name is required')
-      return
-    }
-
-    setSubmitting(true)
-    try {
-      const payload = {
-        name: formData.name.trim(),
-        description: formData.description?.trim() || '',
-        start_time: fromInputValue(formData.start_time),
-        end_time: fromInputValue(formData.end_time),
-        always_show_challenges: formData.always_show_challenges,
-        image_url: formData.image_url?.trim() || null,
-      }
-
-      if (editing?.id) {
-        await updateEvent(editing.id, payload)
-        await setEventJoinSettings(editing.id, formData.join_mode, formData.join_mode === 'key' ? formData.join_key.trim() : null)
-        toast.success('Event updated')
-      } else {
-        const created = await addEvent(payload)
-        const createdEventId = Array.isArray(created) ? created[0]?.id : created?.id
-        if (createdEventId) {
-          await setEventJoinSettings(createdEventId, formData.join_mode, formData.join_mode === 'key' ? formData.join_key.trim() : null)
-        }
-        toast.success('Event created')
-      }
-
-      await loadEvents()
-      setOpenForm(false)
-      setEditing(null)
-      setFormData({ ...emptyForm })
-    } catch (err) {
-      console.error(err)
-      toast.error('Failed to save event')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleRegenerateJoinKey = async () => {
-    if (!editing?.id) {
-      toast.error('Save event first before regenerating key')
-      return
-    }
-    try {
-      const key = await regenerateEventJoinKey(editing.id)
-      setFormData((prev) => ({ ...prev, join_key: key }))
-      toast.success('Join key regenerated')
-    } catch (err) {
-      console.error(err)
-      toast.error('Failed to regenerate join key')
-    }
-  }
-
-  const handleReviewRequest = async (requestId: string, approve: boolean) => {
-    if (!manageEventId) return
-    setReviewingRequestId(requestId)
-    try {
-      await reviewEventJoinRequest(requestId, approve)
-      await loadJoinRequests(manageEventId)
-      await loadEventMembers(manageEventId)
-      toast.success(approve ? 'Request approved' : 'Request rejected')
-    } catch (err) {
-      console.error(err)
-      toast.error('Failed to review request')
-    } finally {
-      setReviewingRequestId(null)
-    }
-  }
-
-  const askDelete = (evt: Event) => {
-    setPendingDelete(evt)
-    setConfirmOpen(true)
-  }
-
-  const doDelete = async () => {
-    if (!pendingDelete?.id) return
-    try {
-      await deleteEvent(pendingDelete.id)
-      await loadEvents()
-      toast.success('Event deleted')
-    } catch (err) {
-      console.error(err)
-      toast.error('Failed to delete event')
-    } finally {
-      setPendingDelete(null)
-      setConfirmOpen(false)
-    }
-  }
-
-  const sortedEvents = useMemo(() => {
-    return [...events].sort((a, b) => {
-      const aTime = a.start_time ? new Date(a.start_time).getTime() : 0
-      const bTime = b.start_time ? new Date(b.start_time).getTime() : 0
-      return aTime - bTime
-    })
-  }, [events])
-
-  useEffect(() => {
-    if (!manageEventId && sortedEvents.length > 0) {
-      setManageEventId(sortedEvents[0].id)
-      return
-    }
-    if (manageEventId) {
-      void loadJoinRequests(manageEventId)
-      void loadEventMembers(manageEventId)
-    }
-  }, [manageEventId, sortedEvents])
-
-  useEffect(() => {
-    const q = assignUserQuery.trim()
-
-    if (!manageEventId || q.length < 2) {
-      setSearchedUsers([])
-      setLoadingUserSearch(false)
-      return
-    }
-
-    let canceled = false
-    setLoadingUserSearch(true)
-
-    const timer = setTimeout(async () => {
-      try {
-        const data = await searchUsersByUsername(q, 12)
-        if (canceled) return
-        setSearchedUsers(data)
-      } catch (err) {
-        if (!canceled) {
-          console.error(err)
-          setSearchedUsers([])
-        }
-      } finally {
-        if (!canceled) setLoadingUserSearch(false)
-      }
-    }, 250)
-
-    return () => {
-      canceled = true
-      clearTimeout(timer)
-    }
-  }, [assignUserQuery, manageEventId])
-
-  const handleQuickAddMember = async (targetUserId: string) => {
-    if (!manageEventId) {
-      toast.error('Select an event first')
-      return
-    }
-    setMemberActionUserId(targetUserId)
-    try {
-      await adminAddEventMember(manageEventId, targetUserId)
-      await loadEventMembers(manageEventId)
-      setAssignUserQuery('')
-      setSearchedUsers([])
-      clearCandidateSelection()
-      toast.success('Member added to event')
-    } catch (err) {
-      console.error(err)
-      toast.error(getErrorMessage(err, 'Failed to add member'))
-    } finally {
-      setMemberActionUserId(null)
-    }
-  }
-
-  const toggleCandidateSelection = (targetUserId: string) => {
-    setSelectedCandidateUserIds((prev) => {
-      if (prev.includes(targetUserId)) {
-        return prev.filter((id) => id !== targetUserId)
-      }
-      return [...prev, targetUserId]
-    })
-  }
-
-  const selectAllCandidates = () => {
-    setSelectedCandidateUserIds(candidateUsers.map((u) => u.id))
-  }
-
-  const clearCandidateSelection = () => {
-    setSelectedCandidateUserIds([])
-  }
-
-  const handleQuickAddSelectedMembers = async () => {
-    if (!manageEventId) {
-      toast.error('Select an event first')
-      return
-    }
-
-    if (selectedCandidateUserIds.length === 0) {
-      toast.error('No user selected')
-      return
-    }
-
-    setMemberActionUserId('__bulk__')
-    try {
-      await Promise.all(
-        selectedCandidateUserIds.map((userId) => adminAddEventMember(manageEventId, userId))
-      )
-      await loadEventMembers(manageEventId)
-      clearCandidateSelection()
-      setAssignUserQuery('')
-      setSearchedUsers([])
-      toast.success(`${selectedCandidateUserIds.length} member(s) added to event`)
-    } catch (err) {
-      console.error(err)
-      toast.error(getErrorMessage(err, 'Failed to add selected members'))
-    } finally {
-      setMemberActionUserId(null)
-    }
-  }
-
-  const handleRemoveMember = async (targetUserId: string) => {
-    if (!manageEventId) return
-    setMemberActionUserId(targetUserId)
-    try {
-      await adminRemoveEventMember(manageEventId, targetUserId)
-      await loadEventMembers(manageEventId)
-      toast.success('Member removed from event')
-    } catch (err) {
-      console.error(err)
-      toast.error(getErrorMessage(err, 'Failed to remove member'))
-    } finally {
-      setMemberActionUserId(null)
-    }
-  }
-
-  const candidateUsers = useMemo(() => {
-    const joinedSet = new Set(eventMembers.map((m) => m.user_id))
-
-    return searchedUsers
-      .filter((u) => !joinedSet.has(u.id))
-      .slice(0, 8)
-  }, [searchedUsers, eventMembers])
-
-  const filteredEventMembers = useMemo(() => {
-    const q = memberQuery.trim().toLowerCase()
-    if (!q) return eventMembers
-    return eventMembers.filter((m) => {
-      return m.username.toLowerCase().includes(q) || m.user_id.toLowerCase().includes(q)
-    })
-  }, [eventMembers, memberQuery])
-
-  useEffect(() => {
-    const visibleIds = new Set(candidateUsers.map((u) => u.id))
-    setSelectedCandidateUserIds((prev) => prev.filter((id) => visibleIds.has(id)))
-  }, [candidateUsers])
-
-  const filteredChallenges = useMemo(() => {
-    const q = (filters.search || '').toLowerCase()
-    return challenges.filter(c => {
-      if (q && !c.title.toLowerCase().includes(q)) return false
-      if (filters.category !== 'all' && c.category !== filters.category) return false
-      if (filters.difficulty !== 'all' && c.difficulty !== filters.difficulty) return false
-
-      const hasQuestions = !!(c as any).has_questions
-      const hasServices = Array.isArray((c as any).services) && (c as any).services.length > 0
-      const featureType = hasQuestions && hasServices ? 'TS' : hasQuestions ? 'T' : hasServices ? 'S' : 'N'
-      if (filters.feature === 'T' && !(featureType === 'T' || featureType === 'TS')) return false
-      if (filters.feature === 'S' && !(featureType === 'S' || featureType === 'TS')) return false
-
-      return true
-    })
-  }, [filters, challenges])
-
-  const allCategories = useMemo(
-    () => Array.from(new Set(challenges.map(c => c.category))).filter((c): c is string => Boolean(c)),
-    [challenges]
-  )
-  const categories = useMemo(() => {
-    const preferredOrder = APP.challengeCategories || []
-    const matchedCategorySet = new Set<string>()
-    return [
-      ...preferredOrder.flatMap(p => {
-        const pLower = p.toLowerCase()
-        const found = allCategories.find(c => c.toLowerCase().includes(pLower) || pLower.includes(c.toLowerCase()))
-        if (found && !matchedCategorySet.has(found)) {
-          matchedCategorySet.add(found)
-          return found
-        }
-        return [] as string[]
-      }),
-      ...allCategories.filter(c => !matchedCategorySet.has(c)).sort(),
-    ]
-  }, [allCategories])
-
-  const difficulties = useMemo(
-    () => Array.from(new Set(challenges.map(c => c.difficulty))).filter((d): d is string => Boolean(d)).sort(),
-    [challenges]
-  )
-
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]))
-  }
-
-  const selectAllFiltered = () => {
-    setSelectedIds(filteredChallenges.map(c => c.id))
-  }
-
-  const clearSelection = () => setSelectedIds([])
-
-  const handleBulkAssign = async () => {
-    if (!bulkEventId) {
-      toast.error('Select an event first')
-      return
-    }
-    if (selectedIds.length === 0) {
-      toast.error('No challenges selected')
-      return
-    }
-    setBulkSubmitting(true)
-    try {
-      await setChallengesEvent(bulkEventId, selectedIds)
-      await loadChallenges()
-      clearSelection()
-      toast.success('Challenges assigned to event')
-    } catch (err) {
-      console.error(err)
-      toast.error('Failed to assign challenges')
-    } finally {
-      setBulkSubmitting(false)
-    }
-  }
-
-  const handleBulkRemove = async () => {
-    if (selectedIds.length === 0) {
-      toast.error('No challenges selected')
-      return
-    }
-    setBulkSubmitting(true)
-    try {
-      await setChallengesEvent(null, selectedIds)
-      await loadChallenges()
-      clearSelection()
-      toast.success('Challenges moved to Main Event')
-    } catch (err) {
-      console.error(err)
-      toast.error('Failed to remove event from challenges')
-    } finally {
-      setBulkSubmitting(false)
-    }
-  }
-
-  if (loading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
   if (!user || !isAdminUser) return null
 
   return (
@@ -563,50 +86,12 @@ export default function AdminEventPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <BackButton href="/admin" label="Go Back" />
 
-        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-gray-900 dark:text-white">Event List</CardTitle>
-              <Button onClick={openAdd} className="bg-primary-600 text-white hover:bg-primary-700">+ Add Event</Button>
-          </CardHeader>
-          <CardContent>
-            {sortedEvents.length === 0 ? (
-              <div className="text-center py-10 text-gray-500 dark:text-gray-400">No events yet</div>
-            ) : (
-              <motion.div
-                className="divide-y border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                {sortedEvents.map(evt => (
-                  <div key={evt.id} className="px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3 bg-white dark:bg-gray-900/40">
-                    <div className="min-w-0">
-                      <div className="font-medium text-gray-900 dark:text-white truncate">{evt.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-300 truncate">
-                        {evt.description || 'No description'}
-                      </div>
-                      <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        {evt.start_time ? `Start: ${new Date(evt.start_time).toLocaleString()}` : 'Start: -'}
-                        <span className="mx-2">•</span>
-                        {evt.end_time ? `End: ${new Date(evt.end_time).toLocaleString()}` : 'End: -'}
-                        {evt.always_show_challenges && (
-                          <>
-                            <span className="mx-2">•</span>
-                            Always show challenges
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEdit(evt)}>Edit</Button>
-                      <Button variant="destructive" size="sm" onClick={() => askDelete(evt)}>Delete</Button>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </CardContent>
-        </Card>
+        <EventListCard
+          events={sortedEvents}
+          onAdd={openAdd}
+          onEdit={openEdit}
+          onDelete={askDelete}
+        />
 
         <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
           <CardHeader>
@@ -867,157 +352,16 @@ export default function AdminEventPage() {
 
       <AnimatePresence>
         {openForm && (
-          <Dialog open={openForm} onOpenChange={setOpenForm}>
-            <DialogContent
-              className={`${DIALOG_CONTENT_CLASS} max-w-3xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden`}
-              style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
-            >
-              <DialogHeader>
-                <DialogTitle>{editing ? 'Edit Event' : 'Add Event'}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="md:col-span-2">
-                    <Label>Name</Label>
-                    <Input
-                      required
-                      value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label>Description</Label>
-                    <Textarea
-                      rows={3}
-                      value={formData.description}
-                      onChange={e => setFormData({ ...formData, description: e.target.value })}
-                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Join Mode</Label>
-                    <select
-                      value={formData.join_mode}
-                      onChange={(e) => setFormData({ ...formData, join_mode: e.target.value as 'open' | 'request' | 'key' })}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
-                    >
-                      <option value="open">Open (direct join)</option>
-                      <option value="request">Request (admin approval)</option>
-                      <option value="key">Key (invite key)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label>Join Key</Label>
-                      {editing?.id && formData.join_mode === 'key' && (
-                        <button
-                          type="button"
-                          onClick={handleRegenerateJoinKey}
-                          className="text-xs text-primary-600 hover:underline"
-                        >
-                          Regenerate
-                        </button>
-                      )}
-                    </div>
-                    <Input
-                      value={formData.join_key}
-                      onChange={(e) => setFormData({ ...formData, join_key: e.target.value })}
-                      disabled={formData.join_mode !== 'key'}
-                      placeholder={formData.join_mode === 'key' ? 'Enter custom join key' : 'Join key only for key mode'}
-                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label>Start Time</Label>
-                      {formData.start_time && (
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, start_time: '' })}
-                          className="text-xs text-gray-500 hover:underline"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <Input
-                      type="datetime-local"
-                      value={formData.start_time}
-                      onChange={e => setFormData({ ...formData, start_time: e.target.value })}
-                      className="h-9 px-2 text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label>End Time</Label>
-                      {formData.end_time && (
-                        <button
-                          type="button"
-                          onClick={() => setFormData({ ...formData, end_time: '' })}
-                          className="text-xs text-gray-500 hover:underline"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <Input
-                      type="datetime-local"
-                      value={formData.end_time}
-                      onChange={e => setFormData({ ...formData, end_time: e.target.value })}
-                      className="h-9 px-2 text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-800/40">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Always show challenges</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Show event challenges after end.</p>
-                    </div>
-                    <Switch
-                      checked={formData.always_show_challenges}
-                      onCheckedChange={checked => setFormData({ ...formData, always_show_challenges: checked })}
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label>Image URL</Label>
-                    <Input
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={formData.image_url}
-                      onChange={e => setFormData({ ...formData, image_url: e.target.value })}
-                      className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
-                    />
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Add a banner image URL for this event</p>
-                  </div>
-                </div>
-
-                <DialogFooter className="flex flex-row items-center justify-end gap-2 sticky bottom-0 z-10 pt-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setOpenForm(false)}
-                    className="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={submitting}
-                    className="bg-primary-600 text-white hover:bg-primary-700 dark:bg-primary-600 dark:text-white dark:hover:bg-primary-700"
-                  >
-                    {submitting ? 'Saving...' : (editing ? 'Update' : 'Add')}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+          <EventFormDialog
+            open={openForm}
+            editing={editing}
+            formData={formData}
+            submitting={submitting}
+            onOpenChange={setOpenForm}
+            onChange={setFormData}
+            onSubmit={handleSubmit}
+            onRegenerateJoinKey={handleRegenerateJoinKey}
+          />
         )}
       </AnimatePresence>
 

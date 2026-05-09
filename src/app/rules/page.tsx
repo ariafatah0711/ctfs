@@ -56,7 +56,7 @@ export default function RulesPage() {
       <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
       <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
 
-     <section className="flex flex-col items-center justify-start pt-8 md:pt-12 flex-1 text-center px-4 relative z-10">
+      <section className="flex flex-col items-center justify-start pt-8 md:pt-12 flex-1 text-center px-4 relative z-10">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -86,35 +86,35 @@ export default function RulesPage() {
           className="mb-6 flex flex-col items-center justify-center gap-3 w-full"
         >
           <div className="w-full max-w-3xl">
-           {RULES.map((rule, idx) => (
-            <motion.div
-              key={idx}
-              variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.32 } } }}
-              whileHover={{ scale: 1.01, y: -1 }}
-              transition={{ type: 'spring', stiffness: 220, damping: 18 }}
-              layout
-              className={`group flex gap-3 items-start bg-white/90 dark:bg-gray-800/90
+            {RULES.map((rule, idx) => (
+              <motion.div
+                key={idx}
+                variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.32 } } }}
+                whileHover={{ scale: 1.01, y: -1 }}
+                transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+                layout
+                className={`group flex gap-3 items-start bg-white/90 dark:bg-gray-800/90
                           border border-transparent dark:border-transparent rounded-md
                           px-4 py-3 shadow-sm text-sm md:text-base text-left w-full
                           hover:shadow-lg hover:border-orange-400 dark:hover:border-orange-700
                           hover:bg-orange-100 dark:hover:bg-gray-800/70
                           transition-all duration-200 ease-out
                           ${idx < RULES.length - 1 ? 'mb-2' : ''}`}
-            >
-              <div className="flex-shrink-0 mt-1">
-                <div className="w-3 h-3 rounded-full bg-orange-600 dark:bg-orange-500
+              >
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-3 h-3 rounded-full bg-orange-600 dark:bg-orange-500
                                 group-hover:scale-125 transition-transform duration-300" />
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold text-orange-700 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors duration-300">
-                  {rule.title}
                 </div>
-                <div className="text-gray-700 dark:text-gray-200 leading-snug mt-1">
-                  <RulesMarkdownRenderer content={rule.description} />
+                <div className="flex-1">
+                  <div className="font-semibold text-orange-700 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors duration-300">
+                    {rule.title}
+                  </div>
+                  <div className="text-gray-700 dark:text-gray-200 leading-snug mt-1">
+                    <RulesMarkdownRenderer content={rule.description} />
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 

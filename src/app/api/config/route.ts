@@ -6,6 +6,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const configFilePath = path.join(process.cwd(), 'src/config.ts')
+const envFilePath = path.join(process.cwd(), '.env.local')
 const isProduction = process.env.NODE_ENV === 'production'
 
 type SetupConfig = {
@@ -13,12 +14,8 @@ type SetupConfig = {
   fullName: string
   description: string
   flagFormat: string
-  baseUrl: string
   challengeCategories: string[]
   notifSolves: boolean
-  challengeTutorial: boolean
-  chatBotAI: boolean
-  live2dMaskotAnime: boolean
   teamsEnabled: boolean
   hideScoreboardIndividual: boolean
   hideScoreboardTotal: boolean
@@ -26,12 +23,125 @@ type SetupConfig = {
   eventMainLabel: string
   eventMainImageUrl: string
   eventFallbackImageUrl: string
-  maintenanceMode: 'no' | 'yes' | 'auto'
-  maintenanceMessage: string
+
+}
+
+type SecretConfig = {
+  supabaseUrl: string
+  supabaseAnonKey: string
+  turnstileSiteKey: string
+  turnstileSiteKeyEnabled: boolean
+  nxctlEnabled: boolean
+  nxctlApiUrl: string
+  nxctlApiToken: string
+}
+
+type ConfigResponse = {
+  config: SetupConfig
+  secret: SecretConfig
 }
 
 function toJsonString(value: string) {
   return JSON.stringify(value)
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function parseEnvValue(raw: string) {
+  const trimmed = raw.trim()
+  if (!trimmed) return ''
+
+  const quoted = (trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  return quoted ? trimmed.slice(1, -1) : trimmed
+}
+
+function readEnvEntry(source: string, key: string, fallback = '') {
+  const lines = source.split(/\r?\n/)
+  const pattern = new RegExp(`^\\s*#?\\s*${escapeRegExp(key)}\\s*=\\s*(.*)$`)
+
+  for (const line of lines) {
+    const match = line.match(pattern)
+    if (!match) continue
+
+    const enabled = !line.trimStart().startsWith('#')
+    return {
+      value: parseEnvValue(match[1] || ''),
+      enabled,
+    }
+  }
+
+  return {
+    value: fallback,
+    enabled: Boolean(fallback),
+  }
+}
+
+function stringifyEnvValue(value: string) {
+  const normalized = String(value ?? '')
+  if (normalized === '') return ''
+  if (/^[A-Za-z0-9_./:-]+$/.test(normalized)) return normalized
+  return JSON.stringify(normalized)
+}
+
+function replaceOrAppendEnvLine(source: string, key: string, value: string, enabled: boolean) {
+  const linePattern = new RegExp(`^\\s*#?\\s*${escapeRegExp(key)}\\s*=.*$`, 'm')
+  const nextLine = `${enabled ? '' : '# '}${key}=${stringifyEnvValue(value)}`
+
+  if (linePattern.test(source)) {
+    return source.replace(linePattern, nextLine)
+  }
+
+  const trimmed = source.replace(/\s*$/, '')
+  return `${trimmed}${trimmed ? '\n' : ''}${nextLine}\n`
+}
+
+// Strict replace-only helper: only replace existing lines, do NOT append
+function replaceEnvLine(source: string, key: string, value: string, enabled: boolean) {
+  const lines = source.split(/\r?\n/)
+  let found = false
+
+  const newLines = lines.map((line) => {
+    const trimmed = line.trim()
+    const match = trimmed.match(new RegExp(`^#?\\s*${escapeRegExp(key)}\\s*=`))
+    if (!match) return line
+    found = true
+    return `${enabled ? '' : '# '}${key}=${stringifyEnvValue(value)}`
+  })
+
+  return found ? newLines.join('\n') : source
+}
+
+// Remove any existing entries for a key and append a single canonical line (replace or append)
+function setEnvKey(source: string, key: string, value: string, enabled: boolean) {
+  const linePattern = new RegExp(`^\\s*#?\\s*${escapeRegExp(key)}\\s*=.*$`, 'gm')
+  const cleaned = source.replace(linePattern, '').replace(/\n{2,}/g, '\n').replace(/^\n|\n$/g, '')
+  const nextLine = `${enabled ? '' : '# '}${key}=${stringifyEnvValue(value)}`
+  return `${cleaned}${cleaned ? '\n' : ''}${nextLine}\n`
+}
+
+function hasEnvKey(source: string, key: string) {
+  const pattern = new RegExp(`^\\s*#?\\s*${escapeRegExp(key)}\\s*=`, 'm')
+  return pattern.test(source)
+}
+
+function readSecretConfig(source: string): SecretConfig {
+  const supabaseUrl = readEnvEntry(source, 'NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL || '')
+  const supabaseAnonKey = readEnvEntry(source, 'NEXT_PUBLIC_SUPABASE_ANON_KEY', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '')
+  const turnstileSiteKey = readEnvEntry(source, 'NEXT_PUBLIC_TURNSTILE_SITE_KEY', process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '')
+  const nxctlApiUrl = readEnvEntry(source, 'NXCTL_API_URL', process.env.NXCTL_API_URL || '')
+  const nxctlApiToken = readEnvEntry(source, 'NXCTL_API_TOKEN', process.env.NXCTL_API_TOKEN || '')
+
+  return {
+    supabaseUrl: supabaseUrl.value,
+    supabaseAnonKey: supabaseAnonKey.value,
+    turnstileSiteKey: turnstileSiteKey.value,
+    turnstileSiteKeyEnabled: turnstileSiteKey.enabled,
+    nxctlEnabled: nxctlApiUrl.enabled || nxctlApiToken.enabled,
+    nxctlApiUrl: nxctlApiUrl.value,
+    nxctlApiToken: nxctlApiToken.value,
+  }
 }
 
 function readString(source: string, pattern: RegExp, fallback = '') {
@@ -61,15 +171,8 @@ function readConfig(source: string): SetupConfig {
     fullName: readString(source, /fullName:\s*['"]([^'"]*)['"]/),
     description: readString(source, /description:\s*['"]([^'"]*)['"]/),
     flagFormat: readString(source, /flagFormat:\s*['"]([^'"]*)['"]/),
-    baseUrl: readString(
-      source,
-      /baseUrl:\s*[\r\n\s]*process\.env\.NEXT_PUBLIC_SITE_URL \|\| ['"]([^'"]*)['"]/,
-    ),
     challengeCategories: readCategories(source),
     notifSolves: readBoolean(source, /notifSolves:\s*(true|false)/),
-    challengeTutorial: readBoolean(source, /ChallengeTutorial:\s*(true|false)/),
-    chatBotAI: readBoolean(source, /ChatBotAI:\s*(true|false)/),
-    live2dMaskotAnime: readBoolean(source, /Live2DMaskotAnime:\s*(true|false)/),
     teamsEnabled: readBoolean(teamsBlock?.[1] || '', /enabled:\s*(true|false)/),
     hideScoreboardIndividual: readBoolean(teamsBlock?.[1] || '', /hideScoreboardIndividual:\s*(true|false)/),
     hideScoreboardTotal: readBoolean(teamsBlock?.[1] || '', /hidescoreboardTotal:\s*(true|false)/),
@@ -77,16 +180,12 @@ function readConfig(source: string): SetupConfig {
     eventMainLabel: readString(source, /eventMainLabel:\s*['"]([^'"]*)['"]/),
     eventMainImageUrl: readString(source, /eventMainImageUrl:\s*['"]([^'"]*)['"]/),
     eventFallbackImageUrl: readString(source, /eventFallbackImageUrl:\s*['"]([^'"]*)['"]/),
-    maintenanceMode: (readString(
-      maintenanceBlock?.[1] || '',
-      /mode:\s*process\.env\.NEXT_PUBLIC_MAINTENANCE_MODE \|\| ['"]([^'"]*)['"]/,
-      'no'
-    ) as SetupConfig['maintenanceMode']),
-    maintenanceMessage: readString(
-      source,
-      /process\.env\.NEXT_PUBLIC_MAINTENANCE_MESSAGE \|\|\s*['"]([^'"]*)['"]/,
-    ),
+
   }
+}
+
+function readEnvFile() {
+  return fs.readFile(envFilePath, 'utf8').catch(() => '')
 }
 
 function replaceFirst(source: string, pattern: RegExp, replacement: string) {
@@ -101,11 +200,7 @@ function updateConfig(source: string, config: SetupConfig) {
   updated = replaceFirst(updated, /fullName:\s*['"][^'"]*['"]/, `fullName: ${toJsonString(config.fullName)}`)
   updated = replaceFirst(updated, /description:\s*['"][^'"]*['"]/, `description: ${toJsonString(config.description)}`)
   updated = replaceFirst(updated, /flagFormat:\s*['"][^'"]*['"]/, `flagFormat: ${toJsonString(config.flagFormat)}`)
-  updated = replaceFirst(
-    updated,
-    /baseUrl:\s*[\r\n\s]*process\.env\.NEXT_PUBLIC_SITE_URL \|\| ['"][^'"]*['"]/,
-    `baseUrl:\n    process.env.NEXT_PUBLIC_SITE_URL || ${toJsonString(config.baseUrl)}`
-  )
+  // baseUrl is env-backed (NEXT_PUBLIC_SITE_URL); do not change literal fallback here.
 
   const categoriesBlock = config.challengeCategories.length
     ? `challengeCategories: [\n${config.challengeCategories
@@ -120,9 +215,6 @@ function updateConfig(source: string, config: SetupConfig) {
   )
 
   updated = replaceFirst(updated, /notifSolves:\s*(true|false)/, `notifSolves: ${config.notifSolves}`)
-  updated = replaceFirst(updated, /ChallengeTutorial:\s*(true|false)/, `ChallengeTutorial: ${config.challengeTutorial}`)
-  updated = replaceFirst(updated, /ChatBotAI:\s*(true|false)/, `ChatBotAI: ${config.chatBotAI}`)
-  updated = replaceFirst(updated, /Live2DMaskotAnime:\s*(true|false)/, `Live2DMaskotAnime: ${config.live2dMaskotAnime}`)
   updated = replaceFirst(
     updated,
     /teams:\s*\{([\s\S]*?)\n\s*\},/,
@@ -132,16 +224,33 @@ function updateConfig(source: string, config: SetupConfig) {
   updated = replaceFirst(updated, /eventMainLabel:\s*['"][^'"]*['"]/, `eventMainLabel: ${toJsonString(config.eventMainLabel)}`)
   updated = replaceFirst(updated, /eventMainImageUrl:\s*['"][^'"]*['"]/, `eventMainImageUrl: ${toJsonString(config.eventMainImageUrl)}`)
   updated = replaceFirst(updated, /eventFallbackImageUrl:\s*['"][^'"]*['"]/, `eventFallbackImageUrl: ${toJsonString(config.eventFallbackImageUrl)}`)
-  updated = replaceFirst(
-    updated,
-    /mode:\s*process\.env\.NEXT_PUBLIC_MAINTENANCE_MODE \|\| ['"][^'"]*['"]/,
-    `mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE || ${toJsonString(config.maintenanceMode)}`
-  )
-  updated = replaceFirst(
-    updated,
-    /process\.env\.NEXT_PUBLIC_MAINTENANCE_MESSAGE \|\|\s*['"][^'"]*['"]/,
-    `process.env.NEXT_PUBLIC_MAINTENANCE_MESSAGE || ${toJsonString(config.maintenanceMessage)}`
-  )
+  // Note: maintenance mode and site URL are env-backed and will be written to .env.local instead of editing the literal fallback here.
+
+  return updated
+}
+
+function updateSecret(source: string, secret: SecretConfig) {
+  let updated = source
+
+  const updateIfExists = (key: string, value: string, enabled: boolean) => {
+    if (!value && !enabled) return
+    if (hasEnvKey(updated, key)) {
+      updated = replaceEnvLine(updated, key, value || '', enabled)
+    }
+  }
+
+  updateIfExists('NEXT_PUBLIC_SUPABASE_URL', secret.supabaseUrl, true)
+  updateIfExists('NEXT_PUBLIC_SUPABASE_ANON_KEY', secret.supabaseAnonKey, true)
+  updateIfExists('NEXT_PUBLIC_TURNSTILE_SITE_KEY', secret.turnstileSiteKey, secret.turnstileSiteKeyEnabled)
+  // Ensure NXCTL entries are explicitly set or commented when toggled.
+  // Preserve existing values if the client payload doesn't include them (avoid erasing real values).
+  const existingNxctlUrl = readEnvEntry(updated, 'NXCTL_API_URL').value
+  const nxctlUrlToWrite = (secret.nxctlApiUrl?.trim() || existingNxctlUrl || '')
+  updated = setEnvKey(updated, 'NXCTL_API_URL', nxctlUrlToWrite, Boolean(secret.nxctlEnabled))
+
+  const existingNxctlToken = readEnvEntry(updated, 'NXCTL_API_TOKEN').value
+  const nxctlTokenToWrite = (secret.nxctlApiToken?.trim() || existingNxctlToken || '')
+  updated = setEnvKey(updated, 'NXCTL_API_TOKEN', nxctlTokenToWrite, Boolean(secret.nxctlEnabled))
 
   return updated
 }
@@ -152,14 +261,10 @@ function normalizeConfig(input: Partial<SetupConfig>): SetupConfig {
     fullName: input.fullName?.trim() || '',
     description: input.description?.trim() || '',
     flagFormat: input.flagFormat?.trim() || '',
-    baseUrl: input.baseUrl?.trim() || '',
     challengeCategories: Array.isArray(input.challengeCategories)
       ? input.challengeCategories.map((item) => item.trim()).filter(Boolean)
       : [],
     notifSolves: Boolean(input.notifSolves),
-    challengeTutorial: Boolean(input.challengeTutorial),
-    chatBotAI: Boolean(input.chatBotAI),
-    live2dMaskotAnime: Boolean(input.live2dMaskotAnime),
     teamsEnabled: Boolean(input.teamsEnabled),
     hideScoreboardIndividual: Boolean(input.hideScoreboardIndividual),
     hideScoreboardTotal: Boolean(input.hideScoreboardTotal),
@@ -167,9 +272,24 @@ function normalizeConfig(input: Partial<SetupConfig>): SetupConfig {
     eventMainLabel: input.eventMainLabel?.trim() || '',
     eventMainImageUrl: input.eventMainImageUrl?.trim() || '',
     eventFallbackImageUrl: input.eventFallbackImageUrl?.trim() || '',
-    maintenanceMode: input.maintenanceMode === 'yes' || input.maintenanceMode === 'auto' ? input.maintenanceMode : 'no',
-    maintenanceMessage: input.maintenanceMessage?.trim() || '',
+
   }
+}
+
+function normalizeSecret(input: Partial<SecretConfig>): SecretConfig {
+  return {
+    supabaseUrl: input.supabaseUrl?.trim() || '',
+    supabaseAnonKey: input.supabaseAnonKey?.trim() || '',
+    turnstileSiteKey: input.turnstileSiteKey?.trim() || '',
+    turnstileSiteKeyEnabled: input.turnstileSiteKeyEnabled ?? Boolean(input.turnstileSiteKey?.trim()),
+    nxctlEnabled: input.nxctlEnabled ?? Boolean(input.nxctlApiUrl?.trim() || input.nxctlApiToken?.trim()),
+    nxctlApiUrl: input.nxctlApiUrl?.trim() || '',
+    nxctlApiToken: input.nxctlApiToken?.trim() || '',
+  }
+}
+
+function hasAnyOwnProperty(source: Record<string, unknown>, keys: string[]) {
+  return keys.some((key) => Object.prototype.hasOwnProperty.call(source, key))
 }
 
 export async function GET() {
@@ -178,8 +298,16 @@ export async function GET() {
   }
 
   try {
-    const source = await fs.readFile(configFilePath, 'utf8')
-    return NextResponse.json({ ok: true, config: readConfig(source) })
+    const [configSource, envSource] = await Promise.all([
+      fs.readFile(configFilePath, 'utf8'),
+      readEnvFile(),
+    ])
+
+    return NextResponse.json({
+      ok: true,
+      config: readConfig(configSource),
+      secret: readSecretConfig(envSource),
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to read src/config.ts'
     return NextResponse.json({ ok: false, error: message }, { status: 500 })
@@ -192,14 +320,67 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as Partial<SetupConfig>
-    const config = normalizeConfig(body)
-    const source = await fs.readFile(configFilePath, 'utf8')
-    const updated = updateConfig(source, config)
+    const body = (await request.json()) as {
+      config?: Partial<SetupConfig>
+      secret?: Partial<SecretConfig>
+    } & Partial<SetupConfig> & Partial<SecretConfig>
 
-    await fs.writeFile(configFilePath, updated, 'utf8')
+    const [source, envSource] = await Promise.all([
+      fs.readFile(configFilePath, 'utf8'),
+      readEnvFile(),
+    ])
 
-    return NextResponse.json({ ok: true, config: readConfig(updated) })
+    const currentConfig = readConfig(source)
+    const currentSecret = readSecretConfig(envSource)
+
+    const configInput = body.config || body
+    const secretInput = body.secret || body
+
+    const hasConfigPayload = Boolean(body.config) || hasAnyOwnProperty(body, [
+      'shortName',
+      'fullName',
+      'description',
+      'flagFormat',
+      'challengeCategories',
+      'notifSolves',
+      'teamsEnabled',
+      'hideScoreboardIndividual',
+      'hideScoreboardTotal',
+      'hideEventMain',
+      'eventMainLabel',
+      'eventMainImageUrl',
+      'eventFallbackImageUrl',
+    ])
+
+    const hasSecretPayload = Boolean(body.secret) || hasAnyOwnProperty(body, [
+      'supabaseUrl',
+      'supabaseAnonKey',
+      'turnstileSiteKey',
+      'turnstileSiteKeyEnabled',
+      'nxctlEnabled',
+      'nxctlApiUrl',
+      'nxctlApiToken',
+    ])
+
+    const config = hasConfigPayload ? normalizeConfig({ ...currentConfig, ...configInput }) : currentConfig
+    const secret = hasSecretPayload ? normalizeSecret({ ...currentSecret, ...secretInput }) : currentSecret
+
+    // Merge secret updates into env (only updates existing env keys)
+    const updatedEnv = updateSecret(envSource, secret)
+
+    // Update the non-env-backed parts of src/config.ts
+    const updatedConfig = updateConfig(source, config)
+
+    await Promise.all([
+      fs.writeFile(configFilePath, updatedConfig, 'utf8'),
+      fs.writeFile(envFilePath, updatedEnv, 'utf8'),
+    ])
+
+    return NextResponse.json({
+      ok: true,
+      config: readConfig(updatedConfig),
+      secret: readSecretConfig(updatedEnv),
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to update src/config.ts'
     return NextResponse.json({ ok: false, error: message }, { status: 500 })
