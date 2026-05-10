@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getLeaderboardSummary } from '@/shared/lib'
 import { useAuth, useEventContext } from '@/shared/contexts'
 import type { LeaderboardEntry } from '@/shared/types'
-import { buildLeaderboardEntries, getScoreboardEventParam } from '../lib'
-import type { LeaderboardSummaryRow } from '../types'
+import { buildScoreboard, getScoreboardEventParam } from '../lib'
 
 export function useScoreboardAllPageData() {
   const { user, loading: authLoading } = useAuth()
@@ -29,9 +28,14 @@ export function useScoreboardAllPageData() {
 
       const eventParam = getScoreboardEventParam(selectedEvent)
       const summary = await getLeaderboardSummary(1000, 0, eventParam)
-      summary.sort((a: LeaderboardSummaryRow, b: LeaderboardSummaryRow) => (b.score ?? 0) - (a.score ?? 0))
 
-      setLeaderboard(buildLeaderboardEntries(summary))
+      const result = buildScoreboard(summary, {
+        nameKey: 'username',
+        scoreKey: 'score',
+        limit: 1000
+      })
+
+      setLeaderboard(result.entries)
       setLoading(false)
     }
 

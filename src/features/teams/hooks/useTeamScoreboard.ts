@@ -1,0 +1,65 @@
+import { useState, useEffect } from 'react'
+import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/shared/lib'
+import { buildScoreboard, getOrderedProgressSeries } from '@/features/scoreboard/lib'
+import { TeamScoreboardEntry, TeamProgressSeries } from '../types'
+
+export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEvent: string | number) {
+  const [loading, setLoading] = useState(true)
+  const [entries, setEntries] = useState<TeamScoreboardEntry[]>([])
+  const [series, setSeries] = useState<TeamProgressSeries[]>([])
+
+  useEffect(() => {
+    if (!user) return
+    const fetchData = async () => {
+      const isFirstLoad = entries.length === 0
+      if (isFirstLoad) setLoading(true)
+
+      const p_event_id = (selectedEvent === 'all' || selectedEvent === 'main') ? null : String(selectedEvent)
+      const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
+
+      const { entries: data, error: scoreboardError } = await getTeamScoreboard(200, 0, p_event_id, p_event_mode)
+      if (scoreboardError) {
+        setEntries([])
+        setSeries([])
+        if (isFirstLoad) setLoading(false)
+        return
+      }
+
+      const scoreKey = showTotalScore ? 'total_score' : 'unique_score'
+      const result = buildScoreboard(data || [], {
+        nameKey: 'team_name',
+        scoreKey,
+        filterZero: true,
+        limit: 200
+      })
+
+      // Preserve original structure for UI compatibility
+      const teamEntries: TeamScoreboardEntry[] = result.entries.map((e, idx) => {
+        const original = (data || []).find(o => o.team_name === e.username)
+        return {
+          ...original,
+          team_id: e.id,
+          team_name: e.username,
+          [scoreKey]: e.score
+        } as TeamScoreboardEntry
+      })
+
+      setEntries(teamEntries)
+
+      const progressData = showTotalScore
+        ? await getTopTeamProgressByNames(result.topNames, p_event_id, p_event_mode)
+        : await getTopTeamUniqueProgressByNames(result.topNames, p_event_id, p_event_mode)
+
+      setSeries(getOrderedProgressSeries(result.topNames, progressData) as TeamProgressSeries[])
+
+      if (isFirstLoad) setLoading(false)
+    }
+    fetchData()
+  }, [user, showTotalScore, selectedEvent])
+
+  return {
+    loading,
+    entries,
+    series
+  }
+}

@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { InfoIcon, Users, Crown, ChartColumnDecreasing, Copy, Wrench, RefreshCw, LogOut, Trash2, CheckCircle2, Sparkles, Coins } from 'lucide-react'
 import EditTeamModal from './EditTeamModal'
-import TeamSolves from '@/app/teams/_components/TeamSolves'
+import TeamSolves from './TeamSolves'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
-import { TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '@/shared/lib/teams'
+import { TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '../types'
 
 interface TeamPageContentProps {
   team: TeamInfo
@@ -43,11 +43,8 @@ export default function TeamPageContent({
   onKickMember,
   onTransferCaptain,
 }: TeamPageContentProps) {
-  const currentMember = members.find(m => m.user_id === currentUserId)
-
   return (
     <div className="space-y-6">
-      {/* Team Info & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-white dark:bg-gray-800">
           <CardHeader>
@@ -151,8 +148,8 @@ export default function TeamPageContent({
 
           <Card className="bg-white dark:bg-gray-800">
             <CardHeader>
-             <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                 <Wrench size={18} className="text-red-500" /> Quick Actions
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Wrench size={18} className="text-red-500" /> Quick Actions
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -184,11 +181,6 @@ export default function TeamPageContent({
             members.map((m) => (
               <div key={m.user_id} className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-700 py-3 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded px-2">
                 <div className="flex items-start gap-2 min-w-0">
-                  {/* {m.role === 'captain' ? (
-                    <Crown size={16} className="text-yellow-500 dark:text-yellow-400" />
-                  ) : (
-                    <Users size={16} className="text-gray-400" />
-                  )} */}
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       {m.role === 'captain' ? <Crown size={16} className="text-yellow-500 dark:text-yellow-400" /> : <Users size={16} className="text-gray-400" />}
@@ -198,11 +190,10 @@ export default function TeamPageContent({
                       >
                         {m.username}
                       </Link>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                        m.role === 'captain'
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${m.role === 'captain'
                           ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-                      }`}>
+                        }`}>
                         {m.role}
                       </span>
                     </div>

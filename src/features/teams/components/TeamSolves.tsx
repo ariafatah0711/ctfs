@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { DIALOG_CONTENT_CLASS_3XL } from '@/shared/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
-import { TeamChallenge } from '@/shared/lib/teams'
+import { TeamChallenge } from '../types'
 
 interface TeamSolvesProps {
   challenges: TeamChallenge[]
@@ -29,7 +29,6 @@ export default function TeamSolves({
 
   return (
     <>
-      {/* === RECENT SOLVES === */}
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
@@ -74,10 +73,8 @@ export default function TeamSolves({
         </CardContent>
       </Card>
 
-      {/* === MODAL SHOW ALL === */}
       <Dialog open={showAllSolves} onOpenChange={setShowAllSolves}>
         <DialogContent className={DIALOG_CONTENT_CLASS_3XL + " fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"}>
-          {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
             <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
               All Team Solves ({challenges.length})
@@ -92,7 +89,6 @@ export default function TeamSolves({
             </Button>
           </div>
 
-          {/* Body */}
           <div className="p-0">
             {challenges.length === 0 ? (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">No solves yet.</div>
@@ -103,7 +99,6 @@ export default function TeamSolves({
                     key={c.challenge_id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-3"
                   >
-                    {/* Left */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-medium text-gray-900 dark:text-white">
@@ -118,7 +113,6 @@ export default function TeamSolves({
                       </p>
                     </div>
 
-                    {/* Right */}
                     <span className="text-sm font-semibold text-green-600 dark:text-green-300 whitespace-nowrap">
                       +{c.points}
                     </span>

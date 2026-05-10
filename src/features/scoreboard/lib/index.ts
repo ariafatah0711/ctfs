@@ -1,1 +1,1 @@
-export * from './scoreboard-data'
+export * from './build-scoreboard'

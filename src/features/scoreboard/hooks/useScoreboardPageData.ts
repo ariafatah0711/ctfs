@@ -10,10 +10,9 @@ import {
 import { useAuth, useEventContext, useTheme } from '@/shared/contexts'
 import type { LeaderboardEntry } from '@/shared/types'
 import {
-  applyProgressHistory,
-  buildLeaderboardEntries,
   getScoreboardEventParam,
-  isLeaderboardEmpty,
+  buildScoreboard,
+  isScoreboardEmpty,
 } from '../lib'
 import type { LeaderboardSummaryRow } from '../types'
 
@@ -65,15 +64,17 @@ export function useScoreboardPageData() {
       }
 
       const summary = await getLeaderboardSummary(100, 0, eventParam)
-      summary.sort((a: LeaderboardSummaryRow, b: LeaderboardSummaryRow) => (b.score ?? 0) - (a.score ?? 0))
-      const top100 = summary.slice(0, 100)
-      const baseLeaderboard = buildLeaderboardEntries(top100)
-      const topForChart = top100.slice(0, 10)
-      const topUsernames = topForChart.map((entry: LeaderboardSummaryRow) => entry.username)
+      const topUsernames = summary.slice(0, 10).map((row: LeaderboardSummaryRow) => row.username)
       const progressMap = await getTopProgressByUsernames(topUsernames, eventParam)
 
-      applyProgressHistory(baseLeaderboard, topForChart, progressMap)
-      setLeaderboard(baseLeaderboard)
+      const result = buildScoreboard(summary, {
+        nameKey: 'username',
+        scoreKey: 'score',
+        limit: 100,
+        progressMap
+      })
+
+      setLeaderboard(result.entries)
       if (isFirstLoad) setLoading(false)
     }
 
@@ -95,7 +96,7 @@ export function useScoreboardPageData() {
     setSelectedEvent,
     hasMounted,
     stableLeaderboard,
-    isEmpty: isLeaderboardEmpty(leaderboard),
+    isEmpty: isScoreboardEmpty(leaderboard),
     isDark: theme === 'dark',
     eventParam,
   }

@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Skeleton } from '@/shared/ui/skeleton'
-import { TeamProgressSeries } from '@/shared/lib/teams'
+import { TeamProgressSeries } from '../types'
 
 const Plot = dynamic(() => import('react-plotly.js'), {
   ssr: false,

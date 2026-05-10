@@ -60,7 +60,6 @@ export default function EditTeamModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      {/* Trigger */}
       <Button
         variant="outline"
         size="sm"
@@ -72,7 +71,6 @@ export default function EditTeamModal({
         Edit Team
       </Button>
 
-      {/* Modal */}
       <DialogContent
         className={
           DIALOG_CONTENT_CLASS +
@@ -89,7 +87,6 @@ export default function EditTeamModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Team Name */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
               Team Name
@@ -106,7 +103,6 @@ export default function EditTeamModal({
             </p>
           </div>
 
-          {/* Error */}
           {error && (
             <div className="text-red-500 dark:text-red-400 text-sm text-center font-semibold">
               {error}
