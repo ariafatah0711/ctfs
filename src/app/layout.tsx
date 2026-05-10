@@ -10,7 +10,7 @@ import Navbar from '@/shared/components/Navbar'
 import { ScrollToggle } from '@/shared/components/custom'
 import { AuthProvider, ThemeProvider, LogsProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
 import APP from '@/config'
-import ChallengeJoyride from '@/app/challenges/_components/ChallengeJoyride'
+import ChallengeJoyride from '@/features/challenges/components/ChallengeJoyride'
 
 const inter = Inter({ subsets: ['latin'] })
 

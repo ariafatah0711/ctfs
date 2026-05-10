@@ -1,0 +1,636 @@
+"use client"
+
+// React Imports
+import React, { useState } from 'react';
+import { FileText, Link as LinkIcon, Lightbulb, ClipboardList, Copy, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+// Shared Imports
+import APP from '@/config';
+import { Dialog, DialogContent, DialogTitle, DialogDescription, CustomBadge } from "@/shared/ui";
+import { MarkdownRenderer } from '@/shared/components'
+import { formatSmartFlag } from "../lib/flag-formatting";
+import DifficultyBadge from '@/shared/components/custom/DifficultyBadge';
+import { Attachment, ChallengeWithSolve } from '@/shared/types';
+import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+
+// Local Imports
+import SolversList from './SolversList';
+import HintDialog from './HintDialog';
+import ChallengeServicesPanel from './ChallengeServicesPanel';
+import type {
+  ChallengeDialogTab,
+  HintModalState,
+  KeyedBooleanMap,
+  KeyedFlagFeedbackMap,
+  KeyedStringMap,
+  Solver,
+} from '../types'
+
+interface ChallengeDetailDialogProps {
+  open: boolean;
+  challenge: ChallengeWithSolve | null;
+  solvers: Solver[];
+  challengeTab: ChallengeDialogTab;
+  showQuestionTab: boolean;
+  setChallengeTab: (tab: ChallengeDialogTab, challengeId?: string) => void;
+  onClose: () => void;
+  flagInputs: KeyedStringMap;
+  handleFlagInputChange: (challengeId: string, value: string) => void;
+  handleFlagSubmit: (challengeId: string) => void;
+  submitting: KeyedBooleanMap;
+  flagFeedback: KeyedFlagFeedbackMap;
+  downloading: KeyedBooleanMap;
+  downloadFile: (attachment: Attachment, attachmentKey: string) => void;
+  showHintModal: HintModalState;
+  setShowHintModal: (modal: HintModalState) => void;
+  events?: { id: string; name: string }[];
+  subChallengeLoaded: boolean;
+  subChallengeLoading: boolean;
+  subChallengeSubmitting: boolean;
+  subChallengeMode: 'none' | 'non_sequential' | 'sequential';
+  subChallengeQuestions: { order_number: number; question: string }[];
+  subChallengeNextQuestion: { order_number: number; question: string } | null;
+  subChallengeAnswers: Record<string, string>;
+  subChallengeResults: Record<string, boolean>;
+  subChallengeCompleted: boolean;
+  subChallengeFlag: string | null;
+  subChallengeMessage: string | null;
+  onSubChallengeAnswerChange: (orderNumber: number, value: string) => void;
+  onSubChallengeSubmit: (orderNumber?: number) => void;
+  onSubChallengeReset: () => void;
+  placeholders: KeyedStringMap;
+  services?: string[];
+}
+
+const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
+  open,
+  challenge,
+  solvers,
+  challengeTab,
+  showQuestionTab,
+  setChallengeTab,
+  onClose,
+  flagInputs,
+  handleFlagInputChange,
+  handleFlagSubmit,
+  submitting,
+  flagFeedback,
+  downloading,
+  downloadFile,
+  showHintModal,
+  setShowHintModal,
+  onSubChallengeReset,
+  events = [],
+  subChallengeLoaded,
+  subChallengeLoading,
+  subChallengeSubmitting,
+  subChallengeMode,
+  subChallengeQuestions,
+  subChallengeNextQuestion,
+  subChallengeAnswers,
+  subChallengeResults,
+  subChallengeCompleted,
+  subChallengeFlag,
+  subChallengeMessage,
+  onSubChallengeAnswerChange,
+  onSubChallengeSubmit,
+  placeholders,
+  services = [],
+}) => {
+  const [copiedAll, setCopiedAll] = useState<{ [key: string]: boolean }>({});
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+
+  if (!challenge) return null;
+
+  const normalizeQuestionMarkdown = (value: string) => {
+    const trimmed = String(value ?? '').trim()
+    const wrappedInQuotes = (trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith('“') && trimmed.endsWith('”'))
+    return wrappedInQuotes ? trimmed.slice(1, -1).trim() : trimmed
+  }
+
+  const solverCount = solvers.length > 0 ? solvers.length : (challenge.total_solves ?? 0);
+  const tabs: Array<{ key: ChallengeDialogTab; label: string }> = [
+    { key: 'challenge', label: 'Challenge' },
+    ...(showQuestionTab ? [{ key: 'question' as ChallengeDialogTab, label: 'Questions' }] : []),
+    { key: 'solvers', label: `${solverCount} ${solverCount === 1 ? 'solve' : 'solves'}` },
+  ]
+  const hasSubChallengeQuestions =
+    subChallengeMode === 'non_sequential'
+      ? subChallengeQuestions.length > 0
+      : subChallengeMode === 'sequential'
+        ? !!subChallengeNextQuestion || subChallengeCompleted
+        : false
+  const isShowingEmptyQuestionMessage =
+    !subChallengeLoading && subChallengeLoaded && !hasSubChallengeQuestions
+  const subChallengeFlagCopyKey = `${challenge.id}-sub-flag`
+
+  // Get event name from event_id
+  const getEventName = (eventId?: string | null) => {
+    if (!eventId) return String(APP.eventMainLabel || 'Main');
+    const event = events.find(e => e.id === eventId);
+    return event?.name || 'Unknown Event';
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
+      <DialogContent
+        className={DIALOG_CONTENT_CLASS + " min-w-0 overflow-x-hidden rounded-md bg-[#232344] dark:bg-gray-900 border border-[#35355e] dark:border-gray-700 p-4 md:p-6 font-mono max-h-[90vh] overflow-y-auto scroll-hidden [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-white"}
+        onClick={e => e.stopPropagation()}
+        style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
+      >
+        {/* Header: title + close (DialogTitle for accessibility) */}
+        <DialogTitle asChild>
+          <h2
+            className={`text-xl font-bold tracking-wide max-w-max truncate block ${challenge.is_solved ? 'text-green-400 dark:text-green-300' : 'text-pink-400 dark:text-pink-300'}`}
+            style={{ fontSize: '1.25rem' }}
+          >
+            {challenge.title}
+          </h2>
+        </DialogTitle>
+
+        {/* Tabs */}
+        <div
+          className="grid w-full gap-2"
+          style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        >
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              className={`w-full px-2 py-1 rounded-t-md font-bold text-sm text-center transition-colors ${challengeTab === tab.key ? 'bg-[#35355e] dark:bg-gray-800 text-pink-300 dark:text-pink-200' : 'bg-[#232344] dark:bg-gray-900 text-gray-300 dark:text-gray-400 hover:text-pink-200'}`}
+              onClick={() => setChallengeTab(tab.key, challenge.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content: Challenge detail */}
+        {challengeTab === 'challenge' && (
+          <>
+            {/* Description for accessibility (DialogDescription) */}
+            <DialogDescription asChild>
+              <div className="sr-only">{challenge.description}</div>
+            </DialogDescription>
+            {/* Badge bar */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <CustomBadge label={challenge.category} color="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200" />
+                {/* Difficulty badge */}
+                <span>
+                  <React.Suspense fallback={<span className="inline-block min-w-[64px] text-center text-xs font-semibold">{challenge.difficulty}</span>}>
+                    <DifficultyBadge className="min-w-[62px]" difficulty={challenge.difficulty} />
+                  </React.Suspense>
+                </span>
+                {/* Event badge - only show if not main event */}
+                {challenge.event_id && (
+                  <CustomBadge
+                    label={getEventName(challenge.event_id)}
+                    color="bg-purple-200 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                  />
+                )}
+              </div>
+              <span className={`flex items-center gap-1 text-base font-bold ${challenge.is_solved ? 'text-green-300 dark:text-white' : 'text-yellow-300 dark:text-white'}`}>
+                🪙 {challenge.points}
+              </span>
+            </div>
+
+            {/* Description */}
+            <div className="max-w-full overflow-x-auto break-words">
+              <MarkdownRenderer
+                content={challenge.description}
+                className="max-w-full break-words [&_p:last-child]:mb-0 [&_ul:last-child]:mb-0 [&_ol:last-child]:mb-0 [&_blockquote:last-child]:my-0"
+              />
+            </div>
+
+            {/* Services */}
+            <ChallengeServicesPanel open={open} services={services} />
+
+            {/* Attachments */}
+            {challenge.attachments && challenge.attachments.length > 0 && (
+              <div className="space-y-3">
+                {/* File Attachments */}
+                {challenge.attachments.some(att => att.type === 'file') && (
+                  <div>
+                    <p className="text-xs text-gray-400 inline-flex items-center gap-1">
+                      <FileText className="h-3.5 w-3.5" /> Files
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {/* Copy wget commands for all files (compact icon/text) */}
+                      <button
+                        key="copy-wget-all"
+                        type="button"
+                        title="Copy wget commands for all files"
+                        className="px-2 py-1 bg-green-700 hover:bg-green-600 text-white text-xs rounded-md shadow transition"
+                        onClick={e => {
+                          e.stopPropagation();
+                          const fileAttachments = challenge.attachments!.filter(att => att.type === 'file' && (att.url || att.name));
+                          if (!fileAttachments.length) return;
+                          const commands = fileAttachments.map((att, idx) => {
+                            const url = att.url || '';
+                            const filename = (att.name && att.name.trim()) || url.split('/').pop() || `file-${idx}`;
+                            const escUrl = url.replace(/'/g, "'\\'\'");
+                            const escName = filename.replace(/'/g, "'\\'\'");
+                            return `wget '${escUrl}' -O '${escName}'`;
+                          });
+                          const joined = commands.join(' && ');
+                          if (!navigator.clipboard) {
+                            toast.error('Clipboard not available')
+                            return
+                          }
+                          navigator.clipboard.writeText(joined).then(() => {
+                            const key = `${challenge.id}-copied`;
+                            setCopiedAll(prev => ({ ...prev, [key]: true }));
+                            setTimeout(() => setCopiedAll(prev => ({ ...prev, [key]: false })), 2000);
+                            toast.success('Copied wget commands to clipboard')
+                          }).catch((err) => {
+                            console.error('Copy failed', err)
+                            toast.error('Failed to copy to clipboard')
+                          });
+                        }}
+                      >
+                        <span className="text-xs font-mono">
+                          {copiedAll[`${challenge.id}-copied`] ? 'Copied!' : 'copy wget'}
+                        </span>
+                      </button>
+
+                      {/* 🧱 Pembatas visual */}
+                      <span className="text-gray-500">|</span>
+
+                      {challenge.attachments.filter(att => att.type === 'file').map((attachment, idx) => {
+                        const displayName = attachment.name?.length > 40 ? attachment.name.slice(0, 37) + "..." : attachment.name || 'file';
+                        const key = `${challenge.id}-${idx}`;
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            title={attachment.name}
+                            className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
+                            onClick={e => {
+                              e.stopPropagation();
+                              downloadFile(attachment, key);
+                            }}
+                            disabled={downloading[key]}
+                          >
+                            {downloading[key] ? "Downloading..." : displayName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* URL Attachments */}
+                {challenge.attachments.some(att => att.type !== 'file') && (
+                  <div>
+                    <p className="text-xs text-gray-400 inline-flex items-center gap-1">
+                      <LinkIcon className="h-3.5 w-3.5" /> Links
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {challenge.attachments.filter(att => att.type !== 'file').map((attachment, idx) => {
+                        const displayName = attachment.name?.length > 40 ? attachment.name.slice(0, 37) + "..." : attachment.name || (attachment.url ? attachment.url.slice(0, 40) + "..." : 'link');
+                        return (
+                          <a
+                            key={idx}
+                            href={attachment.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={attachment.url}
+                            className="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs rounded-md shadow"
+                          >
+                            {displayName}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Sub-challenge Tasks */}
+            {showQuestionTab && (
+              <div>
+                <p className="text-xs text-gray-400 inline-flex items-center gap-1">
+                  <ClipboardList className="h-3.5 w-3.5" /> Tasks
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setChallengeTab('question', challenge.id)}
+                    className="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white text-xs rounded-md shadow flex items-center gap-2 group transition-all"
+                  >
+                    <span>Jawab semua questions untuk mendapatkan flag</span>
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Hint buttons */}
+            {Array.isArray(challenge.hint) && challenge.hint.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(challenge.hint ?? []).map((hint: string, idx: number) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="px-3 py-1 rounded bg-yellow-200 text-yellow-900 font-semibold text-xs hover:bg-yellow-300 transition"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setShowHintModal({ challenge, hintIdx: idx });
+                    }}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      <Lightbulb className="h-3.5 w-3.5" /> Hint {(challenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Flag input */}
+            <form
+              className="flex gap-2"
+              onSubmit={e => {
+                e.preventDefault();
+                handleFlagSubmit(challenge.id);
+              }}
+            >
+              <div className="relative flex-1 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-pink-400">
+                {challenge.flag_placeholder && placeholders[challenge.id] && (
+                  <div
+                    ref={overlayRef}
+                    className="absolute inset-0 pl-3 pr-6 py-2 pointer-events-none text-gray-500 dark:text-gray-600 opacity-70 font-mono font-medium overflow-hidden whitespace-pre flex items-center"
+                  >
+                    <span className="invisible">{flagInputs[challenge.id] || ''}</span>
+                    <span>{placeholders[challenge.id].slice((flagInputs[challenge.id] || '').length)}</span>
+                  </div>
+                )}
+                <input
+                  type="text"
+                  onScroll={(e) => {
+                    if (overlayRef.current) overlayRef.current.scrollLeft = e.currentTarget.scrollLeft;
+                  }}
+                  value={flagInputs[challenge.id] || ''}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const mask = placeholders[challenge.id];
+                    if (challenge.flag_placeholder && mask) {
+                      handleFlagInputChange(challenge.id, formatSmartFlag(val, mask));
+                    } else {
+                      handleFlagInputChange(challenge.id, val);
+                    }
+                  }}
+                  maxLength={challenge.flag_placeholder && placeholders[challenge.id] ? placeholders[challenge.id].length : undefined}
+                  placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : "Flag"}
+                  className="w-full h-full pl-3 pr-6 py-2 bg-transparent text-white focus:outline-none relative z-10 font-mono font-medium"
+                  autoFocus
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={
+                  submitting[challenge.id] ||
+                  !flagInputs[challenge.id]?.trim() ||
+                  (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
+                }
+                className="px-5 py-2 rounded bg-gradient-to-br from-pink-500 to-pink-400 text-white font-bold shadow hover:from-pink-400 hover:to-pink-500 transition disabled:opacity-50"
+              >
+                {submitting[challenge.id] ? '...' : 'Submit'}
+              </button>
+            </form>
+
+            {/* Feedback box */}
+            {flagFeedback[challenge.id] && (
+              <div
+                className={`mt-2 p-2 rounded text-sm font-semibold
+                  ${flagFeedback[challenge.id]?.success
+                    ? 'bg-green-600 text-white dark:bg-green-700 dark:text-white'
+                    : 'bg-red-600 text-white dark:bg-red-700 dark:text-white'}
+                `}
+              >
+                {flagFeedback[challenge.id]?.message}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Content: Solvers */}
+        {challengeTab === 'solvers' && (
+          <SolversList solvers={solvers} />
+        )}
+
+        {/* Content: Questions */}
+        {challengeTab === 'question' && (
+          <div className="space-y-3 min-w-0 overflow-x-hidden">
+            {subChallengeLoading && !hasSubChallengeQuestions && (
+              <div className="text-sm text-gray-300">Loading questions...</div>
+            )}
+
+            {isShowingEmptyQuestionMessage && (
+              <div className="text-sm text-gray-300">
+                {subChallengeMessage || 'No sub-question configured for this challenge.'}
+              </div>
+            )}
+
+            {!subChallengeLoading && subChallengeMode !== 'none' && (
+              <div className="space-y-2.5">
+                {subChallengeMode === 'non_sequential' ? (
+                  subChallengeQuestions.map((q) => {
+                    const isCompleted = subChallengeResults[String(q.order_number)] === true
+
+                    return (
+                      <div key={q.order_number} className={`min-w-0 overflow-x-hidden space-y-2 rounded-md p-2.5 ${isCompleted ? 'border border-[#35355e] bg-[#1a1a33]/50 opacity-90' : 'border border-pink-500/10 bg-[#1a1a33]'}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className={`text-[10px] uppercase tracking-[0.18em] ${isCompleted ? 'text-gray-500' : 'text-pink-300/70'}`}>Question #{q.order_number}</p>
+                              <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded border ${isCompleted ? 'bg-green-900/50 text-green-400 border-green-800' : 'bg-pink-900/30 text-pink-200 border-pink-700/40'}`}>
+                                {isCompleted ? 'Completed' : 'Pending'}
+                              </span>
+                            </div>
+                            <div className={`mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold ${isCompleted ? 'text-gray-200' : 'text-white'}`}>
+                              <MarkdownRenderer content={normalizeQuestionMarkdown(q.question)} className="max-w-full break-words" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={subChallengeAnswers[String(q.order_number)] || ''}
+                            onChange={isCompleted ? undefined : (e) => onSubChallengeAnswerChange(q.order_number, e.target.value)}
+                            placeholder={isCompleted ? 'Answer saved' : 'Type your answer...'}
+                            readOnly={isCompleted}
+                            className={`flex-1 px-3 py-2 rounded border text-sm focus:outline-none ${isCompleted ? 'border-[#35355e] bg-[#1a1a33] text-gray-400 cursor-not-allowed' : 'border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:ring-2 focus:ring-pink-400'}`}
+                            onKeyDown={(e) => {
+                              if (!isCompleted && e.key === 'Enter') {
+                                e.preventDefault();
+                                onSubChallengeSubmit(q.order_number);
+                              }
+                            }}
+                          />
+                          {!isCompleted && (
+                            <button
+                              type="button"
+                              onClick={() => onSubChallengeSubmit(q.order_number)}
+                              disabled={subChallengeSubmitting || !subChallengeAnswers[String(q.order_number)]?.trim()}
+                              className="px-4 py-2 rounded bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition disabled:opacity-50"
+                            >
+                              {subChallengeSubmitting ? '...' : 'Check'}
+                            </button>
+                          )}
+                        </div>
+
+                        {!isCompleted && typeof subChallengeResults[String(q.order_number)] === 'boolean' && subChallengeResults[String(q.order_number)] === false && subChallengeAnswers[String(q.order_number)]?.trim() && (
+                          <p className="text-xs font-semibold text-red-300">✗ Incorrect</p>
+                        )}
+                      </div>
+                    )
+                  })
+                ) : (
+                  /* Sequential Mode Current Question */
+                  <>
+                    {subChallengeQuestions.filter(q => subChallengeResults[String(q.order_number)] === true).map((q) => (
+                      <div key={q.order_number} className="min-w-0 overflow-x-hidden space-y-2 rounded-md border border-[#35355e] bg-[#1a1a33]/50 p-2.5 opacity-90">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">Question #{q.order_number}</p>
+                              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border bg-green-900/50 text-green-400 border-green-800">Completed</span>
+                            </div>
+                            <div className="mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold text-gray-200">
+                              <MarkdownRenderer content={normalizeQuestionMarkdown(q.question)} className="max-w-full break-words" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={subChallengeAnswers[String(q.order_number)] || ''}
+                            readOnly
+                            className="flex-1 px-3 py-2 rounded border border-[#35355e] bg-[#1a1a33] text-gray-400 focus:outline-none cursor-not-allowed text-sm"
+                          />
+                        </div>
+                      </div>
+                    ))}
+
+                    {!subChallengeCompleted && subChallengeNextQuestion && (
+                      <div className="min-w-0 overflow-x-hidden space-y-2 rounded-md border border-pink-500/30 bg-[#1a1a33] p-2.5 shadow-lg shadow-pink-500/5">
+                        <div className="min-w-0">
+                          <p className="text-[10px] uppercase tracking-[0.18em] text-pink-300/70">Question #{subChallengeNextQuestion.order_number}</p>
+                          <div className="mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold text-white">
+                            <MarkdownRenderer content={normalizeQuestionMarkdown(subChallengeNextQuestion.question)} className="max-w-full break-words" />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={subChallengeAnswers[String(subChallengeNextQuestion.order_number)] || ''}
+                            onChange={(e) => onSubChallengeAnswerChange(subChallengeNextQuestion.order_number, e.target.value)}
+                            placeholder="Type your answer..."
+                            className="flex-1 px-3 py-2 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                onSubChallengeSubmit(subChallengeNextQuestion.order_number);
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => onSubChallengeSubmit(subChallengeNextQuestion.order_number)}
+                            disabled={subChallengeSubmitting || !subChallengeAnswers[String(subChallengeNextQuestion.order_number)]?.trim()}
+                            className="px-4 py-2 rounded bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition disabled:opacity-50"
+                          >
+                            {subChallengeSubmitting ? '...' : 'Check'}
+                          </button>
+                        </div>
+                        {typeof subChallengeResults[String(subChallengeNextQuestion.order_number)] === 'boolean' && subChallengeResults[String(subChallengeNextQuestion.order_number)] === false && subChallengeAnswers[String(subChallengeNextQuestion.order_number)]?.trim() && (
+                          <p className="text-xs font-semibold text-red-300">✗ Incorrect</p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+
+            {hasSubChallengeQuestions && !subChallengeCompleted && subChallengeMode === 'non_sequential' && (
+              <button
+                type="button"
+                disabled={subChallengeSubmitting || !Object.values(subChallengeAnswers).some(v => v?.trim())}
+                onClick={() => onSubChallengeSubmit()}
+                className="px-5 py-2 rounded bg-gradient-to-br from-[#35355e] to-[#232344] text-white font-bold shadow hover:from-[#4a4a7a] transition disabled:opacity-50 border border-gray-600"
+              >
+                {subChallengeSubmitting ? '...' : 'Submit All Answers'}
+              </button>
+            )}
+
+            {hasSubChallengeQuestions && (
+              <div className="pt-4 border-t border-gray-800 flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('Are you sure you want to reset your progress for this challenge? This will clear all your locally saved answers.')) {
+                      onSubChallengeReset();
+                    }
+                  }}
+                  className="text-[10px] text-gray-500 hover:text-red-400 transition underline decoration-dotted underline-offset-2"
+                >
+                  Reset Progress
+                </button>
+              </div>
+            )}
+
+            {subChallengeMessage && !isShowingEmptyQuestionMessage && (
+              <div className="p-2 rounded text-sm font-semibold bg-[#2c2c52] text-gray-100">
+                {subChallengeMessage}
+              </div>
+            )}
+
+            {subChallengeCompleted && (
+              <div className="p-2 rounded text-sm font-semibold bg-green-600 text-white">
+                All questions correct.
+              </div>
+            )}
+
+            {subChallengeFlag && (
+              <div className="flex items-center gap-2 rounded bg-emerald-700 text-white p-2 text-sm font-semibold break-all">
+                <span className="min-w-0 flex-1">Flag: {subChallengeFlag}</span>
+                <button
+                  type="button"
+                  className="shrink-0 inline-flex items-center gap-1 rounded-md bg-emerald-900/40 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-50 transition hover:bg-emerald-900/60"
+                  onClick={async () => {
+                    try {
+                      if (!navigator.clipboard) {
+                        toast.error('Clipboard not available')
+                        return
+                      }
+                      await navigator.clipboard.writeText(subChallengeFlag)
+                      setCopiedAll(prev => ({ ...prev, [subChallengeFlagCopyKey]: true }))
+                      setTimeout(() => setCopiedAll(prev => ({ ...prev, [subChallengeFlagCopyKey]: false })), 2000)
+                      toast.success('Flag copied to clipboard')
+                    } catch (error) {
+                      console.error('Copy failed', error)
+                      toast.error('Failed to copy flag')
+                    }
+                  }}
+                >
+                  {copiedAll[subChallengeFlagCopyKey] ? <><Check className="h-3.5 w-3.5" /> Copied</> : <><Copy className="h-3.5 w-3.5" /> Copy</>}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+      {/* Hint Dialog Modular */}
+      <HintDialog
+        challenge={showHintModal.challenge}
+        hintIdx={showHintModal.hintIdx}
+        open={!!showHintModal.challenge}
+        onClose={() => setShowHintModal({ challenge: null })}
+      />
+    </Dialog>
+  );
+};
+
+export default ChallengeDetailDialog;
