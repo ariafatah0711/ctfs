@@ -27,7 +27,19 @@ export default function ChallengeFlagForm({
   const overlayRef = React.useRef<HTMLDivElement>(null)
 
   return (
-    <>
+    <div className="flex flex-col gap-3">
+      {flagFeedback[challenge.id] && (
+        <div
+          className={`p-2.5 rounded-lg text-xs font-black uppercase tracking-widest text-center shadow-sm transition-all
+            ${flagFeedback[challenge.id]?.success
+              ? 'bg-green-500 text-white dark:bg-green-600'
+              : 'bg-red-500 text-white dark:bg-red-600'}
+          `}
+        >
+          {flagFeedback[challenge.id]?.message}
+        </div>
+      )}
+
       <form
         className="flex gap-2"
         onSubmit={(event) => {
@@ -35,11 +47,11 @@ export default function ChallengeFlagForm({
           handleFlagSubmit(challenge.id)
         }}
       >
-        <div className="relative flex-1 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-pink-400">
+        <div className="relative flex-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 overflow-hidden focus-within:ring-2 focus-within:ring-pink-400 transition-all">
           {challenge.flag_placeholder && placeholders[challenge.id] && (
             <div
               ref={overlayRef}
-              className="absolute inset-0 pl-3 pr-6 py-2 pointer-events-none text-gray-500 dark:text-gray-600 opacity-70 font-mono font-medium overflow-hidden whitespace-pre flex items-center"
+              className="absolute inset-0 pl-4 pr-6 py-2.5 pointer-events-none text-gray-400 dark:text-gray-600 opacity-50 font-mono text-sm overflow-hidden whitespace-pre flex items-center"
             >
               <span className="invisible">{flagInputs[challenge.id] || ''}</span>
               <span>{placeholders[challenge.id].slice((flagInputs[challenge.id] || '').length)}</span>
@@ -61,8 +73,8 @@ export default function ChallengeFlagForm({
               }
             }}
             maxLength={challenge.flag_placeholder && placeholders[challenge.id] ? placeholders[challenge.id].length : undefined}
-            placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : 'Flag'}
-            className="w-full h-full pl-3 pr-6 py-2 bg-transparent text-white focus:outline-none relative z-10 font-mono font-medium"
+            placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : 'Enter flag here...'}
+            className="w-full h-full pl-4 pr-6 py-2.5 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-sm"
             autoFocus
           />
         </div>
@@ -73,23 +85,11 @@ export default function ChallengeFlagForm({
             !flagInputs[challenge.id]?.trim() ||
             (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
           }
-          className="px-5 py-2 rounded bg-gradient-to-br from-pink-500 to-pink-400 text-white font-bold shadow hover:from-pink-400 hover:to-pink-500 transition disabled:opacity-50"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:from-pink-400 hover:to-pink-500 transition-all disabled:opacity-30 active:scale-95"
         >
           {submitting[challenge.id] ? '...' : 'Submit'}
         </button>
       </form>
-
-      {flagFeedback[challenge.id] && (
-        <div
-          className={`mt-2 p-2 rounded text-sm font-semibold
-            ${flagFeedback[challenge.id]?.success
-              ? 'bg-green-600 text-white dark:bg-green-700 dark:text-white'
-              : 'bg-red-600 text-white dark:bg-red-700 dark:text-white'}
-          `}
-        >
-          {flagFeedback[challenge.id]?.message}
-        </div>
-      )}
-    </>
+    </div>
   )
 }

@@ -1,10 +1,10 @@
 // React Imports
 import React from "react";
 import { motion } from "framer-motion";
+import { Flame, Sparkles, AlertTriangle } from 'lucide-react';
 
 // Shared Imports
 import APP from '@/config';
-import { Card, CardHeader, CardContent } from "@/shared/ui";
 import { ChallengeWithSolve } from '@/shared/types'
 
 interface ChallengeCardProps {
@@ -13,6 +13,7 @@ interface ChallengeCardProps {
     is_new?: boolean;
     has_questions?: boolean;
     is_team_solved?: boolean;
+    is_maintenance?: boolean;
   };
   highlightTeamSolves?: boolean;
   showCategory?: boolean;
@@ -24,16 +25,12 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
   const noFirstBlood = !challenge.has_first_blood;
   const isMaintenance = !!challenge.is_maintenance;
   const isTeamSolved = !!challenge.is_team_solved && highlightTeamSolves;
+
   const hasQuestions = !!challenge.has_questions;
   const hasServices = Array.isArray((challenge as any).services) && (challenge as any).services.length > 0;
   const featureBadge = hasQuestions && hasServices ? 'TS' : hasQuestions ? 'T' : hasServices ? 'S' : null;
 
-  let ribbonLabel: string | null = null;
-  if (isMaintenance) ribbonLabel = "MAINTENANCE";
-  else if (noFirstBlood) ribbonLabel = "🩸NEW CHALL🩸";
-  else if (isRecentlyCreated) ribbonLabel = "NEW CHALL";
-
-  // Difficulty color mapping (same as DifficultyBadge)
+  // Difficulty color mapping
   const rawDiff = (challenge.difficulty || '').toString().trim();
   const normalizedDiff = rawDiff === 'imposible' ? 'Impossible' : rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase();
   const colorName = (APP as any).difficultyStyles?.[normalizedDiff];
@@ -48,101 +45,134 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.98 }}
       key={challenge.id}
-      className={`relative overflow-hidden group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`relative group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+      onClick={isMaintenance ? undefined : onClick}
     >
-      {/* Ribbon pojok kanan atas */}
-      {ribbonLabel && (
-        <div className="absolute top-2 right-[-32px] rotate-45 translate-y-[16px] z-20">
-          <div className={`text-white text-[10px] font-bold px-8 py-1 shadow-md ${isMaintenance ? 'bg-amber-800' : 'bg-green-500'}`}>
-            {ribbonLabel}
-          </div>
-        </div>
-      )}
+      {/* Glow Effect on Hover */}
+      <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.03] rounded-2xl transition-colors duration-300 pointer-events-none" />
 
-      {featureBadge && (
-        <div className="absolute top-2 right-2 z-20" title={featureBadge === 'TS' ? 'Has tasks and services' : featureBadge === 'T' ? 'Has tasks' : 'Has services'}>
-          <div className={`min-w-6 h-6 px-2 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow ring-2 ring-white/20 ${isMaintenance ? 'bg-amber-900' : 'bg-indigo-600'}`}>
-            {featureBadge}
-          </div>
-        </div>
-      )}
-
-      {/* Difficulty badge top-left (icon + label) */}
-      <div className="absolute top-2 left-2 z-10">
-        <div
-          className={`flex items-center gap-2 px-2 py-0.5 rounded-md text-xs font-semibold text-white shadow ${isMaintenance ? 'bg-amber-800' : diffCircleColor}`}
-          title={`Difficulty: ${normalizedDiff}`}
-          aria-label={`Difficulty: ${normalizedDiff}`}
-        >
-          <span className="capitalize">{normalizedDiff}</span>
-        </div>
-      </div>
-
-      <Card
-        onClick={isMaintenance ? undefined : onClick}
-        className={`shadow-md rounded-md transition-colors
-          ${isMaintenance
-            ? 'bg-amber-800 dark:bg-amber-900 opacity-95'
-            : (challenge.is_solved
-                ? 'bg-green-600 dark:bg-green-700'
-                : (isTeamSolved
-                    ? 'bg-purple-600 dark:bg-purple-700'
-                    : 'bg-blue-600 dark:bg-blue-700'))}
-        `}
+      <div className={`relative h-full flex flex-col p-4 md:p-5 rounded-2xl border backdrop-blur-md transition-all duration-300
+        ${isMaintenance
+          ? 'bg-amber-500/[0.02] border-amber-500/20 dark:border-amber-500/10 border-dashed opacity-70 shadow-none'
+          : challenge.is_solved
+            ? 'bg-green-500/[0.03] border-green-500/30 dark:border-green-500/20 shadow-sm'
+            : isTeamSolved
+              ? 'bg-purple-500/[0.03] border-purple-500/30 dark:border-purple-500/20 shadow-sm'
+              : 'bg-white/40 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 group-hover:border-blue-500/50 shadow-sm'}
+       hover:shadow-md`}
       >
-        <CardHeader className="flex items-center justify-center pl-6 pr-4">
-          <h3
-            className="text-white dark:text-gray-100 font-semibold text-center truncate"
-            style={{
-              maxWidth: "140px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              display: "block",
-            }}
-            title={challenge.title}
-          >
+
+        <div className="relative flex-1 flex flex-col">
+          {/* Maintenance Overlay Info */}
+          {isMaintenance && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/70 dark:bg-gray-950 backdrop-blur-[4px] rounded-xl pointer-events-none">
+              <p className="text-[10px] font-black text-center px-4 text-amber-600 dark:text-amber-500 leading-relaxed uppercase tracking-wider">
+                This service is currently unavailable. Points remain awarded to those who solved it.
+              </p>
+            </div>
+          )}
+
+          {/* Header Area */}
+          <div className="flex items-start justify-between mb-3">
+
+            {/* LEFT: Category + Difficulty */}
+            <div className="flex items-center gap-2">
+              <div className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md w-fit
+        ${isMaintenance
+                  ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400'
+                  : 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'}`}>
+                {challenge.category}
+              </div>
+
+              {/* MODE (T / S / TS) */}
+              {featureBadge && (
+                <span className="text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 px-1.5 rounded uppercase tracking-tight">
+                  {featureBadge}
+                </span>
+              )}
+            </div>
+
+            {/* RIGHT: Mode + Points */}
+            <div className="flex flex-col items-end justify-between h-full gap-1">
+
+              {/* POINTS */}
+              <div className={`text-lg font-black tracking-tight leading-none
+                  ${challenge.is_solved
+                  ? 'text-green-600 dark:text-green-400'
+                  : 'text-gray-900 dark:text-white'}`}>
+                {challenge.points}
+              </div>
+
+            </div>
+          </div>
+
+          {/* Title */}
+          <h3 className="text-sm md:text-base font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 h-[2.5rem] md:h-[2.75rem]">
             {challenge.title}
           </h3>
-        </CardHeader>
+        </div>
 
-        <CardContent className={`flex items-center justify-center gap-2 font-bold ${isMaintenance ? 'text-white' : 'text-yellow-300 dark:text-yellow-200'}`}>
-          {challenge.points}
-        </CardContent>
-      </Card>
+        {/* Footer Area */}
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800/50">
+          <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
+            {isMaintenance ? (
+              <span className="text-amber-600 dark:text-amber-500 flex items-center gap-1.5 font-black">
+                <AlertTriangle size={12} className="animate-pulse" />
+                Maintenance
+              </span>
+            ) : noFirstBlood ? (
+              <span className="text-emerald-600 dark:text-emerald-500 flex items-center gap-1.5 font-black">
+                <Flame size={12} className="fill-current" />
+                First Blood Available
+              </span>
+            ) : isRecentlyCreated ? (
+              <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1.5 font-black">
+                <Sparkles size={12} />
+                New
+              </span>
+            ) : (
+              /* DEFAULT: Show Difficulty Indicator */
+              <div className="flex items-center gap-1.5">
+                <div className={`w-1.5 h-1.5 rounded-full ${diffCircleColor}`} />
+                <span className="text-gray-400 dark:text-gray-500 font-bold tracking-tight">
+                  {normalizedDiff}
+                </span>
+              </div>
+            )}
+          </div>
 
-      {/* Solved count bottom-left */}
-      {!isMaintenance && (
-      <div className="absolute bottom-2 left-2 z-10">
-        <div className={`text-white text-xs font-medium px-2 py-0.5 rounded-md shadow ${isMaintenance ? 'bg-amber-900/85' : 'bg-black/40'}`}>
-          ✓ {challenge.total_solves ?? 0}
+          {!isMaintenance && (
+            <div className="flex items-center gap-3">
+              {/* Only show Difficulty here if NOT already shown on the left */}
+              {(noFirstBlood || isRecentlyCreated) && (
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${diffCircleColor}`} />
+                  <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                    {normalizedDiff}
+                  </span>
+                </div>
+              )}
+
+              {/* Show divider and solves ONLY if FB is not available */}
+              {!noFirstBlood && (
+                <>
+                  {(noFirstBlood || isRecentlyCreated) && (
+                    <div className="w-[1px] h-3 bg-gray-200 dark:bg-gray-800/50" />
+                  )}
+                  <div className="text-[10px] font-mono text-gray-400 dark:text-gray-500">
+                    {challenge.total_solves ?? 0} {challenge.total_solves === 1 ? 'solve' : 'solves'}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
-      )}
 
-      {/* Category bottom-right (only shown when requested, e.g. compact mode) */}
-      {/** showCategory defaults to false so it won't appear in regular layout */}
-      {showCategory && (
-        <div className="absolute bottom-2 right-2 z-10">
-          <div className={`text-white text-xs font-medium px-2 py-0.5 rounded-md shadow ${isMaintenance ? 'bg-amber-900/85' : 'bg-black/40'}`}>
-            {challenge.category}
-          </div>
-        </div>
-      )}
 
-      {/* Maintenance hover info */}
-      {isMaintenance && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-          <div className="max-w-[260px] bg-amber-900/95 text-white text-[11px] leading-relaxed px-3 py-2 rounded-lg border border-amber-700 shadow-xl justify-center text-justify">
-            <div className="font-semibold mb-1 text-center">⚠️ Informasi</div>
-            <div>Saat ini service tidak dapat diakses karena VPS sudah tidak aktif.</div>
-            <div>Peserta yang sudah mengerjakan tetap mendapatkan poin.</div>
-          </div>
-        </div>
-      )}
     </motion.div>
   );
 };

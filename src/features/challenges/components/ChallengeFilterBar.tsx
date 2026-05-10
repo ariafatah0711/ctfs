@@ -67,7 +67,7 @@ export default function ChallengeFilterBar({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       data-tour="challenge-filter-bar"
-      className="w-full bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-3 mb-0"
+      className="w-full bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-2xl p-4 md:p-5"
     >
       {events && onEventChange && (
         <EventFilterPills

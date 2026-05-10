@@ -7,10 +7,9 @@ export const getEventStatus = (event: Event) => {
   const start = event.start_time ? new Date(event.start_time) : null
   const end = event.end_time ? new Date(event.end_time) : null
 
-  if (start && now < start) return { label: 'Upcoming', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', icon: 'ðŸ“…' }
-  if (end && now > end) return { label: 'Ended', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200', icon: 'âœ“' }
-  if (end) return { label: 'Ongoing', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: 'ðŸ”¥' }
-  return { label: 'Active', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: 'ðŸ”¥' }
+  if (start && now < start) return { label: 'Upcoming', color: 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400' }
+  if (end && now > end) return { label: 'Ended', color: 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500' }
+  return { label: 'Live', color: 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' }
 }
 
 export const getTimeRemaining = (event: Event) => {

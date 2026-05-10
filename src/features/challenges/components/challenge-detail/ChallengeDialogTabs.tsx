@@ -16,14 +16,14 @@ export default function ChallengeDialogTabs({
   onTabChange,
 }: ChallengeDialogTabsProps) {
   return (
-    <div
-      className="grid w-full gap-2"
-      style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
-    >
+    <div className="flex p-1 gap-1 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-gray-800 rounded-xl">
       {tabs.map((tab) => (
         <button
           key={tab.key}
-          className={`w-full px-2 py-1 rounded-t-md font-bold text-sm text-center transition-colors ${activeTab === tab.key ? 'bg-[#35355e] dark:bg-gray-800 text-pink-300 dark:text-pink-200' : 'bg-[#232344] dark:bg-gray-900 text-gray-300 dark:text-gray-400 hover:text-pink-200'}`}
+          className={`flex-1 px-3 py-1.5 rounded-lg font-bold text-xs text-center transition-all ${activeTab === tab.key
+            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            }`}
           onClick={() => onTabChange(tab.key, challengeId)}
         >
           {tab.label}

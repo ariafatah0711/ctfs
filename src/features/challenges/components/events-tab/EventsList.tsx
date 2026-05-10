@@ -32,14 +32,16 @@ export default function EventsList({
   onEventSelect,
   mainEvent,
   tone = 'default',
-  titleClassName = 'mb-3',
 }: EventsListProps) {
   const delayOffset = mainEvent ? 1 : 0
 
   return (
-    <div>
-      <h3 className={`text-sm font-semibold text-gray-700 dark:text-gray-300 ${titleClassName}`}>{title}</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-5">
+      <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">
+        {title}
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
         {mainEvent && (
           <MainEventCard
             label={mainEvent.label}
@@ -49,6 +51,7 @@ export default function EventsList({
             onSelect={mainEvent.onSelect}
           />
         )}
+
         {events.map((event, index) => (
           <EventCard
             key={event.id}

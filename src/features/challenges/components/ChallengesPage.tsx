@@ -11,31 +11,39 @@ import ChallengesTabPanel from './challenges-page/ChallengesTabPanel'
 export default function ChallengesPage() {
   const data = useChallengesPageData()
 
-  if (data.loading) return <Loader fullscreen color="text-orange-500" />
+  if (data.loading) return <Loader fullscreen color="text-blue-500" />
   if (!data.user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        <ChallengePageTabs
-          currentTab={data.currentTab}
-          onTabChange={data.setCurrentTab}
-        />
-
-        <ChallengeWatermark />
-
-        {data.currentTab === 'challenges' && (
-          <ChallengesTabPanel data={data} />
-        )}
-
-        {data.currentTab === 'events' && (
-          <EventsTab
-            events={data.enrichedEvents}
-            selectedEventId={data.eventId}
-            onEventSelect={data.attemptEventSelect}
-          />
-        )}
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-blue-500/30 overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
       </div>
+
+      <main className="flex-1 flex flex-col relative z-10">
+        <div className="max-w-6xl mx-auto px-6 py-10 lg:py-16 w-full space-y-6 md:space-y-8">
+          <ChallengePageTabs
+            currentTab={data.currentTab}
+            onTabChange={data.setCurrentTab}
+          />
+
+          <ChallengeWatermark />
+
+          {data.currentTab === 'challenges' && (
+            <ChallengesTabPanel data={data} />
+          )}
+
+          {data.currentTab === 'events' && (
+            <EventsTab
+              events={data.enrichedEvents}
+              selectedEventId={data.eventId}
+              onEventSelect={data.attemptEventSelect}
+            />
+          )}
+        </div>
+      </main>
 
       <ChallengeDialogs data={data} />
     </div>

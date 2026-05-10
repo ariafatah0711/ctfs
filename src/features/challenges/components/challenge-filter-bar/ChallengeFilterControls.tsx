@@ -133,7 +133,7 @@ export default function ChallengeFilterControls({
             : featureMode === 'T'
               ? 'bg-orange-500 border-orange-500 text-white'
               : 'bg-blue-500 border-blue-500 text-white'
-          }`}
+            }`}
         >
           {featureMode}
         </button>

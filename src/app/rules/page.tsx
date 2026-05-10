@@ -1,135 +1,80 @@
 "use client"
 
-// React Imports
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Scale } from 'lucide-react';
-
-// Shared Imports
-import APP from '@/config';
-import { RulesMarkdownRenderer, Loader } from '@/shared/components'
+import { ArrowLeft } from 'lucide-react';
+import Link from "next/link";
+import { RulesMarkdownRenderer, Loader, BrandLogo } from '@/shared/components'
 import { Footer } from "@/shared/components/custom";
-import { Button } from '@/shared/ui';
-
-const RULES = [
-  {
-    title: "Fokus ke Challenge",
-    description: "Mainkan challenge untuk mencari flag. Fokus pada permainan — jangan ganggu atau eksploitasi layanan lain."
-  },
-  {
-    title: "Kolaborasi & Bantuan",
-    description: "Boleh kerja sama, pakai AI, atau tanya admin/author. Tapi **jangan pernah** membagikan flag ke publik."
-  },
-  {
-    title: "Point",
-    description: "Poin tergantung tingkat kesulitan. Sistem dynamic (turun tiap solve) dan static (tetap). Baby: 150–50–5, Easy: 300–100–10, Medium: 500–300–20, Hard: 750–500–50, Impossible: 1000–3000 (tetap)."
-  },
-  {
-    title: "Writeup",
-    description: "Boleh dipublikasikan **30 hari setelah rilis** dan jika sudah disolve **≥10 orang**. Semua flag wajib **{REDACTED}**."
-  },
-  {
-    title: "Akun",
-    description: "Gunakan satu akun per peserta. Dilarang membuat akun ganda untuk keuntungan apa pun."
-  },
-  {
-    title: "Etika & Privasi",
-    description: "Hormati peserta lain. Dilarang mengambil atau menyebarkan data pribadi."
-  },
-  {
-    title: "Larangan Serangan",
-    description: "Jangan serang host, platform, atau lakukan bruteforce pada layanan apa pun."
-  },
-  {
-    title: "Pelaporan Bug",
-    description: "Laporkan bug atau celah keamanan ke admin secepatnya."
-  },
-];
+import { rulesConfig } from "@/rules";
 
 export default function RulesPage() {
   const { loading } = require("@/shared/contexts").useAuth();
-  if (loading) return <Loader fullscreen color="text-orange-500" />
+
+  if (loading) return <Loader fullscreen color="text-blue-500" />
 
   return (
-    <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-gray-50 dark:bg-gray-900 relative overflow-hidden">
-      {/* Decorative background shapes */}
-      <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
-      <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
+    <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-blue-500/30 overflow-hidden">
 
-      <section className="flex flex-col items-center justify-start pt-8 md:pt-12 flex-1 text-center px-4 relative z-10">
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="text-3xl md:text-4xl font-extrabold text-orange-600 dark:text-orange-400 mb-2 drop-shadow flex items-center justify-center gap-2"
-        >
-          <Scale size={32} className="text-orange-500 dark:text-orange-300 drop-shadow mr-1" /> Rules {APP.shortName}
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-base md:text-lg text-gray-700 dark:text-gray-200 max-w-2xl md:max-w-3xl mb-6"
-        >
-          Mohon baca dan patuhi aturan berikut sebelum mengikuti challenge di {APP.fullName}.
-        </motion.p>
+      {/* Background Effects - Ultra Subtle */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-[30%] h-[30%] rounded-full bg-blue-500/5 blur-[100px]" />
+        <div className="absolute bottom-0 left-100 w-[50%] h-[30%] rounded-full bg-blue-500/5 blur-[100px]" />
+      </div>
 
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{
-            hidden: { opacity: 0, scale: 0.985, y: 8 },
-            show: { opacity: 1, scale: 1, y: 0, transition: { staggerChildren: 0.06, delayChildren: 0.04 } }
-          }}
-          transition={{ delay: 0.35, duration: 0.36 }}
-          style={{ willChange: 'transform, opacity' }}
-          className="mb-6 flex flex-col items-center justify-center gap-3 w-full"
-        >
-          <div className="w-full max-w-3xl">
-            {RULES.map((rule, idx) => (
-              <motion.div
+      <main className="flex-1 flex flex-col items-center justify-center pt-8 pb-8 relative z-10 w-full px-6">
+
+        <div className="w-full max-w-6xl mx-auto">
+          {/* ULTRA MINIMAL HEADER */}
+          <header className="flex items-center justify-between mb-12 border-b border-gray-100 dark:border-gray-900/50 pb-6">
+            <div className="flex items-center gap-4">
+              <BrandLogo name="Rules" className="text-2xl md:text-3xl" />
+            </div>
+
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-xs md:text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-blue-500 transition-colors"
+            >
+              <ArrowLeft size={16} />
+              <span>Dashboard</span>
+            </Link>
+          </header>
+
+          {/* RULES LIST - Lightweight Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+            {rulesConfig.rules.map((rule, idx) => (
+              <div
                 key={idx}
-                variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.32 } } }}
-                whileHover={{ scale: 1.01, y: -1 }}
-                transition={{ type: 'spring', stiffness: 220, damping: 18 }}
-                layout
-                className={`group flex gap-3 items-start bg-white/90 dark:bg-gray-800/90
-                          border border-transparent dark:border-transparent rounded-md
-                          px-4 py-3 shadow-sm text-sm md:text-base text-left w-full
-                          hover:shadow-lg hover:border-orange-400 dark:hover:border-orange-700
-                          hover:bg-orange-100 dark:hover:bg-gray-800/70
-                          transition-all duration-200 ease-out
-                          ${idx < RULES.length - 1 ? 'mb-2' : ''}`}
+                className="group flex flex-col gap-2 p-4 rounded-2xl hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-all duration-200 cursor-pointer"
               >
-                <div className="flex-shrink-0 mt-1">
-                  <div className="w-3 h-3 rounded-full bg-orange-600 dark:bg-orange-500
-                                group-hover:scale-125 transition-transform duration-300" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-orange-700 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300 transition-colors duration-300">
+                <div className="flex items-center gap-4">
+                  <span className="text-lg font-mono font-black text-blue-600/20 group-hover:text-blue-500 transition-colors">
+                    {String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <h3 className="text-base font-black text-gray-800 dark:text-gray-200 tracking-tight uppercase">
                     {rule.title}
-                  </div>
-                  <div className="text-gray-700 dark:text-gray-200 leading-snug mt-1">
-                    <RulesMarkdownRenderer content={rule.description} />
-                  </div>
+                  </h3>
                 </div>
-              </motion.div>
+
+                <div className="pl-12 text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                  <RulesMarkdownRenderer content={rule.description} />
+                </div>
+              </div>
             ))}
           </div>
-        </motion.div>
 
-        <p className="text-gray-50 dark:text-gray-900">
-          RkdURXtZb3VfSGF2ZV9BY2NlcHRlZF9BbGxfUnVsZXNfQW5kX0V0aGljc30=
-        </p>
-
-        <div className="w-full max-w-3xl mt-2 flex justify-center">
-          <Button asChild className="bg-orange-600 text-white hover:bg-orange-700 px-4 py-2 rounded-lg shadow text-sm">
-            <a href="/">Back to Home</a>
-          </Button>
+          {/* STEALTH FLAG - Perfectly Invisible */}
+          {rulesConfig.showHiddenFlag && (
+            <div className="mt-4 flex justify-center">
+              <p className="text-[8px] font-mono select-all cursor-help text-[#fafafa] dark:text-[#0b0f19] leading-none">
+                {rulesConfig.hiddenFlagBase64}
+              </p>
+            </div>
+          )}
         </div>
-      </section>
 
-      <Footer></Footer>
+      </main>
+
+      <Footer />
     </div>
   )
 }

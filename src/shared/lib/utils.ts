@@ -37,25 +37,37 @@ export function isValidUsername(username: string): string | null {
 // - days up to 30 days: "X days ago • HH:MM"
 // - older than 30 days: localized date/time
 export function formatRelativeDate(isoDate: string) {
-  const then = new Date(isoDate).getTime()
+  const dateObj = new Date(isoDate)
+  const then = dateObj.getTime()
   if (isNaN(then)) return isoDate
   const now = Date.now()
   const diffMs = now - then
   const diffSeconds = Math.floor(diffMs / 1000)
+
+  // Use 24-hour format helper
+  const get24hTime = (date: Date) => {
+    const hh = date.getHours().toString().padStart(2, '0')
+    const mm = date.getMinutes().toString().padStart(2, '0')
+    return `${hh}:${mm}`
+  }
 
   if (diffSeconds < 60) return `${diffSeconds} ${diffSeconds === 1 ? 'second' : 'seconds'} ago`
   const diffMinutes = Math.floor(diffSeconds / 60)
   if (diffMinutes < 60) return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`
   const diffHours = Math.floor(diffMinutes / 60)
   if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`
+
   const diffDays = Math.floor(diffHours / 24)
   if (diffDays < 30) {
     if (diffDays === 0) return '0 days ago'
-    const timeStr = new Date(isoDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago • ${timeStr}`
+    return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago • ${get24hTime(dateObj)}`
   }
 
-  return new Date(isoDate).toLocaleString()
+  // Older than 30 days: 01 Month YYYY HH:mm
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const month = dateObj.toLocaleString('en-US', { month: 'long' })
+  const year = dateObj.getFullYear()
+  return `${day} ${month} ${year} ${get24hTime(dateObj)}`
 }
 
 export type EventTimingLike = {

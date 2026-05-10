@@ -37,78 +37,79 @@ export default function EventCard({
   const timeRemaining = getTimeRemaining(event)
   const eventImageUrl = normalizeEventImageUrl(event.image_url) || fallbackImageUrl
   const { startText, endText, startLabel, endLabel } = getEventDateLabels(event, now)
-  const selectedClasses = tone === 'ended'
-    ? 'bg-gray-100 dark:bg-gray-900/20 border-gray-600 dark:border-gray-400 ring-2 ring-gray-600 dark:ring-gray-400'
-    : 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-600 dark:border-indigo-400 ring-2 ring-indigo-600 dark:ring-indigo-400'
-  const idleClasses = tone === 'ended'
-    ? 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-gray-400 dark:hover:border-gray-400'
-    : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
 
   return (
-    <motion.button
+    <motion.div
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
       key={event.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
+      className="relative group cursor-pointer h-full"
       onClick={onSelect}
-      className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
     >
-      <Card
-        className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${selected ? selectedClasses : idleClasses} group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+      {/* Glow Effect on Hover */}
+      <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.03] rounded-2xl transition-colors duration-300 pointer-events-none" />
+
+      <div className={`relative h-full flex flex-col overflow-hidden rounded-2xl border backdrop-blur-md transition-all duration-300
+        ${selected
+          ? 'bg-blue-500/[0.03] border-blue-500/50 shadow-sm'
+          : 'bg-white/40 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 group-hover:border-blue-500/50 shadow-sm'}
+        ${tone === 'ended' ? 'opacity-70 grayscale-[0.3]' : ''}
+        hover:shadow-md`}
       >
-        {eventImageUrl ? (
-          <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+        {/* Image Section */}
+        <div className="relative h-40 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800/50">
+          {eventImageUrl ? (
             <img
               src={eventImageUrl}
               alt={event.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-          </div>
-        ) : (
-          <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
-            No image
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 flex items-center justify-center">
+              <Calendar size={24} className="text-blue-500/20" />
+            </div>
+          )}
 
-        <div className="flex-1 p-4 flex flex-col">
-          <div className="mb-3">
-            <div className="flex items-center gap-2 mb-2">
-              <h4 className="font-bold text-lg text-gray-900 dark:text-white">
-                {event.name}
-              </h4>
-              <EventJoinSection isLocked={event.isLocked} />
+          <div className="absolute top-3 right-3">
+            <EventJoinSection isLocked={event.isLocked} />
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 p-4 md:p-5 flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md w-fit ${status.color}`}>
+                {status.label}
+              </div>
             </div>
-            <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
-              {status.icon} {status.label}
-            </div>
+
+            <h4 className="text-sm md:text-base font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+              {event.name}
+            </h4>
           </div>
 
           {event.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1">
               {event.description}
             </p>
           )}
 
-          <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-            {startText && startLabel && (
-              <div className="flex items-center gap-2">
-                <Calendar size={14} />
-                <span>{startLabel}: {startText}</span>
+          {/* Footer Metadata */}
+          <div className="pt-3 border-t border-gray-100 dark:border-gray-800/50 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                <Calendar size={12} className="text-blue-500/40" />
+                <span>{startText}</span>
               </div>
-            )}
-            {endText && endLabel && (
-              <div className="flex items-center gap-2">
-                <Calendar size={14} />
-                <span>{endLabel}: {endText}</span>
+              <div className="flex items-center gap-1 text-[10px] font-mono text-blue-600 dark:text-blue-400">
+                <Clock size={11} />
+                <span>{timeRemaining}</span>
               </div>
-            )}
-            <div className="flex items-center gap-2">
-              <Clock size={14} />
-              <span>{timeRemaining}</span>
             </div>
           </div>
         </div>
-      </Card>
-    </motion.button>
+      </div>
+    </motion.div>
   )
 }

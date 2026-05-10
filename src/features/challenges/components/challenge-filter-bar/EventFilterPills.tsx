@@ -72,7 +72,7 @@ export default function EventFilterPills({
           <button
             type="button"
             onClick={() => onEventChange('all')}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
+            className={`shrink-0 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
           >
             All
           </button>
@@ -81,7 +81,7 @@ export default function EventFilterPills({
           <button
             type="button"
             onClick={() => onEventChange(null)}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition ${!selectedEventId ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+            className={`shrink-0 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border transition ${!selectedEventId ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
           >
             {mainLabel}
           </button>
@@ -102,30 +102,29 @@ export default function EventFilterPills({
               type="button"
               onClick={() => onEventChange(event.id)}
               className={`
-                shrink-0 whitespace-nowrap px-3 py-1.5 text-sm rounded-full border transition flex items-center gap-1
-                ${isEndedButAlwaysVisible && !isSelected ? 'text-[11px] opacity-40 border-dashed' : ''}
-                ${
-                  isSelected
-                      ? 'bg-indigo-600 border-indigo-600 text-white'
-                      : (`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700
+                shrink-0 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border transition flex items-center gap-1
+                ${isEndedButAlwaysVisible && !isSelected ? 'text-[10px] opacity-40 border-dashed' : ''}
+                ${isSelected
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : (`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700
                         hover:bg-gray-50 dark:hover:bg-gray-800` + (showEventState ? ` ${stateStyles[state]}` : ''))
                 }
               `}
               title={timing || undefined}
             >
               {showEventState && state === 'upcoming-soon' && (
-                <Zap size={12} className="text-yellow-500" />
+                <Zap size={10} className="text-yellow-500" />
               )}
 
               {showEventState && state === 'ending-soon' && (
-                <Zap size={12} className="text-purple-500" />
+                <Zap size={10} className="text-purple-500" />
               )}
 
-              {event.isLocked && <Lock size={12} className="opacity-70" />}
+              {event.isLocked && <Lock size={10} className="opacity-70" />}
               <span>{event.name}</span>
 
               {showEventState && isEndedButAlwaysVisible && !isSelected && (
-                <span className="text-[10px] opacity-70">ended</span>
+                <span className="text-[9px] opacity-70">ended</span>
               )}
 
               {showEventState && (isSelected || shouldShowEventTimingAlways({
@@ -133,10 +132,10 @@ export default function EventFilterPills({
                 showEventState,
                 upcomingVisibilityWindowDays,
               })) && timing && (
-                <span className="ml-1 text-[10px] opacity-80 hidden sm:inline">
-                  {timing}
-                </span>
-              )}
+                  <span className="ml-1 text-[9px] opacity-80 hidden sm:inline normal-case font-medium">
+                    {timing}
+                  </span>
+                )}
             </button>
           )
         })}

@@ -3,6 +3,7 @@
 import { Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Card } from '@/shared/ui'
+import { Calendar } from 'lucide-react'
 
 type MainEventCardProps = {
   label: string
@@ -20,56 +21,70 @@ export default function MainEventCard({
   onSelect,
 }: MainEventCardProps) {
   return (
-    <motion.button
+    <motion.div
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
       key="__main__"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
+      className="relative group cursor-pointer h-full"
       onClick={onSelect}
-      className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
     >
-      <Card
-        className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${selected
-            ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 dark:border-emerald-400 ring-2 ring-emerald-600 dark:ring-emerald-400'
-            : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-400'
-          } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
+      {/* Glow Effect on Hover */}
+      <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.03] rounded-2xl transition-colors duration-300 pointer-events-none" />
+
+      <div className={`relative h-full flex flex-col overflow-hidden rounded-2xl border backdrop-blur-md transition-all duration-300
+        ${selected
+          ? 'bg-blue-500/[0.03] border-blue-500/50 shadow-sm'
+          : 'bg-white/40 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 group-hover:border-blue-500/50 shadow-sm'}
+        hover:shadow-md`}
       >
-        {imageUrl ? (
-          <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+        {/* Image Section */}
+        <div className="relative h-40 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800/50">
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt={label}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-          </div>
-        ) : (
-          <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
-            No image
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 flex items-center justify-center">
+              <Calendar size={24} className="text-blue-500/20" />
+            </div>
+          )}
+        </div>
 
-        <div className="flex-1 p-4 flex flex-col">
-          <div className="mb-3">
-            <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
+        {/* Content Section */}
+        <div className="flex-1 p-4 md:p-5 flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md w-fit bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                Live
+              </div>
+            </div>
+
+            <h4 className="text-sm md:text-base font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
               {label}
             </h4>
-            <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-              Active
-            </div>
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
-            Default challenges dari platform ini.
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1">
+            Default challenges from this platform. Always available for practice.
           </p>
 
-          <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-            <div className="flex items-center gap-2">
-              <Clock size={14} />
-              <span>Always available</span>
+          {/* Footer Metadata */}
+          <div className="pt-3 border-t border-gray-100 dark:border-gray-800/50 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                <Calendar size={12} className="text-blue-500/40" />
+                <span>Permanent Event</span>
+              </div>
+              <div className="flex items-center gap-1 text-[10px] font-mono text-blue-600 dark:text-blue-400">
+                <Clock size={11} />
+                <span>Always active</span>
+              </div>
             </div>
           </div>
         </div>
-      </Card>
-    </motion.button>
+      </div>
+    </motion.div>
   )
 }

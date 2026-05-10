@@ -195,8 +195,8 @@ export default function SubChallengePanel({
                   result={results[String(question.order_number)]}
                   submitting={submitting}
                   completed
-                  onAnswerChange={() => {}}
-                  onSubmit={() => {}}
+                  onAnswerChange={() => { }}
+                  onSubmit={() => { }}
                 />
               ))}
 
@@ -228,58 +228,15 @@ export default function SubChallengePanel({
         </button>
       )}
 
-      {hasQuestions && (
-        <div className="pt-4 border-t border-gray-800 flex justify-end">
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm('Are you sure you want to reset your progress for this challenge? This will clear all your locally saved answers.')) {
-                onReset()
-              }
-            }}
-            className="text-[10px] text-gray-500 hover:text-red-400 transition underline decoration-dotted underline-offset-2"
-          >
-            Reset Progress
-          </button>
-        </div>
-      )}
-
       {message && !isShowingEmptyQuestionMessage && (
         <div className="p-2 rounded text-sm font-semibold bg-[#2c2c52] text-gray-100">
           {message}
         </div>
       )}
 
-      {completed && (
+      {completed && !flag && (
         <div className="p-2 rounded text-sm font-semibold bg-green-600 text-white">
           All questions correct.
-        </div>
-      )}
-
-      {flag && (
-        <div className="flex items-center gap-2 rounded bg-emerald-700 text-white p-2 text-sm font-semibold break-all">
-          <span className="min-w-0 flex-1">Flag: {flag}</span>
-          <button
-            type="button"
-            className="shrink-0 inline-flex items-center gap-1 rounded-md bg-emerald-900/40 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-50 transition hover:bg-emerald-900/60"
-            onClick={async () => {
-              try {
-                if (!navigator.clipboard) {
-                  toast.error('Clipboard not available')
-                  return
-                }
-                await navigator.clipboard.writeText(flag)
-                setCopiedFlag((prev) => ({ ...prev, [subChallengeFlagCopyKey]: true }))
-                setTimeout(() => setCopiedFlag((prev) => ({ ...prev, [subChallengeFlagCopyKey]: false })), 2000)
-                toast.success('Flag copied to clipboard')
-              } catch (error) {
-                console.error('Copy failed', error)
-                toast.error('Failed to copy flag')
-              }
-            }}
-          >
-            {copiedFlag[subChallengeFlagCopyKey] ? <><Check className="h-3.5 w-3.5" /> Copied</> : <><Copy className="h-3.5 w-3.5" /> Copy</>}
-          </button>
         </div>
       )}
     </div>

@@ -13,30 +13,26 @@ export default function ChallengePageTabs({
   onTabChange,
 }: ChallengePageTabsProps) {
   return (
-    <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+    <div className="flex p-1.5 gap-1 bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-xl w-fit">
       <button
         onClick={() => onTabChange('challenges')}
-        className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'challenges'
-          ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+        className={`px-5 py-2 text-sm font-bold transition-all rounded-lg flex items-center gap-2 ${currentTab === 'challenges'
+          ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
           }`}
       >
-        <div className="flex items-center gap-2">
-          <Flag size={16} />
-          Challenges
-        </div>
+        <Flag size={14} className={currentTab === 'challenges' ? 'animate-pulse' : ''} />
+        Challenges
       </button>
       <button
         onClick={() => onTabChange('events')}
-        className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'events'
-          ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+        className={`px-5 py-2 text-sm font-bold transition-all rounded-lg flex items-center gap-2 ${currentTab === 'events'
+          ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
           }`}
       >
-        <div className="flex items-center gap-2">
-          <Zap size={16} />
-          Events
-        </div>
+        <Zap size={14} className={currentTab === 'events' ? 'animate-pulse' : ''} />
+        Events
       </button>
     </div>
   )
