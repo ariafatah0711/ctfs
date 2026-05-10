@@ -8,14 +8,14 @@ const ScoreboardEmptyState: React.FC = () => (
       transition={{ duration: 0.4 }}
       className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4"
     >
-      <span className="text-4xl text-gray-400 dark:text-gray-500">🎯</span>
+      <span className="text-4xl text-gray-400 dark:text-gray-500">ðŸŽ¯</span>
     </motion.div>
     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
       No challenges solved yet.
     </h3>
     <p className="text-gray-500 dark:text-gray-300 text-sm sm:text-base">
       Leaderboard is empty!<br />
-      Be the first to solve a challenge 🚀
+      Be the first to solve a challenge ðŸš€
     </p>
   </div>
 )

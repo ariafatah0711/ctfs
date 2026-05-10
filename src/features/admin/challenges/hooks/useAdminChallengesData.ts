@@ -36,7 +36,7 @@ export function useAdminChallengesData() {
   const initAdminData = useCallback(async (silent = false) => {
     if (!silent) setIsLoading(true)
     else setIsRefreshing(true)
-    
+
     try {
       const scope = await getAdminScope()
       setAdminScope(scope)

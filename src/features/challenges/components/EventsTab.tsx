@@ -1,490 +1,79 @@
 'use client'
 
-// React Imports
-import { Calendar, Clock, Lock } from 'lucide-react'
-import { motion } from 'framer-motion'
-
-// Shared Imports
 import APP from '@/config'
-import { Card } from '@/shared/ui'
-import { Event } from '@/shared/types'
-import { formatEventDurationCompact } from '@/shared/lib'
-
-type EnrichedEvent = Event & { isLocked?: boolean }
+import { getEventSections, normalizeEventImageUrl } from '../lib'
+import type { EnrichedChallengeEvent } from '../types'
+import AllEventsButton from './events-tab/AllEventsButton'
+import EventsEmptyState from './events-tab/EventsEmptyState'
+import EventsList from './events-tab/EventsList'
 
 type Props = {
-  events: EnrichedEvent[]
+  events: EnrichedChallengeEvent[]
   selectedEventId?: string | null | 'all'
   onEventSelect: (eventId: string | null | 'all') => void
 }
 
-const getEventStatus = (evt: Event) => {
-  const now = new Date()
-  const start = evt.start_time ? new Date(evt.start_time) : null
-  const end = evt.end_time ? new Date(evt.end_time) : null
-
-  if (start && now < start) return { label: 'Upcoming', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', icon: '📅' }
-  if (end && now > end) return { label: 'Ended', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200', icon: '✓' }
-  if (end) return { label: 'Ongoing', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: '🔥' }
-  return { label: 'Active', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: '🔥' }
-}
-
-const getTimeRemaining = (evt: Event) => {
-  const now = new Date()
-  const start = evt.start_time ? new Date(evt.start_time) : null
-  const end = evt.end_time ? new Date(evt.end_time) : null
-
-  if (start && now < start) {
-    const diff = start.getTime() - now.getTime()
-    return `Starts in ${formatEventDurationCompact(diff)}`
-  }
-  if (end && now < end) {
-    const diff = end.getTime() - now.getTime()
-    return `Ends in ${formatEventDurationCompact(diff)}`
-  }
-  if (end && now >= end) {
-    return 'Event ended'
-  }
-  return 'Ongoing'
-}
-
-function normalizeImageUrl(url?: string | null) {
-  if (!url) return null
-  const trimmed = String(url).trim()
-  if (!trimmed) return null
-  if (/^https?:\/\//i.test(trimmed)) return trimmed
-  if (trimmed.startsWith('/')) return trimmed
-  return `/${trimmed}`
-}
-
-function formatEventDateTime(value?: string | null) {
-  if (!value) return null
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-  return date.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 export default function EventsTab({ events, selectedEventId, onEventSelect }: Props) {
   const mainLabel = String(APP.eventMainLabel || 'Main')
-  const fallbackImageUrl = normalizeImageUrl((APP as any).eventFallbackImageUrl)
-  const mainImageUrl = normalizeImageUrl((APP as any).eventMainImageUrl) || fallbackImageUrl
+  const fallbackImageUrl = normalizeEventImageUrl((APP as any).eventFallbackImageUrl)
+  const mainImageUrl = normalizeEventImageUrl((APP as any).eventMainImageUrl) || fallbackImageUrl
   const showMain = !APP.hideEventMain
-  // Split events into ongoing/upcoming and ended
-  const now = new Date();
-  // Sort events: Active first, then Ongoing (soonest end), then Upcoming (soonest start)
-  const activeList = events.filter(evt => {
-    // Active: no end_time, already started
-    const start = evt.start_time ? new Date(evt.start_time) : null;
-    return !evt.end_time && (!start || start <= now);
-  });
-  const ongoingList = events.filter(evt => {
-    // Ongoing: started, has end_time in future
-    const start = evt.start_time ? new Date(evt.start_time) : null;
-    const end = evt.end_time ? new Date(evt.end_time) : null;
-    return end && end > now && (!start || start <= now);
-  }).sort((a, b) => {
-    // Sort ongoing by soonest end time
-    const aEnd = a.end_time ? new Date(a.end_time) : null;
-    const bEnd = b.end_time ? new Date(b.end_time) : null;
-    return (aEnd?.getTime() ?? Infinity) - (bEnd?.getTime() ?? Infinity);
-  });
-  const upcomingList = events.filter(evt => {
-    // Upcoming: not started yet
-    const start = evt.start_time ? new Date(evt.start_time) : null;
-    return start && start > now;
-  }).sort((a, b) => {
-    // Sort upcoming by soonest start time
-    const aStart = a.start_time ? new Date(a.start_time) : null;
-    const bStart = b.start_time ? new Date(b.start_time) : null;
-    return (aStart?.getTime() ?? Infinity) - (bStart?.getTime() ?? Infinity);
-  }).sort((a, b) => {
-    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1
-    return 0
-  });
-  const availableEvents = [...activeList, ...ongoingList].sort((a, b) => {
-    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1
-    return 0
-  });
-  const endedEvents = events.filter(evt => {
-    const end = evt.end_time ? new Date(evt.end_time) : null;
-    return end && end <= now;
-  }).sort((a, b) => {
-    const aEnd = a.end_time ? new Date(a.end_time) : null;
-    const bEnd = b.end_time ? new Date(b.end_time) : null;
-    // Most recently ended first
-    return (bEnd?.getTime() ?? 0) - (aEnd?.getTime() ?? 0);
-  }).sort((a, b) => {
-    if (a.isLocked !== b.isLocked) return a.isLocked ? 1 : -1
-    return 0
-  });
-
+  const now = new Date()
+  const { availableEvents, upcomingList, endedEvents } = getEventSections(events, now)
   const hasAvailableSection = showMain || availableEvents.length > 0
   const hasUpcomingSection = upcomingList.length > 0
+  const isEmpty = !hasAvailableSection && !hasUpcomingSection && endedEvents.length === 0
 
   return (
     <div className="space-y-6">
-      {/* All Events Button */}
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => onEventSelect('all')}
-        className={`w-full p-4 rounded-lg border-2 transition ${selectedEventId === 'all'
-            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-400'
-          }`}
-      >
-        <div className="text-left">
-          <div className="font-bold text-blue-700 dark:text-blue-300">ALL Events</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Show all challenges from all events (Exclude - Intro Category that are not {mainLabel}, and Challenge have Event Ended)</div>
-        </div>
-      </motion.button>
+      <AllEventsButton
+        selected={selectedEventId === 'all'}
+        mainLabel={mainLabel}
+        onSelect={() => onEventSelect('all')}
+      />
 
-      {/* Available Events List */}
       {hasAvailableSection && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Available Events</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {showMain && (() => {
-              const isSelected = selectedEventId === null
-              return (
-                <motion.button
-                  key="__main__"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0 }}
-                  onClick={() => onEventSelect(null)}
-                  className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
-                >
-                  <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-600 dark:border-emerald-400 ring-2 ring-emerald-600 dark:ring-emerald-400'
-                        : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-emerald-400 dark:hover:border-emerald-400'
-                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
-                  >
-                    {mainImageUrl ? (
-                      <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                        <img
-                          src={mainImageUrl}
-                          alt={mainLabel}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
-                        No image
-                      </div>
-                    )}
-
-                    <div className="flex-1 p-4 flex flex-col">
-                      <div className="mb-3">
-                        <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-2">
-                          {mainLabel}
-                        </h4>
-                        <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-                          Active
-                        </div>
-                      </div>
-
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
-                        Default challenges dari platform ini.
-                      </p>
-
-                      <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} />
-                          <span>Always available</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.button>
-              )
-            })()}
-            {availableEvents.map((evt, idx) => {
-              const status = getEventStatus(evt);
-              const timeRemaining = getTimeRemaining(evt);
-              const isSelected = selectedEventId === evt.id;
-              const eventImageUrl = normalizeImageUrl(evt.image_url) || fallbackImageUrl
-              const startText = formatEventDateTime(evt.start_time)
-              const endText = formatEventDateTime(evt.end_time)
-              const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
-              const endLabel = endText ? ((evt.end_time && new Date(evt.end_time) > now) ? 'Ends' : 'Ended') : null
-              return (
-                <motion.button
-                  key={evt.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: (idx + (showMain ? 1 : 0)) * 0.05 }}
-                  onClick={() => onEventSelect(evt.id)}
-                  className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
-                >
-                  <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
-                        ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-600 dark:border-indigo-400 ring-2 ring-indigo-600 dark:ring-indigo-400'
-                        : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
-                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
-                  >
-                    {/* Image */}
-                    {eventImageUrl ? (
-                      <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                        <img
-                          src={eventImageUrl}
-                          alt={evt.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
-                        No image
-                      </div>
-                    )}
-
-                    {/* Content */}
-                    <div className="flex-1 p-4 flex flex-col">
-                      {/* Title & Status */}
-                      <div className="mb-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">
-                            {evt.name}
-                          </h4>
-                          {evt.isLocked && <Lock size={16} className="text-gray-500" />}
-                        </div>
-                        <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
-                          {status.icon} {status.label}
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      {evt.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
-                          {evt.description}
-                        </p>
-                      )}
-
-                      {/* Time Info */}
-                      <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                        {startText && startLabel && (
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} />
-                            <span>{startLabel}: {startText}</span>
-                          </div>
-                        )}
-                        {endText && endLabel && (
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} />
-                            <span>{endLabel}: {endText}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} />
-                          <span>{timeRemaining}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
+        <EventsList
+          title="Available Events"
+          events={availableEvents}
+          selectedEventId={selectedEventId}
+          fallbackImageUrl={fallbackImageUrl}
+          now={now}
+          onEventSelect={onEventSelect}
+          mainEvent={showMain ? {
+            label: mainLabel,
+            imageUrl: mainImageUrl,
+            selected: selectedEventId === null,
+            onSelect: () => onEventSelect(null),
+          } : undefined}
+        />
       )}
 
-      {/* Upcoming Events List */}
       {hasUpcomingSection && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Upcoming Events</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {upcomingList.map((evt, idx) => {
-              const status = getEventStatus(evt);
-              const timeRemaining = getTimeRemaining(evt);
-              const isSelected = selectedEventId === evt.id;
-              const eventImageUrl = normalizeImageUrl(evt.image_url) || fallbackImageUrl
-              const startText = formatEventDateTime(evt.start_time)
-              const endText = formatEventDateTime(evt.end_time)
-              const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
-              const endLabel = endText ? ((evt.end_time && new Date(evt.end_time) > now) ? 'Ends' : 'Ended') : null
-              return (
-                <motion.button
-                  key={evt.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
-                  onClick={() => onEventSelect(evt.id)}
-                  className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
-                >
-                  <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
-                        ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-600 dark:border-indigo-400 ring-2 ring-indigo-600 dark:ring-indigo-400'
-                        : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400'
-                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
-                  >
-                    {eventImageUrl ? (
-                      <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                        <img
-                          src={eventImageUrl}
-                          alt={evt.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
-                        No image
-                      </div>
-                    )}
-
-                    <div className="flex-1 p-4 flex flex-col">
-                      <div className="mb-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">
-                            {evt.name}
-                          </h4>
-                          {evt.isLocked && <Lock size={16} className="text-gray-500" />}
-                        </div>
-                        <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
-                          {status.icon} {status.label}
-                        </div>
-                      </div>
-
-                      {evt.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
-                          {evt.description}
-                        </p>
-                      )}
-
-                      <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                        {startText && startLabel && (
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} />
-                            <span>{startLabel}: {startText}</span>
-                          </div>
-                        )}
-                        {endText && endLabel && (
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} />
-                            <span>{endLabel}: {endText}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} />
-                          <span>{timeRemaining}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
+        <EventsList
+          title="Upcoming Events"
+          events={upcomingList}
+          selectedEventId={selectedEventId}
+          fallbackImageUrl={fallbackImageUrl}
+          now={now}
+          onEventSelect={onEventSelect}
+        />
       )}
 
-      {/* Ended Events List */}
       {endedEvents.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 mt-8">Ended Events</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {endedEvents.map((evt, idx) => {
-              const status = getEventStatus(evt);
-              const timeRemaining = getTimeRemaining(evt);
-              const isSelected = selectedEventId === evt.id;
-              const eventImageUrl = normalizeImageUrl(evt.image_url) || fallbackImageUrl
-              const startText = formatEventDateTime(evt.start_time)
-              const endText = formatEventDateTime(evt.end_time)
-              const startLabel = startText ? ((evt.start_time && new Date(evt.start_time) > now) ? 'Starts' : 'Started') : null
-              const endLabel = endText ? ((evt.end_time && new Date(evt.end_time) > now) ? 'Ends' : 'Ended') : null
-              return (
-                <motion.button
-                  key={evt.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: idx * 0.05 }}
-                  onClick={() => onEventSelect(evt.id)}
-                  className="h-full text-left transition transform group bg-transparent p-0 border-none shadow-none"
-                >
-                  <Card
-                    className={`h-full flex flex-col overflow-hidden transition-all duration-200 ${isSelected
-                        ? 'bg-gray-100 dark:bg-gray-900/20 border-gray-600 dark:border-gray-400 ring-2 ring-gray-600 dark:ring-gray-400'
-                        : 'bg-white dark:bg-gray-800 hover:shadow-xl hover:border-gray-400 dark:hover:border-gray-400'
-                      } group-hover:scale-[1.025] group-hover:-translate-y-1 group-hover:shadow-2xl`}
-                  >
-                    {/* Image */}
-                    {eventImageUrl ? (
-                      <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                        <img
-                          src={eventImageUrl}
-                          alt={evt.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-72 w-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-semibold text-gray-500 dark:text-gray-300">
-                        No image
-                      </div>
-                    )}
-
-                    {/* Content */}
-                    <div className="flex-1 p-4 flex flex-col">
-                      {/* Title & Status */}
-                      <div className="mb-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-bold text-lg text-gray-900 dark:text-white">
-                            {evt.name}
-                          </h4>
-                          {evt.isLocked && <Lock size={16} className="text-gray-500" />}
-                        </div>
-                        <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${status.color}`}>
-                          {status.icon} {status.label}
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      {evt.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-1">
-                          {evt.description}
-                        </p>
-                      )}
-
-                      {/* Time Info */}
-                      <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-3">
-                        {startText && startLabel && (
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} />
-                            <span>{startLabel}: {startText}</span>
-                          </div>
-                        )}
-                        {endText && endLabel && (
-                          <div className="flex items-center gap-2">
-                            <Calendar size={14} />
-                            <span>{endLabel}: {endText}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} />
-                          <span>{timeRemaining}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.button>
-              );
-            })}
-          </div>
-        </div>
+        <EventsList
+          title="Ended Events"
+          events={endedEvents}
+          selectedEventId={selectedEventId}
+          fallbackImageUrl={fallbackImageUrl}
+          now={now}
+          onEventSelect={onEventSelect}
+          tone="ended"
+          titleClassName="mb-3 mt-8"
+        />
       )}
 
-      {/* Empty State */}
-      {!hasAvailableSection && !hasUpcomingSection && endedEvents.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-4xl mb-2">📭</div>
-          <p className="text-gray-500 dark:text-gray-400">No events scheduled yet</p>
-        </div>
-      )}
+      {isEmpty && <EventsEmptyState />}
     </div>
   )
 }

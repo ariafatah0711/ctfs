@@ -16,3 +16,5 @@ export {
   setChallengeMaintenance,
   updateChallenge,
 } from '@/shared/lib'
+
+export * from './admin-challenge-filters'

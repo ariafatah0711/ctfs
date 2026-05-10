@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table"
-import { Button } from '../../../shared/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
+import { Button } from '@/shared/ui/button'
 import { LeaderboardEntry } from '@/shared/types'
 
 interface ScoreboardTableProps {

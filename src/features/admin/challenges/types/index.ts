@@ -49,6 +49,15 @@ export type AdminScope = {
   event_ids: string[]
 }
 
+export type AdminChallengeEventId = string | null | 'all'
+
+export type AdminChallengeFilterState = {
+  category: string
+  difficulty: string
+  search: string
+  feature: 'T' | 'S' | 'N'
+}
+
 export type ChallengePayload = {
   title: string
   description: string

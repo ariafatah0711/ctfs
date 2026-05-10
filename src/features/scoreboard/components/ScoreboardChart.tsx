@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic'
-import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card"
-import { Skeleton } from "@/shared/ui/skeleton"
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
+import { Skeleton } from '@/shared/ui/skeleton'
 import { LeaderboardEntry } from '@/shared/types'
 
 const Plot = dynamic(() => import('react-plotly.js'), {
@@ -15,19 +15,19 @@ interface ScoreboardChartProps {
 
 const ScoreboardChart: React.FC<ScoreboardChartProps> = ({ leaderboard, isDark }) => {
   // Fungsi untuk truncate username
-  const truncate = (str: string, n: number) => str.length > n ? str.slice(0, n) + '...' : str;
+  const truncate = (str: string, n: number) => str.length > n ? str.slice(0, n) + '...' : str
 
   const chartData = leaderboard.slice(0, 10).map((entry) => {
-    const x = entry.progress.map((p) => {
-      const date = new Date(p.date)
+    const x = entry.progress.map((point) => {
+      const date = new Date(point.date)
       const offset = date.getTimezoneOffset() * 60000
       return new Date(date.getTime() - offset).toISOString().slice(0, 16)
     })
-    const shortName = truncate(entry.username, 16);
+    const shortName = truncate(entry.username, 16)
     return {
       x,
-      y: entry.progress.map((p) => p.score),
-      text: entry.progress.map((p) => `${shortName} - ${p.score}`),
+      y: entry.progress.map((point) => point.score),
+      text: entry.progress.map((point) => `${shortName} - ${point.score}`),
       hovertemplate: '%{x}<br>%{text}<extra></extra>',
       mode: 'lines+markers',
       name: shortName,
