@@ -1,7 +1,15 @@
+export const NXCTF = {
+  nxctf_title: 'NXCTF',
+  nxctf_logo: 'https://raw.githubusercontent.com/nxctf/assets/refs/heads/main/logo/logo-no-bg.svg',
+  nxctf_discord: 'https://discord.gg/5etKks6aQQ',
+  nxctf_donation: 'https://saweria.co/ariafatah',
+  nxctf_github: 'https://github.com/nxctf/nxctf',
+  nxctf_github_org: 'https://github.com/nxctf',
+  nxctf_author: 'https://github.com/ariafatah0711',
+  nxctf_docs: 'https://docs.nxctf.my.id/'
+}
+
 export const LINKS = {
-  github: 'https://github.com/nxctf/nxctf',
-  discord: 'https://discord.gg/5etKks6aQQ',
-  docs: 'https://docs.nxctf.my.id/',
   nextjs: 'https://nextjs.org/',
   tailwind: 'https://tailwindcss.com/',
   framer: 'https://www.framer.com/motion/',

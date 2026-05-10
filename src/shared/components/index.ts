@@ -5,6 +5,7 @@ export { default as Loader } from '@/shared/components/custom/loading'
 export { default as TitlePage } from '@/shared/components/custom/TitlePage'
 export { default as DevConfigDialog } from '@/shared/components/custom/DevConfigDialog'
 export { default as EmptyState } from '@/shared/components/EmptyState'
+export { default as BrandLogo } from '@/shared/components/custom/BrandLogo'
 
 export * as userComponents from './user'
 export * as customComponents from './custom'

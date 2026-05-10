@@ -1,6 +1,6 @@
 type Nullable<T> = T | null | undefined
 
-export type CtfSettingsV1 = {
+export type nxctfettingsV1 = {
   v: 1
   theme?: 'light' | 'dark'
   notif?: {
@@ -20,7 +20,7 @@ export type CtfSettingsV1 = {
   }
 }
 
-const STORE_KEY = 'ctfs_settings_v1'
+const STORE_KEY = 'nxctf_settings_v1'
 
 const safeJsonParse = <T,>(raw: string | null): T | null => {
   if (!raw) return null
@@ -31,20 +31,20 @@ const safeJsonParse = <T,>(raw: string | null): T | null => {
   }
 }
 
-const readSettingsNoMigrate = (): CtfSettingsV1 => {
+const readSettingsNoMigrate = (): nxctfettingsV1 => {
   if (typeof window === 'undefined') return { v: 1 }
   const raw = window.localStorage.getItem(STORE_KEY)
-  const parsed = safeJsonParse<CtfSettingsV1>(raw)
+  const parsed = safeJsonParse<nxctfettingsV1>(raw)
   if (!parsed || parsed.v !== 1) return { v: 1 }
   return parsed
 }
 
-const writeSettings = (settings: CtfSettingsV1) => {
+const writeSettings = (settings: nxctfettingsV1) => {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(STORE_KEY, JSON.stringify(settings))
 }
 
-const migrateLegacyNonUserKeysIfNeeded = (): CtfSettingsV1 => {
+const migrateLegacyNonUserKeysIfNeeded = (): nxctfettingsV1 => {
   if (typeof window === 'undefined') return { v: 1 }
 
   const settings = readSettingsNoMigrate()
@@ -118,7 +118,7 @@ const migrateLegacyNonUserKeysIfNeeded = (): CtfSettingsV1 => {
   return settings
 }
 
-const migrateTutorialFromUserKeysIfNeeded = (userId: Nullable<string>): CtfSettingsV1 => {
+const migrateTutorialFromUserKeysIfNeeded = (userId: Nullable<string>): nxctfettingsV1 => {
   if (typeof window === 'undefined') return { v: 1 }
 
   const settings = migrateLegacyNonUserKeysIfNeeded()
@@ -138,10 +138,10 @@ const migrateTutorialFromUserKeysIfNeeded = (userId: Nullable<string>): CtfSetti
     } catch {}
   }
 
-  // If we previously stored tutorial in ctfs_user_state_v1:<userId>, migrate it into settings
+  // If we previously stored tutorial in nxctf_user_state_v1:<userId>, migrate it into settings
   if (typeof settings.tutorial?.challenge_guide_seen !== 'boolean' && userId) {
     try {
-      const userStateKey = `ctfs_user_state_v1:${String(userId)}`
+      const userStateKey = `nxctf_user_state_v1:${String(userId)}`
       const raw = window.localStorage.getItem(userStateKey)
       const parsed = safeJsonParse<any>(raw)
       const maybeSeen = parsed?.tutorial?.challenge_guide_seen
@@ -162,11 +162,11 @@ const migrateTutorialFromUserKeysIfNeeded = (userId: Nullable<string>): CtfSetti
   return settings
 }
 
-export const getSettings = (): CtfSettingsV1 => {
+export const getSettings = (): nxctfettingsV1 => {
   return migrateLegacyNonUserKeysIfNeeded()
 }
 
-export const updateSettings = (updater: (prev: CtfSettingsV1) => CtfSettingsV1) => {
+export const updateSettings = (updater: (prev: nxctfettingsV1) => nxctfettingsV1) => {
   if (typeof window === 'undefined') return
   const prev = migrateLegacyNonUserKeysIfNeeded()
   const next = updater(prev)

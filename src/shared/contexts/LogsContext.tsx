@@ -183,7 +183,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
     if (eventId === 'all') return null
     // Normalize null (Main) to a stable cache key.
     const normalizedId = eventId === null ? 'main' : String(eventId)
-    const key = `ctfs_event_challenge_ids_v1:${normalizedId}`
+    const key = `nxctf_event_challenge_ids_v1:${normalizedId}`
     // check in-memory
     if (eventChallengeCacheRef.current[normalizedId]) return new Set(eventChallengeCacheRef.current[normalizedId])
     // check sessionStorage
@@ -205,7 +205,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
       eventChallengeCacheRef.current[normalizedId] = ids
       try {
         if (typeof window !== 'undefined') sessionStorage.setItem(key, JSON.stringify(ids))
-      } catch (err) {}
+      } catch (err) { }
       return new Set(ids)
     } catch (err) {
       console.warn('getEventChallengeIds failed', err)

@@ -1,5 +1,5 @@
 // LocalStorage keys for persisting challenge state
-const SELECTED_CHALLENGE_KEY = 'ctfs:selectedChallengeId'
+const SELECTED_CHALLENGE_KEY = 'nxctf:selectedChallengeId'
 
 /**
  * Persist selected challenge ID to localStorage

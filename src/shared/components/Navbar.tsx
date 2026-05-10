@@ -496,7 +496,7 @@ export default function Navbar() {
                         </span>
                       </Link>
                       <Link
-                        href={APP.links.docs}
+                        href={APP.nxctf.nxctf_docs}
                         target="_blank"
                         onClick={() => setDocsOpen(false)}
                         className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}

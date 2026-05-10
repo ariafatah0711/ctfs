@@ -70,7 +70,7 @@ export default function LoginPage() {
         className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8"
       >
         <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Sign in to CTFS
+          Sign in to nxctf
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-300">
           Or{' '}
@@ -125,14 +125,14 @@ export default function LoginPage() {
 
           {Config.captchaEnabled && (
             <div className="w-full flex justify-center">
-                <Turnstile
-                  siteKey={Config.captchaSiteKey}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                  onExpire={() => setCaptchaToken(null)}
-                  options={{
-                    theme: 'auto'
-                  }}
-                />
+              <Turnstile
+                siteKey={Config.captchaSiteKey}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onExpire={() => setCaptchaToken(null)}
+                options={{
+                  theme: 'auto'
+                }}
+              />
             </div>
           )}
 
@@ -148,6 +148,6 @@ export default function LoginPage() {
           <GoogleLoginButton />
         </form>
       </motion.div>
-  </div>
+    </div>
   )
 }

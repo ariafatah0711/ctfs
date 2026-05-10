@@ -9,7 +9,7 @@ export type ChallengeFilters = {
   feature: 'T' | 'S' | 'N'
 }
 
-const STORAGE_KEY = 'ctfs:challengeFilters'
+const STORAGE_KEY = 'nxctf:challengeFilters'
 
 const defaultFilters: ChallengeFilters = {
   status: 'all',
@@ -64,7 +64,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
       try {
         const raw = JSON.stringify({ filters: next, layoutMode })
         localStorage.setItem(STORAGE_KEY, raw)
-      } catch {}
+      } catch { }
       return next
     })
   }, [layoutMode])
@@ -75,7 +75,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
       try {
         const raw = JSON.stringify({ filters, layoutMode: next, sortMode })
         localStorage.setItem(STORAGE_KEY, raw)
-      } catch {}
+      } catch { }
       return next
     })
   }, [filters, sortMode])
@@ -86,7 +86,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
       try {
         const raw = JSON.stringify({ filters, layoutMode, sortMode: next })
         localStorage.setItem(STORAGE_KEY, raw)
-      } catch {}
+      } catch { }
       return next
     })
   }, [filters, layoutMode])
@@ -94,7 +94,7 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const resetFilters = React.useCallback(() => {
     try {
       localStorage.removeItem(STORAGE_KEY)
-    } catch {}
+    } catch { }
     setFiltersState(defaultFilters)
   }, [])
 

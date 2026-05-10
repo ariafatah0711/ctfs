@@ -1,4 +1,4 @@
-import { LINKS, YEAR, DIFFICULTY_STYLES } from './const'
+import { LINKS, YEAR, DIFFICULTY_STYLES, NXCTF } from './const'
 
 export const APP = {
   shortName: "NXCTF",
@@ -38,7 +38,7 @@ export const APP = {
     hideScoreboardIndividual: false,
     hidescoreboardTotal: false,
   },
-  hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event CTFs)
+  hideEventMain: false, // enable / disable hiding "Main Event" in event selector (useful for single event nxctf)
   // Label untuk challenges tanpa event_id (event_id = NULL). Jika kosong, fallback ke "Main".
 
   eventMainLabel: "main",
@@ -53,9 +53,13 @@ export const APP = {
     mode: process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'yes' ? 'yes' : 'no',
   },
 
-  links: LINKS,
+  links: {
+    ...LINKS,
+    discord: "https://discord.gg/5etKks6aQQ",
+  },
   difficultyStyles: DIFFICULTY_STYLES,
   year: YEAR,
+  nxctf: NXCTF
 }
 
 export default APP

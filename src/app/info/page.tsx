@@ -3,34 +3,13 @@
 // React Imports
 import { useEffect, useState } from 'react'
 import { motion } from "framer-motion";
-import { Star, GitBranch, Users, Github, BookOpen, ScrollText, Info, ListOrdered } from 'lucide-react'
+import { Star, GitBranch, Users, Github, BookOpen, ScrollText, Info, ListOrdered, MessageSquare, Clock } from 'lucide-react'
 
 // Shared Imports
 import APP from "@/config";
 import { VERSION, BUILD_TIME } from "@/version";
-import { Loader } from '@/shared/components';
+import { Loader, ImageWithFallback, BrandLogo } from '@/shared/components';
 import { Footer } from "@/shared/components/custom";
-
-function DiscordIcon({
-  size = 16,
-  className = '',
-}: {
-  size?: number;
-  className?: string;
-}) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden
-    >
-      <path d="M20.317 4.369a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.078.037c-.21.375-.444.864-.608 1.249a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.249.077.077 0 0 0-.078-.037 19.736 19.736 0 0 0-4.885 1.515.069.069 0 0 0-.032.027C.533 9.045-.32 13.579.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.201 13.201 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.125-.094.25-.192.369-.291a.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.062 0a.073.073 0 0 1 .078.01c.12.099.246.197.372.291a.077.077 0 0 1-.006.128 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.106c.36.699.772 1.364 1.225 1.994a.076.076 0 0 0 .084.028 19.876 19.876 0 0 0 5.993-3.03.077.077 0 0 0 .031-.056c.5-5.177-.838-9.673-3.548-13.66a.061.061 0 0 0-.031-.028zM8.02 15.331c-1.183 0-2.156-1.085-2.156-2.419 0-1.333.955-2.418 2.156-2.418 1.21 0 2.175 1.094 2.156 2.418 0 1.334-.946 2.419-2.156 2.419zm7.974 0c-1.183 0-2.156-1.085-2.156-2.419 0-1.333.955-2.418 2.156-2.418 1.21 0 2.175 1.094 2.156 2.418 0 1.334-.946 2.419-2.156 2.419z" />
-    </svg>
-  );
-}
 
 const CONTRIBUTORS = [
   "@ariafatah0711",
@@ -70,9 +49,9 @@ function fillContributors(list: string[], minLength = 14) {
 const filledContributors = fillContributors(CONTRIBUTORS, 14);
 
 const LINKS = [
-  { name: "GitHub", href: APP.links?.github || "#" },
-  { name: "Docs", href: APP.links?.docs || "#" },
-  { name: "Discord", href: APP.links?.discord || "#" },
+  { name: "GitHub", href: APP.nxctf.nxctf_github || "#", icon: Github },
+  { name: "Docs", href: APP.nxctf.nxctf_docs || "#", icon: BookOpen },
+  { name: "Discord", href: APP.nxctf?.nxctf_discord || "#", icon: MessageSquare },
 ];
 
 export default function InfoPage() {
@@ -80,10 +59,9 @@ export default function InfoPage() {
   const { loading } = require("@/shared/contexts").useAuth();
 
   useEffect(() => {
-    const repoUrl = APP.links?.github
+    const repoUrl = APP.nxctf.nxctf_github
     if (!repoUrl) return
     try {
-      // extract owner/repo from URL like https://github.com/owner/repo
       const m = repoUrl.match(/github\.com\/(.+?)\/(.+?)(?:\.git|\/|$)/i)
       if (!m) return
       const owner = m[1]
@@ -104,140 +82,229 @@ export default function InfoPage() {
   if (loading) return <Loader fullscreen color="text-orange-500" />;
 
   return (
-    <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-gray-50/100 dark:bg-gray-900/100 relative overflow-hidden">
-      <main className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        {/* Decorative background shapes */}
-        <div className="absolute -top-32 -right-32 w-[28rem] h-[28rem] bg-orange-100 dark:bg-orange-900 rounded-full blur-3xl opacity-40 animate-pulse" />
-        <div className="absolute -bottom-32 -left-32 w-[28rem] h-[28rem] bg-orange-200 dark:bg-orange-800 rounded-full blur-3xl opacity-30 animate-pulse" />
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30 overflow-hidden">
+      {/* Subtle Glowing Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-orange-600/10 blur-[120px]" />
+      </div>
 
-        {/* HERO */}
-        <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} layout>
-          <h1 className="text-5xl font-extrabold tracking-tight">
-            <span className="text-orange-600 dark:text-orange-400 drop-shadow-lg">CTF</span><span className="text-orange-500">:S</span>
-          </h1>
+      {/* Faint Watermark Logo */}
+      <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02] z-0">
+        <ImageWithFallback
+          src={APP.nxctf?.nxctf_logo}
+          alt={`${APP.shortName} watermark`}
+          size={1000}
+          rounded={false}
+        />
+      </div>
 
-          <p className="mt-2 text-gray-400">Community-driven Capture The Flag platform</p>
+      <main className="flex-1 flex flex-col items-center justify-center relative z-10 w-full px-6 py-12 lg:py-16">
+        {/* HERO SECTION */}
+        <section className="w-full max-w-4xl mx-auto flex flex-col items-center text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-5xl sm:text-6xl font-extrabold tracking-tight mb-4 flex flex-row items-center justify-center gap-4"
+          >
+            <ImageWithFallback
+              src={APP.image_logo}
+              alt={`${APP.shortName} logo`}
+              size={160}
+              rounded={false}
+            />
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl sm:text-6xl mb-2"
+            >
+              <BrandLogo name={APP.nxctf.nxctf_title} />
+            </motion.h1>
+          </motion.h1>
 
-          <p className="mt-4 font-mono text-sm text-gray-300">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mb-2 leading-relaxed"
+          >
+            A modern Capture The Flag (CTF) platform built for security competitions, workshops, and training.
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="font-mono text-sm text-gray-500 dark:text-gray-500 mb-8"
+          >
             &gt; {APP.description || "Ngehack untuk senang-senang, bukan buat nyari profit"}
-          </p>
+          </motion.p>
+        </section>
+
+        {/* COMBINED STATS & PROJECT INFO STRIP */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="w-full max-w-3xl mx-auto flex flex-col mb-12 p-5 rounded-2xl bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 backdrop-blur-xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(249,115,22,0.05)] transition-all duration-300"
+        >
+          {/* Top: GitHub Stats */}
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pb-5">
+            {repoStats && (
+              <>
+                <div className="flex items-center gap-4">
+                  <div className="p-2.5 bg-orange-100 dark:bg-orange-500/10 rounded-xl">
+                    <Star className="text-orange-600 dark:text-orange-400 w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{repoStats.stars}</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">Stars</div>
+                  </div>
+                </div>
+                <div className="h-10 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+                <div className="flex items-center gap-4">
+                  <div className="p-2.5 bg-orange-100 dark:bg-orange-500/10 rounded-xl">
+                    <GitBranch className="text-orange-600 dark:text-orange-400 w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{repoStats.forks}</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">Forks</div>
+                  </div>
+                </div>
+                <div className="h-10 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+              </>
+            )}
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-orange-100 dark:bg-orange-500/10 rounded-xl">
+                <Users className="text-orange-600 dark:text-orange-400 w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{CONTRIBUTORS.length}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">Contributors</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="w-full h-px bg-gray-200 dark:bg-gray-800"></div>
+
+          {/* Bottom: Technical Details */}
+          <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 sm:gap-x-8 pt-4 text-sm font-mono text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <Info size={16} className="text-blue-500" />
+              <span className="font-medium text-gray-700 dark:text-gray-300">v{VERSION}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Clock size={16} className="text-blue-500" />
+              <span>{BUILD_TIME}</span>
+            </div>
+
+            <a href={`${APP.nxctf.nxctf_github}/blob/main/LICENSE` || "https://www.apache.org/licenses/LICENSE-2.0"} target="_blank" rel="noopener" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+              <ScrollText size={16} className="group-hover:text-blue-500 transition-colors" /> Apache 2.0
+            </a>
+
+            <a href={`${APP.nxctf.nxctf_github}/blob/main/CHANGELOG.md` || '#'} target="_blank" rel="noopener" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+              <ListOrdered size={16} className="group-hover:text-blue-500 transition-colors" /> Changelog
+            </a>
+          </div>
         </motion.div>
 
-        {/* LINKS */}
-        <div className="mt-6 flex gap-4">
+        {/* QUICK LINKS */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16"
+        >
           {LINKS.map((link, i) => {
-            let icon = null;
-            if (link.name === 'GitHub') icon = <Github size={18} className="mr-1" />;
-            if (link.name === 'Docs') icon = <BookOpen size={18} className="mr-1" />;
-            if (link.name === 'Discord')
-              icon = <DiscordIcon size={18} className="mr-1" />;
-            return link.href !== "#" ? (
+            const Icon = link.icon;
+            if (link.href === "#") return null;
+            return (
               <a
                 key={i}
                 href={link.href}
                 target="_blank"
                 rel="noopener"
-                className="px-4 py-2 border border-gray-400 dark:border-orange-700 rounded-md font-mono text-sm flex items-center transition
-                  text-orange-600 dark:text-orange-400
-                  hover:border-orange-500 hover:text-orange-500 dark:hover:text-orange-300"
+                className="group flex flex-col items-center justify-center p-6 transition-all duration-300 bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 rounded-2xl backdrop-blur-xl hover:bg-white dark:hover:bg-[#151a28] hover:-translate-y-1 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)]"
               >
-                {icon} {link.name}
+                <div className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 group-hover:text-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <span className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">
+                  {link.name}
+                </span>
               </a>
-            ) : null;
+            );
           })}
-        </div>
+        </motion.div>
 
-        {/* DIVIDER */}
-        <div className="my-10 w-24 border-t border-gray-700" />
-
-        {/* CONTRIBUTORS */}
-        <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2"><Users size={20} className="mr-1" /> Contributors</h2>
-
-        <div className="marquee-group relative w-full max-w-4xl overflow-hidden space-y-4">
-          {/* ROW 1 */}
-          <div className="marquee marquee-left">
-            <div className="marquee-track" style={{ willChange: 'transform' }}>
-              {[...filledContributors, ...filledContributors].map((name, i) => {
-                const username = name.replace("@", "");
-                return (
-                  <a
-                    key={`top-${i}`}
-                    href={`https://github.com/${username}`}
-                    target="_blank"
-                    rel="noopener"
-                    className="flex items-center gap-2 shrink-0 group px-2"
-                  >
-                    <ProfileAvatar username={username} />
-                    <span
-                      className="text-xs font-mono text-gray-300
-                             group-hover:text-orange-400 transition"
-                    >
-                      {username}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
+        {/* CONTRIBUTORS MARQUEE */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="w-full max-w-5xl mx-auto mb-8 relative"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
+              <Users size={24} className="text-blue-500" /> Built by the Community
+            </h2>
           </div>
 
-          {/* ROW 2 */}
-          <div className="marquee marquee-right">
-            <div className="marquee-track" style={{ willChange: 'transform' }}>
-              {[...filledContributors, ...filledContributors].map((name, i) => {
-                const username = name.replace("@", "");
-                return (
-                  <a
-                    key={`bot-${i}`}
-                    href={`https://github.com/${username}`}
-                    target="_blank"
-                    rel="noopener"
-                    className="flex items-center gap-2 shrink-0 group px-2"
-                  >
-                    <ProfileAvatar username={username} />
-                    <span
-                      className="text-xs font-mono text-gray-300
-                             group-hover:text-orange-400 transition"
+          <div className="marquee-group relative w-full overflow-hidden space-y-4 py-2">
+            {/* Gradient Fades for Marquee */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#fafafa] dark:from-[#0b0f19] to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#fafafa] dark:from-[#0b0f19] to-transparent z-10" />
+
+            {/* ROW 1 */}
+            <div className="marquee marquee-left">
+              <div className="marquee-track" style={{ willChange: 'transform' }}>
+                {[...filledContributors, ...filledContributors].map((name, i) => {
+                  const username = name.replace("@", "");
+                  return (
+                    <a
+                      key={`top-${i}`}
+                      href={`https://github.com/${username}`}
+                      target="_blank"
+                      rel="noopener"
+                      className="flex items-center gap-3 shrink-0 group px-4 py-2 mx-2 rounded-full bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 backdrop-blur-md hover:bg-white dark:hover:bg-gray-800 hover:border-blue-500/50 hover:shadow-sm transition-all"
                     >
-                      {username}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* DIVIDER */}
-        <div className="my-10 w-24 border-t border-gray-700" />
-
-        {/* VERSION & LICENSE */}
-        <div className="flex flex-col items-center gap-1 mt-2">
-          <div className="flex items-center gap-3">
-            <div className="text-xs font-mono text-gray-500 flex items-center gap-1">
-              <Info size={15} className="mr-1" /> v{VERSION} · build {BUILD_TIME}
-            </div>
-            {repoStats && (
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <a href={APP.links.github} target="_blank" rel="noopener" className="inline-flex items-center gap-1 hover:text-orange-500">
-                  <Star size={14} className="text-yellow-500" /> {repoStats.stars}
-                </a>
-                <a href={APP.links.github} target="_blank" rel="noopener" className="inline-flex items-center gap-1 hover:text-orange-500">
-                  <GitBranch size={14} className="text-gray-500" /> {repoStats.forks}
-                </a>
+                      <ProfileAvatar username={username} />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-500 transition-colors">
+                        {username}
+                      </span>
+                    </a>
+                  );
+                })}
               </div>
-            )}
-          </div>
-          <div className="text-xs font-mono text-gray-500 flex items-center gap-1 mt-1">
-            <ScrollText size={15} className="mr-1" />
-            <span>Licensed under <a href={`${APP.links.github}/blob/main/LICENSE` || "https://www.apache.org/licenses/LICENSE-2.0"} target="_blank" rel="noopener" className="underline hover:text-orange-500">Apache 2.0</a></span>
-          </div>
+            </div>
 
-          {/* Change Log */}
-          <div className="text-xs font-mono text-gray-500 flex items-center gap-1 mt-1">
-            <ListOrdered size={15} className="mr-1" />
-            <span>See the <a href={`${APP.links.github}/blob/main/CHANGELOG.md` || '#'} target="_blank" rel="noopener" className="underline hover:text-orange-500">Change Log</a></span>
+            {/* ROW 2 */}
+            <div className="marquee marquee-right">
+              <div className="marquee-track" style={{ willChange: 'transform' }}>
+                {[...filledContributors, ...filledContributors].map((name, i) => {
+                  const username = name.replace("@", "");
+                  return (
+                    <a
+                      key={`bot-${i}`}
+                      href={`https://github.com/${username}`}
+                      target="_blank"
+                      rel="noopener"
+                      className="flex items-center gap-3 shrink-0 group px-4 py-2 mx-2 rounded-full bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 backdrop-blur-md hover:bg-white dark:hover:bg-gray-800 hover:border-blue-500/50 hover:shadow-sm transition-all"
+                    >
+                      <ProfileAvatar username={username} />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-500 transition-colors">
+                        {username}
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </div>
+        </motion.div>
+
       </main>
 
       <Footer />
@@ -245,7 +312,7 @@ export default function InfoPage() {
   );
 }
 
-function ProfileAvatar({ username, size = 36 }: { username: string; size?: number }) {
+function ProfileAvatar({ username, size = 32 }: { username: string; size?: number }) {
   const [loaded, setLoaded] = useState(false)
   const [errored, setErrored] = useState(false)
   const url = `https://github.com/${username}.png`
@@ -261,7 +328,7 @@ function ProfileAvatar({ username, size = 36 }: { username: string; size?: numbe
     return () => { cancelled = true }
   }, [url])
 
-  const sizeClass = size === 36 ? 'w-9 h-9' : `w-[${size}px] h-[${size}px]`
+  const sizeClass = size === 32 ? 'w-8 h-8' : `w-[${size}px] h-[${size}px]`
 
   if (!loaded) {
     return (
@@ -273,7 +340,7 @@ function ProfileAvatar({ username, size = 36 }: { username: string; size?: numbe
     <img
       src={url}
       alt={`${username} avatar`}
-      className={`${sizeClass} rounded-full grayscale group-hover:grayscale-0 transition-opacity duration-200`}
+      className={`${sizeClass} rounded-full grayscale group-hover:grayscale-0 transition-all duration-300 shadow-sm`}
       style={{ opacity: loaded && !errored ? 1 : 0 }}
     />
   )
