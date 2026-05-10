@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Trophy } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
+import { EmptyState } from '@/shared/components'
 import { DIALOG_CONTENT_CLASS_3XL } from '@/shared/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { TeamChallenge } from '../types'
@@ -45,7 +46,12 @@ export default function TeamSolves({
 
         <CardContent>
           {challenges.length === 0 ? (
-            <div className="text-sm text-gray-500 dark:text-gray-400">No solves yet.</div>
+            <EmptyState
+              icon={<Trophy className="w-full h-full" />}
+              title="No solves yet"
+              description="Challenges solved by your team will appear here."
+              containerHeight="py-8"
+            />
           ) : (
             <Table>
               <TableHeader>

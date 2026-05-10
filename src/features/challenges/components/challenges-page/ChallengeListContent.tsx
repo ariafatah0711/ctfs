@@ -1,8 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { Lock } from 'lucide-react'
 import APP from '@/config'
-import { Loader } from '@/shared/components'
+import { Loader, EmptyState } from '@/shared/components'
 import type { ChallengeWithSolve } from '@/shared/types'
 import type { ChallengeFilterSettings, EventSelectorValue } from '../../types'
 import ChallengeCard from '../ChallengeCard'
@@ -69,9 +70,12 @@ export default function ChallengeListContent({
 
   if (eventJoinBlocked) {
     return (
-      <div className="text-center py-10 text-sm text-gray-500 dark:text-gray-400">
-        Challenge dikunci sampai kamu join event.
-      </div>
+      <EmptyState
+        icon={<Lock className="w-full h-full" />}
+        title="Challenge dikunci"
+        description="Silakan join event terlebih dahulu untuk membuka challenge ini."
+        containerHeight="py-16"
+      />
     )
   }
 

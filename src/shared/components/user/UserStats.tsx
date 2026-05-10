@@ -4,11 +4,13 @@
 import React from "react"
 import { motion } from "framer-motion"
 import dynamic from "next/dynamic"
+import { ChartColumnDecreasing } from "lucide-react"
 
 // Shared Imports
 import APP from "@/config"
 import { Skeleton, Card, CardHeader, CardTitle, CardContent } from "@/shared/ui"
 import { useTheme } from "@/shared/contexts"
+import { EmptyState } from "@/shared/components"
 import { ChallengeWithSolve } from "@/shared/types"
 
 const Plot = dynamic(() => import("react-plotly.js"), {
@@ -72,12 +74,15 @@ export default function UserStatsPlotly({
       <motion.div className="space-y-6">
         <Card className="bg-white dark:bg-gray-800">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm text-center">User stats</CardTitle>
+            <CardTitle className="text-sm text-center w-full">User stats</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-              No stat data available. Solve some challenges to see stats here!
-            </div>
+            <EmptyState
+              icon={<ChartColumnDecreasing className="w-full h-full" />}
+              title="No stat data available"
+              description="Solve some challenges to see stats here!"
+              containerHeight="py-12"
+            />
           </CardContent>
         </Card>
       </motion.div>

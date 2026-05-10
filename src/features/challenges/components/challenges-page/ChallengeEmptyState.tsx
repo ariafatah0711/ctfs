@@ -1,6 +1,5 @@
-'use client'
-
 import { CalendarClock, CalendarX, CircleAlert, Search } from 'lucide-react'
+import { EmptyState } from '@/shared/components'
 import type { EventSelectorValue } from '../../types'
 
 type ChallengeEmptyStateProps = {
@@ -24,56 +23,38 @@ export default function ChallengeEmptyState({
   challengesCount,
   formatRemaining,
 }: ChallengeEmptyStateProps) {
+  const getIcon = () => {
+    if (typeof eventId === 'string' && selectedEventNotStarted) return <CalendarClock className="w-full h-full" />
+    if (typeof eventId === 'string' && selectedEventEnded) return <CalendarX className="w-full h-full" />
+    if (typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj) return <CircleAlert className="w-full h-full" />
+    return <Search className="w-full h-full" />
+  }
+
+  const getTitle = () => {
+    if (typeof eventId === 'string' && selectedEventNotStarted) return 'Event belum mulai'
+    if (typeof eventId === 'string' && selectedEventEnded) return 'Event telah berakhir'
+    if (typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj) return 'Event tidak ditemukan'
+    return challengesCount === 0 ? 'No challenges available' : 'No challenges match your filters'
+  }
+
+  const getDescription = () => {
+    if (typeof eventId === 'string' && selectedEventNotStarted) {
+      return `Starts in ${formatRemaining(selectedEventStart!.getTime() - nowDate.getTime())}`
+    }
+    if (typeof eventId === 'string' && selectedEventEnded) {
+      return 'Challenge untuk event ini sudah tidak tersedia.'
+    }
+    if (typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj) {
+      return 'Silakan pilih event lain.'
+    }
+    return challengesCount === 0 ? 'Check back later for new challenges' : 'Try adjusting your filter criteria'
+  }
+
   return (
-    <div className="text-center py-16">
-      <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-        {typeof eventId === 'string' && selectedEventNotStarted ? (
-          <CalendarClock className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-        ) : typeof eventId === 'string' && selectedEventEnded ? (
-          <CalendarX className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-        ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
-          <CircleAlert className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-        ) : (
-          <Search className="w-7 h-7 text-gray-400 dark:text-gray-500" />
-        )}
-      </div>
-      {typeof eventId === 'string' && selectedEventNotStarted ? (
-        <>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Event belum mulai
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            Starts in {formatRemaining(selectedEventStart!.getTime() - nowDate.getTime())}
-          </p>
-        </>
-      ) : typeof eventId === 'string' && selectedEventEnded ? (
-        <>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Event telah berakhir
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            Challenge untuk event ini sudah tidak tersedia.
-          </p>
-        </>
-      ) : typeof eventId === 'string' && eventId !== 'all' && !selectedEventObj ? (
-        <>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            Event tidak ditemukan
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            Silakan pilih event lain.
-          </p>
-        </>
-      ) : (
-        <>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {challengesCount === 0 ? 'No challenges available' : 'No challenges match your filters'}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400">
-            {challengesCount === 0 ? 'Check back later for new challenges' : 'Try adjusting your filter criteria'}
-          </p>
-        </>
-      )}
-    </div>
+    <EmptyState
+      icon={getIcon()}
+      title={getTitle()}
+      description={getDescription()}
+    />
   )
 }

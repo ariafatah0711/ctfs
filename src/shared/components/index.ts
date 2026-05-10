@@ -4,6 +4,7 @@ export { RulesMarkdownRenderer } from '@/shared/components/MarkdownRenderer'
 export { default as Loader } from '@/shared/components/custom/loading'
 export { default as TitlePage } from '@/shared/components/custom/TitlePage'
 export { default as DevConfigDialog } from '@/shared/components/custom/DevConfigDialog'
+export { default as EmptyState } from '@/shared/components/EmptyState'
 
 export * as userComponents from './user'
 export * as customComponents from './custom'

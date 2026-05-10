@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Coins, Sparkles, Users } from 'lucide-react'
 
 import { APP } from '@/config'
-import { Loader } from '@/shared/components'
+import { Loader, EmptyState } from '@/shared/components'
 import { EventSelect } from '@/shared/components/custom'
 import { Card, CardHeader, CardTitle, CardContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui'
 import { useAuth, useTheme, useEventContext } from '@/shared/contexts'
@@ -124,7 +124,12 @@ export default function TeamScoreboardPage() {
                   <Loader color="text-orange-500" />
                 </div>
               ) : entries.length === 0 ? (
-                <div className="text-sm text-gray-500 dark:text-gray-300">No teams yet.</div>
+                <EmptyState
+                  icon={<Users className="w-full h-full" />}
+                  title="No teams yet"
+                  description="Be the first to create or join a team!"
+                  containerHeight="py-12"
+                />
               ) : (
                 <Table>
                   <TableHeader>

@@ -29,7 +29,7 @@ export default function Home() {
         {/* Subtle background logo watermark */}
         <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.08] dark:opacity-[0.06] z-0">
           <ImageWithFallback
-            src={APP.image_icon}
+            src={APP.image_logo}
             alt={`${APP.shortName} watermark`}
             size={820}
             className="rounded-[3rem]"

@@ -1,8 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Search } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+import { EmptyState } from '@/shared/components'
 import { formatRelativeDate } from '../lib'
 import type { SolverRow } from '../types'
 
@@ -61,7 +62,12 @@ const SolversListCard: React.FC<SolversListCardProps> = ({
       </CardHeader>
       <CardContent>
         {solvers.length === 0 ? (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-300">No solvers found</div>
+          <EmptyState
+            icon={<Search className="w-full h-full" />}
+            title="No solvers found"
+            description="No one has solved this challenge yet or matches your search."
+            containerHeight="py-8"
+          />
         ) : (
           <motion.div
             className="divide-y border dark:border-gray-700 rounded-md overflow-hidden"

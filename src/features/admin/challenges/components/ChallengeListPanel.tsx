@@ -1,7 +1,9 @@
 import React from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { ShieldAlert } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+import { EmptyState } from '@/shared/components'
 import ChallengeFilterBar from '@/features/challenges/components/ChallengeFilterBar'
 import ChallengeListItem from './ChallengeListItem'
 import type { AdminChallengeEventId, AdminChallengeFilterState, Challenge, Event } from '../types'
@@ -82,7 +84,12 @@ const ChallengeListPanel: React.FC<ChallengeListPanelProps> = ({
 
           <div className="mt-4 space-y-2">
             {filteredChallenges.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No challenges found</div>
+              <EmptyState
+                icon={<ShieldAlert className="w-full h-full" />}
+                title="No challenges found"
+                description="Try adjusting your filters or add a new challenge."
+                containerHeight="py-8"
+              />
             ) : (
               <div className="divide-y border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
                 {filteredChallenges.map(challenge => (

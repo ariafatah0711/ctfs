@@ -1,11 +1,11 @@
 'use client'
 
-import { Coins, Droplet } from 'lucide-react'
-import { Loader } from '@/shared/components'
+import { Coins, Droplet, User, Rocket } from 'lucide-react'
+import { Loader, EmptyState } from '@/shared/components'
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { EventSelect } from '@/shared/components/custom'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
-import ScoreboardEmptyState from './ScoreboardEmptyState'
 import ScoreboardTable from './ScoreboardTable'
 
 export default function ScoreboardPage() {
@@ -90,22 +90,43 @@ export default function ScoreboardPage() {
           <div className="flex justify-center py-16">
             <Loader color="text-orange-500" />
           </div>
-        ) : !user ? null : isEmpty ? (
-          <ScoreboardEmptyState />
-        ) : (
+        ) : !user ? null : (
           <div className={`space-y-8 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
+            {stableLeaderboard.length > 0 && !isEmpty && (
+              <div>
+                <ScoreboardChart leaderboard={stableLeaderboard.length > 0 ? stableLeaderboard : leaderboard} isDark={isDark} />
+              </div>
+            )}
             <div>
-              <ScoreboardChart leaderboard={stableLeaderboard.length > 0 ? stableLeaderboard : leaderboard} isDark={isDark} />
-            </div>
-            <div>
-              <ScoreboardTable
-                leaderboard={leaderboard}
-                currentUsername={user?.username}
-                eventId={eventParam}
-                scoreColumnLabel={firstBloodMode ? 'First Blood' : undefined}
-                scoreColumnRenderer={(entry) => entry.score}
-                showAllLink={!firstBloodMode}
-              />
+              {isEmpty ? (
+                <Card className="bg-white dark:bg-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <EmptyState
+                      icon={<User className="w-full h-full" />}
+                      title="No challenges solved yet."
+                      description={
+                        <>
+                          Leaderboard is empty!<br />
+                          Be the first to solve a challenge <Rocket size={16} className="inline-block ml-1 text-orange-500" />
+                        </>
+                      }
+                      containerHeight="py-12"
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <ScoreboardTable
+                  leaderboard={leaderboard}
+                  currentUsername={user?.username}
+                  eventId={eventParam}
+                  scoreColumnLabel={firstBloodMode ? 'First Blood' : undefined}
+                  scoreColumnRenderer={(entry) => entry.score}
+                  showAllLink={!firstBloodMode}
+                />
+              )}
             </div>
           </div>
         )}

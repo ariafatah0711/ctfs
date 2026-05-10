@@ -1,6 +1,8 @@
 import React from 'react'
 import ChallengeFilterBar from '@/features/challenges/components/ChallengeFilterBar'
+import { Search } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle, Label } from '@/shared/ui'
+import { EmptyState } from '@/shared/components'
 import { DEFAULT_EVENT_FILTERS } from '../lib'
 import type { ChallengeLite, Event, FilterState } from '../types'
 
@@ -85,7 +87,11 @@ const BulkAssignChallengesCard: React.FC<BulkAssignChallengesCardProps> = ({
 
         <div className="mt-4 border border-gray-200 dark:border-gray-700 rounded-md max-h-[360px] overflow-auto bg-white dark:bg-gray-800">
           {filteredChallenges.length === 0 ? (
-            <div className="text-center py-6 text-gray-500 dark:text-gray-400">No challenges found</div>
+            <EmptyState
+              icon={<Search className="w-full h-full" />}
+              title="No challenges found"
+              containerHeight="py-6"
+            />
           ) : (
             filteredChallenges.map((challenge) => (
               <label key={challenge.id} className="flex items-center gap-3 px-3 py-2 border-b last:border-b-0 border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/40">
@@ -112,4 +118,3 @@ const BulkAssignChallengesCard: React.FC<BulkAssignChallengesCardProps> = ({
 }
 
 export default BulkAssignChallengesCard
-

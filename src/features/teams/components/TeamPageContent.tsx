@@ -1,12 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { InfoIcon, Users, Crown, ChartColumnDecreasing, Copy, Wrench, RefreshCw, LogOut, Trash2, CheckCircle2, Sparkles, Coins } from 'lucide-react'
+import { InfoIcon, Users, Crown, ChartColumnDecreasing, Copy, Wrench, RefreshCw, LogOut, Trash2, CheckCircle2, Sparkles, Coins, UserX } from 'lucide-react'
 import EditTeamModal from './EditTeamModal'
 import TeamSolves from './TeamSolves'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '../types'
+import { EmptyState } from '@/shared/components'
 
 interface TeamPageContentProps {
   team: TeamInfo
@@ -176,7 +177,12 @@ export default function TeamPageContent({
         </CardHeader>
         <CardContent className="space-y-1">
           {members.length === 0 ? (
-            <div className="text-sm text-gray-500 dark:text-gray-300">No members found.</div>
+            <EmptyState
+              icon={<UserX className="w-full h-full" />}
+              title="No members found"
+              description="Invite your friends to join your team!"
+              containerHeight="py-8"
+            />
           ) : (
             members.map((m) => (
               <div key={m.user_id} className="flex items-start justify-between gap-4 border-b border-gray-100 dark:border-gray-700 py-3 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded px-2">
@@ -191,8 +197,8 @@ export default function TeamPageContent({
                         {m.username}
                       </Link>
                       <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${m.role === 'captain'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                         }`}>
                         {m.role}
                       </span>

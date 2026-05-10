@@ -1,6 +1,8 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { Inbox } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+import { EmptyState } from '@/shared/components'
 import type { Event } from '../types'
 
 interface EventListCardProps {
@@ -21,7 +23,12 @@ const EventListCard: React.FC<EventListCardProps> = ({ events, onAdd, onEdit, on
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <div className="text-center py-10 text-gray-500 dark:text-gray-400">No events yet</div>
+          <EmptyState
+            icon={<Inbox className="w-full h-full" />}
+            title="No events yet"
+            description="Create your first event to get started."
+            containerHeight="py-10"
+          />
         ) : (
           <motion.div
             className="divide-y border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
