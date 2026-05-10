@@ -6,8 +6,7 @@ import 'react-medium-image-zoom/dist/styles.css'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
-import Navbar from '@/shared/components/Navbar'
-import { ScrollToggle } from '@/shared/components/custom'
+import { Navbar, ScrollToggle } from '@/_layouts'
 import { AuthProvider, ThemeProvider, LogsProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
 import APP from '@/config'
 import ChallengeJoyride from '@/features/challenges/components/ChallengeJoyride'

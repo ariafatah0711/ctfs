@@ -23,7 +23,7 @@ export default function ChallengesPage() {
       </div>
 
       <main className="flex-1 flex flex-col relative z-10">
-        <div className="max-w-6xl mx-auto px-6 py-10 lg:py-16 w-full space-y-6 md:space-y-8">
+        <div className="max-w-6xl mx-auto px-6 py-6 lg:py-8 w-full space-y-6 md:space-y-8">
           <ChallengePageTabs
             currentTab={data.currentTab}
             onTabChange={data.setCurrentTab}

@@ -11,7 +11,7 @@ import Link from "next/link"
 // Shared Imports
 import APP from '@/config'
 import { Loader, BrandLogo } from '@/shared/components'
-import { Footer } from "@/shared/components/custom"
+import { Footer } from "@/_layouts"
 
 const FEATURES = [
   {

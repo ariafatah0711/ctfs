@@ -2,8 +2,8 @@ export { default as ImageWithFallback } from '@/shared/components/ImageWithFallb
 export { MarkdownRenderer } from '@/shared/components/MarkdownRenderer'
 export { RulesMarkdownRenderer } from '@/shared/components/MarkdownRenderer'
 export { default as Loader } from '@/shared/components/custom/loading'
-export { default as TitlePage } from '@/shared/components/custom/TitlePage'
-export { default as DevConfigDialog } from '@/shared/components/custom/DevConfigDialog'
+export { TitlePage } from '@/_layouts'
+export { DevConfigDialog } from '@/_layouts'
 export { default as EmptyState } from '@/shared/components/EmptyState'
 export { default as BrandLogo } from '@/shared/components/custom/BrandLogo'
 

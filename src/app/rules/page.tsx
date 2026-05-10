@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from 'lucide-react';
 import Link from "next/link";
 import { RulesMarkdownRenderer, Loader, BrandLogo } from '@/shared/components'
-import { Footer } from "@/shared/components/custom";
+import { Footer } from "@/_layouts";
 import { rulesConfig } from "@/rules";
 
 export default function RulesPage() {

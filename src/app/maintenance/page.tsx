@@ -5,11 +5,12 @@ import { motion } from 'framer-motion'
 import { Database, Settings, ShieldAlert, MessageCircle, RefreshCw, Key, Wifi, WifiOff, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/ui'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, MAINTENANCE_MODE, LINKS } from '@/const'
+import { APP } from '@/config'
 import { cn } from '@/shared/lib/utils'
 import dynamic from 'next/dynamic'
 
 // Dynamically import DevConfigDialog
-const DevConfigDialog = dynamic(() => import('@/shared/components/custom/DevConfigDialog'), { ssr: false })
+const DevConfigDialog = dynamic(() => import('@/_layouts/components/DevConfigDialog'), { ssr: false })
 
 function getCookie(name: string) {
   if (typeof document === 'undefined') return ''
@@ -188,7 +189,7 @@ export default function MaintenancePage() {
                 size="sm"
                 className="text-gray-500 hover:text-white font-black h-10 px-3 rounded-xl transition-all"
               >
-                <a href={LINKS.discord} target="_blank" rel="noopener noreferrer">
+                <a href={APP.links.discord} target="_blank" rel="noopener noreferrer">
                   <MessageCircle size={16} />
                 </a>
               </Button>

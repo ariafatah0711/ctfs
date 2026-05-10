@@ -9,7 +9,7 @@ import { Star, GitBranch, Users, Github, BookOpen, ScrollText, Info, ListOrdered
 import APP from "@/config";
 import { VERSION, BUILD_TIME } from "@/version";
 import { Loader, ImageWithFallback, BrandLogo } from '@/shared/components';
-import { Footer } from "@/shared/components/custom";
+import { Footer } from "@/_layouts";
 
 const CONTRIBUTORS = [
   "@ariafatah0711",
