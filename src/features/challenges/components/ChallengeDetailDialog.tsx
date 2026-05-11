@@ -18,6 +18,11 @@ import ChallengeHints from './challenge-detail/ChallengeHints'
 import ChallengeMetadata from './challenge-detail/ChallengeMetadata'
 import ChallengeTasksTeaser from './challenge-detail/ChallengeTasksTeaser'
 import SubChallengePanel from './challenge-detail/SubChallengePanel'
+import {
+  ChallengeFooter,
+  QuestionFooter,
+  SolversFooter,
+} from './challenge-detail/footers'
 import type {
   ChallengeDialogTab,
   HintModalState,
@@ -109,16 +114,9 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   placeholders,
   services = [],
 }) => {
-  if (!challenge) return null
-
   const [solvesSortOrder, setSolvesSortOrder] = useState<'newest' | 'oldest'>('oldest')
-  const handleSubChallengeResetConfirm = () => {
-    if (confirm('Are you sure you want to reset your progress?')) {
-      onSubChallengeReset()
-    }
-  }
 
-  const solverCount = solvers.length > 0 ? solvers.length : (challenge.total_solves ?? 0)
+  const solverCount = solvers.length > 0 ? solvers.length : (challenge?.total_solves ?? 0)
 
   const tabs = React.useMemo(() => [
     { key: 'challenge' as ChallengeDialogTab, label: 'Challenge' },
@@ -134,6 +132,14 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
       return solvesSortOrder === 'newest' ? timeB - timeA : timeA - timeB
     })
   }, [solvers, solvesSortOrder])
+
+  if (!challenge) return null
+
+  const handleSubChallengeResetConfirm = () => {
+    if (confirm('Are you sure you want to reset your progress?')) {
+      onSubChallengeReset()
+    }
+  }
 
   // Difficulty color mapping (matching ChallengeCard)
   const rawDiff = (challenge.difficulty || '').toString().trim();
@@ -207,7 +213,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         {/* Scrollable Content Area */}
         <div className="flex-1 overflow-y-auto px-4 pb-2 md:px-6 scroll-hidden">
           {challengeTab === 'challenge' && (
-            <div className="min-h-full flex flex-col">
+            <div className="min-h-full flex flex-col pb-5">
               {/* Description at the Top */}
               <div className="flex-1">
                 <div className="max-w-full overflow-x-auto break-words mt-2">
@@ -271,96 +277,30 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
         {/* Fixed Footer for Flag Submission / Questions Progress */}
         {challengeTab === 'challenge' && (
-          <div className="p-4 md:p-6 pt-3 border-t border-gray-100 dark:border-gray-800/50 shrink-0">
-            <ChallengeFlagForm
-              challenge={challenge}
-              flagInputs={flagInputs}
-              placeholders={placeholders}
-              submitting={submitting}
-              flagFeedback={flagFeedback}
-              handleFlagInputChange={handleFlagInputChange}
-              handleFlagSubmit={handleFlagSubmit}
-            />
-          </div>
+          <ChallengeFooter
+            challenge={challenge}
+            flagInputs={flagInputs}
+            placeholders={placeholders}
+            submitting={submitting}
+            flagFeedback={flagFeedback}
+            handleFlagInputChange={handleFlagInputChange}
+            handleFlagSubmit={handleFlagSubmit}
+          />
         )}
 
         {challengeTab === 'question' && (
-          <div className="p-4 md:p-6 pt-3 border-t border-gray-100 dark:border-gray-800/50 shrink-0 bg-gray-50/30 dark:bg-gray-900/30">
-            {subChallengeCompleted ? (
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-sm">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  All Questions Solved
-                </div>
-                <div className="flex flex-wrap items-center gap-3 justify-end">
-                  {subChallengeFlag && (
-                    <div className="flex items-center gap-2 max-w-[70%]">
-                      <div className="px-3 py-1.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-mono text-xs truncate border border-green-200 dark:border-green-800">
-                        {subChallengeFlag}
-                      </div>
-                      <button
-                        onClick={async () => {
-                          await navigator.clipboard.writeText(subChallengeFlag);
-                          toast.success('Flag copied!');
-                        }}
-                        className="p-1.5 rounded bg-green-500 text-white hover:bg-green-600 transition"
-                        title="Copy Flag"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    onClick={handleSubChallengeResetConfirm}
-                    className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-widest underline decoration-dotted underline-offset-4"
-                  >
-                    Reset Progress
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-black text-gray-400 dark:text-gray-500 tracking-[0.2em]">
-                  Questions Not Solved
-                </span>
-                <button
-                  onClick={handleSubChallengeResetConfirm}
-                  className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-widest underline decoration-dotted underline-offset-4"
-                >
-                  Reset Progress
-                </button>
-              </div>
-            )}
-          </div>
+          <QuestionFooter
+            subChallengeCompleted={subChallengeCompleted}
+            subChallengeFlag={subChallengeFlag}
+            onReset={onSubChallengeReset}
+          />
         )}
+
         {challengeTab === 'solvers' && (
-          <div className="p-4 md:p-6 pt-3 border-t border-gray-100 dark:border-gray-800/50 shrink-0 bg-gray-50/30 dark:bg-gray-900/30">
-            <div className="flex items-center justify-between gap-4">
-              <span className="text-[10px] uppercase font-black text-gray-400 dark:text-gray-500 tracking-[0.2em]">
-                Order by solve time
-              </span>
-              <div className="flex bg-gray-200 dark:bg-gray-800 p-1 rounded-lg">
-                <button
-                  onClick={() => setSolvesSortOrder('oldest')}
-                  className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-all active:scale-95 ${solvesSortOrder === 'oldest'
-                    ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    }`}
-                >
-                  Oldest
-                </button>
-                <button
-                  onClick={() => setSolvesSortOrder('newest')}
-                  className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-all active:scale-95 ${solvesSortOrder === 'newest'
-                    ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                    : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    }`}
-                >
-                  Newest
-                </button>
-              </div>
-            </div>
-          </div>
+          <SolversFooter
+            solvesSortOrder={solvesSortOrder}
+            setSolvesSortOrder={setSolvesSortOrder}
+          />
         )}
       </DialogContent>
       <HintDialog

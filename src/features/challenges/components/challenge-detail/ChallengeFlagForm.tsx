@@ -27,10 +27,10 @@ export default function ChallengeFlagForm({
   const overlayRef = React.useRef<HTMLDivElement>(null)
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col relative w-full">
       {flagFeedback[challenge.id] && (
         <div
-          className={`p-2.5 rounded-lg text-xs font-black uppercase tracking-widest text-center shadow-sm transition-all
+          className={`absolute bottom-[calc(100%+12px)] left-0 right-0 p-2.5 rounded-lg text-xs font-black uppercase tracking-widest text-center shadow-lg transition-all z-20 animate-in fade-in slide-in-from-bottom-2
             ${flagFeedback[challenge.id]?.success
               ? 'bg-green-500 text-white dark:bg-green-600'
               : 'bg-red-500 text-white dark:bg-red-600'}
@@ -74,7 +74,7 @@ export default function ChallengeFlagForm({
             }}
             maxLength={challenge.flag_placeholder && placeholders[challenge.id] ? placeholders[challenge.id].length : undefined}
             placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : 'Enter flag here...'}
-            className="w-full h-full pl-4 pr-6 py-2.5 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-sm"
+            className="w-full h-[38px] pl-4 pr-6 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-sm"
             autoFocus
           />
         </div>
@@ -85,7 +85,7 @@ export default function ChallengeFlagForm({
             !flagInputs[challenge.id]?.trim() ||
             (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
           }
-          className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:from-pink-400 hover:to-pink-500 transition-all disabled:opacity-30 active:scale-95"
+          className="flex items-center justify-center px-6 h-[38px] rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:from-pink-400 hover:to-pink-500 transition-all disabled:opacity-30 active:scale-95 shrink-0"
         >
           {submitting[challenge.id] ? '...' : 'Submit'}
         </button>

@@ -12,7 +12,7 @@ import {
   getChallenges
 } from '@/shared/lib'
 import { useAuth, useEventContext } from '@/shared/contexts'
-import { Event } from '@/shared/types'
+import type { ChallengeWithSolve, Event } from '@/shared/types'
 import { UserDetail, TeamInfo } from '../types'
 
 export function useUserProfile(userId: string | null, isCurrentUser: boolean) {
@@ -31,7 +31,7 @@ export function useUserProfile(userId: string | null, isCurrentUser: boolean) {
 
   const [showAllModal, setShowAllModal] = useState(false)
   const [showUnsolvedModal, setShowUnsolvedModal] = useState(false)
-  const [unsolvedChallenges, setUnsolvedChallenges] = useState<any[]>([])
+  const [unsolvedChallenges, setUnsolvedChallenges] = useState<ChallengeWithSolve[]>([])
   const [loadingUnsolved, setLoadingUnsolved] = useState(false)
 
   const [authInfo, setAuthInfo] = useState<Array<{ provider: string; email: string }>>([])
@@ -182,7 +182,7 @@ export function useUserProfile(userId: string | null, isCurrentUser: boolean) {
 
       const solvedIds = new Set(solvedChallenges.map(c => c.id))
 
-      const unsolved = allChallenges.filter((c: any) => {
+      const unsolved = allChallenges.filter((c: ChallengeWithSolve) => {
         if (solvedIds.has(c.id)) return false
         if (!c.event_id) return true
         const ev = eventsById.get(String(c.event_id))

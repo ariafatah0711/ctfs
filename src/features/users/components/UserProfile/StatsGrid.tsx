@@ -26,14 +26,14 @@ export default function StatsGrid({
   return (
     <section className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${showTeam ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
       <UserStat
-        icon={Trophy}
-        label="Score"
-        value={userDetail.score ?? 0}
-      />
-      <UserStat
         icon={Crown}
         label="Rank"
         value={(!userDetail.rank || solvedChallengesCount === 0) ? '-' : `#${userDetail.rank}`}
+      />
+      <UserStat
+        icon={Trophy}
+        label="Score"
+        value={userDetail.score ?? 0}
       />
       <UserStat
         icon={CheckCircle2}

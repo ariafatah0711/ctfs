@@ -1,6 +1,6 @@
 'use client'
 
-import { ClipboardList } from 'lucide-react'
+import { ClipboardList, ArrowBigRightDash } from 'lucide-react'
 import type { ChallengeDialogTab } from '../../types'
 
 type ChallengeTasksTeaserProps = {
@@ -24,7 +24,7 @@ export default function ChallengeTasksTeaser({
           className="px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white text-xs rounded-md shadow flex items-center gap-2 group transition-all"
         >
           <span>Jawab semua questions untuk mendapatkan flag</span>
-          <span className="group-hover:translate-x-1 transition-transform">â†’</span>
+          <ArrowBigRightDash className="h-4 w-4" />
         </button>
       </div>
     </div>

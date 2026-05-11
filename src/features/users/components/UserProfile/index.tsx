@@ -16,6 +16,7 @@ import ProgressSection from './ProgressSection'
 import SolvedChallenges from './SolvedChallenges'
 import UnsolvedChallengesModal from './UnsolvedChallengesModal'
 import UserStatsPlotly from './UserStats'
+import EditProfileModal from './EditProfileModal'
 import { UserEmptyState } from '../ui'
 
 export default function UserProfile({
@@ -71,7 +72,8 @@ export default function UserProfile({
 
   if (initialLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center items-center min-h-screen overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-blue-500/30 dark:bg-[#0b0f19] dark:text-gray-100">
+        <ProfileBackground />
         <Loader color="text-blue-500" />
       </div>
     )
@@ -114,6 +116,40 @@ export default function UserProfile({
 
         {userDetail && (
           <>
+            <ProfileTabs
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              onBack={onBack}
+              editAction={
+                isCurrentUser && userDetail ? (
+                  <EditProfileModal
+                    userId={userDetail.id}
+                    currentUsername={userDetail.username}
+                    currentBio={userDetail.bio || ''}
+                    currentProfilePictureUrl={userDetail.profile_picture_url || ''}
+                    currentSosmed={userDetail.sosmed || {}}
+                    onUsernameChange={username => setUserDetail({ ...userDetail, username })}
+                    onProfileChange={({ username, bio, sosmed, profile_picture_url }) => {
+                      const nextProfileUrl = profile_picture_url ?? userDetail.profile_picture_url ?? null
+                      const isGooglePicture = !!userDetail.picture && userDetail.picture !== userDetail.profile_picture_url
+                      const nextPicture = isGooglePicture ? userDetail.picture : (nextProfileUrl || null)
+                      setUserDetail({
+                        ...userDetail,
+                        username,
+                        bio,
+                        sosmed,
+                        profile_picture_url: nextProfileUrl,
+                        picture: nextPicture,
+                      })
+                    }}
+                    onSaved={refreshUserDetail}
+                    triggerButtonClass="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/50 px-4 py-2 text-sm font-semibold text-gray-600 backdrop-blur transition hover:border-blue-500/40 hover:text-blue-600 dark:border-white/10 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:text-blue-400"
+                    authInfo={authInfo}
+                  />
+                ) : null
+              }
+            />
+
             <ProfileHeader
               userDetail={userDetail}
               avatarSrc={avatarSrc}
@@ -136,12 +172,6 @@ export default function UserProfile({
             />
           </>
         )}
-
-        <ProfileTabs
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onBack={onBack}
-        />
 
         <AnimatePresence mode="wait">
           {activeTab === 'profile' ? (
@@ -203,17 +233,6 @@ function ProfileBackground() {
         <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
       </div>
-      {watermarkSrc && (
-        <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={watermarkSrc}
-            alt=""
-            aria-hidden="true"
-            className="h-auto w-[min(72vw,720px)] select-none object-contain"
-          />
-        </div>
-      )}
     </>
   )
 }
