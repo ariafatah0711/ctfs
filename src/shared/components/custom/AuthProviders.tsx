@@ -1,6 +1,6 @@
 "use client";
 
-import { bindGoogleManual, unbindGoogleManual } from "@/shared/lib/auth";
+import { AuthService } from "@/features/auth";
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { Mail, Chrome, X } from "lucide-react";
@@ -101,7 +101,7 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
             onClick={async () => {
               setLoading(true);
               setError("");
-              const { error } = await bindGoogleManual();
+              const { error } = await AuthService.bindGoogle();
               setLoading(false);
               if (error) setError(error);
             }}
@@ -151,7 +151,7 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
           setLoading(true);
           setError("");
 
-          const { error } = await unbindGoogleManual();
+          const { error } = await AuthService.unbindGoogle();
 
           setLoading(false);
           setConfirmOpen(false);

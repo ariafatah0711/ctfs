@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/shared/hooks'
-import { getChallengesList, getInfo, getStatsByRange, isGlobalAdmin } from '@/shared/lib'
+import { useAuth } from '@/shared/contexts'
+import { AuthService } from '@/features/auth'
+import { getChallengesList, getInfo, getStatsByRange } from '@/shared/lib'
 import type { Challenge } from '@/shared/types'
 import type { ActivityPoint, TimeRange, SiteInfo } from '../types'
 
@@ -34,7 +35,7 @@ export function useAdminOverviewData() {
         return
       }
 
-      const adminCheck = await isGlobalAdmin()
+      const adminCheck = await AuthService.isGlobalAdmin()
       if (!mounted) return
       if (!adminCheck) {
         router.push('/challenges')

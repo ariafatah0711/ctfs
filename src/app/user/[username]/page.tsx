@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { SearchX } from 'lucide-react'
 import { getUserByUsername } from '@/shared/lib/users'
 import { useAuth } from '@/shared/contexts'
-import { UserProfile } from '@/shared/components/user'
+import { UserEmptyState, UserProfile } from '@/features/users'
+import APP from '@/config'
 
 export default function UserProfilePage() {
   const router = useRouter()
@@ -91,19 +93,39 @@ export default function UserProfilePage() {
   // ❌ Error UI (ini boleh beda)
   if (error) {
     return (
-      <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Oops!</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">
-            {error}
-          </p>
-          <button
-            onClick={() => router.push('/challenges')}
-            className="mt-6 px-6 py-2 rounded-lg bg-primary-600 dark:bg-primary-700 text-white font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition"
-          >
-            Back to Challenges
-          </button>
+      <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-blue-500/30 dark:bg-[#0b0f19] dark:text-gray-100">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
         </div>
+        {(APP.nxctf?.nxctf_logo || APP.image_logo) && (
+          <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={APP.nxctf?.nxctf_logo || APP.image_logo}
+              alt=""
+              aria-hidden="true"
+              className="h-auto w-[min(72vw,720px)] select-none object-contain"
+            />
+          </div>
+        )}
+        <main className="relative z-10 mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl items-center justify-center px-6 py-16">
+          <UserEmptyState
+            icon={SearchX}
+            title="Oops!"
+            description={error}
+            action={(
+              <button
+                type="button"
+                onClick={() => router.push('/challenges')}
+                className="rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-500/20 dark:text-blue-400"
+              >
+                Back to Challenges
+              </button>
+            )}
+            className="w-full max-w-md"
+          />
+        </main>
       </div>
     )
   }

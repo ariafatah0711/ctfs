@@ -1,0 +1,45 @@
+import type React from 'react'
+import type { LucideIcon } from 'lucide-react'
+import { cn } from '@/shared/lib/utils'
+
+type UserStatProps = {
+  icon: LucideIcon
+  label: string
+  value: React.ReactNode
+  detail?: React.ReactNode
+  onClick?: () => void
+  className?: string
+}
+
+export function UserStat({ icon: Icon, label, value, detail, onClick, className }: UserStatProps) {
+  const Component = onClick ? 'button' : 'div'
+
+  return (
+    <Component
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className={cn(
+        'group flex min-h-[96px] w-full items-center gap-4 rounded-xl border border-gray-200 bg-white/40 p-4 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/80 hover:shadow-[0_10px_20px_rgba(59,130,246,0.1)] dark:border-white/10 dark:bg-gray-900/40 dark:hover:bg-gray-800/80',
+        onClick && 'cursor-pointer',
+        className
+      )}
+    >
+      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 dark:text-blue-400">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white">
+          {value}
+        </div>
+        <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+          {label}
+        </div>
+        {detail && (
+          <div className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+            {detail}
+          </div>
+        )}
+      </div>
+    </Component>
+  )
+}

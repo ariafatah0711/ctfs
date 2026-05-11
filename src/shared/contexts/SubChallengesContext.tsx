@@ -239,16 +239,38 @@ export function SubChallengesProvider({ children }: { children: React.ReactNode 
     const payload = getAnswers(challengeId)
     const response = await submitSubChallenges(challengeId, payload)
 
+    const normalizedResults = { ...(response.results || {}) }
+    Object.keys(normalizedResults).forEach((key) => {
+      if (normalizedResults[key] === false && !payload[key]?.trim()) {
+        delete normalizedResults[key]
+      }
+    })
+
+    const correctAnswers: SubChallengeAnswerMap = {}
+    Object.entries(normalizedResults).forEach(([key, ok]) => {
+      if (ok) {
+        const val = payload[key]
+        if (val !== undefined) correctAnswers[key] = val
+      }
+    })
+
+    const prevCorrect = answersByChallenge[challengeId] || {}
+    const hasNewCorrect = Object.keys(correctAnswers).some((key) => prevCorrect[key] !== correctAnswers[key])
+    const hasIncorrect = Object.values(normalizedResults).some((value) => value === false)
+
+    if (hasNewCorrect) {
+      const audio = new Audio('/sounds/tasks_succes.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {})
+    } else if (hasIncorrect) {
+      const audio = new Audio('/sounds/tasks_incorect.mp3')
+      audio.volume = 0.3
+      audio.play().catch(() => {})
+    }
+
     setStates((prev) => {
       const current = prev[challengeId] || cloneDefaultState()
-      const incomingResults = { ...(response.results || {}) }
-
-      // Filter out false results for empty answers
-      Object.keys(incomingResults).forEach((key) => {
-        if (incomingResults[key] === false && !payload[key]?.trim()) {
-          delete incomingResults[key]
-        }
-      })
+      const incomingResults = { ...normalizedResults }
 
       const newResults = {
         ...(current.results || {}),
@@ -256,14 +278,6 @@ export function SubChallengesProvider({ children }: { children: React.ReactNode 
       }
 
       // Identify correct answers from this submission
-      const correctAnswers: SubChallengeAnswerMap = {}
-      Object.entries(response.results || {}).forEach(([key, ok]) => {
-        if (ok) {
-          const val = payload[key]
-          if (val !== undefined) correctAnswers[key] = val
-        }
-      })
-
       // Persist ONLY correct answers to answersByChallenge (localStorage)
       if (Object.keys(correctAnswers).length > 0) {
         setAnswersByChallenge(prevAnswers => ({

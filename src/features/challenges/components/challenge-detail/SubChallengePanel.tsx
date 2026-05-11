@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { MarkdownRenderer } from '@/shared/components'
@@ -34,6 +34,10 @@ function normalizeQuestionMarkdown(value: string) {
   return wrappedInQuotes ? trimmed.slice(1, -1).trim() : trimmed
 }
 
+const QuestionMarkdown = memo(function QuestionMarkdown({ content }: { content: string }) {
+  return <MarkdownRenderer content={content} className="max-w-full break-words" />
+})
+
 type QuestionCardProps = {
   question: SubChallengeQuestion
   answer: string
@@ -55,6 +59,7 @@ function QuestionCard({
   onAnswerChange,
   onSubmit,
 }: QuestionCardProps) {
+  const questionContent = normalizeQuestionMarkdown(question.question)
   const cardClassName = completed
     ? 'min-w-0 overflow-x-hidden space-y-2 rounded-md border border-[#35355e] bg-[#1a1a33]/50 p-2.5 opacity-90'
     : current
@@ -81,7 +86,7 @@ function QuestionCard({
             )}
           </div>
           <div className={`mt-1 max-w-full overflow-x-auto break-words text-sm font-semibold ${completed ? 'text-gray-200' : 'text-white'}`}>
-            <MarkdownRenderer content={normalizeQuestionMarkdown(question.question)} className="max-w-full break-words" />
+            <QuestionMarkdown content={questionContent} />
           </div>
         </div>
       </div>
@@ -120,7 +125,7 @@ function QuestionCard({
       </div>
 
       {!completed && typeof result === 'boolean' && result === false && answer?.trim() && (
-        <p className="text-xs font-semibold text-red-300">âœ— Incorrect</p>
+        <p className="text-xs font-semibold text-red-300">x Incorrect</p>
       )}
     </div>
   )

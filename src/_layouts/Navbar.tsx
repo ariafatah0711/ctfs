@@ -11,7 +11,8 @@ import { AnimatePresence } from 'framer-motion'
 import APP from '@/config'
 import { ImageWithFallback } from '@/shared/components'
 import { DevConfigDialog } from './components'
-import { signOut, isAdmin, isGlobalAdmin } from '@/shared/lib'
+import { isAdmin, isGlobalAdmin } from '@/shared/lib'
+import { AuthService } from '@/features/auth'
 import { useTheme, useAuth, useLogs } from '@/shared/contexts'
 
 // Internal Imports
@@ -82,7 +83,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setMobileMenuOpen(false)
-    await signOut()
+    await AuthService.signOut()
     setUser(null)
     setAdminStatus(false)
     setGlobalAdminStatus(false)

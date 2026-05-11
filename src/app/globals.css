@@ -185,6 +185,12 @@ select {
   background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
 }
 
+/* Hide browser password reveal to avoid duplicate custom toggle */
+input[type='password']::-ms-reveal,
+input[type='password']::-ms-clear {
+  display: none;
+}
+
 /* #### */
 
 @layer base {

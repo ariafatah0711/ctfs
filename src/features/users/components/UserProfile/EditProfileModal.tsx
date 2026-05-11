@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 // React Imports
 import { useState } from "react";
@@ -7,7 +7,8 @@ import Link from "next/link";
 // Shared Imports
 import { AuthProviders } from "@/shared/components/custom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogTrigger, Input, Button } from "@/shared/ui";
-import { updateUsername, updateBio, updateSosmed, updateProfilePicture, bindGoogleManual, unbindGoogleManual, isValidUsername } from "@/shared/lib";
+import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/shared/lib";
+import { isValidUsername } from "@/features/auth";
 import { DIALOG_CONTENT_CLASS } from "@/shared/styles";
 
 export default function EditProfileModal({
@@ -249,8 +250,8 @@ export default function EditProfileModal({
             </div>
           </div>
           <AuthProviders authInfo={authInfo} />
-          {error && <div className="text-red-500 dark:text-red-400 text-sm text-center font-semibold">{error}</div>}
-          {success && <div className="text-green-600 dark:text-green-400 text-sm text-center font-semibold">{success}</div>}
+          {error && <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-sm font-semibold text-blue-600 dark:text-blue-400">{error}</div>}
+          {success && <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-sm font-semibold text-blue-600 dark:text-blue-400">{success}</div>}
           <DialogFooter>
             <Button
               type="submit"

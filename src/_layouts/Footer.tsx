@@ -41,9 +41,9 @@ const Footer: React.FC = () => {
               href={APP.nxctf.nxctf_donation}
               target="_blank"
               rel="noopener"
-              className="flex items-center gap-2 px-5 py-2 bg-blue-600/5 dark:bg-blue-400/5 border border-blue-500/20 hover:border-orange-500/50 hover:bg-orange-500/5 text-blue-600 dark:text-blue-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-full transition-all duration-300 group shadow-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600/5 dark:bg-blue-400/5 border border-blue-500/20 hover:border-orange-500/50 hover:bg-orange-500/5 text-blue-600 dark:text-blue-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-full transition-all duration-300 group shadow-sm"
             >
-              <Coffee size={14} className="group-hover:animate-bounce text-orange-500" />
+              <Coffee size={14} className="animate-bounce text-orange-500" />
               <span className="text-[11px] font-bold uppercase tracking-wider">Support Dev</span>
             </a>
           </div>

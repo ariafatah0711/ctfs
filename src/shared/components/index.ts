@@ -6,6 +6,6 @@ export { TitlePage } from '@/_layouts'
 export { DevConfigDialog } from '@/_layouts'
 export { default as EmptyState } from '@/shared/components/EmptyState'
 export { default as BrandLogo } from '@/shared/components/custom/BrandLogo'
+export { default as EventSelect } from '@/shared/components/custom/EventSelect'
 
-export * as userComponents from './user'
 export * as customComponents from './custom'

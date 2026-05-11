@@ -29,6 +29,15 @@ import type {
   SubChallengeQuestion,
 } from '../types'
 
+const ChallengeDescription = React.memo(function ChallengeDescription({ description }: { description: string }) {
+  return (
+    <MarkdownRenderer
+      content={description}
+      className="max-w-full break-words text-gray-700 dark:text-gray-300 leading-relaxed [&_p:last-child]:mb-0 [&_ul:last-child]:mb-0 [&_ol:last-child]:mb-0 [&_blockquote:last-child]:my-0"
+    />
+  )
+})
+
 interface ChallengeDetailDialogProps {
   open: boolean
   challenge: ChallengeWithSolve | null
@@ -103,6 +112,11 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   if (!challenge) return null
 
   const [solvesSortOrder, setSolvesSortOrder] = useState<'newest' | 'oldest'>('oldest')
+  const handleSubChallengeResetConfirm = () => {
+    if (confirm('Are you sure you want to reset your progress?')) {
+      onSubChallengeReset()
+    }
+  }
 
   const solverCount = solvers.length > 0 ? solvers.length : (challenge.total_solves ?? 0)
 
@@ -197,10 +211,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
               {/* Description at the Top */}
               <div className="flex-1">
                 <div className="max-w-full overflow-x-auto break-words mt-2">
-                  <MarkdownRenderer
-                    content={challenge.description}
-                    className="max-w-full break-words text-gray-700 dark:text-gray-300 leading-relaxed [&_p:last-child]:mb-0 [&_ul:last-child]:mb-0 [&_ol:last-child]:mb-0 [&_blockquote:last-child]:my-0"
-                  />
+                  <ChallengeDescription description={challenge.description} />
                 </div>
               </div>
 
@@ -276,28 +287,36 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
         {challengeTab === 'question' && (
           <div className="p-4 md:p-6 pt-3 border-t border-gray-100 dark:border-gray-800/50 shrink-0 bg-gray-50/30 dark:bg-gray-900/30">
             {subChallengeCompleted ? (
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-sm">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   All Questions Solved
                 </div>
-                {subChallengeFlag && (
-                  <div className="flex items-center gap-2 max-w-[70%]">
-                    <div className="px-3 py-1.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-mono text-xs truncate border border-green-200 dark:border-green-800">
-                      {subChallengeFlag}
+                <div className="flex flex-wrap items-center gap-3 justify-end">
+                  {subChallengeFlag && (
+                    <div className="flex items-center gap-2 max-w-[70%]">
+                      <div className="px-3 py-1.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-mono text-xs truncate border border-green-200 dark:border-green-800">
+                        {subChallengeFlag}
+                      </div>
+                      <button
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(subChallengeFlag);
+                          toast.success('Flag copied!');
+                        }}
+                        className="p-1.5 rounded bg-green-500 text-white hover:bg-green-600 transition"
+                        title="Copy Flag"
+                      >
+                        <Copy size={14} />
+                      </button>
                     </div>
-                    <button
-                      onClick={async () => {
-                        await navigator.clipboard.writeText(subChallengeFlag);
-                        toast.success('Flag copied!');
-                      }}
-                      className="p-1.5 rounded bg-green-500 text-white hover:bg-green-600 transition"
-                      title="Copy Flag"
-                    >
-                      <Copy size={14} />
-                    </button>
-                  </div>
-                )}
+                  )}
+                  <button
+                    onClick={handleSubChallengeResetConfirm}
+                    className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-widest underline decoration-dotted underline-offset-4"
+                  >
+                    Reset Progress
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex items-center justify-between">
@@ -305,11 +324,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                   Questions Not Solved
                 </span>
                 <button
-                  onClick={() => {
-                    if (confirm('Are you sure you want to reset your progress?')) {
-                      onSubChallengeReset();
-                    }
-                  }}
+                  onClick={handleSubChallengeResetConfirm}
                   className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-widest underline decoration-dotted underline-offset-4"
                 >
                   Reset Progress

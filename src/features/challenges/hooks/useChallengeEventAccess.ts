@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { AuthService } from '@/features/auth'
 import {
   formatEventDurationCompact,
-  getAdminScope,
   getAllMyEventMemberships,
   getMyEventMembership,
 } from '@/shared/lib'
@@ -70,7 +70,7 @@ export function useChallengeEventAccess({
         return
       }
 
-      const scope = await getAdminScope()
+      const scope = await AuthService.getAdminScope()
       if (!mounted) return
       setIsGlobalAdminUser(!!scope.is_global_admin)
       setEventAdminIds(scope.event_ids || [])

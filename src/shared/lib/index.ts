@@ -1,19 +1,5 @@
 export * from '@/shared/lib/activityStats'
 export * from '@/shared/lib/admin'
-export {
-	bindGoogleManual,
-	getCurrentAuthInfo,
-	getCurrentUser,
-	isAdmin as isAuthAdmin,
-	loginGoogle,
-	sendPasswordReset,
-	signIn,
-	signOut,
-	signUp,
-	unbindGoogleManual,
-	updatePassword,
-} from '@/shared/lib/auth'
-export type { AuthResponse } from '@/shared/lib/auth'
 export * from '@/shared/lib/challenges'
 export * from '@/shared/lib/crypto'
 export * from '@/shared/lib/events'

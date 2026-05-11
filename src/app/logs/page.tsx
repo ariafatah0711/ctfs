@@ -56,7 +56,7 @@ export default function LogsPage() {
             value={selectedEvent}
             onChange={setSelectedEvent}
             events={startedEvents}
-            className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded mr-3"
+            className="min-w-[180px] mr-3"
             getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
           />
         </div>

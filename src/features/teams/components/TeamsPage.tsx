@@ -195,7 +195,7 @@ export default function TeamsPage() {
                   onChange={setSelectedEvent}
                   events={teamEvents as any}
                   showMain={showMainOption}
-                  className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+                  className="min-w-[180px]"
                   getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
                 />
               </div>

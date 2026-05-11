@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { loginGoogle } from '@/shared/lib/auth'
+import { AlertCircle, Chrome, Loader2 } from 'lucide-react'
+import { AuthService } from '@/features/auth'
 
 export default function GoogleLoginButton() {
   const [loading, setLoading] = useState(false)
@@ -11,7 +12,7 @@ export default function GoogleLoginButton() {
     setLoading(true)
     setError('')
     try {
-      const { error } = await loginGoogle()
+      const { error } = await AuthService.loginWithGoogle()
       if (error) {
         setError(error)
       }
@@ -29,24 +30,15 @@ export default function GoogleLoginButton() {
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="flex items-center justify-center gap-2 w-full py-2 px-4 text-sm font-medium rounded-md border border-gray-400 bg-white text-gray-800 shadow-sm hover:bg-gray-100 focus:ring-2 focus:ring-offset-2 focus:ring-red-400 disabled:opacity-50 dark:border-gray-300 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+        className="relative flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/60 px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-orange-500/30 hover:bg-white hover:shadow-[0_8px_30px_rgba(249,115,22,0.06)] focus:outline-none focus:ring-2 focus:ring-orange-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 dark:hover:bg-white/10"
       >
-        {/* Google SVG logo */}
-        <svg
-          className="w-5 h-5"
-          viewBox="0 0 48 48"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path fill="#4285F4" d="M24 9.5c3.54 0 6.72 1.22 9.21 3.6l6.85-6.85C35.09 2.4 29.91 0 24 0 14.64 0 6.51 5.68 2.55 13.91l7.98 6.19C12.48 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#34A853" d="M46.1 24.55c0-1.57-.14-3.09-.39-4.55H24v9.13h12.4c-.54 2.93-2.15 5.41-4.6 7.09l7.19 5.59C43.98 37.58 46.1 31.54 46.1 24.55z"/>
-          <path fill="#FBBC05" d="M10.53 28.09c-.48-1.43-.76-2.94-.76-4.54s.27-3.11.76-4.54L2.55 12.91C.91 16.08 0 19.44 0 23c0 3.56.91 6.92 2.55 10.09l7.98-6.19z"/>
-          <path fill="#EA4335" d="M24 46c6.48 0 11.91-2.13 15.88-5.79l-7.19-5.59c-2 1.35-4.55 2.14-8.69 2.14-6.26 0-11.52-4.22-13.47-10.02l-7.98 6.19C6.51 42.32 14.64 48 24 48z"/>
-        </svg>
-        {loading ? 'Processing...' : 'Sign in with Google'}
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Chrome className="h-4 w-4" />}
+        <span>{loading ? 'Processing...' : 'Sign in with Google'}</span>
       </button>
 
       {error && (
-        <div className="rounded-md bg-red-50 dark:bg-red-900 p-2 text-sm text-red-700 dark:text-red-300">
+        <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+          <AlertCircle className="h-4 w-4 flex-none" />
           {error}
         </div>
       )}

@@ -7,11 +7,10 @@ import dynamic from "next/dynamic"
 import { ChartColumnDecreasing } from "lucide-react"
 
 // Shared Imports
-import APP from "@/config"
-import { Skeleton, Card, CardHeader, CardTitle, CardContent } from "@/shared/ui"
+import { Skeleton } from "@/shared/ui"
 import { useTheme } from "@/shared/contexts"
-import { EmptyState } from "@/shared/components"
 import { ChallengeWithSolve } from "@/shared/types"
+import { UserEmptyState, UserSection } from "../ui"
 
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
@@ -27,17 +26,17 @@ type Props = {
 /* ===================== THEME ===================== */
 
 const theme = (isDark: boolean) => ({
-  bg: isDark ? "#1f2937" : "#ffffff",
+  bg: isDark ? "rgba(17,24,39,0.2)" : "rgba(255,255,255,0.2)",
   text: isDark ? "#e5e7eb" : "#111827",
-  grid: isDark ? "#374151" : "#e5e7eb",
+  grid: isDark ? "rgba(55,65,81,0.8)" : "rgba(229,231,235,0.9)",
 })
 
 const pieColors = [
   "#60a5fa",
-  "#34d399",
-  "#fbbf24",
-  "#f87171",
-  "#a78bfa",
+  "#3b82f6",
+  "#2563eb",
+  "#93c5fd",
+  "#1d4ed8",
 ]
 
 /* ===================== HELPERS ===================== */
@@ -71,21 +70,11 @@ export default function UserStatsPlotly({
   // If there are no solves, show a friendly empty state matching UserProfile
   if (!solvedChallenges || solvedChallenges.length === 0) {
     return (
-      <motion.div className="space-y-6">
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-sm text-center w-full">User stats</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EmptyState
-              icon={<ChartColumnDecreasing className="w-full h-full" />}
-              title="No stat data available"
-              description="Solve some challenges to see stats here!"
-              containerHeight="py-12"
-            />
-          </CardContent>
-        </Card>
-      </motion.div>
+      <UserEmptyState
+        icon={ChartColumnDecreasing}
+        title="No stat data available"
+        description="Solve some challenges to see stats here."
+      />
     )
   }
 
@@ -103,22 +92,9 @@ export default function UserStatsPlotly({
     byDifficulty[d] = (byDifficulty[d] || 0) + 1
   })
 
-  // map difficulty labels to colors using APP.difficultyStyles
-  const difficultyColorNameToHex: Record<string, string> = {
-    cyan: "#60a5fa",
-    green: "#34d399",
-    yellow: "#fbbf24",
-    red: "#f87171",
-    purple: "#a78bfa",
-  }
-
   const diffKeys = Object.keys(byDifficulty)
-  const diffColors = diffKeys.map(label => {
-    const styles = APP?.difficultyStyles || {}
-    const matched = Object.keys(styles).find(k => k.toLowerCase() === label.toLowerCase())
-    const colorName = matched ? (styles as any)[matched] : undefined
-    return (colorName && difficultyColorNameToHex[colorName]) || "#94a3b8"
-  })
+  const diffColors = diffKeys.map((_, index) => pieColors[index % pieColors.length])
+  const firstBloodCount = firstBloodIds.length
 
   const timeSeries = groupSolvesOverTime(solvedChallenges)
 
@@ -151,13 +127,7 @@ export default function UserStatsPlotly({
       {/* ================= PIE ================= */}
       <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-6" variants={item}>
         {/* CATEGORY */}
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="text-sm text-center">
-              Solves by Category
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <UserSection title="Solves by Category" icon={ChartColumnDecreasing}>
             <Plot
               key={`cat-${isDarkMode}`}
               data={[
@@ -180,17 +150,10 @@ export default function UserStatsPlotly({
               useResizeHandler
               config={{ displayModeBar: false }}
             />
-          </CardContent>
-        </Card>
+        </UserSection>
 
         {/* DIFFICULTY */}
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="text-sm text-center">
-              Solves by Difficulty
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <UserSection title="Solves by Difficulty" icon={ChartColumnDecreasing}>
             <Plot
               key={`diff-${isDarkMode}`}
               data={[
@@ -213,19 +176,16 @@ export default function UserStatsPlotly({
               useResizeHandler
               config={{ displayModeBar: false }}
             />
-          </CardContent>
-        </Card>
+        </UserSection>
       </motion.div>
 
       {/* ================= LINE ================= */}
       <motion.div variants={item}>
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="text-sm text-center">
-              Solves Over Time
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <UserSection
+          title="Solves Over Time"
+          description={`${firstBloodCount} first blood${firstBloodCount !== 1 ? 's' : ''} recorded in this event scope.`}
+          icon={ChartColumnDecreasing}
+        >
             <Plot
               key={`line-${isDarkMode}`}
               data={[
@@ -258,8 +218,7 @@ export default function UserStatsPlotly({
               useResizeHandler
               config={{ scrollZoom: false, displayModeBar: false }}
             />
-          </CardContent>
-        </Card>
+        </UserSection>
       </motion.div>
     </motion.div>
   )

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 // Shared Imports
 import { Loader } from '@/shared/components'
-import { UserProfile } from '@/shared/components/user'
+import { UserProfile } from '@/features/users'
 import { useAuth } from '@/shared/contexts'
 
 export default function ProfilePage() {
@@ -23,7 +23,7 @@ export default function ProfilePage() {
   if (authLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-orange-500" />
+        <Loader fullscreen color="text-blue-500" />
       </div>
     )
   }

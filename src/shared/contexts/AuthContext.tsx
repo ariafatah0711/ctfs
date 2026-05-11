@@ -1,6 +1,6 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
-import { getCurrentUser } from '@/shared/lib/auth'
+import { AuthService } from '@/features/auth'
 import { User } from '@/shared/types'
 
 type AuthContextType = {
@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getCurrentUser()
+    AuthService.getCurrentUser()
       .then(setUser)
       .finally(() => setLoading(false))
   }, [])
