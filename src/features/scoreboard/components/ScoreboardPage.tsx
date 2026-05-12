@@ -1,8 +1,9 @@
 'use client'
 
-import { Coins, Droplet, User, Rocket } from 'lucide-react'
+import Link from 'next/link'
+import { Coins, Droplet, Trophy, Rocket } from 'lucide-react'
 import { Loader, EmptyState } from '@/shared/components'
-import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
+import { Card, CardContent } from '@/shared/ui/card'
 import { EventSelect } from '@/shared/components/custom'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
@@ -30,8 +31,14 @@ export default function ScoreboardPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         {/* <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300 drop-shadow" />}>Scoreboard</TitlePage> */}
 
         <div className="mb-4 flex justify-between items-center">
@@ -48,42 +55,28 @@ export default function ScoreboardPage() {
             </div>
           </div>
 
-          <span className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex p-1.5 gap-1 bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-xl">
             <button
               onClick={() => setFirstBloodMode(false)}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${!firstBloodMode
-                ? 'border-orange-500 text-orange-600 dark:text-orange-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              className={`px-5 py-2 text-sm font-bold transition-all rounded-lg flex items-center gap-2 ${!firstBloodMode
+                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
                 }`}
             >
-              <span
-                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
-                title="Points"
-              >
-                <Coins size={16} className="shrink-0" />
-                <span className="truncate whitespace-nowrap block">
-                  Points
-                </span>
-              </span>
+              <Coins size={14} className={!firstBloodMode ? 'animate-pulse' : ''} />
+              Points
             </button>
             <button
               onClick={() => setFirstBloodMode(true)}
-              className={`px-4 py-2 text-sm font-medium transition border-b-2 ${firstBloodMode
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+              className={`px-5 py-2 text-sm font-bold transition-all rounded-lg flex items-center gap-2 ${firstBloodMode
+                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
                 }`}
             >
-              <span
-                className="flex items-center gap-1 max-w-[90px] md:max-w-none overflow-hidden"
-                title="Points"
-              >
-                <Droplet size={16} className="shrink-0" />
-                <span className="truncate whitespace-nowrap block">
-                  First Blood
-                </span>
-              </span>
+              <Droplet size={14} className={firstBloodMode ? 'animate-pulse' : ''} />
+              First Blood
             </button>
-          </span>
+          </div>
         </div>
 
         {loading && leaderboard.length === 0 ? (
@@ -99,21 +92,26 @@ export default function ScoreboardPage() {
             )}
             <div>
               {isEmpty ? (
-                <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
-                  </CardHeader>
+                <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(249,115,22,0.05)] transition-all duration-300">
                   <CardContent>
                     <EmptyState
-                      icon={<User className="w-full h-full" />}
+                      icon={<Trophy className="w-full h-full text-orange-500" />}
                       title="No challenges solved yet."
                       description={
                         <>
-                          Leaderboard is empty!<br />
-                          Be the first to solve a challenge <Rocket size={16} className="inline-block ml-1 text-orange-500" />
+                          No submissions yet for this event. Start solving challenges and claim the top spot.
+                          <Rocket size={14} className="inline-block ml-1 text-orange-400/70" />
                         </>
                       }
-                      containerHeight="py-12"
+                      containerHeight="py-16"
+                      action={
+                        <Link
+                          href="/challenges"
+                          className="inline-flex items-center gap-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                        >
+                          Explore Challenges
+                        </Link>
+                      }
                     />
                   </CardContent>
                 </Card>

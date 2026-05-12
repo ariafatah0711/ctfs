@@ -24,7 +24,7 @@ export default function StatsGrid({
   const showTeam = APP.teams.enabled && !!teamInfo
 
   return (
-    <section className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${showTeam ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
+    <section className={`grid grid-cols-2 gap-3 sm:grid-cols-2 ${showTeam ? 'lg:grid-cols-5' : 'lg:grid-cols-4'}`}>
       <UserStat
         icon={Crown}
         label="Rank"
@@ -56,6 +56,7 @@ export default function StatsGrid({
           }
           detail={`${teamInfo.members.length} member${teamInfo.members.length !== 1 ? 's' : ''}`}
           onClick={() => router.push(`/teams/${encodeURIComponent(teamInfo.team.name)}`)}
+          className="col-span-2 sm:col-span-1"
         />
       ) : null}
     </section>

@@ -23,74 +23,72 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
   const pathname = usePathname()
 
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)] transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
-      {pathname === '/scoreboard' &&
-        showAllLink &&
-        leaderboard.length >= 100 &&
-        (() => {
-          let href = '/scoreboard/all'
-          if (eventId !== undefined && eventId !== 'all') {
-            if (eventId === null) {
-              href += '?event_id=main'
-            } else {
-              href += `?event_id=${encodeURIComponent(String(eventId))}`
+        {pathname === '/scoreboard' &&
+          showAllLink &&
+          leaderboard.length >= 100 &&
+          (() => {
+            let href = '/scoreboard/all'
+            if (eventId !== undefined && eventId !== 'all') {
+              if (eventId === null) {
+                href += '?event_id=main'
+              } else {
+                href += `?event_id=${encodeURIComponent(String(eventId))}`
+              }
             }
-          }
-          return (
-            <Link href={href}>
-              <Button variant="default" size="sm">Show All</Button>
-            </Link>
-          )
-        })()}
+            return (
+              <Link href={href}>
+                <Button variant="default" size="sm">Show All</Button>
+              </Link>
+            )
+          })()}
       </CardHeader>
       <CardContent>
         <motion.div key={`table-${scoreColumnLabel ?? 'score'}-${leaderboard.length}-${leaderboard[0]?.username ?? ''}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
           <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16 text-center text-gray-700 dark:text-gray-200">Rank</TableHead>
-              <TableHead className="text-gray-700 dark:text-gray-200">User</TableHead>
-              <TableHead className="w-24 text-center text-gray-700 dark:text-gray-200">{scoreColumnLabel ?? 'Score'}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {leaderboard.map((entry, i) => {
-              const isCurrentUser = entry.username === currentUsername
-              return (
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16 text-center text-gray-700 dark:text-gray-200">Rank</TableHead>
+                <TableHead className="text-gray-700 dark:text-gray-200">User</TableHead>
+                <TableHead className="w-24 text-center text-gray-700 dark:text-gray-200">{scoreColumnLabel ?? 'Score'}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {leaderboard.map((entry, i) => {
+                const isCurrentUser = entry.username === currentUsername
+                return (
                   <TableRow
                     key={entry.username}
                     className={`
                       transition-colors duration-150 ease-in-out hover:bg-gray-100 dark:hover:bg-gray-600
-                      ${
-                        isCurrentUser
-                          ? 'bg-gray-100 dark:bg-gray-700 font-semibold'
-                          : ''
+                      ${isCurrentUser
+                        ? 'bg-gray-100 dark:bg-gray-700 font-semibold'
+                        : ''
                       }
                     `}
                   >
-                  <TableCell className="text-center font-mono text-gray-600 dark:text-gray-300">{i + 1}</TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/user/${encodeURIComponent(entry.username)}`}
-                      className={`hover:underline ${
-                        isCurrentUser ? 'text-blue-700 dark:text-blue-300' : 'hover:text-blue-600 dark:hover:text-blue-400'
-                      } max-w-[120px] md:max-w-xs truncate whitespace-nowrap block`}
-                      title={entry.username}
-                    >
-                      {entry.username}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="w-24 text-center font-medium text-gray-900 dark:text-white">
-                    <motion.span key={`score-${entry.username}-${entry.score}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
-                      {scoreColumnRenderer ? scoreColumnRenderer(entry) : entry.score}
-                    </motion.span>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
+                    <TableCell className="text-center font-mono text-gray-600 dark:text-gray-300">{i + 1}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/user/${encodeURIComponent(entry.username)}`}
+                        className={`hover:underline ${isCurrentUser ? 'text-blue-700 dark:text-blue-300' : 'hover:text-blue-600 dark:hover:text-blue-400'
+                          } max-w-[120px] md:max-w-xs truncate whitespace-nowrap block`}
+                        title={entry.username}
+                      >
+                        {entry.username}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="w-24 text-center font-medium text-gray-900 dark:text-white">
+                      <motion.span key={`score-${entry.username}-${entry.score}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+                        {scoreColumnRenderer ? scoreColumnRenderer(entry) : entry.score}
+                      </motion.span>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
           </Table>
         </motion.div>
       </CardContent>

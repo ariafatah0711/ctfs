@@ -1,17 +1,27 @@
 'use client'
 
 import React from 'react'
-import { ArrowLeft, ChartColumnDecreasing, Flag } from 'lucide-react'
-import { UserTabs } from '../ui'
+import { ArrowLeft, Flag, Users, Wrench, LayoutDashboard } from 'lucide-react'
+import { UserTabs } from '@/features/users/components/ui/UserTabs'
 
-type ProfileTabsProps = {
-  activeTab: 'profile' | 'stats'
-  setActiveTab: (tab: 'profile' | 'stats') => void
+type TeamTabsProps = {
+  activeTab: 'overview' | 'members' | 'solves' | 'manage'
+  setActiveTab: (tab: 'overview' | 'members' | 'solves' | 'manage') => void
   onBack?: () => void
-  editAction?: React.ReactNode
+  canManage?: boolean
 }
 
-export default function ProfileTabs({ activeTab, setActiveTab, onBack, editAction }: ProfileTabsProps) {
+export default function TeamTabs({ activeTab, setActiveTab, onBack, canManage }: TeamTabsProps) {
+  const tabs = [
+    { value: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { value: 'members', label: 'Members', icon: Users },
+    { value: 'solves', label: 'Solves', icon: Flag },
+  ]
+
+  if (canManage) {
+    tabs.push({ value: 'manage', label: 'Manage', icon: Wrench })
+  }
+
   return (
     <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
       <div className="flex items-center justify-center gap-2 sm:justify-start">
@@ -26,16 +36,12 @@ export default function ProfileTabs({ activeTab, setActiveTab, onBack, editActio
             <span className="xs:hidden">Back</span>
           </button>
         )}
-        {editAction}
       </div>
 
       <UserTabs
         activeTab={activeTab}
-        onChange={setActiveTab}
-        tabs={[
-          { value: 'profile', label: 'Challenges', icon: Flag },
-          { value: 'stats', label: 'Stats', icon: ChartColumnDecreasing },
-        ]}
+        onChange={setActiveTab as any}
+        tabs={tabs as any}
       />
     </div>
   )

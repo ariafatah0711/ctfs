@@ -19,15 +19,15 @@ export function UserStat({ icon: Icon, label, value, detail, onClick, className 
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'group flex min-h-[96px] w-full items-center gap-4 rounded-xl border border-gray-200 bg-white/40 p-4 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/80 hover:shadow-[0_10px_20px_rgba(59,130,246,0.1)] dark:border-white/10 dark:bg-gray-900/40 dark:hover:bg-gray-800/80',
+        'group flex min-h-[80px] w-full items-center gap-3 rounded-xl border border-gray-200 bg-white/40 p-3 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/80 hover:shadow-[0_10px_20px_rgba(59,130,246,0.1)] dark:border-white/10 dark:bg-gray-900/40 dark:hover:bg-gray-800/80 sm:min-h-[96px] sm:gap-4 sm:p-4',
         onClick && 'cursor-pointer',
         className
       )}
     >
-      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 dark:text-blue-400">
-        <Icon className="h-5 w-5" />
+      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 dark:text-blue-400 sm:h-11 sm:w-11 sm:rounded-xl">
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="text-2xl font-extrabold leading-tight text-gray-900 dark:text-white">
           {value}
         </div>

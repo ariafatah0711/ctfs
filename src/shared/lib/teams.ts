@@ -91,6 +91,7 @@ export type TeamSummary = {
 	total_score: number
 	unique_challenges: number
 	total_solves: number
+	rank?: number
 }
 
 export type TeamScoreboardEntry = {

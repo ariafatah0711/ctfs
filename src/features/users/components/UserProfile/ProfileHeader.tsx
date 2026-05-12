@@ -42,38 +42,40 @@ export default function ProfileHeader({
       transition={{ duration: 0.25 }}
       className="mx-auto flex w-full max-w-6xl flex-col gap-4 md:flex-row md:items-start md:justify-between"
     >
-      <div className="flex w-full flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
-        <ImageWithFallback
-          src={avatarSrc}
-          alt={userDetail.username}
-          size={120}
-          className="rounded-full border-4 border-white object-cover shadow-md dark:border-gray-900"
-          fallbackBg="bg-blue-500/10"
-        />
+      <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+        <div className="relative mx-auto flex h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md dark:border-gray-900 sm:mx-0 aspect-square">
+          <ImageWithFallback
+            src={avatarSrc}
+            alt={userDetail.username}
+            size={128}
+            className="!h-full !w-full object-cover"
+            fallbackBg="bg-blue-500/10"
+          />
+        </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-2 text-center sm:text-left">
           <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-4">
-              <h1 className="max-w-full truncate text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
-                title={userDetail.username}
-                  >
-                {userDetail.username}
-              </h1>
-              <EventSelect
-                value={effectiveSelectedEvent}
-                onChange={setSelectedEvent}
-                events={profileEvents as any}
-                showMain={showMainOption}
-                className="sm:min-w-[180px] md:w-[220px]"
-                getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
-              />
+            <h1 className="max-w-full truncate text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
+              title={userDetail.username}
+            >
+              {userDetail.username}
+            </h1>
+            <EventSelect
+              value={effectiveSelectedEvent}
+              onChange={setSelectedEvent}
+              events={profileEvents as any}
+              showMain={showMainOption}
+              className="w-full sm:min-w-[180px] md:w-[220px]"
+              getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
+            />
           </div>
 
           <p className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base">
             {userDetail.bio?.trim() || 'CTF player on NXCTF'}
           </p>
 
-          <div className="mt-1 flex flex-row items-start justify-between gap-4 w-full flex-wrap">
-            <div className="flex-1 flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400 sm:flex-nowrap">
+          <div className="mt-2 flex flex-col items-center justify-between gap-4 w-full sm:flex-row sm:items-start">
+            <div className="flex flex-wrap justify-center items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 sm:flex-nowrap sm:justify-start sm:text-xs">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-3 py-1.5 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
                 <CalendarDays className="h-3.5 w-3.5 text-blue-500" />
                 Joined {userDetail.created_at ? formatRelativeDate(userDetail.created_at) : '-'}
@@ -85,7 +87,7 @@ export default function ProfileHeader({
             </div>
 
             {userDetail.sosmed && (
-              <div className="flex items-center gap-2 justify-end">
+              <div className="flex items-center gap-2">
                 {userDetail.sosmed.linkedin?.trim() && (
                   <SocialIcon
                     type="linkedin"

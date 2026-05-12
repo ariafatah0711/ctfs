@@ -1,9 +1,10 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
-import { getLogs, getRecentSolves, getChallengesList, subscribeToLogSignals } from '@/shared/lib/challenges'
+import { getChallengesList } from '@/shared/lib/challenges'
 import { useAuth } from '@/shared/contexts'
 import { addLogsSeenIds, getLogsSeenIds } from '@/shared/lib/userState'
+import { getLogs, getRecentSolves, subscribeToLogSignals } from '@/features/logs/lib/log-service'
 
 type LogShape = {
   log_type: 'new_challenge' | 'first_blood'
@@ -58,7 +59,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
 
   // Debounce refresh calls triggered by realtime signals.
   const refreshDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Hard throttle: at most one refresh per window, even if many inserts arrive.
+  // Hard throttle: at most one refresh per window, even if many bursts arrive.
   const lastSignalRefreshAtRef = useRef<number>(0)
 
   const logId = (n: LogShape) => `${n.log_type}|${n.log_challenge_id}|${n.log_user_id || ''}|${n.log_created_at}`
@@ -178,10 +179,8 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Return a Set of challenge ids for the given eventId.
-  // Caches results in-memory and in sessionStorage to avoid repeated RPCs.
   async function getEventChallengeIds(eventId: string | null | 'all') {
     if (eventId === 'all') return null
-    // Normalize null (Main) to a stable cache key.
     const normalizedId = eventId === null ? 'main' : String(eventId)
     const key = `nxctf_event_challenge_ids_v1:${normalizedId}`
     // check in-memory
@@ -194,9 +193,7 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
         eventChallengeCacheRef.current[normalizedId] = arr
         return new Set(arr)
       }
-    } catch (err) {
-      // ignore
-    }
+    } catch (err) { }
 
     // fetch from server
     try {
@@ -219,27 +216,21 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
         setUnreadCount(0)
         return
       }
-      // fetch current logs to know ids
-      // If an eventId filter is provided (and not 'all'), fetch challenges for that event
       if (eventId !== undefined && eventId !== 'all') {
-        // need to mark only logs whose challenge id belongs to that event
         Promise.all([getLogsCached(false), getEventChallengeIds(eventId as any)])
           .then(([logs, allowedSet]: [any[], Set<string> | null]) => {
-            // If allowedSet is null (should only happen for 'all'), treat as no filter.
             const allowed = allowedSet
             const ids = (logs || [])
               .filter((n: LogShape) => (allowed ? allowed.has(String(n.log_challenge_id)) : true))
               .map((n: LogShape) => logId(n))
             const merged = addLogsSeenIds(user.id, ids)
             const mergedSet = new Set(merged)
-            // recompute unread by subtracting newly seen ids from current logs
             const remaining = (logs || []).map(logId).filter((id) => !mergedSet.has(id)).length
             setUnreadCount(remaining)
           }).catch(err => {
             console.warn('markAllRead failed to fetch logs/challenges', err)
           })
       } else {
-        // No event filter or eventId === 'all' -> mark all logs as read
         getLogsCached(false).then((logs: any) => {
           const ids = (logs || []).map((n: LogShape) => logId(n))
           addLogsSeenIds(user.id, ids)
@@ -254,7 +245,6 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    // Only reset caches when the actual user identity changes.
     logsCacheRef.current = null
     lastSignalRefreshAtRef.current = 0
     refresh()
@@ -264,7 +254,6 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!userId) return
     const unsubscribe = subscribeToLogSignals(() => {
-      // Debounce bursts of inserts.
       if (refreshDebounceRef.current) clearTimeout(refreshDebounceRef.current)
       refreshDebounceRef.current = setTimeout(() => {
         const now = Date.now()
@@ -272,7 +261,6 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
           return
         }
         lastSignalRefreshAtRef.current = now
-        // Do NOT clear the cache here; let getLogsCached TTL control RPC frequency.
         refresh()
       }, 750)
     })

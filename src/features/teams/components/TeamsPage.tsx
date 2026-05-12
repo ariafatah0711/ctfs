@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Users, UserPlus } from 'lucide-react'
+import { Users, UserPlus, Sparkles, ShieldCheck } from 'lucide-react'
 
 import { Loader } from '@/shared/components'
-import { BackButton, ConfirmDialog, EventSelect } from '@/shared/components/custom'
+import { BackButton, ConfirmDialog } from '@/shared/components/custom'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
 import { useAuth, useEventContext } from '@/shared/contexts'
 
@@ -37,7 +37,6 @@ export default function TeamsPage() {
   }, [authLoading, user, router])
 
   // Get data using hooks
-  // We need a temporary event state for the hook to calculate effective event
   const [tempSolvedEventIds, setTempSolvedEventIds] = useState<string[]>([])
   const [tempHasMainSolved, setTempHasMainSolved] = useState<boolean>(false)
 
@@ -173,8 +172,14 @@ export default function TeamsPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         {initialLoading ? (
           <div className="flex justify-center py-16">
             <Loader color="text-orange-500" />
@@ -187,78 +192,115 @@ export default function TeamsPage() {
               </div>
             )}
 
-            {team && (
-              <div className="mb-4 flex justify-between items-center">
-                <BackButton label="Go Back" className="mb-2" />
-                <EventSelect
-                  value={effectiveSelectedEvent}
-                  onChange={setSelectedEvent}
-                  events={teamEvents as any}
-                  showMain={showMainOption}
-                  className="min-w-[180px]"
-                  getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
-                />
-              </div>
-            )}
-
             {status && (
-              <div
-                className={`rounded-md px-4 py-3 text-sm ${status.type === 'error'
-                  ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200'
-                  : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200'
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm border ${status.type === 'error'
+                  ? 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-900/50'
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50'
                   }`}
               >
                 {status.message}
-              </div>
+              </motion.div>
             )}
 
             {!team ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <Users size={18} /> Create Team
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Input
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      placeholder="Team name"
-                      disabled={busy}
-                    />
-                    <Button
-                      onClick={onCreateTeam}
-                      disabled={busy || !teamName.trim()}
-                      className="w-full"
-                    >
-                      Create
-                    </Button>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-10">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+                      Squad up for the <span className="text-blue-600 dark:text-blue-400">Next Conquest.</span>
+                    </h2>
+                    <p className="text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+                      Join an existing crew or build your own elite team of hackers. Solve together, win together.
+                    </p>
+                  </div>
 
-                <Card className="bg-white dark:bg-gray-800">
-                  <CardHeader>
-                    <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      <UserPlus size={18} /> Join Team
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Input
-                      value={inviteCode}
-                      onChange={(e) => setInviteCode(e.target.value)}
-                      placeholder="Invite code"
-                      disabled={busy}
-                    />
-                    <Button
-                      onClick={onJoinTeam}
-                      disabled={busy || !inviteCode.trim()}
-                      className="w-full"
-                    >
-                      Join
-                    </Button>
-                  </CardContent>
-                </Card>
+                  <div className="flex flex-wrap gap-4 pt-4">
+                    <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-gray-800/50 p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+                      <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                        <Users size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-widest text-gray-400">Collaboration</p>
+                        <p className="text-sm font-bold">Shared Solves</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-gray-800/50 p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+                      <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600">
+                        <ShieldCheck size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-widest text-gray-400">Competition</p>
+                        <p className="text-sm font-bold">Team Rank</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <Card className="bg-white/70 dark:bg-[#111622]/70 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
+                        <Sparkles size={18} className="text-blue-500" /> Start Your Team
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Team Name</label>
+                        <Input
+                          value={teamName}
+                          onChange={(e) => setTeamName(e.target.value)}
+                          placeholder="CyberKnights, VoidWalkers, etc."
+                          disabled={busy}
+                          className="rounded-xl bg-white/50 dark:bg-gray-900/50 h-12"
+                        />
+                      </div>
+                      <Button
+                        onClick={onCreateTeam}
+                        disabled={busy || !teamName.trim()}
+                        className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                      >
+                        Create Team
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-gray-200 dark:border-gray-800" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-[#fafafa] dark:bg-[#0b0f19] px-2 text-gray-500 font-black">Or Join One</span>
+                    </div>
+                  </div>
+
+                  <Card className="bg-white/70 dark:bg-[#111622]/70 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl">
+                    <CardHeader>
+                      <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
+                        <UserPlus size={18} className="text-emerald-500" /> Enter Invite Code
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Input
+                        value={inviteCode}
+                        onChange={(e) => setInviteCode(e.target.value)}
+                        placeholder="Paste code here..."
+                        disabled={busy}
+                        className="rounded-xl bg-white/50 dark:bg-gray-900/50 h-12 font-mono text-center tracking-widest"
+                      />
+                      <Button
+                        onClick={onJoinTeam}
+                        disabled={busy || !inviteCode.trim()}
+                        variant="secondary"
+                        className="w-full h-12 rounded-xl font-black uppercase tracking-widest"
+                      >
+                        Join Team
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             ) : (
               <AnimatePresence mode="wait">
@@ -285,6 +327,12 @@ export default function TeamsPage() {
                     onDeleteTeam={onDeleteTeamClick}
                     onKickMember={onKickMemberClick}
                     onTransferCaptain={onTransferCaptainClick}
+
+                    effectiveSelectedEvent={effectiveSelectedEvent}
+                    setSelectedEvent={setSelectedEvent}
+                    teamEvents={teamEvents as any}
+                    showMainOption={showMainOption}
+                    onBack={() => router.back()}
                   />
                 </motion.div>
               </AnimatePresence>
@@ -306,31 +354,33 @@ export default function TeamsPage() {
         title="Confirm"
         description={
           confirmExpected ? (
-            <div className="space-y-2">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="space-y-4 pt-2">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {confirmMessage}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Type{' '}
-                <span className="font-mono text-gray-900 dark:text-gray-100">
-                  {confirmExpected}
-                </span>{' '}
-                to continue.
-              </p>
-              <Input
-                value={confirmInput}
-                onChange={(e) => setConfirmInput(e.target.value)}
-                placeholder={confirmExpected}
-              />
+              <div className="space-y-2 rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-100 dark:border-red-900/30">
+                <p className="text-xs text-red-600 dark:text-red-400 uppercase font-black tracking-widest">
+                  Verification Required
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Type <span className="font-mono font-bold text-red-600 dark:text-red-400">{confirmExpected}</span> below.
+                </p>
+                <Input
+                  value={confirmInput}
+                  onChange={(e) => setConfirmInput(e.target.value)}
+                  placeholder={confirmExpected}
+                  className="bg-white dark:bg-gray-900 border-red-200 dark:border-red-900/50"
+                />
+              </div>
             </div>
           ) : (
-            confirmMessage
+            <p className="text-sm font-medium py-4">{confirmMessage}</p>
           )
         }
         onConfirm={async () => {
           await confirmActionRef.current?.()
         }}
-        confirmLabel="Yes"
+        confirmLabel="Confirm Action"
         cancelLabel="Cancel"
         confirmDisabled={
           !!confirmExpected &&

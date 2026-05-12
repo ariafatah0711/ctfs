@@ -42,7 +42,7 @@ const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDar
   })
 
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)] transition-all duration-300">
       <CardHeader>
         <CardTitle className="text-lg font-semibold text-center text-gray-900 dark:text-white">
           Top 10 Teams
@@ -79,8 +79,8 @@ const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDar
               font: { size: 10, color: isDark ? '#e5e7eb' : '#111' },
             },
             margin: { t: 20, r: 10, l: 30, b: 40 },
-            plot_bgcolor: isDark ? '#1f2937' : '#fff',
-            paper_bgcolor: isDark ? '#1f2937' : '#fff',
+            plot_bgcolor: 'transparent',
+            paper_bgcolor: 'transparent',
           }}
           style={{ width: '100%', height: '320px' }}
           useResizeHandler

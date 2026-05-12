@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import { Loader } from '@/shared/components'
-import { BackButton, EventSelect } from '@/shared/components/custom'
 import { useAuth, useEventContext } from '@/shared/contexts'
 
 import TeamPageContent from './TeamPageContent'
@@ -77,8 +76,14 @@ export default function TeamDetailPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
+      {/* Background Effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         {loading && !team && (
           <div className="flex justify-center py-16">
             <Loader color="text-orange-500" />
@@ -92,22 +97,8 @@ export default function TeamDetailPage() {
         )}
 
         <>
-          {team && (
-            <div className="mb-4 flex justify-between items-center">
-              <BackButton label="Go Back" className="mb-2" />
-              <EventSelect
-                value={effectiveSelectedEvent}
-                onChange={setSelectedEvent}
-                events={teamEvents as any}
-                showMain={showMainOption}
-                className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
-                getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
-              />
-            </div>
-          )}
-
           {error ? (
-            <div className="text-sm text-red-600 dark:text-red-300">{error}</div>
+            <div className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/50">{error}</div>
           ) : !team && !loading ? (
             <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
           ) : (
@@ -126,6 +117,12 @@ export default function TeamDetailPage() {
                     summary={stableSummary || summary}
                     challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
                     currentUserId={user?.id}
+
+                    effectiveSelectedEvent={effectiveSelectedEvent}
+                    setSelectedEvent={setSelectedEvent}
+                    teamEvents={teamEvents as any}
+                    showMainOption={showMainOption}
+                    onBack={() => router.back()}
                   />
                 </motion.div>
               )}

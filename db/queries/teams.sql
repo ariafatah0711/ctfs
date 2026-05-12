@@ -48,6 +48,7 @@ DECLARE
   v_can_view_invite BOOLEAN := FALSE;
   v_solved_event_ids UUID[];
   v_has_main_solved BOOLEAN := FALSE;
+  v_rank BIGINT := 0;
 BEGIN
   -- ambil team id
   SELECT id INTO v_team_id
@@ -192,6 +193,28 @@ BEGIN
   FROM unique_calc uc
   CROSS JOIN totals t;
 
+  -- rank team
+  SELECT COUNT(*) + 1 INTO v_rank
+  FROM (
+    SELECT
+      t_inner.team_id,
+      SUM(t_inner.points)::BIGINT AS unique_score
+    FROM (
+      SELECT tm_inner.team_id, s_inner.challenge_id, MAX(c_inner.points) AS points
+      FROM public.team_members tm_inner
+      JOIN public.solves s_inner ON s_inner.user_id = tm_inner.user_id
+      JOIN public.challenges c_inner ON c_inner.id = s_inner.challenge_id
+      WHERE (
+        p_event_mode = 'any'
+        OR (p_event_mode = 'main' AND c_inner.event_id IS NULL)
+        OR (p_event_id IS NOT NULL AND c_inner.event_id = p_event_id)
+      )
+      GROUP BY tm_inner.team_id, s_inner.challenge_id
+    ) t_inner
+    GROUP BY t_inner.team_id
+  ) scores
+  WHERE scores.unique_score > v_unique_score;
+
   -- 🔥 RETURN FINAL
   RETURN json_build_object(
     'success', true,
@@ -203,7 +226,8 @@ BEGIN
       'unique_score', v_unique_score,
       'total_score', v_total_score,
       'unique_challenges', v_unique_challenges,
-      'total_solves', v_total_solves
+      'total_solves', v_total_solves,
+      'rank', v_rank
     )
   );
 END;
