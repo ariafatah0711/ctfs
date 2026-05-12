@@ -1,5 +1,3 @@
-'use client'
-
 import { AuthPageShell } from '@/features/auth/components/ui/AuthPageShell'
 import ForgotPasswordForm from '@/features/auth/components/ForgotPasswordForm'
 

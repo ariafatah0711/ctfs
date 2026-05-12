@@ -4,9 +4,24 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, Check, Plus, Loader2, X, Megaphone, Settings2, Trash2, Calendar } from 'lucide-react'
 import { Switch } from '@/shared/ui'
-import { MarkdownRenderer } from '@/shared/components/MarkdownRenderer'
 import { formatRelativeDate } from '@/shared/lib/utils'
 import NotificationItem from './NotificationItem'
+
+function formatNotificationText(content: string) {
+  return content
+    .replace(/```[\s\S]*?```/g, (match) => match.slice(3, -3))
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s{0,3}>\s?/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    .replace(/~~(.*?)~~/g, '$1')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
 
 type NotificationPanelProps = {
   theme: string
@@ -290,7 +305,9 @@ export default function NotificationPanel({
                               className="overflow-hidden"
                             >
                               <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-md border border-gray-100 dark:border-gray-700/50">
-                                <MarkdownRenderer content={n.message} variant="compact" />
+                                <div className="whitespace-pre-line break-words line-clamp-3">
+                                  {formatNotificationText(n.message)}
+                                </div>
                               </div>
                               <div className="mt-1.5 text-[9px] text-gray-400 font-medium">
                                 {formatRelativeDate(n.created_at)}

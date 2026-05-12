@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Label, Input, Textarea, Button, Switch } from '@/shared/ui'
 import { Plus, Trash2, ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
 import { SubChallengeFormRow } from '../../types'
-import { MarkdownRenderer } from '@/shared/components'
+import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
 
 interface SubChallengesSectionProps {
   subChallenges: SubChallengeFormRow[]

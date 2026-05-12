@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -13,7 +14,6 @@ interface MarkdownRendererProps {
   variant?: 'default' | 'compact'
 }
 
-// Helper function to extract text from React children
 function extractText(children: any): string {
   if (typeof children === 'string') {
     return children
@@ -27,14 +27,12 @@ function extractText(children: any): string {
   return ''
 }
 
-// Wrapper component untuk code block dengan toggle wrap
 function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNode; isDark?: boolean }) {
   const [isWrapped, setIsWrapped] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hasOverflow, setHasOverflow] = useState(false)
   const preRef = React.useRef<HTMLPreElement>(null)
 
-  // Check if content overflows
   React.useEffect(() => {
     if (preRef.current) {
       const hasScroll = preRef.current.scrollWidth > preRef.current.clientWidth
@@ -42,7 +40,6 @@ function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNo
     }
   }, [])
 
-  // children adalah <pre> element, clone dan update classNamenya based on state
   const childElement = React.isValidElement(children) ? (children as React.ReactElement<any>) : null
   const modifiedChild = childElement
     ? React.cloneElement(childElement, {
@@ -92,14 +89,12 @@ function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNo
   )
 }
 
-// Wrapper component untuk blockquote dengan toggle wrap
 function BlockquoteWrapper({ children, isDark = true }: { children: React.ReactNode; isDark?: boolean }) {
   const [isWrapped, setIsWrapped] = useState(false)
   const [copied, setCopied] = useState(false)
   const [hasOverflow, setHasOverflow] = useState(false)
   const blockquoteRef = React.useRef<HTMLQuoteElement>(null)
 
-  // Check if content overflows
   React.useEffect(() => {
     if (blockquoteRef.current) {
       const hasScroll = blockquoteRef.current.scrollWidth > blockquoteRef.current.clientWidth
@@ -127,18 +122,6 @@ function BlockquoteWrapper({ children, isDark = true }: { children: React.ReactN
     <div className="relative mb-6">
       {hasOverflow && (
         <div className="absolute -top-8 right-0 flex gap-1 z-10">
-          {/* <button
-            type="button"
-            onClick={handleCopy}
-            className={`p-1.5 rounded transition-colors ${
-              isDark
-                ? 'bg-gray-800 hover:bg-gray-700 text-orange-300'
-                : 'bg-orange-100 hover:bg-orange-200 text-orange-600'
-            }`}
-            title={copied ? 'Copied!' : 'Copy'}
-          >
-            {copied ? <Check size={16} /> : <Copy size={16} />}
-          </button> */}
           <button
             type="button"
             onClick={() => setIsWrapped(!isWrapped)}
@@ -180,7 +163,6 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted,
   if (!content) {
     content = ''
   } else {
-    // Replace lines that contain only "." with a forced empty space to create a visible gap
     content = content
       .split('\n')
       .map(line => line.trim() === '.' ? '\n\n&nbsp;\n\n' : line)
@@ -344,5 +326,4 @@ export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRende
   )
 }
 
-// Backwards-compatible default export for existing imports
 export default MarkdownRenderer

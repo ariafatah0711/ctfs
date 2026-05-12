@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import { Info, BookOpen, Flag, Trophy, Shield, FileText, Users, Scale, User, Settings2 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
-import { AnimatePresence } from 'framer-motion'
 
 // Shared Imports
 import APP from '@/config'
@@ -18,12 +17,11 @@ import { useAuth } from '@/shared/contexts/AuthContext'
 import { useTheme } from '@/shared/contexts/ThemeContext'
 
 // Internal Imports
-import { useNotifications } from './hooks/useNotifications'
-import NotificationBell from './components/notifications/NotificationBell'
-import NotificationPanel from './components/notifications/NotificationPanel'
-import NotificationToast from './components/notifications/NotificationToast'
-
 const NavbarLogsButton = dynamic(() => import('./components/NavbarLogsButton'), {
+  ssr: false,
+})
+
+const NavbarNotifications = dynamic(() => import('@/widgets/notifications/NavbarNotifications'), {
   ssr: false,
 })
 
@@ -46,35 +44,6 @@ export default function Navbar() {
   const avatarSrc = user?.profile_picture_url || user?.picture || null
 
   const [devConfigOpen, setDevConfigOpen] = useState(false)
-
-  // Notifications Hook
-  const {
-    notifOpen,
-    setNotifOpen,
-    notifLoading,
-    notifUnreadCount,
-    notifItems,
-    notifTitle,
-    setNotifTitle,
-    notifMessage,
-    setNotifMessage,
-    notifLevel,
-    setNotifLevel,
-    solveNotif,
-    notifToast,
-    solveSoundEnabled,
-    setSolveSoundEnabled,
-    notifPanelRef,
-    notifButtonRef,
-    markAllNotificationsRead,
-    openNotifPanel,
-    handleSendNotif,
-    handleDeleteNotif,
-    dismissSolveNotif,
-    dismissNotifToast,
-    isNotifRead,
-    getLevelBadgeClass,
-  } = useNotifications()
 
   useEffect(() => {
     if (user) {
@@ -127,21 +96,10 @@ export default function Navbar() {
     }
   }, [docsOpen])
 
-  useEffect(() => {
-    if (notifOpen) setNotifOpen(false)
-  }, [pathname])
-
   if (loading) return null
 
   return (
     <>
-      <NotificationToast
-        solveNotif={solveNotif}
-        notifToast={notifToast}
-        onDismissSolve={dismissSolveNotif}
-        onDismissToast={dismissNotifToast}
-      />
-
       <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-0">
           <div className="flex justify-between h-14 items-center">
@@ -346,41 +304,7 @@ export default function Navbar() {
 
               {/* Notifications */}
               {user && (
-                <>
-                  <NotificationBell
-                    notifButtonRef={notifButtonRef}
-                    notifOpen={notifOpen}
-                    theme={theme}
-                    unreadCount={notifUnreadCount}
-                    onToggle={openNotifPanel}
-                  />
-
-                  <AnimatePresence>
-                    {notifOpen && (
-                      <NotificationPanel
-                        theme={theme}
-                        notifPanelRef={notifPanelRef}
-                        setNotifOpen={setNotifOpen}
-                        markAllNotificationsRead={markAllNotificationsRead}
-                        solveSoundEnabled={solveSoundEnabled}
-                        setSolveSoundEnabled={setSolveSoundEnabled}
-                        globalAdminStatus={globalAdminStatus}
-                        notifTitle={notifTitle}
-                        setNotifTitle={setNotifTitle}
-                        notifMessage={notifMessage}
-                        setNotifMessage={setNotifMessage}
-                        notifLevel={notifLevel}
-                        setNotifLevel={setNotifLevel}
-                        handleSendNotif={handleSendNotif}
-                        notifLoading={notifLoading}
-                        notifItems={notifItems}
-                        isNotifRead={isNotifRead}
-                        getLevelBadgeClass={getLevelBadgeClass}
-                        handleDeleteNotif={handleDeleteNotif}
-                      />
-                    )}
-                  </AnimatePresence>
-                </>
+                <NavbarNotifications theme={theme} globalAdminStatus={globalAdminStatus} />
               )}
 
               {/* Logs Icon */}

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowLeft } from 'lucide-react';
 import Link from "next/link";
-import { RulesMarkdownRenderer } from '@/shared/components/MarkdownRenderer'
+import { RulesMarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
 import Loader from '@/shared/components/custom/loading'
 import BrandLogo from '@/shared/components/custom/BrandLogo'
 import Footer from "@/_layouts/Footer";

@@ -1,8 +1,23 @@
 'use client'
 
 import React from 'react'
-import { MarkdownRenderer } from '@/shared/components/MarkdownRenderer'
 import { formatRelativeDate } from '@/shared/lib/utils'
+
+function formatNotificationText(content: string) {
+  return content
+    .replace(/```[\s\S]*?```/g, (match) => match.slice(3, -3))
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/!\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '')
+    .replace(/^\s{0,3}>\s?/gm, '')
+    .replace(/^\s*[-*+]\s+/gm, '')
+    .replace(/(\*\*|__)(.*?)\1/g, '$2')
+    .replace(/(\*|_)(.*?)\1/g, '$2')
+    .replace(/~~(.*?)~~/g, '$1')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
 
 type NotificationItemProps = {
   notification: {
@@ -53,12 +68,8 @@ export default function NotificationItem({
             </div>
           </div>
 
-          <div className="text-xs text-gray-500 dark:text-gray-400 leading-normal">
-            <MarkdownRenderer
-              content={notification.message}
-              variant="compact"
-              className="line-clamp-2 break-words [&_a]:text-blue-600 dark:[&_a]:text-blue-400"
-            />
+          <div className="text-xs text-gray-500 dark:text-gray-400 leading-normal whitespace-pre-line break-words line-clamp-2">
+            {formatNotificationText(notification.message)}
           </div>
         </div>
 

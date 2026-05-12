@@ -15,13 +15,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "date-fns",
-      "lodash-es",
-      "@mui/material",
-      "@mui/icons-material",
-    ],
+    optimizePackageImports: ["lucide-react", "date-fns", "lodash-es", "@mui/material", "@mui/icons-material"],
   },
 
   compiler: {

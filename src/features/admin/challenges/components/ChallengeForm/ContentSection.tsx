@@ -1,6 +1,6 @@
 import React from 'react'
 import { Label, Input, Textarea, Button } from '@/shared/ui'
-import { MarkdownRenderer } from '@/shared/components'
+import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
 import { Flag as FlagIcon, Zap, Type } from 'lucide-react'
 import { ChallengeFormData } from '../../types'
 import { cn } from '@/shared/lib/utils'
