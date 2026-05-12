@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/shared/lib'
-import { buildScoreboard, getOrderedProgressSeries } from '@/features/scoreboard/lib'
+import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/shared/lib/teams'
+import { buildScoreboard, getOrderedProgressSeries } from '@/features/scoreboard/lib/build-scoreboard'
 import { TeamScoreboardEntry, TeamProgressSeries } from '../types'
 
 export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEvent: string | number) {

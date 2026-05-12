@@ -6,7 +6,7 @@ import EventAdminsCard from './EventAdminsCard'
 import GlobalAdminsCard from './GlobalAdminsCard'
 import RemoveEventAdminConfirmDialog from './RemoveEventAdminConfirmDialog'
 import { useAdminAdminsData } from '../hooks/useAdminAdminsData'
-import { AdminPageShell } from '../../shared'
+import { AdminPageShell } from '../../ui'
 
 export default function AdminAdminsPage() {
   const {

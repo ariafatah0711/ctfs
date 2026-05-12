@@ -5,8 +5,8 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 // Shared Imports
-import { Loader } from '@/shared/components'
-import { UserProfile } from '@/features/users'
+import Loader from '@/shared/components/custom/loading'
+import UserProfile from '@/features/users/components/UserProfile'
 import { useAuth } from '@/shared/contexts/AuthContext'
 
 export default function ProfilePage() {

@@ -6,9 +6,5 @@ export {
   ScrollToggle,
   FloatingToolbar,
   TitlePage,
-  DevConfigDialog,
-  NotificationBell,
-  NotificationPanel,
-  NotificationItem,
-  NotificationToast
+  DevConfigDialog
 } from './components/index'

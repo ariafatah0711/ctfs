@@ -2,13 +2,11 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/shared/contexts/AuthContext'
-import { Loader } from '@/shared/components'
-import {
-  AuthCard,
-  AuthHeader,
-  AuthPageShell,
-  ResetPasswordForm,
-} from '@/features/auth'
+import Loader from '@/shared/components/custom/loading'
+import { AuthCard } from '@/features/auth/components/ui/AuthCard'
+import { AuthHeader } from '@/features/auth/components/ui/AuthHeader'
+import { AuthPageShell } from '@/features/auth/components/ui/AuthPageShell'
+import ResetPasswordForm from '@/features/auth/components/ResetPasswordForm'
 
 export default function ChangePasswordPage() {
   const { user, loading: authLoading } = useAuth()

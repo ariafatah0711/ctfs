@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import APP from '@/config'
-import { Loader } from '@/shared/components/custom'
+import Loader from '@/shared/components/custom/loading'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import { UserProfileProps } from '../../types'
 import { getUserBadges } from '../../lib/badge-utils'
@@ -17,7 +17,7 @@ import SolvedChallenges from './SolvedChallenges'
 import UnsolvedChallengesModal from './UnsolvedChallengesModal'
 import UserStatsPlotly from './UserStats'
 import EditProfileModal from './EditProfileModal'
-import { UserEmptyState } from '../ui'
+import { UserEmptyState } from '../ui/UserEmptyState'
 
 export default function UserProfile({
   userId,

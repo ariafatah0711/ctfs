@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { SearchX } from 'lucide-react'
 import { getUserByUsername } from '@/shared/lib/users'
 import { useAuth } from '@/shared/contexts/AuthContext'
-import { UserEmptyState, UserProfile } from '@/features/users'
+import UserProfile from '@/features/users/components/UserProfile'
+import { UserEmptyState } from '@/features/users/components/ui/UserEmptyState'
 import APP from '@/config'
 
 export default function UserProfilePage() {

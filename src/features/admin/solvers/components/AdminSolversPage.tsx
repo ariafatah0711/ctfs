@@ -4,7 +4,7 @@ import { Loader } from '@/shared/components'
 import DeleteSolverConfirmDialog from './DeleteSolverConfirmDialog'
 import SolversListCard from './SolversListCard'
 import { useAdminSolversData } from '../hooks/useAdminSolversData'
-import { AdminPageShell } from '../../shared'
+import { AdminPageShell } from '../../ui'
 
 export default function AdminSolversPage() {
   const {

@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 
 interface LayoutContainerProps {
@@ -8,10 +6,10 @@ interface LayoutContainerProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '7xl' | 'full'
 }
 
-const LayoutContainer: React.FC<LayoutContainerProps> = ({ 
-  children, 
-  className = '', 
-  maxWidth = '7xl' 
+const LayoutContainer: React.FC<LayoutContainerProps> = ({
+  children,
+  className = '',
+  maxWidth = '7xl'
 }) => {
   const maxWidthClass = {
     sm: 'max-w-screen-sm',

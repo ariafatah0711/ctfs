@@ -5,12 +5,12 @@ import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 
-import NotificationBell from '@/_layouts/components/notifications/NotificationBell'
+import NotificationBell from './components/NotificationBell'
 import NotificationToast from '@/_layouts/components/notifications/NotificationToast'
 import { useNotifications } from '@/_layouts/hooks/useNotifications'
 
 const NotificationPanel = dynamic(
-  () => import('@/_layouts/components/notifications/NotificationPanel'),
+  () => import('./components/NotificationPanel'),
   { ssr: false }
 )
 

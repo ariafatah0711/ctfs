@@ -6,7 +6,7 @@ import AuditLogList from './AuditLogList'
 import OverviewStatsCards from './OverviewStatsCards'
 import StatsGraph from './StatsGraph'
 import { useAdminOverviewData } from '../hooks/useAdminOverviewData'
-import { AdminPageShell } from '../../shared'
+import { AdminPageShell } from '../../ui'
 
 export default function AdminOverviewPage() {
   const {

@@ -9,7 +9,7 @@ import EventListCard from './EventListCard'
 import EventMembersCard from './EventMembersCard'
 import JoinRequestsCard from './JoinRequestsCard'
 import { useAdminEventData } from '../hooks/useAdminEventData'
-import { AdminPageShell } from '../../shared'
+import { AdminPageShell } from '../../ui'
 
 export default function AdminEventPage() {
   const {
