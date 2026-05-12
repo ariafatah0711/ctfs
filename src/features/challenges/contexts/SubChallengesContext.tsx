@@ -8,7 +8,7 @@ import {
   type SubChallengeAnswerMap,
   type SubChallengeQuestion,
   type SubmitSubChallengesResult,
-} from '@/shared/lib/subChallenges'
+} from '@/features/challenges/services/sub-challenges.service'
 import { useAuth } from '@/shared/contexts/AuthContext'
 
 type SubChallengeState = {

@@ -4,9 +4,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/shared/contexts'
 import { AuthService } from '@/features/auth'
-import { getChallengesList, getInfo, getStatsByRange } from '@/shared/lib'
+import { getChallengesList, getInfo } from '@/shared/lib'
 import type { Challenge } from '@/shared/types'
 import type { ActivityPoint, TimeRange, SiteInfo } from '../types'
+import { getStatsByRange } from '../services/activity-stats.service'
 
 export function useAdminOverviewData() {
   const router = useRouter()

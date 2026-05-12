@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import Image from 'next/image'
-import { getPreviewData, PreviewData } from '@/shared/lib/preview'
+import { getPreviewData, type PreviewData } from '@/features/preview/services/preview.service'
 import { Calendar, Clock, Users, CheckCircle2, Trophy, Zap } from 'lucide-react'
 import ScoreboardTable from '@/features/scoreboard/components/ScoreboardTable'
 import { LeaderboardEntry, Event } from '@/shared/types'

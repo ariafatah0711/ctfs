@@ -1,11 +1,12 @@
 export {
-  addChallenge,
   addAdminSubChallenge,
-  deleteChallenge,
   deleteAdminSubChallenge,
-  formatRelativeDate,
-  getAdminScope,
   getAdminSubChallenges,
+} from '@/features/challenges/services/sub-challenges.service'
+export {
+  addChallenge,
+  deleteChallenge,
+  formatRelativeDate,
   getChallengeById,
   getChallengesList,
   getEvents,
@@ -16,5 +17,6 @@ export {
   setChallengeMaintenance,
   updateChallenge,
 } from '@/shared/lib'
+export { getAdminScope } from '@/features/admin/services/admin.service'
 
 export * from './admin-challenge-filters'

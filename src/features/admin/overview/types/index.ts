@@ -1,4 +1,5 @@
-import type { DailyStats, SiteInfo as SharedSiteInfo } from '@/shared/lib'
+import type { DailyStats } from '../services/activity-stats.service'
+import type { SiteInfo as SharedSiteInfo } from '@/shared/lib'
 
 export type TimeRange = '7d' | '30d' | '90d'
 

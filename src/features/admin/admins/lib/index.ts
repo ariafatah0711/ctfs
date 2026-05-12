@@ -1,12 +1,11 @@
 export {
   getEventAdmins,
-  getEvents,
   getGlobalAdmins,
   grantEventAdmin,
   isGlobalAdmin,
   revokeEventAdmin,
   searchUsersByUsername,
-} from '@/shared/lib'
+} from '@/features/admin/services/admin.service'
+export { getEvents } from '@/shared/lib'
 
-export type { EventAdminRow, UserLite } from '@/shared/lib'
-
+export type { EventAdminRow, UserLite } from '@/features/admin/services/admin.service'

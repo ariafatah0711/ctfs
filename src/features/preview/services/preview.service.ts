@@ -1,4 +1,4 @@
-import { supabase } from '@/shared/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 
 export type PreviewLeaderboardEntry = {
   username: string

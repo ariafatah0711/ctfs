@@ -1,5 +1,5 @@
 import type { Event, EventJoinRequestRow, EventMemberRow } from '@/shared/types'
-import type { UserLite } from '@/shared/lib'
+import type { UserLite } from '@/features/admin/services/admin.service'
 
 export type { Event, EventJoinRequestRow, EventMemberRow, UserLite }
 
@@ -31,4 +31,3 @@ export type EventFormData = {
   always_show_challenges: boolean
   image_url: string
 }
-

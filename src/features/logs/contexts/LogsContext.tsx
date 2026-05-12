@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { getChallengesList } from '@/shared/lib/challenges'
 import { useAuth } from '@/shared/contexts/AuthContext'
-import { addLogsSeenIds, getLogsSeenIds } from '@/shared/lib/userState'
+import { addLogsSeenIds, getLogsSeenIds } from '@/lib/storage/user-state'
 import { getLogs, getRecentSolves, subscribeToLogSignals } from '@/features/logs/lib/log-service'
 
 type LogShape = {

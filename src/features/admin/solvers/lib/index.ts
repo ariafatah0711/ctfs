@@ -4,6 +4,5 @@ export {
   getSolversAll,
   getSolversByChallengeTitle,
   getSolversByUsername,
-  isAdmin,
 } from '@/shared/lib'
-
+export { isAdmin } from '@/features/admin/services/admin.service'

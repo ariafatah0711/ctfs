@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { createSupabaseConfigErrorMessage, getSupabaseConfigStatus } from './supabase-config'
+import { createSupabaseConfigErrorMessage, getSupabaseConfigStatus } from '@/lib/supabase/config'
 
 type SupabaseErrorResult = {
   data: null

@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase/client'
 
 export type TeamMember = {
 	user_id: string

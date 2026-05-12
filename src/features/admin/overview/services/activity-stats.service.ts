@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase/client'
 
 export interface DailyStats {
   date: string;

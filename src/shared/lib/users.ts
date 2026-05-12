@@ -1,6 +1,6 @@
 // Get user detail (rank, solved challenges) via RPC
 import { PostgrestSingleResponse } from '@supabase/supabase-js'
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase/client'
 import { User, ChallengeWithSolve } from '@/shared/types'
 
 export type UserDetail = {

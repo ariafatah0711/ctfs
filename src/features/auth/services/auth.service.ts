@@ -1,4 +1,4 @@
-import { supabase } from '@/shared/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { User } from '@/shared/types'
 import { AuthResponse, AuthIdentity } from '../types'
 import { mergeProfilePicture } from '../lib/auth-utils'

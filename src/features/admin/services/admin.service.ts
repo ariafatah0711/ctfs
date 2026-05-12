@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase/client'
 
 export type AdminScope = {
   is_global_admin: boolean
@@ -97,7 +97,7 @@ export async function getEventAdmins(): Promise<EventAdminRow[]> {
   }))
 }
 
-export async function grantEventAdmin(userId: string, eventId: string): Promise<{ success: boolean; message?: string }>{
+export async function grantEventAdmin(userId: string, eventId: string): Promise<{ success: boolean; message?: string }> {
   const { data, error } = await supabase.rpc('grant_event_admin', {
     p_user_id: userId,
     p_event_id: eventId,
@@ -113,7 +113,7 @@ export async function grantEventAdmin(userId: string, eventId: string): Promise<
   return { success, message }
 }
 
-export async function revokeEventAdmin(userId: string, eventId: string): Promise<{ success: boolean; deleted?: number; message?: string }>{
+export async function revokeEventAdmin(userId: string, eventId: string): Promise<{ success: boolean; deleted?: number; message?: string }> {
   const { data, error } = await supabase.rpc('revoke_event_admin', {
     p_user_id: userId,
     p_event_id: eventId,

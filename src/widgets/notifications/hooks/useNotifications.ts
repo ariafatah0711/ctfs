@@ -16,7 +16,7 @@ import {
 import {
   getNotifSeenIds,
   addNotifSeenIds,
-} from '@/shared/lib/userState'
+} from '@/lib/storage/user-state'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useTheme } from '@/shared/contexts/ThemeContext'
 

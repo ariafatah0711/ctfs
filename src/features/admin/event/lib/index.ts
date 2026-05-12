@@ -5,17 +5,15 @@ export {
   deleteEvent,
   getChallengesLite,
   getEvents,
-  isGlobalAdmin,
   listEventJoinRequests,
   listEventMembers,
   regenerateEventJoinKey,
   reviewEventJoinRequest,
-  searchUsersByUsername,
   setChallengesEvent,
   setEventJoinSettings,
   updateEvent,
 } from '@/shared/lib'
+export { isGlobalAdmin, searchUsersByUsername } from '@/features/admin/services/admin.service'
 
-export type { UserLite } from '@/shared/lib'
+export type { UserLite } from '@/features/admin/services/admin.service'
 export * from './event-form-utils'
-

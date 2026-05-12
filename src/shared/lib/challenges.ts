@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from '@/lib/supabase/client'
 import { Challenge, ChallengeWithSolve, Attachment } from '@/shared/types'
 import { getLogs } from '@/features/logs/lib/log-service'
 
