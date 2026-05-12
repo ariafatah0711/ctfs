@@ -1,4 +1,45 @@
+import { Globe, Bomb, Binary, Cpu, Search, Puzzle, Shield, Terminal, Lightbulb, Eye, Wifi } from 'lucide-react'
+import { ImageIcon } from 'lucide-react'
 import type { ChallengeWithSolve } from '@/shared/types'
+
+export interface CategoryDetails {
+  color: string
+  borderColor: string
+  badgeColor: string
+}
+
+export function getCategoryDetails(category: string): CategoryDetails {
+  const cat = (category || '').toLowerCase()
+  if (cat.includes('intro'))        return { color: 'text-yellow-500',  borderColor: 'border-yellow-500/30',  badgeColor: 'bg-yellow-500/15 text-yellow-400'   }
+  if (cat.includes('boot to root')) return { color: 'text-emerald-500', borderColor: 'border-emerald-500/30', badgeColor: 'bg-emerald-500/15 text-emerald-400'  }
+  if (cat.includes('web'))          return { color: 'text-blue-500',    borderColor: 'border-blue-500/30',    badgeColor: 'bg-blue-500/15 text-blue-400'        }
+  if (cat.includes('forensic'))     return { color: 'text-teal-500',    borderColor: 'border-teal-500/30',    badgeColor: 'bg-teal-500/15 text-teal-400'        }
+  if (cat.includes('osint'))        return { color: 'text-cyan-500',    borderColor: 'border-cyan-500/30',    badgeColor: 'bg-cyan-500/15 text-cyan-400'        }
+  if (cat.includes('crypto'))       return { color: 'text-purple-500',  borderColor: 'border-purple-500/30',  badgeColor: 'bg-purple-500/15 text-purple-400'    }
+  if (cat.includes('rev'))          return { color: 'text-orange-500',  borderColor: 'border-orange-500/30',  badgeColor: 'bg-orange-500/15 text-orange-400'    }
+  if (cat.includes('pwn') || cat.includes('exploit')) return { color: 'text-red-500', borderColor: 'border-red-500/30', badgeColor: 'bg-red-500/15 text-red-400' }
+  if (cat.includes('steg'))         return { color: 'text-pink-500',    borderColor: 'border-pink-500/30',    badgeColor: 'bg-pink-500/15 text-pink-400'        }
+  if (cat.includes('network'))      return { color: 'text-indigo-500',  borderColor: 'border-indigo-500/30',  badgeColor: 'bg-indigo-500/15 text-indigo-400'    }
+  if (cat.includes('misc'))         return { color: 'text-gray-500',    borderColor: 'border-gray-500/30',    badgeColor: 'bg-gray-500/15 text-gray-400'        }
+  return                                   { color: 'text-gray-500',    borderColor: 'border-gray-500/30',    badgeColor: 'bg-gray-500/15 text-gray-400'        }
+}
+
+export interface DifficultyStyle {
+  dotClass: string
+  textClass: string
+}
+
+export function getDifficultyStyle(colorName: string): DifficultyStyle {
+  const map: Record<string, DifficultyStyle> = {
+    cyan:   { dotClass: 'bg-cyan-500',   textClass: 'text-cyan-400'   },
+    green:  { dotClass: 'bg-green-500',  textClass: 'text-green-400'  },
+    yellow: { dotClass: 'bg-yellow-400', textClass: 'text-yellow-400' },
+    red:    { dotClass: 'bg-red-500',    textClass: 'text-red-400'    },
+    purple: { dotClass: 'bg-purple-500', textClass: 'text-purple-400' },
+  }
+  return map[colorName] ?? { dotClass: 'bg-gray-400', textClass: 'text-gray-400' }
+}
+
 
 export function normalizeChallengeHints(raw: unknown): string[] {
   let hints: string[] = []

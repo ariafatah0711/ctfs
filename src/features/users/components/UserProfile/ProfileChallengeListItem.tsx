@@ -26,7 +26,7 @@ export default function ProfileChallengeListItem({
       )}
     >
       <div className="min-w-0 flex-1">
-        <div className="flex items-start gap-2">
+        <div className="flex min-w-0 items-start gap-2">
           <h3 className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
             {title}
           </h3>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy, Flag, CheckCircle2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import APP from '@/config'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/ui'
@@ -33,6 +33,7 @@ import type {
   SubChallengeMode,
   SubChallengeQuestion,
 } from '../types'
+import { getCategoryDetails, getDifficultyStyle } from '../lib'
 
 const ChallengeDescription = React.memo(function ChallengeDescription({ description }: { description: string }) {
   return (
@@ -45,7 +46,7 @@ const ChallengeDescription = React.memo(function ChallengeDescription({ descript
 
 interface ChallengeDetailDialogProps {
   open: boolean
-  challenge: ChallengeWithSolve | null
+  challenge: (ChallengeWithSolve & { is_team_solved?: boolean }) | null
   solvers: Solver[]
   challengeTab: ChallengeDialogTab
   showQuestionTab: boolean
@@ -141,24 +142,21 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
     }
   }
 
+  const isSolved = !!challenge.is_solved;
+  const isTeamSolved = !!challenge.is_team_solved;
+
   // Difficulty color mapping (matching ChallengeCard)
   const rawDiff = (challenge.difficulty || '').toString().trim();
   const normalizedDiff = rawDiff === 'imposible' ? 'Impossible' : rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase();
   const colorName = (APP as any).difficultyStyles?.[normalizedDiff];
-  const colorMap: Record<string, string> = {
-    cyan: 'bg-cyan-500',
-    green: 'bg-green-500',
-    yellow: 'bg-yellow-400',
-    red: 'bg-red-500',
-    purple: 'bg-purple-500',
-  };
-  const diffCircleColor = colorMap[colorName] || 'bg-gray-300';
+  const { dotClass: diffDotColor, textClass: diffTextColor } = getDifficultyStyle(colorName);
+  const { borderColor: categoryBorderColor, badgeColor: categoryBadgeColor } = getCategoryDetails(challenge.category);
   const eventName = events.find(e => e.id === challenge.event_id)?.name || '';
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <DialogContent
-        className="max-w-2xl w-[95vw] h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 backdrop-blur-xl p-0 shadow-2xl [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-gray-500 dark:[&_button.absolute.right-4.top-4]:text-gray-400"
+        className="max-w-2xl w-[95vw] h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white/60 dark:bg-[#0a0d14]/80 border border-gray-200 dark:border-gray-800 backdrop-blur-xl p-0 shadow-2xl [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-gray-500 dark:[&_button.absolute.right-4.top-4]:text-gray-400"
         onClick={(event) => event.stopPropagation()}
       >
         {/* Fixed Header Section */}
@@ -179,25 +177,39 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             </div>
 
             {/* ROW 2: Metadata & Points */}
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
+            <div className={`flex items-center justify-between border-b pb-4 ${categoryBorderColor}`}>
               <div className="flex items-center gap-4">
                 {/* Category Badge */}
-                <div className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/20">
+                <div className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
                   {challenge.category}
                 </div>
 
                 {/* Difficulty */}
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${diffCircleColor} shadow-sm`} />
-                  <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-2 h-2 rounded-full ${diffTextColor.replace('text-', 'bg-').replace('-400', '-500')} shadow-sm`} />
+                  <span className="text-[11px] font-semibold text-gray-500 tracking-tight">
                     {normalizedDiff}
                   </span>
                 </div>
               </div>
 
-              {/* Points */}
-              <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">
-                {challenge.points}
+              {/* Points & Solved Status */}
+              <div className="flex items-center gap-4">
+                {isSolved && (
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/15 rounded-md border border-green-500/20">
+                    <Flag size={12} className="text-green-400 fill-green-400" />
+                    <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Solved</span>
+                  </div>
+                )}
+                {!isSolved && isTeamSolved && (
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/15 rounded-md border border-purple-500/20">
+                    <CheckCircle2 size={12} className="text-purple-400" />
+                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Team Solved</span>
+                  </div>
+                )}
+                <div className={`text-2xl font-black tracking-tighter ${isSolved ? 'text-green-400' : isTeamSolved ? 'text-purple-400' : 'text-gray-900 dark:text-white'}`}>
+                  {challenge.points} <span className="text-[12px] font-bold opacity-60 ml-0.5">pts</span>
+                </div>
               </div>
             </div>
           </div>
