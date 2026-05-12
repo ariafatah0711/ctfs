@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useLogin } from '../hooks'
-import GoogleLoginButton from '@/shared/components/GoogleLoginButton'
+import GoogleLoginButton from './GoogleLoginButton'
 import {
   AuthButton,
   AuthCard,

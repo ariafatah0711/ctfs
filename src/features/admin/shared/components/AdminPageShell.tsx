@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from 'react'
-import BackButton from '@/shared/components/custom/BackButton'
+import BackButton from '@/shared/components/BackButton'
 import { cn } from '@/shared/lib/utils'
 
 interface AdminPageShellProps {

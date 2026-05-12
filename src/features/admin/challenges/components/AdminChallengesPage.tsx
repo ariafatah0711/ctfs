@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 
 import { Loader } from '@/shared/components'
-import { useAuth } from '@/shared/hooks'
+import { useAuth } from '@/shared/contexts/AuthContext'
 import APP from '@/config'
 
 import ChallengeListPanel from './ChallengeListPanel'

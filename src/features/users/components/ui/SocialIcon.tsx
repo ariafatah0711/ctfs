@@ -5,7 +5,6 @@ import {
 } from 'lucide-react';
 import React from 'react';
 
-// Custom Discord SVG icon (official look)
 function DiscordIcon({
   size = 16,
   className = '',
@@ -76,7 +75,6 @@ export default function SocialIcon({
     hover:bg-gray-100 dark:hover:bg-gray-700
     ${colorClasses[type]} ${className}
   `;
-  // Hide label on mobile except for Discord
   const labelClass = alwaysShowLabel
     ? ''
     : hideLabelOnMobile
@@ -97,7 +95,7 @@ export default function SocialIcon({
       </a>
     );
   }
-  // Discord (no link, just text)
+
   return (
     <span className={baseClass} title={label || type.charAt(0).toUpperCase() + type.slice(1)}>
       <Icon size={size} />

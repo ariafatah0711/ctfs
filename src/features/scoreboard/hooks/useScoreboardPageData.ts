@@ -7,7 +7,8 @@ import {
   getLeaderboardSummary,
   getTopProgressByUsernames,
 } from '@/shared/lib'
-import { useAuth, useEventContext, useTheme } from '@/shared/contexts'
+import { useAuth, useTheme } from '@/shared/contexts'
+import { useEventContext } from '@/features/events/contexts/EventContext'
 import type { LeaderboardEntry } from '@/shared/types'
 import {
   getScoreboardEventParam,

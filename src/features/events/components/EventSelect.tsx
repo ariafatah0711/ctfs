@@ -17,18 +17,14 @@ type Props = {
   events: EventSelectItem[]
   className?: string
   disabled?: boolean
-
   sortMode?: 'challenge-filter-bar' | 'none'
   referenceTimeMs?: number
-
   showMain?: boolean
   mainValue?: string
   mainLabel?: string
-
   showAll?: boolean
   allValue?: string
   allLabel?: string
-
   getEventLabel?: (evt: EventSelectItem) => string
 }
 
@@ -63,13 +59,9 @@ export default function EventSelect({
       const start = evt.start_time ? new Date(evt.start_time).getTime() : null
       const end = evt.end_time ? new Date(evt.end_time).getTime() : null
 
-      // Permanent = no start & no end
       if (!start && !end) return 'permanent' as const
-      // Ended
       if (end && nowMs > end) return 'ended' as const
-      // Upcoming
       if (start && nowMs < start) return 'upcoming' as const
-      // Ongoing
       return 'ongoing' as const
     }
 
@@ -132,7 +124,7 @@ export default function EventSelect({
     >
       {!isValueKnown && (
         <option value={value} disabled>
-          Event not found — select again
+          Event not found â€” select again
         </option>
       )}
       {showAll && <option value={allValue}>{allLabel}</option>}

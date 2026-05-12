@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
-} from '@/shared/components/custom'
+} from '@/shared/components'
 import { Button } from '@/shared/ui'
 import { formatRelativeDate } from '@/shared/lib'
 import type { ChallengeWithSolve } from '@/shared/types'

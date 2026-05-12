@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 
-import Loader from '@/shared/components/custom/loading'
+import Loader from '@/shared/components/Loader'
 import { useAuth } from '@/shared/contexts/AuthContext'
-import { useEventContext } from '@/shared/contexts/EventContext'
+import { useEventContext } from '@/features/events/contexts/EventContext'
 
 import TeamPageContent from './TeamPageContent'
 import { useTeamDetail } from '../hooks/useTeamDetail'

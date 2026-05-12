@@ -9,12 +9,10 @@ interface DifficultyBadgeProps {
 }
 
 const DifficultyBadge: React.FC<DifficultyBadgeProps> = ({ difficulty, className = '', width }) => {
-  // Capitalize first letter agar cocok dengan config
   const raw = (difficulty || '').toString().trim();
   const normalized = raw === 'imposible' ? 'Impossible' : raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
   const styles = (APP as any).difficultyStyles || {};
   const colorName = styles[normalized];
-  // Map color name to Tailwind classes
   const colorMap: Record<string, string> = {
     cyan: 'bg-cyan-600 text-white dark:bg-cyan-600 dark:text-white',
     green: 'bg-green-600 text-white dark:bg-green-600 dark:text-white',

@@ -1,7 +1,7 @@
 export { default as ImageWithFallback } from '@/shared/components/ImageWithFallback'
-export { default as Loader } from '@/shared/components/custom/loading'
+export { default as Loader } from '@/shared/components/Loader'
 export { default as EmptyState } from '@/shared/components/EmptyState'
-export { default as BrandLogo } from '@/shared/components/custom/BrandLogo'
-export { default as EventSelect } from '@/shared/components/custom/EventSelect'
-
-export * as customComponents from './custom'
+export { default as BrandLogo } from '@/shared/components/BrandLogo'
+export { default as BackButton } from '@/shared/components/BackButton'
+export { default as ConfirmDialog } from '@/shared/components/ConfirmDialog'
+export { BaseModal, ModalBody, ModalFooter, ModalHeader } from '@/shared/components/BaseModal'

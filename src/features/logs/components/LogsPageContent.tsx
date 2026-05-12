@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Flag, Activity, LayoutDashboard, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Loader } from '@/shared/components';
-import { EventSelect } from '@/shared/components/custom'
-import { useEventContext, useAuth, useLogs } from '@/shared/contexts'
+import EventSelect from '@/features/events/components/EventSelect'
+import { useAuth } from '@/shared/contexts'
+import { useEventContext } from '@/features/events/contexts/EventContext'
+import { useLogs } from '@/features/logs/contexts/LogsContext'
 import LogsList from "@/features/logs/components/LogsList";
 import { motion } from "framer-motion";
 

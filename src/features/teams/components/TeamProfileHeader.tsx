@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Crown, Users, Trophy, Flag, Hash, Calendar, Copy, RefreshCw, LogOut, Eye, EyeOff } from 'lucide-react'
-import { EventSelect } from '@/shared/components/custom'
+import EventSelect from '@/features/events/components/EventSelect'
 import { Button } from '@/shared/ui/button'
 import { TeamInfo, TeamSummary } from '../types'
 

@@ -1,5 +1,5 @@
-import { EventProvider } from '@/shared/contexts/EventContext'
-import { LogsProvider } from '@/shared/contexts/LogsContext'
+import { EventProvider } from '@/features/events/contexts/EventContext'
+import { LogsProvider } from '@/features/logs/contexts/LogsContext'
 
 export default function LogsLayout({
   children,

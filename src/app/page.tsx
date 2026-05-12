@@ -10,8 +10,8 @@ import Link from "next/link"
 
 // Shared Imports
 import APP from '@/config'
-import Loader from '@/shared/components/custom/loading'
-import BrandLogo from '@/shared/components/custom/BrandLogo'
+import Loader from '@/shared/components/Loader'
+import BrandLogo from '@/shared/components/BrandLogo'
 import Footer from "@/_layouts/Footer"
 import { useAuth } from '@/shared/contexts/AuthContext'
 

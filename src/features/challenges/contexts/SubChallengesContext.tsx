@@ -9,7 +9,7 @@ import {
   type SubChallengeQuestion,
   type SubmitSubChallengesResult,
 } from '@/shared/lib/subChallenges'
-import { useAuth } from './AuthContext'
+import { useAuth } from '@/shared/contexts/AuthContext'
 
 type SubChallengeState = {
   loaded: boolean

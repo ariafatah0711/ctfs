@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { AlertCircle, Chrome, Loader2 } from 'lucide-react'
-import { AuthService } from '@/features/auth'
+import { AuthService } from '@/features/auth/services/auth.service'
 
 export default function GoogleLoginButton() {
   const [loading, setLoading] = useState(false)
@@ -16,7 +16,6 @@ export default function GoogleLoginButton() {
       if (error) {
         setError(error)
       }
-      // Supabase akan redirect ke callback URL
     } catch {
       setError('Google sign-in failed')
     } finally {

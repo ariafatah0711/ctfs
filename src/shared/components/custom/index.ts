@@ -1,8 +1,0 @@
-export { default as Loader } from './loading'
-export { default as ConfirmDialog } from './ConfirmDialog'
-export { default as BackButton } from './BackButton'
-export { default as DifficultyBadge } from './DifficultyBadge'
-export { default as AuthProviders } from './AuthProviders'
-export { default as SocialIcon } from './SocialIcon'
-export { default as EventSelect } from './EventSelect'
-export { BaseModal, ModalBody, ModalFooter, ModalHeader } from './BaseModal'

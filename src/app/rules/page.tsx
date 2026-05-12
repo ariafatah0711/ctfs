@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { ArrowLeft } from 'lucide-react';
 import Link from "next/link";
 import { RulesMarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
-import Loader from '@/shared/components/custom/loading'
-import BrandLogo from '@/shared/components/custom/BrandLogo'
+import Loader from '@/shared/components/Loader'
+import BrandLogo from '@/shared/components/BrandLogo'
 import Footer from "@/_layouts/Footer";
 import { rulesConfig } from "@/rules";
 import { useAuth } from '@/shared/contexts/AuthContext'

@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 
 import NotificationBell from './components/NotificationBell'
-import NotificationToast from '@/_layouts/components/notifications/NotificationToast'
-import { useNotifications } from '@/_layouts/hooks/useNotifications'
+import NotificationToast from './components/NotificationToast'
+import { useNotifications } from './hooks'
 
 const NotificationPanel = dynamic(
   () => import('./components/NotificationPanel'),

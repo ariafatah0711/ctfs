@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { Coins, Droplet, Trophy, Rocket } from 'lucide-react'
-import Loader from '@/shared/components/custom/loading'
+import Loader from '@/shared/components/Loader'
 import EmptyState from '@/shared/components/EmptyState'
 import { Card, CardContent } from '@/shared/ui/card'
-import EventSelect from '@/shared/components/custom/EventSelect'
+import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
 import ScoreboardTable from './ScoreboardTable'

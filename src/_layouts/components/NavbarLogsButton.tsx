@@ -3,7 +3,7 @@
 import { FileText } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-import { LogsProvider, useLogs } from '@/shared/contexts/LogsContext'
+import { LogsProvider, useLogs } from '@/features/logs/contexts/LogsContext'
 import type { Theme } from '@/shared/contexts/ThemeContext'
 
 type NavbarLogsButtonProps = {

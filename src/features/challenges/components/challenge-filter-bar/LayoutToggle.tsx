@@ -1,7 +1,7 @@
 'use client'
 
 import { LayoutGrid, List } from 'lucide-react'
-import { useFilterContext } from '@/shared/contexts'
+import { useFilterContext } from '@/features/challenges/contexts/FilterContext'
 
 export default function LayoutToggle() {
   const { layoutMode, setLayoutMode } = useFilterContext()

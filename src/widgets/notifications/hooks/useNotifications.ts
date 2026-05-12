@@ -28,19 +28,19 @@ export function useNotifications() {
   const [notifLoading, setNotifLoading] = useState(false)
   const [notifUnreadCount, setNotifUnreadCount] = useState(0)
   const [notifItems, setNotifItems] = useState<Array<{ id: string; title: string; message: string; level: string; created_at: string }>>([])
-  
+
   const [notifTitle, setNotifTitle] = useState('')
   const [notifMessage, setNotifMessage] = useState('')
   const [notifLevel, setNotifLevel] = useState<'info' | 'info_platform' | 'info_challenges'>('info')
-  
+
   const [solveNotif, setSolveNotif] = useState<{ username: string; challenge: string } | null>(null)
   const [notifToast, setNotifToast] = useState<{ title: string; message: string } | null>(null)
-  
+
   const notifTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const notifToastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const notifPanelRef = useRef<HTMLDivElement>(null)
   const notifButtonRef = useRef<HTMLButtonElement>(null)
-  
+
   const [solveSoundEnabled, setSolveSoundEnabled] = useState(true)
 
   const mergeNotifications = useCallback((

@@ -4,7 +4,7 @@ import React from 'react'
 import { getEvents, filterStartedEvents } from '@/shared/lib/events'
 import type { Event } from '@/shared/types'
 import { getSelectedEventSetting, setSelectedEventSetting } from '@/shared/lib/settings'
-import { useAuth } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts/AuthContext'
 
 export type SelectedEvent = 'all' | 'main' | string
 

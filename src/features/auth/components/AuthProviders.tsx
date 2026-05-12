@@ -1,10 +1,10 @@
 "use client";
 
-import { AuthService } from "@/features/auth";
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { Mail, Chrome, X } from "lucide-react";
-import ConfirmDialog from './ConfirmDialog';
+import { AuthService } from "@/features/auth/services/auth.service";
+import ConfirmDialog from '@/shared/components/ConfirmDialog';
 
 type AuthInfo = { provider: string; email: string };
 
@@ -19,7 +19,6 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
 
   if (!localAuthInfo || localAuthInfo.length === 0) return null;
 
-  // Email selalu paling atas
   const sorted = [...localAuthInfo].sort((a, b) =>
     a.provider === "email" ? -1 : b.provider === "email" ? 1 : 0
   );
@@ -58,12 +57,10 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
               className="flex flex-1 min-w-0 items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 shadow-sm transition-all"
               style={{ minHeight: 48 }}
             >
-              {/* ICON */}
               <span className="text-gray-500 dark:text-gray-300">
                 {getIcon(item.provider)}
               </span>
 
-              {/* LABEL + EMAIL */}
               <div className="flex flex-col leading-tight flex-1 min-w-0">
                 <span className="font-semibold truncate">
                   {getLabel(item.provider)}
@@ -73,7 +70,6 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
                 </span>
               </div>
 
-              {/* UNBIND (SEMUA KECUALI EMAIL) */}
               {removable && googleInfo && (
                 <button
                   type="button"
@@ -94,7 +90,6 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
           );
         })}
 
-        {/* CONNECT GOOGLE */}
         {!providers.includes("google") && (
           <button
             disabled={loading}
@@ -117,7 +112,6 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
 
       {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
 
-      {/* ConfirmDialog for Google Unbind */}
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
@@ -162,9 +156,7 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
             setError(error);
             return;
           }
-          // Optimistically remove Google from local state
           setLocalAuthInfo(prev => prev.filter(p => p.provider !== 'google'));
-          // Optionally, reload data from server for full sync
           router.refresh();
         }}
         confirmDisabled={confirmInput !== pendingUnbindEmail}

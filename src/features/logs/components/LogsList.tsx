@@ -16,7 +16,7 @@ import {
 
 import { Loader } from '@/shared/components';
 import { formatRelativeDate } from '@/shared/lib'
-import { useLogs } from '@/shared/contexts';
+import { useLogs } from '@/features/logs/contexts/LogsContext';
 import { Button } from "@/shared/ui";
 
 export type LogEntry = {

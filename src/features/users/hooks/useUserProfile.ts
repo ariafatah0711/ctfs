@@ -11,7 +11,8 @@ import {
   getFirstBloodChallengeIds,
   getChallenges
 } from '@/shared/lib'
-import { useAuth, useEventContext } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts'
+import { useEventContext } from '@/features/events/contexts/EventContext'
 import type { ChallengeWithSolve, Event } from '@/shared/types'
 import { UserDetail, TeamInfo } from '../types'
 

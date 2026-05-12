@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth, useEventContext, useFilterContext, useSubChallenges } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts'
+import { useEventContext } from '@/features/events/contexts/EventContext'
+import { useFilterContext } from '@/features/challenges/contexts/FilterContext'
+import { useSubChallenges } from '@/features/challenges/contexts/SubChallengesContext'
 import type { ChallengesMainTab, EventSelectorValue } from '../types'
 import { useChallengeDialogState } from './useChallengeDialogState'
 import { useChallengeEventAccess } from './useChallengeEventAccess'

@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 // Shared Imports
-import Loader from '@/shared/components/custom/loading'
+import Loader from '@/shared/components/Loader'
 import UserProfile from '@/features/users/components/UserProfile'
 import { useAuth } from '@/shared/contexts/AuthContext'
 

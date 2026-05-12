@@ -2,7 +2,7 @@
 
 import { AnimatePresence } from 'framer-motion'
 import { Loader } from '@/shared/components'
-import ConfirmDialog from '@/shared/components/custom/ConfirmDialog'
+import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import BulkAssignChallengesCard from './BulkAssignChallengesCard'
 import EventFormDialog from './EventFormDialog'
 import EventListCard from './EventListCard'

@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { getLeaderboardSummary } from '@/shared/lib'
-import { useAuth, useEventContext } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts'
+import { useEventContext } from '@/features/events/contexts/EventContext'
 import type { LeaderboardEntry } from '@/shared/types'
 import { buildScoreboard, getScoreboardEventParam } from '../lib'
 

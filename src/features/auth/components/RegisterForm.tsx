@@ -5,7 +5,7 @@ import { Turnstile } from '@marsidev/react-turnstile'
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
 import { useRegister } from '../hooks'
 import { isValidUsername } from '../lib/auth-utils'
-import GoogleLoginButton from '@/shared/components/GoogleLoginButton'
+import GoogleLoginButton from './GoogleLoginButton'
 import {
   AuthButton,
   AuthCard,

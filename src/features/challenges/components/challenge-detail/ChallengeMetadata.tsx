@@ -2,7 +2,7 @@
 
 import React from 'react'
 import APP from '@/config'
-import DifficultyBadge from '@/shared/components/custom/DifficultyBadge'
+import DifficultyBadge from '@/features/challenges/components/DifficultyBadge'
 import { CustomBadge } from '@/shared/ui'
 import type { ChallengeWithSolve } from '@/shared/types'
 

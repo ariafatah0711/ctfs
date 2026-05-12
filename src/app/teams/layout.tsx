@@ -1,4 +1,4 @@
-import { EventProvider } from '@/shared/contexts/EventContext'
+import { EventProvider } from '@/features/events/contexts/EventContext'
 
 export default function TeamsLayout({
   children,

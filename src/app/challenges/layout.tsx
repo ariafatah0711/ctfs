@@ -1,6 +1,6 @@
-import { EventProvider } from '@/shared/contexts/EventContext'
-import { FilterProvider } from '@/shared/contexts/FilterContext'
-import { SubChallengesProvider } from '@/shared/contexts/SubChallengesContext'
+import { EventProvider } from '@/features/events/contexts/EventContext'
+import { FilterProvider } from '@/features/challenges/contexts/FilterContext'
+import { SubChallengesProvider } from '@/features/challenges/contexts/SubChallengesContext'
 
 export default function ChallengesLayout({
   children,

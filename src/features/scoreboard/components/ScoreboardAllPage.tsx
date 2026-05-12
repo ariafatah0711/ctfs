@@ -1,9 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Loader from '@/shared/components/custom/loading'
-import BackButton from '@/shared/components/custom/BackButton'
-import EventSelect from '@/shared/components/custom/EventSelect'
+import Loader from '@/shared/components/Loader'
+import BackButton from '@/shared/components/BackButton'
+import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardAllPageData } from '../hooks'
 import ScoreboardTable from './ScoreboardTable'
 

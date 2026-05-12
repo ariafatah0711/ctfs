@@ -1,5 +1,5 @@
 import React from 'react'
-import ConfirmDialog from '@/shared/components/custom/ConfirmDialog'
+import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import type { Challenge } from '../types'
 
 interface DeleteChallengeConfirmDialogProps {

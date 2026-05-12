@@ -1,5 +1,5 @@
 import React from 'react'
-import DifficultyBadge from '@/shared/components/custom/DifficultyBadge'
+import DifficultyBadge from '@/features/challenges/components/DifficultyBadge'
 import { Badge, Button } from '@/shared/ui'
 import { Pencil, Trash2, Flag, CheckCircle2, CircleOff, Wrench } from 'lucide-react'
 import { Challenge } from '../types'

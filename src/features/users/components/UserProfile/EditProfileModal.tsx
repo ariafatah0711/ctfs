@@ -6,13 +6,13 @@ import Link from "next/link";
 
 // Shared Imports
 import {
-  AuthProviders,
   BaseModal,
   ModalBody,
   ModalFooter,
   ModalHeader,
-} from "@/shared/components/custom";
+} from "@/shared/components";
 import { Input, Button } from "@/shared/ui";
+import AuthProviders from "@/features/auth/components/AuthProviders";
 import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/shared/lib";
 import { isValidUsername } from "@/features/auth";
 

@@ -1,5 +1,4 @@
-// Re-export context from shared
-export * from '@/shared/contexts/LogsContext'
+export * from './contexts/LogsContext'
 
 // Main page components
 export { default as LogsPageContent } from './components/LogsPageContent'

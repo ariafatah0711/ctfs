@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/shared/hooks'
+import { useAuth } from '@/shared/contexts/AuthContext'
 import { isGlobalAdmin } from '../lib'
 import type { Event } from '../types'
 import { useAdminEventBulkChallenges } from './useAdminEventBulkChallenges'

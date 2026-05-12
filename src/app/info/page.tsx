@@ -9,9 +9,9 @@ import Image from "next/image";
 // Shared Imports
 import APP from "@/config";
 import { VERSION, BUILD_TIME } from "@/version";
-import Loader from '@/shared/components/custom/loading'
+import Loader from '@/shared/components/Loader'
 import ImageWithFallback from '@/shared/components/ImageWithFallback'
-import BrandLogo from '@/shared/components/custom/BrandLogo'
+import BrandLogo from '@/shared/components/BrandLogo'
 import Footer from "@/_layouts/Footer";
 import { useAuth } from '@/shared/contexts/AuthContext'
 
