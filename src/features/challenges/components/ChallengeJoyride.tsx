@@ -2,7 +2,6 @@
 
 // React Imports
 import { useEffect, useRef, useState } from 'react'
-import { usePathname } from 'next/navigation'
 import Joyride, { Step, STATUS } from 'react-joyride'
 
 // Shared Imports
@@ -10,7 +9,6 @@ import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/sh
 import { useAuth } from '@/shared/contexts'
 
 export default function ChallengeJoyride() {
-  const pathname = usePathname()
   const { user } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [runTour, setRunTour] = useState(false)
@@ -23,8 +21,7 @@ export default function ChallengeJoyride() {
   }, [])
 
   useEffect(() => {
-    // Only run on challenges page and after hydration
-    if (!mounted || pathname !== '/challenges' || !user) {
+    if (!mounted || !user) {
       return
     }
 
@@ -94,7 +91,7 @@ export default function ChallengeJoyride() {
 
       return () => clearTimeout(timer)
     }
-  }, [pathname, user, mounted])
+  }, [user, mounted])
 
   // Track element clicks
   useEffect(() => {

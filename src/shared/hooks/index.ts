@@ -1,1 +1,1 @@
-export { useAuth } from '@/shared/contexts'
+export { useAuth } from '@/shared/contexts/AuthContext'

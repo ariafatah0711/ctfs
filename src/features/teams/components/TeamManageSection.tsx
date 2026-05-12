@@ -44,7 +44,7 @@ export default function TeamManageSection({
                     onSave={onRenameTeam}
                     disabled={busy}
                     trigger={
-                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-white dark:hover:bg-gray-800 shadow-sm transition-all">
+                      <Button variant="ghost" size="icon" disabled={busy} className="h-9 w-9 rounded-xl hover:bg-white dark:hover:bg-gray-800 shadow-sm transition-all">
                         <Edit2 size={16} className="text-blue-500" />
                       </Button>
                     }

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts/AuthContext'
 import { Loader } from '@/shared/components'
 
 export default function NotFound() {

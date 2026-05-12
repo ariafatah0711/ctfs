@@ -6,10 +6,11 @@ import 'react-medium-image-zoom/dist/styles.css'
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
-import { Navbar, ScrollToggle } from '@/_layouts'
-import { AuthProvider, ThemeProvider, LogsProvider, EventProvider, FilterProvider, SubChallengesProvider } from '@/shared/contexts'
+import Navbar from '@/_layouts/Navbar'
+import ScrollToggle from '@/_layouts/components/ScrollToggle'
+import { AuthProvider } from '@/shared/contexts/AuthContext'
+import { ThemeProvider } from '@/shared/contexts/ThemeContext'
 import APP from '@/config'
-import ChallengeJoyride from '@/features/challenges/components/ChallengeJoyride'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -90,23 +91,14 @@ export default async function RootLayout({
         ) : (
           // Normal mode: with navbar and providers
           <ThemeProvider>
-            <FilterProvider>
-              <AuthProvider>
-                <EventProvider>
-                  <SubChallengesProvider>
-                    <LogsProvider>
-                      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                        <Navbar />
-                        <div className="pt-14">{children}</div>
-                        <Toaster position="top-right" reverseOrder={false} />
-                        <ChallengeJoyride />
-                        <ScrollToggle />
-                      </div>
-                    </LogsProvider>
-                  </SubChallengesProvider>
-                </EventProvider>
-              </AuthProvider>
-            </FilterProvider>
+            <AuthProvider>
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <Navbar />
+                <div className="pt-14">{children}</div>
+                <Toaster position="top-right" reverseOrder={false} />
+                <ScrollToggle />
+              </div>
+            </AuthProvider>
           </ThemeProvider>
         )}
       </body>

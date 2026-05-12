@@ -3,12 +3,15 @@
 import { motion } from "framer-motion";
 import { ArrowLeft } from 'lucide-react';
 import Link from "next/link";
-import { RulesMarkdownRenderer, Loader, BrandLogo } from '@/shared/components'
-import { Footer } from "@/_layouts";
+import { RulesMarkdownRenderer } from '@/shared/components/MarkdownRenderer'
+import Loader from '@/shared/components/custom/loading'
+import BrandLogo from '@/shared/components/custom/BrandLogo'
+import Footer from "@/_layouts/Footer";
 import { rulesConfig } from "@/rules";
+import { useAuth } from '@/shared/contexts/AuthContext'
 
 export default function RulesPage() {
-  const { loading } = require("@/shared/contexts").useAuth();
+  const { loading } = useAuth()
 
   if (loading) return <Loader fullscreen color="text-blue-500" />
 

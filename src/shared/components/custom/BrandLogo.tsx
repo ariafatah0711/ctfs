@@ -8,8 +8,7 @@ interface BrandLogoProps {
     className?: string
 }
 
-// Langsung export default di depan function
-export default ({ name = "", className }: BrandLogoProps) => {
+const BrandLogo = ({ name = "", className }: BrandLogoProps) => {
     const isCtfBrand = name.toUpperCase().endsWith("CTF");
 
     if (isCtfBrand) {
@@ -34,3 +33,6 @@ export default ({ name = "", className }: BrandLogoProps) => {
         </span>
     );
 };
+
+BrandLogo.displayName = "BrandLogo";
+export default BrandLogo;

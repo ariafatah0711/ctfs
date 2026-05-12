@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, Check, Plus, Loader2, X, Megaphone, Settings2, Trash2, Calendar } from 'lucide-react'
 import { Switch } from '@/shared/ui'
-import { MarkdownRenderer } from '@/shared/components'
-import { formatRelativeDate } from '@/shared/lib'
+import { MarkdownRenderer } from '@/shared/components/MarkdownRenderer'
+import { formatRelativeDate } from '@/shared/lib/utils'
 import NotificationItem from './NotificationItem'
 
 type NotificationPanelProps = {

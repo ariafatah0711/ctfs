@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/shared/contexts'
-import { Loader } from '@/shared/components'
-import { AuthPageShell, LoginForm } from '@/features/auth'
+import { useAuth } from '@/shared/contexts/AuthContext'
+import Loader from '@/shared/components/custom/loading'
+import { AuthPageShell } from '@/features/auth/components/ui/AuthPageShell'
+import LoginForm from '@/features/auth/components/LoginForm'
 
 export default function LoginPage() {
   const router = useRouter()

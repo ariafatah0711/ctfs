@@ -8,12 +8,17 @@ import {
   deleteNotification,
   subscribeToNotifications,
   subscribeToSolves,
+} from '@/shared/lib/challenges'
+import {
   getSolveSoundEnabledSetting,
   setSolveSoundEnabledSetting,
+} from '@/shared/lib/settings'
+import {
   getNotifSeenIds,
   addNotifSeenIds,
-} from '@/shared/lib'
-import { useAuth, useTheme } from '@/shared/contexts'
+} from '@/shared/lib/userState'
+import { useAuth } from '@/shared/contexts/AuthContext'
+import { useTheme } from '@/shared/contexts/ThemeContext'
 
 export function useNotifications() {
   const { user } = useAuth()

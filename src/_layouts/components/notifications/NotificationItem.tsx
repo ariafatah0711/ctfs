@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { MarkdownRenderer } from '@/shared/components'
-import { formatRelativeDate } from '@/shared/lib'
+import { MarkdownRenderer } from '@/shared/components/MarkdownRenderer'
+import { formatRelativeDate } from '@/shared/lib/utils'
 
 type NotificationItemProps = {
   notification: {

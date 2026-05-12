@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useAuth } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts/AuthContext'
 import { Loader } from '@/shared/components'
 import {
   AuthCard,

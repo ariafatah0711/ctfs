@@ -2,6 +2,7 @@
 
 // React Imports
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { Info, BookOpen, Flag, Trophy, Shield, FileText, Users, Scale, User, Settings2 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
@@ -9,11 +10,12 @@ import { AnimatePresence } from 'framer-motion'
 
 // Shared Imports
 import APP from '@/config'
-import { ImageWithFallback } from '@/shared/components'
-import { DevConfigDialog } from './components'
-import { isAdmin, isGlobalAdmin } from '@/shared/lib'
-import { AuthService } from '@/features/auth'
-import { useTheme, useAuth, useLogs } from '@/shared/contexts'
+import ImageWithFallback from '@/shared/components/ImageWithFallback'
+import DevConfigDialog from './components/DevConfigDialog'
+import { isAdmin, isGlobalAdmin } from '@/shared/lib/admin'
+import { AuthService } from '@/features/auth/services/auth.service'
+import { useAuth } from '@/shared/contexts/AuthContext'
+import { useTheme } from '@/shared/contexts/ThemeContext'
 
 // Internal Imports
 import { useNotifications } from './hooks/useNotifications'
@@ -21,10 +23,13 @@ import NotificationBell from './components/notifications/NotificationBell'
 import NotificationPanel from './components/notifications/NotificationPanel'
 import NotificationToast from './components/notifications/NotificationToast'
 
+const NavbarLogsButton = dynamic(() => import('./components/NavbarLogsButton'), {
+  ssr: false,
+})
+
 export default function Navbar() {
   const router = useRouter()
   const { user, setUser, loading } = useAuth()
-  const { unreadCount: logsUnreadCount } = useLogs()
   const pathname = usePathname()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -380,32 +385,7 @@ export default function Navbar() {
 
               {/* Logs Icon */}
               {user && (
-                <div className="relative mr-2" data-tour="navbar-logs">
-                  <button
-                    className={`rounded-full p-1 transition-colors duration-150 ${pathname === '/logs' ? (theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100') : ''}`}
-                    title="Logs"
-                    aria-label="Logs"
-                    onClick={() => {
-                      if (pathname === '/logs') {
-                        if (window.history.length > 1) {
-                          router.back()
-                        } else {
-                          router.push('/')
-                        }
-                      } else {
-                        router.push('/logs')
-                      }
-                    }}
-                  >
-                    <FileText size={22} className="text-blue-500" />
-                  </button>
-
-                  {logsUnreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-semibold bg-red-600 text-white">
-                      {logsUnreadCount > 99 ? '99+' : String(logsUnreadCount)}
-                    </span>
-                  )}
-                </div>
+                <NavbarLogsButton theme={theme} pathname={pathname} />
               )}
 
               {/* Dev Config */}

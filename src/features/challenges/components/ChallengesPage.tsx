@@ -1,5 +1,7 @@
 'use client'
 
+import dynamic from 'next/dynamic'
+
 import { Loader } from '@/shared/components'
 import { useChallengesPageData } from '../hooks/useChallengesPageData'
 import EventsTab from './EventsTab'
@@ -7,6 +9,10 @@ import ChallengeDialogs from './challenges-page/ChallengeDialogs'
 import ChallengePageTabs from './challenges-page/ChallengePageTabs'
 import ChallengeWatermark from './challenges-page/ChallengeWatermark'
 import ChallengesTabPanel from './challenges-page/ChallengesTabPanel'
+
+const ChallengeJoyride = dynamic(() => import('./ChallengeJoyride'), {
+  ssr: false,
+})
 
 export default function ChallengesPage() {
   const data = useChallengesPageData()
@@ -46,6 +52,7 @@ export default function ChallengesPage() {
       </main>
 
       <ChallengeDialogs data={data} />
+      <ChallengeJoyride />
     </div>
   )
 }

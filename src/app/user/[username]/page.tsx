@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { SearchX } from 'lucide-react'
 import { getUserByUsername } from '@/shared/lib/users'
-import { useAuth } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts/AuthContext'
 import { UserEmptyState, UserProfile } from '@/features/users'
 import APP from '@/config'
 

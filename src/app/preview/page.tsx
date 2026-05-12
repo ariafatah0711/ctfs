@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import Image from 'next/image'
 import { getPreviewData, PreviewData } from '@/shared/lib/preview'
 import { Calendar, Clock, Users, CheckCircle2, Trophy, Zap } from 'lucide-react'
 import { ScoreboardTable } from '@/features/scoreboard'
@@ -282,8 +283,8 @@ export default function PreviewPage() {
                             className="h-full flex flex-col overflow-hidden transition-all duration-200 bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400"
                           >
                             {evt.image_url && (
-                              <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                                <img src={evt.image_url} alt={evt.name} className="w-full h-full object-cover" />
+                              <div className="h-72 w-full relative overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                <Image src={evt.image_url} alt={evt.name} fill className="object-cover" unoptimized />
                               </div>
                             )}
 
@@ -346,8 +347,8 @@ export default function PreviewPage() {
                             className="h-full flex flex-col overflow-hidden transition-all duration-200 bg-white dark:bg-gray-800 hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-400"
                           >
                             {evt.image_url && (
-                              <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                                <img src={evt.image_url} alt={evt.name} className="w-full h-full object-cover" />
+                              <div className="h-72 w-full relative overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                <Image src={evt.image_url} alt={evt.name} fill className="object-cover" unoptimized />
                               </div>
                             )}
 
@@ -410,8 +411,8 @@ export default function PreviewPage() {
                             className="h-full flex flex-col overflow-hidden transition-all duration-200 bg-white dark:bg-gray-800 hover:shadow-xl hover:border-gray-400 dark:hover:border-gray-400"
                           >
                             {evt.image_url && (
-                              <div className="h-72 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                                <img src={evt.image_url} alt={evt.name} className="w-full h-full object-cover" />
+                              <div className="h-72 w-full relative overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                <Image src={evt.image_url} alt={evt.name} fill className="object-cover" unoptimized />
                               </div>
                             )}
 

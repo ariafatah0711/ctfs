@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogTrigger,
 } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -18,12 +19,14 @@ interface EditTeamModalProps {
   currentName: string
   onSave: (newName: string) => Promise<{ success: boolean; error?: string }>
   disabled?: boolean
+  trigger?: React.ReactNode
 }
 
 export default function EditTeamModal({
   currentName,
   onSave,
   disabled,
+  trigger,
 }: EditTeamModalProps) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(currentName)
@@ -60,16 +63,19 @@ export default function EditTeamModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={disabled}
-        onClick={() => setOpen(true)}
-        className="gap-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white font-semibold border-none"
-      >
-        <Pencil size={14} />
-        Edit Team
-      </Button>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={disabled}
+            className="gap-2 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white font-semibold border-none"
+          >
+            <Pencil size={14} />
+            Edit Team
+          </Button>
+        )}
+      </DialogTrigger>
 
       <DialogContent
         className={

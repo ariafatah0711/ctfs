@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/shared/contexts'
-import { Loader } from '@/shared/components'
-import { AuthPageShell, RegisterForm } from '@/features/auth'
+import { useAuth } from '@/shared/contexts/AuthContext'
+import Loader from '@/shared/components/custom/loading'
+import { AuthPageShell } from '@/features/auth/components/ui/AuthPageShell'
+import RegisterForm from '@/features/auth/components/RegisterForm'
 
 export default function RegisterPage() {
   const router = useRouter()

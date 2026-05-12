@@ -2,6 +2,7 @@
 
 import { Calendar, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { Card } from '@/shared/ui'
 import {
   getEventDateLabels,
@@ -59,10 +60,12 @@ export default function EventCard({
         {/* Image Section */}
         <div className="relative h-40 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800/50">
           {eventImageUrl ? (
-            <img
+            <Image
               src={eventImageUrl}
               alt={event.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              unoptimized
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 flex items-center justify-center">

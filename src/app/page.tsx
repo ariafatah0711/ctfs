@@ -10,8 +10,10 @@ import Link from "next/link"
 
 // Shared Imports
 import APP from '@/config'
-import { Loader, BrandLogo } from '@/shared/components'
-import { Footer } from "@/_layouts"
+import Loader from '@/shared/components/custom/loading'
+import BrandLogo from '@/shared/components/custom/BrandLogo'
+import Footer from "@/_layouts/Footer"
+import { useAuth } from '@/shared/contexts/AuthContext'
 
 const FEATURES = [
   {
@@ -57,7 +59,7 @@ const FEATURES = [
 ]
 
 export default function Home() {
-  const { user, loading } = require("@/shared/contexts").useAuth();
+  const { user, loading } = useAuth()
 
   if (loading) {
     return <Loader fullscreen color="text-blue-500" />

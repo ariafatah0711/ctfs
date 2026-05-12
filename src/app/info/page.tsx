@@ -4,12 +4,16 @@
 import { useEffect, useState } from 'react'
 import { motion } from "framer-motion";
 import { Star, GitBranch, Users, Github, BookOpen, ScrollText, Info, ListOrdered, MessageSquare, Clock } from 'lucide-react'
+import Image from "next/image";
 
 // Shared Imports
 import APP from "@/config";
 import { VERSION, BUILD_TIME } from "@/version";
-import { Loader, ImageWithFallback, BrandLogo } from '@/shared/components';
-import { Footer } from "@/_layouts";
+import Loader from '@/shared/components/custom/loading'
+import ImageWithFallback from '@/shared/components/ImageWithFallback'
+import BrandLogo from '@/shared/components/custom/BrandLogo'
+import Footer from "@/_layouts/Footer";
+import { useAuth } from '@/shared/contexts/AuthContext'
 
 const CONTRIBUTORS = [
   "@ariafatah0711",
@@ -56,7 +60,7 @@ const LINKS = [
 
 export default function InfoPage() {
   const [repoStats, setRepoStats] = useState<{ stars: number; forks: number } | null>(null)
-  const { loading } = require("@/shared/contexts").useAuth();
+  const { loading } = useAuth()
 
   useEffect(() => {
     const repoUrl = APP.nxctf.nxctf_github
@@ -321,7 +325,7 @@ function ProfileAvatar({ username, size = 32 }: { username: string; size?: numbe
     let cancelled = false
     setLoaded(false)
     setErrored(false)
-    const img = new Image()
+    const img = new window.Image()
     img.src = url
     img.onload = () => { if (!cancelled) setLoaded(true) }
     img.onerror = () => { if (!cancelled) setErrored(true) }
@@ -337,11 +341,14 @@ function ProfileAvatar({ username, size = 32 }: { username: string; size?: numbe
   }
 
   return (
-    <img
+    <Image
       src={url}
       alt={`${username} avatar`}
+      width={size}
+      height={size}
       className={`${sizeClass} rounded-full grayscale group-hover:grayscale-0 transition-all duration-300 shadow-sm`}
       style={{ opacity: loaded && !errored ? 1 : 0 }}
+      unoptimized
     />
   )
 }

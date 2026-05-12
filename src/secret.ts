@@ -12,7 +12,8 @@
 export const NXCTL_API_URL = process.env.NXCTL_API_URL || ''
 export const NXCTL_API_TOKEN = process.env.NXCTL_API_TOKEN || ''
 
-export default {
+const SECRETS = {
   NXCTL_API_URL,
   NXCTL_API_TOKEN,
 }
+export default SECRETS

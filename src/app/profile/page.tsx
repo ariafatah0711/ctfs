@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 // Shared Imports
 import { Loader } from '@/shared/components'
 import { UserProfile } from '@/features/users'
-import { useAuth } from '@/shared/contexts'
+import { useAuth } from '@/shared/contexts/AuthContext'
 
 export default function ProfilePage() {
   const router = useRouter()

@@ -49,6 +49,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.6",
     "@types/canvas-confetti": "^1.9.0",
     "@types/crypto-js": "^4.2.1",
     "@types/node": "^20",
