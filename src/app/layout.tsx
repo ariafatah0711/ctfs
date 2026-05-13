@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { Inter } from 'next/font/google'
 import { Settings } from 'lucide-react'
 import 'react-medium-image-zoom/dist/styles.css'
 import './globals.css'
@@ -11,8 +10,6 @@ import ScrollToggle from '@/_layouts/components/ScrollToggle'
 import { AuthProvider } from '@/shared/contexts/AuthContext'
 import { ThemeProvider } from '@/shared/contexts/ThemeContext'
 import APP from '@/config'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP.baseUrl),
@@ -84,7 +81,7 @@ export default async function RootLayout({
 
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
         {isMaintenancePage ? (
           // Maintenance mode: no navbar, no providers, just raw content
           children

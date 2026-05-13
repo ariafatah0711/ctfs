@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { SearchX } from 'lucide-react'
-import { getUserByUsername } from '@/shared/lib/users'
+import { getUserByUsername } from '@/features/users/services/user-profile.service'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import UserProfile from '@/features/users/components/UserProfile'
 import { UserEmptyState } from '@/features/users/components/ui/UserEmptyState'

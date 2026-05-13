@@ -9,14 +9,14 @@ export {
   formatRelativeDate,
   getChallengeById,
   getChallengesList,
-  getEvents,
   getFlag,
-  getInfo,
   getSolversAll,
   setChallengeActive,
   setChallengeMaintenance,
   updateChallenge,
 } from '@/shared/lib'
+export { getInfo } from '@/features/admin/overview/services/site-info.service'
+export { getEvents } from '@/features/events/services/event.service'
 export { getAdminScope } from '@/features/admin/services/admin.service'
 
 export * from './admin-challenge-filters'

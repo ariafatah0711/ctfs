@@ -1,0 +1,198 @@
+import { PostgrestSingleResponse } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase/client'
+import { User, ChallengeWithSolve } from '@/shared/types'
+
+export type UserDetail = {
+  id: string
+  username: string
+  rank: number | null
+  score: number
+  picture?: string | null
+  profile_picture_url?: string | null
+  bio?: string
+  sosmed?: Record<string, string>
+  created_at?: string | null
+  last_login_at?: string | null
+  solved_challenges: ChallengeWithSolve[]
+}
+
+export type UserProfileLite = {
+  id: string
+  username: string
+  picture?: string | null
+  profile_picture_url?: string | null
+  solved_event_ids: string[]
+  has_main_solved: boolean
+}
+
+const normalizeTimestamp = (value?: string | null): string | null => {
+  if (!value) return null
+  let normalized = value.trim()
+  if (normalized.includes(' ') && !normalized.includes('T')) {
+    normalized = normalized.replace(' ', 'T')
+  }
+  if (/([+-]\d{2})$/.test(normalized)) {
+    normalized = normalized.replace(/([+-]\d{2})$/, '$1:00')
+  } else if (/([+-]\d{2})(\d{2})$/.test(normalized)) {
+    normalized = normalized.replace(/([+-]\d{2})(\d{2})$/, '$1:$2')
+  }
+  return normalized
+}
+
+export async function getUserDetail(userId: string, eventId?: string | null, eventMode?: string): Promise<UserDetail | null> {
+  try {
+    const { data, error }: PostgrestSingleResponse<any> = await supabase.rpc('detail_user', {
+      p_id: userId,
+      p_event_id: eventId ?? null,
+      p_event_mode: eventMode ?? (eventId ? 'equals' : 'any')
+    })
+    if (error || !data || !data.success) {
+      console.error('Error fetching user detail:', error || data?.message)
+      return null
+    }
+    return {
+      id: data.user.id,
+      username: data.user.username,
+      rank: data.user.rank ?? null,
+      score: data.user.score ?? 0,
+      picture: data.user.picture ?? null,
+      profile_picture_url: data.user.profile_picture_url ?? null,
+      bio: data.user.bio ?? '',
+      sosmed: data.user.sosmed ?? {},
+      created_at: normalizeTimestamp(data.user.created_at),
+      last_login_at: normalizeTimestamp(data.user.last_login_at),
+      solved_challenges: (data.solved_challenges || []).map((c: any) => ({
+        id: c.challenge_id,
+        title: c.title,
+        category: c.category,
+        points: c.points,
+        difficulty: c.difficulty,
+        is_solved: true,
+        solved_at: c.solved_at,
+      })),
+    }
+  } catch (error) {
+    console.error('Error fetching user detail:', error)
+    return null
+  }
+}
+
+export async function getUserProfileLite(userId: string): Promise<UserProfileLite | null> {
+  try {
+    const { data, error } = await supabase.rpc('get_user_profile', { p_id: userId })
+    if (error) {
+      console.error('Error fetching user profile:', error)
+      return null
+    }
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) return null
+
+    const solvedIds = Array.isArray(row.solved_event_ids)
+      ? row.solved_event_ids.filter(Boolean).map((id: any) => String(id))
+      : []
+
+    return {
+      id: row.id,
+      username: row.username,
+      picture: row.picture ?? null,
+      profile_picture_url: row.profile_picture_url ?? null,
+      solved_event_ids: solvedIds,
+      has_main_solved: !!row.has_main_solved,
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error)
+    return null
+  }
+}
+
+export async function getUserByUsername(username: string): Promise<User | null> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .single()
+
+    if (error) {
+      console.error('Error fetching user by username:', error)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.error('Error fetching user by username:', error)
+    return null
+  }
+}
+
+export async function updateUsername(userId: string, newUsername: string): Promise<{ error: string | null, username?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('update_username', {
+      p_id: userId,
+      p_username: newUsername
+    })
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update username' }
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update username' }
+    }
+    return { error: null, username: data.username }
+  } catch (error) {
+    return { error: 'Failed to update username' }
+  }
+}
+
+export async function updateBio(userId: string, newBio: string): Promise<{ error: string | null, bio?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('update_bio', {
+      p_id: userId,
+      p_bio: newBio
+    })
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update bio' }
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update bio' }
+    }
+    return { error: null, bio: data.bio }
+  } catch (error) {
+    return { error: 'Failed to update bio' }
+  }
+}
+
+export async function updateSosmed(userId: string, newSosmed: Record<string, string>): Promise<{ error: string | null, sosmed?: Record<string, string> }> {
+  try {
+    const { data, error } = await supabase.rpc('update_sosmed', {
+      p_id: userId,
+      p_sosmed: newSosmed
+    })
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update sosmed' }
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update sosmed' }
+    }
+    return { error: null, sosmed: data.sosmed }
+  } catch (error) {
+    return { error: 'Failed to update sosmed' }
+  }
+}
+
+export async function updateProfilePicture(userId: string, profilePictureUrl: string): Promise<{ error: string | null, profile_picture_url?: string | null }> {
+  try {
+    const { data, error } = await supabase.rpc('update_profile_picture', {
+      p_id: userId,
+      p_profile_picture_url: profilePictureUrl
+    })
+    if (error || !data) {
+      return { error: error?.message || 'Failed to update profile picture' }
+    }
+    if (!data.success) {
+      return { error: data.message || 'Failed to update profile picture' }
+    }
+    return { error: null, profile_picture_url: data.profile_picture_url ?? null }
+  } catch (error) {
+    return { error: 'Failed to update profile picture' }
+  }
+}

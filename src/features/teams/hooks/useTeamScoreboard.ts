@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/shared/lib/teams'
+import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/features/teams/services/team.service'
 import { buildScoreboard, getOrderedProgressSeries } from '@/features/scoreboard/lib/build-scoreboard'
 import { TeamScoreboardEntry, TeamProgressSeries } from '../types'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { getEvents, filterStartedEvents } from '@/shared/lib/events'
+import { getEvents, filterStartedEvents } from '@/features/events/services/event.service'
 import type { Event } from '@/shared/types'
 import { getSelectedEventSetting, setSelectedEventSetting } from '@/shared/lib/settings'
 import { useAuth } from '@/shared/contexts/AuthContext'

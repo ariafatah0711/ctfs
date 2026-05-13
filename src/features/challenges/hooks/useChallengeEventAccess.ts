@@ -4,10 +4,10 @@ import { useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { AuthService } from '@/features/auth'
 import {
-  formatEventDurationCompact,
   getAllMyEventMemberships,
   getMyEventMembership,
-} from '@/shared/lib'
+} from '@/features/events/services/event.service'
+import { formatEventDurationCompact } from '@/shared/lib'
 import type { EventMembershipStatus, User } from '@/shared/types'
 import type {
   ChallengeEventFilterItem,

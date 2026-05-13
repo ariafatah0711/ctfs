@@ -5,8 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/shared/ui/button"
 import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
 import { Event } from "@/shared/types"
+import { joinEvent } from "@/features/events/services/event.service"
 import toast from "react-hot-toast"
-import { joinEvent } from "@/shared/lib"
 
 type JoinEventDialogProps = {
   open: boolean

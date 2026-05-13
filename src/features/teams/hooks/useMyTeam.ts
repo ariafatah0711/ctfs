@@ -11,7 +11,7 @@ import {
   kickTeamMember,
   transferTeamCaptain,
   renameTeam,
-} from '@/shared/lib'
+} from '@/features/teams/services/team.service'
 import { TeamInfo, TeamMember, TeamSummary, TeamChallenge } from '../types'
 
 export function useMyTeam(user: any, effectiveSelectedEvent: string | number) {

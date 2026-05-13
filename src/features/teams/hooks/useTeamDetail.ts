@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getTeamByName, getTeamChallengesByName } from '@/shared/lib'
+import { getTeamByName, getTeamChallengesByName } from '@/features/teams/services/team.service'
 import { TeamInfo, TeamMember, TeamSummary, TeamChallenge } from '../types'
 
 export function useTeamDetail(user: any, teamName: string, effectiveSelectedEvent: string | number) {

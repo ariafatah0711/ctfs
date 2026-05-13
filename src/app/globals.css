@@ -17,7 +17,7 @@
 }
 
 body {
-  font-family: 'Fira Mono', 'JetBrains Mono', 'Menlo', 'monospace';
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {

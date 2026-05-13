@@ -2,12 +2,16 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import APP from '@/config'
 import { AuthService } from '@/features/auth'
+import { getTeamByUserId } from '@/features/teams/services/team.service'
 import {
   getUserDetail,
   getUserProfileLite,
+} from '@/features/users/services/user-profile.service'
+import {
   getCategoryTotals,
   getDifficultyTotals,
-  getTeamByUserId,
+} from '@/features/users/services/user-stats.service'
+import {
   getFirstBloodChallengeIds,
   getChallenges
 } from '@/shared/lib'

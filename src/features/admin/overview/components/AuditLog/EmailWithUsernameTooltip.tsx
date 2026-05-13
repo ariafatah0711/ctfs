@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { getUsernameByEmail } from '@/shared/lib'
+import { getUsernameByEmail } from '@/features/admin/overview/services/audit-user-lookup.service'
 
 interface EmailWithUsernameTooltipProps {
   email: string

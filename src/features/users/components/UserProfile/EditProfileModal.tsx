@@ -13,7 +13,7 @@ import {
 } from "@/shared/components";
 import { Input, Button } from "@/shared/ui";
 import AuthProviders from "@/features/auth/components/AuthProviders";
-import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/shared/lib";
+import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/features/users/services/user-profile.service";
 import { isValidUsername } from "@/features/auth";
 
 export default function EditProfileModal({

@@ -3,7 +3,6 @@ export {
   adminRemoveEventMember,
   addEvent,
   deleteEvent,
-  getChallengesLite,
   getEvents,
   listEventJoinRequests,
   listEventMembers,
@@ -12,7 +11,8 @@ export {
   setChallengesEvent,
   setEventJoinSettings,
   updateEvent,
-} from '@/shared/lib'
+} from '@/features/events/services/event.service'
+export { getChallengesLite } from '@/shared/lib'
 export { isGlobalAdmin, searchUsersByUsername } from '@/features/admin/services/admin.service'
 
 export type { UserLite } from '@/features/admin/services/admin.service'

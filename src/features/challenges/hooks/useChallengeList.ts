@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import APP from '@/config'
-import { getChallengesList, getMyTeamChallenges } from '@/shared/lib'
+import { getMyTeamChallenges } from '@/features/teams/services/team.service'
+import { getChallengesList } from '@/shared/lib'
 import type { ChallengeWithSolve } from '@/shared/types'
 
 export function useChallengeList(userId?: string) {
