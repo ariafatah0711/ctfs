@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import APP from '@/config'
 import { AuthService } from '@/features/auth'
@@ -33,6 +33,7 @@ export function useUserProfile(userId: string | null, isCurrentUser: boolean) {
   const [difficultyTotals, setDifficultyTotals] = useState<{ difficulty: string; total_challenges: number }[]>([])
   const [loadingDetail, setLoadingDetail] = useState<boolean>(true)
   const [initialLoading, setInitialLoading] = useState(true)
+  const isInitialDetailLoadRef = useRef(true)
 
   const [showAllModal, setShowAllModal] = useState(false)
   const [showUnsolvedModal, setShowUnsolvedModal] = useState(false)
@@ -101,7 +102,7 @@ export function useUserProfile(userId: string | null, isCurrentUser: boolean) {
   useEffect(() => {
     const fetchDetail = async () => {
       if (!userId) return
-      if (initialLoading) setLoadingDetail(true)
+      if (isInitialDetailLoadRef.current) setLoadingDetail(true)
       try {
         const detail = await getUserDetail(
           userId,
@@ -136,6 +137,7 @@ export function useUserProfile(userId: string | null, isCurrentUser: boolean) {
       } finally {
         setLoadingDetail(false)
         setInitialLoading(false)
+        isInitialDetailLoadRef.current = false
       }
     }
     fetchDetail()

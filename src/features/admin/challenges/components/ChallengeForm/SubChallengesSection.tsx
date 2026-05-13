@@ -3,6 +3,7 @@ import { Label, Input, Textarea, Button, Switch } from '@/shared/ui'
 import { Plus, Trash2, ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
 import { SubChallengeFormRow } from '../../types'
 import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
+import { ADMIN_MUTED_INPUT_CLASS } from '@/features/admin/ui/form-field-styles'
 
 interface SubChallengesSectionProps {
   subChallenges: SubChallengeFormRow[]
@@ -151,7 +152,7 @@ export const SubChallengesSection: React.FC<SubChallengesSectionProps> = ({
                     value={row.question}
                     onChange={e => onUpdate(idx, 'question', e.target.value)}
                     placeholder="Question text, markdown supported"
-                    className="mt-1 h-24 min-h-[84px] resize-none overflow-y-auto transition-colors bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                    className={`mt-1 h-24 min-h-[84px] resize-none overflow-y-auto ${ADMIN_MUTED_INPUT_CLASS}`}
                   />
                 )}
               </div>
@@ -163,7 +164,7 @@ export const SubChallengesSection: React.FC<SubChallengesSectionProps> = ({
                   value={row.answer}
                   onChange={e => onUpdate(idx, 'answer', e.target.value)}
                   placeholder="Plaintext answer"
-                  className="transition-colors bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                  className={ADMIN_MUTED_INPUT_CLASS}
                 />
               </div>
             </div>

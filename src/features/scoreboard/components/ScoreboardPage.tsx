@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Coins, Droplet, Trophy, Rocket } from 'lucide-react'
 import Loader from '@/shared/components/Loader'
 import EmptyState from '@/shared/components/EmptyState'
+import { SegmentedTabs } from '@/shared/components'
 import { Card, CardContent } from '@/shared/ui/card'
 import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardPageData } from '../hooks'
@@ -56,28 +57,15 @@ export default function ScoreboardPage() {
             </div>
           </div>
 
-          <div className="flex p-1.5 gap-1 bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-xl">
-            <button
-              onClick={() => setFirstBloodMode(false)}
-              className={`px-5 py-2 text-sm font-bold transition-all rounded-lg flex items-center gap-2 ${!firstBloodMode
-                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
-                }`}
-            >
-              <Coins size={14} className={!firstBloodMode ? 'animate-pulse' : ''} />
-              Points
-            </button>
-            <button
-              onClick={() => setFirstBloodMode(true)}
-              className={`px-5 py-2 text-sm font-bold transition-all rounded-lg flex items-center gap-2 ${firstBloodMode
-                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
-                }`}
-            >
-              <Droplet size={14} className={firstBloodMode ? 'animate-pulse' : ''} />
-              First Blood
-            </button>
-          </div>
+          <SegmentedTabs
+            items={[
+              { value: 'points', label: 'Points', icon: Coins },
+              { value: 'first-blood', label: 'First Blood', icon: Droplet },
+            ]}
+            value={firstBloodMode ? 'first-blood' : 'points'}
+            onChange={(tab) => setFirstBloodMode(tab === 'first-blood')}
+            variant="panel"
+          />
         </div>
 
         {loading && leaderboard.length === 0 ? (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
   getMyTeam,
   getMyTeamSummary,
@@ -25,10 +25,11 @@ export function useMyTeam(user: any, effectiveSelectedEvent: string | number) {
   const [hasMainSolved, setHasMainSolved] = useState<boolean>(false)
   const [status, setStatus] = useState<{ type: 'error' | 'success'; message: string } | null>(null)
   const [initialLoading, setInitialLoading] = useState(true)
+  const teamRef = useRef<TeamInfo | null>(null)
 
-  const loadTeamData = async () => {
+  const loadTeamData = useCallback(async () => {
     if (!user) return
-    const isFirstLoad = team === null
+    const isFirstLoad = teamRef.current === null
     if (isFirstLoad) setLoading(true)
     setStatus(null)
 
@@ -42,7 +43,9 @@ export function useMyTeam(user: any, effectiveSelectedEvent: string | number) {
         getMyTeamChallenges(p_event_id, p_event_mode),
       ])
 
-      setTeam(teamRes.team ?? null)
+      const nextTeam = teamRes.team ?? null
+      teamRef.current = nextTeam
+      setTeam(nextTeam)
       setMembers(teamRes.members ?? [])
       setSummary(summaryRes.stats ?? null)
       setChallenges(challengesRes.challenges ?? [])
@@ -52,12 +55,11 @@ export function useMyTeam(user: any, effectiveSelectedEvent: string | number) {
       setLoading(false)
       setInitialLoading(false)
     }
-  }
+  }, [user, effectiveSelectedEvent])
 
   useEffect(() => {
-    if (!user) return
     loadTeamData()
-  }, [user, effectiveSelectedEvent])
+  }, [loadTeamData])
 
   const currentMember = useMemo(() => members.find(m => m.user_id === user?.id), [members, user])
   const isCaptain = currentMember?.role === 'captain'

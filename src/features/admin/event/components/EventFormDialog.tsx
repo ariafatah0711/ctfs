@@ -11,7 +11,8 @@ import {
   Switch,
   Textarea,
 } from '@/shared/ui'
-import { DIALOG_CONTENT_CLASS } from '@/shared/styles'
+import { DIALOG_FORM_CONTENT_CLASS } from '@/shared/styles'
+import { ADMIN_INPUT_CLASS, ADMIN_NATIVE_SELECT_CLASS, ADMIN_TEXTAREA_CLASS } from '@/features/admin/ui/form-field-styles'
 import type { Event, EventFormData, EventJoinMode } from '../types'
 
 interface EventFormDialogProps {
@@ -38,7 +39,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={`${DIALOG_CONTENT_CLASS} max-w-3xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden`}
+        className={DIALOG_FORM_CONTENT_CLASS}
         style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
       >
         <DialogHeader>
@@ -52,7 +53,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 required
                 value={formData.name}
                 onChange={(e) => onChange({ ...formData, name: e.target.value })}
-                className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                className={ADMIN_INPUT_CLASS}
               />
             </div>
 
@@ -62,7 +63,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 rows={3}
                 value={formData.description}
                 onChange={(e) => onChange({ ...formData, description: e.target.value })}
-                className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                className={ADMIN_TEXTAREA_CLASS}
               />
             </div>
 
@@ -71,7 +72,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
               <select
                 value={formData.join_mode}
                 onChange={(e) => onChange({ ...formData, join_mode: e.target.value as EventJoinMode })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+                className={ADMIN_NATIVE_SELECT_CLASS}
               >
                 <option value="open">Open (direct join)</option>
                 <option value="request">Request (admin approval)</option>
@@ -93,7 +94,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 onChange={(e) => onChange({ ...formData, join_key: e.target.value })}
                 disabled={formData.join_mode !== 'key'}
                 placeholder={formData.join_mode === 'key' ? 'Enter custom join key' : 'Join key only for key mode'}
-                className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                className={ADMIN_INPUT_CLASS}
               />
             </div>
 
@@ -110,7 +111,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 type="datetime-local"
                 value={formData.start_time}
                 onChange={(e) => onChange({ ...formData, start_time: e.target.value })}
-                className="h-9 px-2 text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                className={`${ADMIN_INPUT_CLASS} h-9 px-2 text-sm`}
               />
             </div>
 
@@ -127,7 +128,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 type="datetime-local"
                 value={formData.end_time}
                 onChange={(e) => onChange({ ...formData, end_time: e.target.value })}
-                className="h-9 px-2 text-sm transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                className={`${ADMIN_INPUT_CLASS} h-9 px-2 text-sm`}
               />
             </div>
 
@@ -146,7 +147,7 @@ const EventFormDialog: React.FC<EventFormDialogProps> = ({
                 placeholder="https://example.com/image.jpg"
                 value={formData.image_url}
                 onChange={(e) => onChange({ ...formData, image_url: e.target.value })}
-                className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+                className={ADMIN_INPUT_CLASS}
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Optional: Add a banner image URL for this event</p>
             </div>

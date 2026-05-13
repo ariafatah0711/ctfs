@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@/shared/ui'
+import { ADMIN_NATIVE_SELECT_CLASS } from '@/features/admin/ui/form-field-styles'
 import type { Event, EventMemberRow, UserLite } from '../types'
 
 interface EventMembersCardProps {
@@ -56,7 +57,7 @@ const EventMembersCard: React.FC<EventMembersCardProps> = ({
           <select
             value={manageEventId}
             onChange={(e) => onManageEventChange(e.target.value)}
-            className="mt-2 w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+            className={`mt-2 ${ADMIN_NATIVE_SELECT_CLASS}`}
           >
             <option value="">Select event</option>
             {events.map((evt) => (
@@ -180,4 +181,3 @@ const EventMembersCard: React.FC<EventMembersCardProps> = ({
 }
 
 export default EventMembersCard
-

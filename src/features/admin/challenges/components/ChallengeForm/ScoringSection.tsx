@@ -1,6 +1,7 @@
 import React from 'react'
 import { Label, Input, Switch } from '@/shared/ui'
 import { ChallengeFormData } from '../../types'
+import { ADMIN_INPUT_CLASS } from '@/features/admin/ui/form-field-styles'
 
 interface ScoringSectionProps {
   formData: ChallengeFormData
@@ -28,7 +29,7 @@ export const ScoringSection: React.FC<ScoringSectionProps> = ({ formData, onChan
               }
             }}
             placeholder={formData.is_dynamic ? 'Nilai awal' : 'Points'}
-            className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+            className={ADMIN_INPUT_CLASS}
           />
         </div>
         <div className="flex items-center pb-2">
@@ -69,7 +70,7 @@ export const ScoringSection: React.FC<ScoringSectionProps> = ({ formData, onChan
                   onChange({ ...formData, min_points: minVal });
                 }
               }}
-              className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+              className={ADMIN_INPUT_CLASS}
               placeholder="Batas minimum"
             />
             {formData.max_points !== '' && Number(formData.min_points) > Number(formData.max_points) && (
@@ -91,7 +92,7 @@ export const ScoringSection: React.FC<ScoringSectionProps> = ({ formData, onChan
                   onChange({ ...formData, decay_per_solve: Number(val) });
                 }
               }}
-              className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+              className={ADMIN_INPUT_CLASS}
               placeholder="Turun tiap solve"
             />
           </div>

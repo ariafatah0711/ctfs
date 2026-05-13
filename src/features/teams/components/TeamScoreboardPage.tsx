@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Coins, Sparkles, Users, Trophy, Rocket, LayoutDashboard, Target } from 'lucide-react'
+import { Coins, Sparkles, Users, Trophy, Rocket, LayoutDashboard } from 'lucide-react'
 
 import { APP } from '@/config'
 import Loader from '@/shared/components/Loader'
 import EmptyState from '@/shared/components/EmptyState'
+import { SegmentedTabs } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
 import { Card, CardHeader, CardTitle, CardContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui'
 import { useAuth } from '@/shared/contexts/AuthContext'
@@ -70,30 +71,17 @@ export default function TeamScoreboardPage() {
           </div>
 
           {/* Mode Tabs */}
-          <div className="flex p-1 gap-1 bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-2xl">
-            <button
-              onClick={() => setShowTotalScore(false)}
-              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${!showTotalScore
-                ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-lg shadow-blue-500/10'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
-                }`}
-            >
-              <Sparkles size={16} className={!showTotalScore ? 'animate-pulse' : ''} />
-              Unique Score
-            </button>
-            {!APP.teams.hidescoreboardTotal && (
-              <button
-                onClick={() => setShowTotalScore(true)}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${showTotalScore
-                  ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-lg shadow-blue-500/10'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
-                  }`}
-              >
-                <Coins size={16} className={showTotalScore ? 'animate-pulse' : ''} />
-                Total Score
-              </button>
-            )}
-          </div>
+          <SegmentedTabs
+            items={[
+              { value: 'unique', label: 'Unique Score', icon: Sparkles },
+              ...(!APP.teams.hidescoreboardTotal
+                ? [{ value: 'total' as const, label: 'Total Score', icon: Coins }]
+                : []),
+            ]}
+            value={showTotalScore ? 'total' : 'unique'}
+            onChange={(tab) => setShowTotalScore(tab === 'total')}
+            variant="panelLarge"
+          />
         </div>
 
         <motion.div

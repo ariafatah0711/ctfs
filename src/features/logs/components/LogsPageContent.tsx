@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flag, Activity, LayoutDashboard, Target } from "lucide-react";
+import { Flag, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Loader } from '@/shared/components';
+import { SegmentedTabs } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
 import { useAuth } from '@/shared/contexts'
 import { useEventContext } from '@/features/events/contexts/EventContext'
@@ -59,20 +60,15 @@ export default function LogsPageContent() {
           </div>
 
           {/* Tab Switcher */}
-          <div className="flex p-1 gap-1 bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-2xl">
-            <TabButton
-              active={tabType === 'solves'}
-              onClick={() => setTabType('solves')}
-              icon={<Target size={16} />}
-              label="Solves Feed"
-            />
-            <TabButton
-              active={tabType === 'challenges'}
-              onClick={() => setTabType('challenges')}
-              icon={<Flag size={16} />}
-              label="Challenge Info"
-            />
-          </div>
+          <SegmentedTabs
+            items={[
+              { value: 'solves', label: 'Solves Feed', icon: Target },
+              { value: 'challenges', label: 'Challenge Info', icon: Flag },
+            ]}
+            value={tabType}
+            onChange={setTabType}
+            variant="panelLarge"
+          />
         </div>
 
         <motion.div
@@ -85,20 +81,5 @@ export default function LogsPageContent() {
         </motion.div>
       </div>
     </div>
-  );
-}
-
-function TabButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: React.ReactNode, label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${active
-        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-lg shadow-blue-500/10'
-        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-800/50'
-        }`}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }

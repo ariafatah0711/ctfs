@@ -3,6 +3,7 @@ import ChallengeFilterBar from '@/features/challenges/components/ChallengeFilter
 import { Search } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle, Label } from '@/shared/ui'
 import { EmptyState } from '@/shared/components'
+import { ADMIN_NATIVE_SELECT_CLASS } from '@/features/admin/ui/form-field-styles'
 import { DEFAULT_EVENT_FILTERS } from '../lib'
 import type { ChallengeLite, Event, FilterState } from '../types'
 
@@ -60,7 +61,7 @@ const BulkAssignChallengesCard: React.FC<BulkAssignChallengesCardProps> = ({
             <select
               value={bulkEventId}
               onChange={(event) => onBulkEventChange(event.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500"
+              className={ADMIN_NATIVE_SELECT_CLASS}
             >
               <option value="">Select event</option>
               {events.map((event) => (

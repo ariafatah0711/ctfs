@@ -4,6 +4,11 @@ import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
 import { Flag as FlagIcon, Zap, Type } from 'lucide-react'
 import { ChallengeFormData } from '../../types'
 import { cn } from '@/shared/lib/utils'
+import {
+  ADMIN_INPUT_CLASS,
+  ADMIN_MUTED_INPUT_CLASS,
+  ADMIN_TEXTAREA_CLASS,
+} from '@/features/admin/ui/form-field-styles'
 
 interface ContentSectionProps {
   formData: ChallengeFormData
@@ -36,7 +41,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
             <MarkdownRenderer content={formData.description || '*No description provided*'} />
           </div>
         ) : (
-          <Textarea required rows={5} value={formData.description} onChange={e => onChange({ ...formData, description: e.target.value })} className="transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm scroll-hidden" />
+          <Textarea required rows={5} value={formData.description} onChange={e => onChange({ ...formData, description: e.target.value })} className={ADMIN_TEXTAREA_CLASS} />
         )}
       </div>
       <div className="md:col-span-2">
@@ -47,7 +52,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
             value={formData.flag}
             onChange={e => onChange({ ...formData, flag: e.target.value })}
             placeholder={editing ? 'Leave blank to keep current' : 'ctf{...}'}
-            className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+            className={ADMIN_INPUT_CLASS}
           />
           <div className="flex items-center gap-1 border-l pl-2 dark:border-gray-700">
             <Button
@@ -96,7 +101,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
                 const next = [...formData.services];
                 next[idx] = e.target.value;
                 onChange({ ...formData, services: next });
-              }} placeholder="service-name" className="transition-colors bg-gray-50 dark:bg-black/20 border border-gray-200 dark:border-gray-800 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm" />
+              }} placeholder="service-name" className={ADMIN_MUTED_INPUT_CLASS} />
               <Button type="button" variant="ghost" onClick={() => onChange({ ...formData, services: formData.services.filter((_, i) => i !== idx) })}>✕</Button>
             </div>
           ))}

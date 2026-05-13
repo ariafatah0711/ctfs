@@ -2,6 +2,11 @@ import React from 'react'
 import { Label, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch } from '@/shared/ui'
 import { ChallengeFormData, Event } from '../../types'
 import APP from '@/config'
+import {
+  ADMIN_INPUT_CLASS,
+  ADMIN_SELECT_CONTENT_CLASS,
+  ADMIN_SELECT_TRIGGER_CLASS,
+} from '@/features/admin/ui/form-field-styles'
 
 interface BasicDetailsSectionProps {
   formData: ChallengeFormData
@@ -47,14 +52,14 @@ export const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
           required
           value={formData.title}
           onChange={e => onChange({ ...formData, title: e.target.value })}
-          className="transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"
+          className={ADMIN_INPUT_CLASS}
         />
       </div>
       <div>
         <Label>Category</Label>
         <Select value={formData.category} onValueChange={v => onChange({ ...formData, category: v })}>
-          <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+          <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}><SelectValue /></SelectTrigger>
+          <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
             {categories.map(cat => (
               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
             ))}
@@ -70,8 +75,8 @@ export const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
             value={formData.event_id ?? '__main__'}
             onValueChange={v => onChange({ ...formData, event_id: v === '__main__' ? null : v })}
           >
-            <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
-            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+            <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}><SelectValue /></SelectTrigger>
+            <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
               {!hideMainEventOption && (
                 <SelectItem value="__main__">{String(APP.eventMainLabel || 'Main')}</SelectItem>
               )}
@@ -85,8 +90,8 @@ export const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
       <div>
         <Label className="mb-1">Difficulty</Label>
         <Select value={formData.difficulty} onValueChange={v => onChange({ ...formData, difficulty: v })}>
-          <SelectTrigger className="w-full transition-colors bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-900 rounded-md shadow-sm"><SelectValue /></SelectTrigger>
-          <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+          <SelectTrigger className={ADMIN_SELECT_TRIGGER_CLASS}><SelectValue /></SelectTrigger>
+          <SelectContent className={ADMIN_SELECT_CONTENT_CLASS}>
             {Object.keys(APP.difficultyStyles || {}).map(key => {
               const label = key.charAt(0).toUpperCase() + key.slice(1)
               return <SelectItem key={key} value={label}>{label}</SelectItem>

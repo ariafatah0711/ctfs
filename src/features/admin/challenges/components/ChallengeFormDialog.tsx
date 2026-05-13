@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/ui'
-import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+import { DIALOG_FORM_CONTENT_CLASS } from "@/shared/styles"
 import { Attachment, Challenge, ChallengeFormData, Event, SubChallengeFormRow } from '../types'
 import { BasicDetailsSection } from './ChallengeForm/BasicDetailsSection'
 import { ScoringSection } from './ChallengeForm/ScoringSection'
@@ -117,7 +117,7 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = (props) => {
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className={DIALOG_CONTENT_CLASS + " max-w-3xl p-4 md:p-8 max-h-[85dvh] overflow-y-auto scroll-hidden"}
+          className={DIALOG_FORM_CONTENT_CLASS}
           style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
         >
           <DialogHeader>

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog"
 import { Button } from "@/shared/ui/button"
-import { DIALOG_CONTENT_CLASS } from "@/shared/styles"
+import { DIALOG_GLASS_CONTENT_MD_CLASS } from "@/shared/styles"
 import { Event } from "@/shared/types"
 import { joinEvent } from "@/features/events/services/event.service"
 import toast from "react-hot-toast"
@@ -62,7 +62,7 @@ export default function JoinEventDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 backdrop-blur-xl p-6 shadow-2xl [&_button.absolute.right-4.top-4]:text-gray-500 dark:[&_button.absolute.right-4.top-4]:text-gray-400">
+      <DialogContent className={DIALOG_GLASS_CONTENT_MD_CLASS}>
         <DialogHeader>
           <DialogTitle className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
             Join Event

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
@@ -159,6 +160,59 @@ function parseCustomComments(content: string) {
   return { filtered: filteredLines.join('\n'), comments }
 }
 
+function getMarkdownImageDimension(value: string | number | undefined, fallback: number) {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number.parseInt(value, 10)
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed
+    }
+  }
+
+  return fallback
+}
+
+function MarkdownImage({
+  src,
+  alt = '',
+  title,
+  width,
+  height,
+}: {
+  src?: string
+  alt?: string
+  title?: string
+  width?: string | number
+  height?: string | number
+}) {
+  if (!src) return null
+
+  const resolvedWidth = getMarkdownImageDimension(width, 1200)
+  const resolvedHeight = getMarkdownImageDimension(height, 800)
+
+  return (
+    <div className="mb-6">
+      <Zoom wrapElement="div">
+        <div className="overflow-hidden rounded-lg border border-gray-800">
+          <Image
+            src={src}
+            alt={alt}
+            title={title}
+            width={resolvedWidth}
+            height={resolvedHeight}
+            sizes="100vw"
+            unoptimized
+            className="h-auto w-full cursor-zoom-in"
+          />
+        </div>
+      </Zoom>
+    </div>
+  )
+}
+
 export function MarkdownRenderer({ content, className = '', onCommentsExtracted, variant = 'default' }: MarkdownRendererProps) {
   if (!content) {
     content = ''
@@ -257,16 +311,14 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted,
               </CodeBlockWrapper>
             ),
           a: ({ ...props }) => <a className="text-blue-400 hover:text-blue-300 underline underline-offset-4 transition-colors font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
-          img: ({ ...props }) => (
-            <div className="mb-6">
-              <Zoom wrapElement="div">
-                <img
-                  {...props}
-                  loading="lazy"
-                  className="max-w-full h-auto rounded-lg border border-gray-800 cursor-zoom-in"
-                />
-              </Zoom>
-            </div>
+          img: ({ src, alt, title, width, height }) => (
+            <MarkdownImage
+              src={typeof src === 'string' ? src : undefined}
+              alt={alt}
+              title={title}
+              width={width}
+              height={height}
+            />
           ),
           blockquote: ({ ...props }) => (
             <BlockquoteWrapper isDark>
