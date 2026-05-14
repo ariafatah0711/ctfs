@@ -1,4 +1,5 @@
 export * from './challenge-utils'
+export * from './challenge-layout-modes'
 export * from './challenge-persistence'
 export * from './challenge-filtering'
 export * from './event-display'

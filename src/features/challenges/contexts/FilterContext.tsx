@@ -1,5 +1,10 @@
 "use client"
 import React from 'react'
+import {
+  CHALLENGE_LAYOUT_MODES,
+  type ChallengeLayoutMode,
+  isChallengeLayoutMode,
+} from '../lib/challenge-layout-modes'
 
 export type ChallengeFilters = {
   status: 'all' | 'solved' | 'unsolved'
@@ -19,55 +24,57 @@ const defaultFilters: ChallengeFilters = {
   feature: 'N'
 }
 
-type LayoutMode = 'grouped' | 'compact'
 type SortMode = 'default' | 'newest'
 
 type FilterContextValue = {
   filters: ChallengeFilters
   setFilters: (v: ChallengeFilters | ((prev: ChallengeFilters) => ChallengeFilters)) => void
   resetFilters: () => void
-  layoutMode: LayoutMode
-  setLayoutMode: (m: LayoutMode | ((prev: LayoutMode) => LayoutMode)) => void
+  layoutMode: ChallengeLayoutMode
+  setLayoutMode: (m: ChallengeLayoutMode | ((prev: ChallengeLayoutMode) => ChallengeLayoutMode)) => void
   sortMode: SortMode
   setSortMode: (m: SortMode | ((prev: SortMode) => SortMode)) => void
 }
 
 const FilterContext = React.createContext<FilterContextValue | null>(null)
 
-function readStored(): { filters: ChallengeFilters; layoutMode: LayoutMode; sortMode: SortMode } {
+function readStored(): { filters: ChallengeFilters; layoutMode: ChallengeLayoutMode; sortMode: SortMode } {
   try {
-    if (typeof window === 'undefined') return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
+    if (typeof window === 'undefined') return { filters: defaultFilters, layoutMode: CHALLENGE_LAYOUT_MODES.GROUPED, sortMode: 'default' }
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
+    if (!raw) return { filters: defaultFilters, layoutMode: CHALLENGE_LAYOUT_MODES.GROUPED, sortMode: 'default' }
     const parsed = JSON.parse(raw)
     const storedFeature = parsed?.filters?.feature ?? parsed?.feature
     const normalizedFeature = storedFeature === 'T' || storedFeature === 'S' || storedFeature === 'N' ? storedFeature : 'N'
+    const normalizedSortMode = parsed.sortMode === 'newest' ? 'newest' : 'default'
     return {
       filters: { ...defaultFilters, ...(parsed.filters || parsed), feature: normalizedFeature },
-      layoutMode: (parsed.layoutMode as LayoutMode) || 'grouped',
-      sortMode: (parsed.sortMode as SortMode) || 'default'
+      layoutMode: isChallengeLayoutMode(parsed.layoutMode)
+        ? parsed.layoutMode
+        : CHALLENGE_LAYOUT_MODES.GROUPED,
+      sortMode: normalizedSortMode
     }
   } catch {
-    return { filters: defaultFilters, layoutMode: 'grouped', sortMode: 'default' }
+    return { filters: defaultFilters, layoutMode: CHALLENGE_LAYOUT_MODES.GROUPED, sortMode: 'default' }
   }
 }
 
 export function FilterProvider({ children }: { children: React.ReactNode }) {
   const stored = React.useMemo(() => readStored(), [])
   const [filters, setFiltersState] = React.useState<ChallengeFilters>(() => stored.filters)
-  const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>(() => stored.layoutMode)
+  const [layoutMode, setLayoutModeState] = React.useState<ChallengeLayoutMode>(() => stored.layoutMode)
   const [sortMode, setSortModeState] = React.useState<SortMode>(() => stored.sortMode)
 
   const setFilters = React.useCallback((v: any) => {
     setFiltersState((prev) => {
       const next = typeof v === 'function' ? v(prev) : v
       try {
-        const raw = JSON.stringify({ filters: next, layoutMode })
+        const raw = JSON.stringify({ filters: next, layoutMode, sortMode })
         localStorage.setItem(STORAGE_KEY, raw)
       } catch { }
       return next
     })
-  }, [layoutMode])
+  }, [layoutMode, sortMode])
 
   const setLayoutMode = React.useCallback((v: any) => {
     setLayoutModeState((prev) => {

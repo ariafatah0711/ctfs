@@ -33,8 +33,13 @@ type Props = {
   onSettingsChange?: (settings: ChallengeFilterSettings) => void
   onClear: () => void
   showStatusFilter?: boolean
+  hideSidebarFiltersOnDesktop?: boolean
+  focusMode?: boolean
+  selectedEventName?: string
+  eventStats?: { solvedCount: number; totalCount: number } | null
   sortMode?: ChallengeSortMode
   onSortModeChange?: () => void
+  onFocusModeChange?: (enabled: boolean) => void
 }
 
 export default function ChallengeFilterBar({
@@ -54,8 +59,13 @@ export default function ChallengeFilterBar({
   onSettingsChange,
   onClear,
   showStatusFilter = true,
+  hideSidebarFiltersOnDesktop = false,
+  focusMode = false,
+  selectedEventName,
+  eventStats,
   sortMode = 'default',
   onSortModeChange,
+  onFocusModeChange,
 }: Props) {
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const dirtyState = getChallengeFilterDirtyState(filters, selectedEventId)
@@ -65,7 +75,7 @@ export default function ChallengeFilterBar({
       data-tour="challenge-filter-bar"
       className="relative z-20 w-full bg-white/50 dark:bg-gray-900/50 border border-blue-500/20 dark:border-blue-500/10 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-sm shadow-blue-500/5"
     >
-      {events && onEventChange && (
+      {!focusMode && events && onEventChange && (
         <EventFilterPills
           events={events}
           selectedEventId={selectedEventId}
@@ -88,12 +98,17 @@ export default function ChallengeFilterBar({
         dirtyState={dirtyState}
         settingsOpen={settingsOpen}
         showStatusFilter={showStatusFilter}
+        hideSidebarFiltersOnDesktop={hideSidebarFiltersOnDesktop}
+        focusMode={focusMode}
+        selectedEventName={selectedEventName}
+        eventStats={eventStats}
         sortMode={sortMode}
         onFilterChange={onFilterChange}
         onSettingsOpenChange={setSettingsOpen}
         onSettingsChange={onSettingsChange}
         onClear={onClear}
         onSortModeChange={onSortModeChange}
+        onFocusModeChange={onFocusModeChange}
       />
     </div>
   )

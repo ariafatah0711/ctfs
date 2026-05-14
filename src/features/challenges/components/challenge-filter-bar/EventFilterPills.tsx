@@ -70,7 +70,7 @@ export default function EventFilterPills({
   }
 
   return (
-    <div className="mb-3">
+    <div data-tour="challenge-event-selector" className="mb-3">
       <div className="w-full flex flex-row flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 py-2">
         {!hideAllEventOption && (
           <button

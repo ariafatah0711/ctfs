@@ -2,11 +2,17 @@
 
 // React Imports
 import { useEffect, useRef, useState } from 'react'
-import Joyride, { Step, STATUS } from 'react-joyride'
+import Joyride, { STATUS } from 'react-joyride'
+import type { CallBackProps, Step, StoreHelpers } from 'react-joyride'
 
 // Shared Imports
-import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/shared/lib'
 import { useAuth } from '@/shared/contexts'
+import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/shared/lib'
+import {
+  CHALLENGE_TOUR_VERSION,
+  buildChallengeTourSteps,
+  getAvailableChallengeTourSteps,
+} from '../lib/challenge-tour-steps'
 
 export default function ChallengeJoyride() {
   const { user } = useAuth()
@@ -14,7 +20,7 @@ export default function ChallengeJoyride() {
   const [runTour, setRunTour] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
   const [steps, setSteps] = useState<Step[]>([])
-  const storeRef = useRef<any>(null)
+  const storeRef = useRef<StoreHelpers | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -25,68 +31,19 @@ export default function ChallengeJoyride() {
       return
     }
 
-    // Check if user has seen the guide
-    const hasSeenGuide = getChallengeGuideSeenSetting(user.id)
+    const hasSeenGuide = getChallengeGuideSeenSetting(user.id, CHALLENGE_TOUR_VERSION)
 
     if (!hasSeenGuide) {
-      // Wait a bit for page to load, then start tour
       const timer = setTimeout(() => {
-        const desktopSteps: Step[] = [
-          {
-            target: 'body',
-            content: '👋 Welcome to the CTF Challenges! Let me show you around.',
-            placement: 'center',
-            disableBeacon: true,
-          },
-          {
-            target: '[data-tour="navbar-challenges"]',
-            content: '💡 Browse all available challenges here.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="navbar-scoreboard"]',
-            content: '🏆 Check the rankings here.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="navbar-notifications"]',
-            content: '🔔 View notifications for information.',
-            placement: 'top',
-          },
-          {
-            target: '[data-tour="navbar-logs"]',
-            content: '📜 View Logs for solved challenges history.',
-            placement: 'top',
-          },
-          {
-            target: '[data-tour="challenge-filter-bar"]',
-            content: '🔎 Use this filter bar to quickly find challenges by status, category, difficulty, and search.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="challenge-feature-filter"]',
-            content: '🧩 Feature filter cycles between N / T / S. N = all challenges, T = challenges with tasks/questions, S = challenges with services.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="challenge-sort-toggle"]',
-            content: '🕒 Toggle sorting mode. Default keeps challenge display priority, while newest shows latest challenges first.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="challenge-layout-toggle"]',
-            content: '🗂️ Switch challenge layout between grouped view and compact grid view.',
-            placement: 'bottom',
-          },
-          {
-            target: '[data-tour="challenge-filter-settings"]',
-            content: '⚙️ Open settings to hide maintenance challenges and highlight team solves.',
-            placement: 'bottom',
-          },
-        ]
+        const showDesktopSidebar = window.matchMedia('(min-width: 1280px)').matches
+        const nextSteps = getAvailableChallengeTourSteps(
+          buildChallengeTourSteps({ showDesktopSidebar })
+        )
 
-        setSteps(desktopSteps)
-        setRunTour(true)
+        if (nextSteps.length > 0) {
+          setSteps(nextSteps)
+          setRunTour(true)
+        }
       }, 1000)
 
       return () => clearTimeout(timer)
@@ -98,23 +55,21 @@ export default function ChallengeJoyride() {
     if (!runTour || !steps.length || stepIndex === 0) return
 
     const step = steps[stepIndex]
-    if (!step) return
+    if (!step || typeof step.target !== 'string') return
 
     const handleClickOnTarget = () => {
       // Auto-advance to next step after short delay
       setTimeout(() => {
-        if (storeRef.current) {
-          storeRef.current.next()
-        }
+        storeRef.current?.next()
       }, 100)
     }
 
-    const targetElement = document.querySelector(step.target as string) as HTMLElement
-    if (targetElement) {
-      targetElement.addEventListener('click', handleClickOnTarget, { once: false })
-      return () => {
-        targetElement.removeEventListener('click', handleClickOnTarget)
-      }
+    const targetElement = document.querySelector(step.target)
+    if (!(targetElement instanceof HTMLElement)) return
+
+    targetElement.addEventListener('click', handleClickOnTarget, { once: false })
+    return () => {
+      targetElement.removeEventListener('click', handleClickOnTarget)
     }
   }, [runTour, stepIndex, steps])
 
@@ -123,15 +78,15 @@ export default function ChallengeJoyride() {
   const handleTourEnd = () => {
     setRunTour(false)
     if (user) {
-      setChallengeGuideSeenSetting(true)
+      setChallengeGuideSeenSetting(true, CHALLENGE_TOUR_VERSION)
     }
   }
 
-  const handleTourStatus = (data: any) => {
+  const handleTourStatus = (data: CallBackProps) => {
     const { status, index } = data
     setStepIndex(index)
 
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       handleTourEnd()
     }
   }

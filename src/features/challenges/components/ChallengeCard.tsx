@@ -1,25 +1,11 @@
 // React Imports
 import React, { memo } from "react";
-import { Flame, Sparkles, AlertTriangle, Globe, Bomb, Binary, Cpu, Search, Puzzle, Shield, Terminal, Lightbulb, Eye, Image as ImageIcon, Wifi, Flag, CheckCircle2 } from 'lucide-react';
+import { Flame, Sparkles, AlertTriangle, Flag, CheckCircle2 } from 'lucide-react';
 
 // Shared Imports
 import APP from '@/config';
 import { ChallengeWithSolve } from '@/shared/types'
-import { getCategoryDetails, getDifficultyStyle } from '../lib'
-
-const CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
-  'text-yellow-500': Lightbulb,
-  'text-emerald-500': Terminal,
-  'text-blue-500': Globe,
-  'text-teal-500': Search,
-  'text-cyan-500': Eye,
-  'text-purple-500': Binary,
-  'text-orange-500': Cpu,
-  'text-red-500': Bomb,
-  'text-pink-500': ImageIcon,
-  'text-indigo-500': Wifi,
-  'text-gray-500': Puzzle,
-};
+import { getCategoryDetails, getCategoryIcon, getDifficultyStyle } from '../lib'
 
 interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {
@@ -54,7 +40,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
   // Icon lookup for background decoration (UI-layer only)
   const { color: categoryIconColor, borderColor: categoryBorderColor, badgeColor: categoryBadgeColor } = getCategoryDetails(challenge.category);
-  const CategoryIcon = CATEGORY_ICON_MAP[categoryIconColor] ?? Shield;
+  const CategoryIcon = getCategoryIcon(challenge.category);
 
   const handleOpen = () => {
     if (!isMaintenance) onOpenChallenge(challenge);
@@ -68,6 +54,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
   return (
     <div
+      data-tour="challenge-card"
       key={challenge.id}
       role={isMaintenance ? undefined : 'button'}
       tabIndex={isMaintenance ? undefined : 0}

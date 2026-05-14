@@ -12,6 +12,7 @@ type FilterSelectProps = {
   options: Array<{ value: string; label: string }>
   isDirty: boolean
   isActive: boolean
+  wrapperClassName?: string
   onChange: (value: string) => void
 }
 
@@ -22,10 +23,11 @@ export default function FilterSelect({
   options,
   isDirty,
   isActive,
+  wrapperClassName = '',
   onChange,
 }: FilterSelectProps) {
   return (
-    <div className="flex-1 min-w-[140px]">
+    <div className={`flex-1 min-w-[140px] ${wrapperClassName}`}>
       <label htmlFor={id} className="sr-only">{label}</label>
       <select
         id={id}

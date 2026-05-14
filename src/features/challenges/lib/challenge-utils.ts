@@ -1,4 +1,5 @@
 import { Globe, Bomb, Binary, Cpu, Search, Puzzle, Shield, Terminal, Lightbulb, Eye, Wifi } from 'lucide-react'
+import type { ElementType } from 'react'
 import { ImageIcon } from 'lucide-react'
 import type { ChallengeWithSolve } from '@/shared/types'
 
@@ -22,6 +23,25 @@ export function getCategoryDetails(category: string): CategoryDetails {
   if (cat.includes('network'))      return { color: 'text-indigo-500',  borderColor: 'border-indigo-500/30',  badgeColor: 'bg-indigo-500/15 text-indigo-400'    }
   if (cat.includes('misc'))         return { color: 'text-gray-500',    borderColor: 'border-gray-500/30',    badgeColor: 'bg-gray-500/15 text-gray-400'        }
   return                                   { color: 'text-gray-500',    borderColor: 'border-gray-500/30',    badgeColor: 'bg-gray-500/15 text-gray-400'        }
+}
+
+const CATEGORY_ICON_MAP: Record<string, ElementType> = {
+  'text-yellow-500': Lightbulb,
+  'text-emerald-500': Terminal,
+  'text-blue-500': Globe,
+  'text-teal-500': Search,
+  'text-cyan-500': Eye,
+  'text-purple-500': Binary,
+  'text-orange-500': Cpu,
+  'text-red-500': Bomb,
+  'text-pink-500': ImageIcon,
+  'text-indigo-500': Wifi,
+  'text-gray-500': Puzzle,
+}
+
+export function getCategoryIcon(category: string): ElementType {
+  const { color } = getCategoryDetails(category)
+  return CATEGORY_ICON_MAP[color] ?? Shield
 }
 
 export interface DifficultyStyle {

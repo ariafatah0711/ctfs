@@ -17,6 +17,7 @@ export type nxctfettingsV1 = {
   }
   tutorial?: {
     challenge_guide_seen?: boolean
+    challenge_guide_seen_version?: number
   }
 }
 
@@ -218,14 +219,26 @@ export const setSelectedEventSetting = (value: string) => {
   }))
 }
 
-export const getChallengeGuideSeenSetting = (userIdForMigration?: Nullable<string>): boolean => {
+export const getChallengeGuideSeenSetting = (
+  userIdForMigration?: Nullable<string>,
+  minVersion?: number
+): boolean => {
   const settings = migrateTutorialFromUserKeysIfNeeded(userIdForMigration)
-  return !!settings.tutorial?.challenge_guide_seen
+  const hasSeenGuide = !!settings.tutorial?.challenge_guide_seen
+
+  if (!hasSeenGuide) return false
+  if (typeof minVersion !== 'number') return true
+
+  return (settings.tutorial?.challenge_guide_seen_version ?? 0) >= minVersion
 }
 
-export const setChallengeGuideSeenSetting = (seen: boolean) => {
+export const setChallengeGuideSeenSetting = (seen: boolean, version?: number) => {
   updateSettings((prev) => ({
     ...prev,
-    tutorial: { ...(prev.tutorial || {}), challenge_guide_seen: !!seen },
+    tutorial: {
+      ...(prev.tutorial || {}),
+      challenge_guide_seen: !!seen,
+      ...(typeof version === 'number' ? { challenge_guide_seen_version: seen ? version : 0 } : {}),
+    },
   }))
 }

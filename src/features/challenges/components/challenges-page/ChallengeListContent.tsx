@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Lock } from 'lucide-react'
 import APP from '@/config'
 import { Loader, EmptyState } from '@/shared/components'
 import type { ChallengeWithSolve } from '@/shared/types'
 import type { ChallengeFilterSettings, EventSelectorValue } from '../../types'
+import { CHALLENGE_LAYOUT_MODES, type ChallengeLayoutMode } from '../../lib'
 import ChallengeCard from '../ChallengeCard'
 import ChallengeEmptyState from './ChallengeEmptyState'
 
@@ -20,7 +21,7 @@ type ChallengeListContentProps = {
   sortedFilteredChallenges: ChallengeWithSolve[]
   grouped: Record<string, ChallengeWithSolve[]>
   orderedKeys: string[]
-  layoutMode: 'grouped' | 'compact'
+  layoutMode: ChallengeLayoutMode
   filterSettings: ChallengeFilterSettings
   selectedEventObj: unknown
   selectedEventStart: Date | null
@@ -65,9 +66,13 @@ export default function ChallengeListContent({
   formatRemaining,
   onOpenChallenge,
 }: ChallengeListContentProps) {
-  const totalVisibleChallenges = layoutMode === 'compact'
+  const categoryOrderedChallenges = useMemo(
+    () => orderedKeys.flatMap((category) => grouped[category] ?? []),
+    [grouped, orderedKeys]
+  )
+  const totalVisibleChallenges = layoutMode === CHALLENGE_LAYOUT_MODES.COMPACT
     ? sortedFilteredChallenges.length
-    : filteredChallenges.length
+    : categoryOrderedChallenges.length
   const [visibleCount, setVisibleCount] = useState(() =>
     Math.min(INITIAL_CHALLENGE_RENDER_COUNT, totalVisibleChallenges)
   )
@@ -128,8 +133,29 @@ export default function ChallengeListContent({
     )
   }
 
-  if (layoutMode === 'compact') {
+  if (layoutMode === CHALLENGE_LAYOUT_MODES.COMPACT) {
     const visibleChallenges = sortedFilteredChallenges.slice(0, visibleCount)
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">
+        {visibleChallenges.map((challenge) => (
+          <div
+            key={challenge.id}
+            className="relative overflow-visible w-full"
+          >
+            <ChallengeCard
+              challenge={challenge}
+              highlightTeamSolves={filterSettings.highlightTeamSolves}
+              onOpenChallenge={onOpenChallenge}
+            />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (layoutMode === CHALLENGE_LAYOUT_MODES.CATEGORY_COMPACT) {
+    const visibleChallenges = categoryOrderedChallenges.slice(0, visibleCount)
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">

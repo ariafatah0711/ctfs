@@ -25,7 +25,7 @@ export default function EventsTab({ events, selectedEventId, onEventSelect }: Pr
   const isEmpty = !hasAvailableSection && !hasUpcomingSection && endedEvents.length === 0
 
   return (
-    <div className="w-full space-y-10 md:space-y-12">
+    <div data-tour="challenge-events-tab" className="w-full space-y-10 md:space-y-12">
       <div className="flex flex-col gap-8 md:gap-10">
         <AllEventsButton
           selected={selectedEventId === 'all'}
