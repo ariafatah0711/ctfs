@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
+import APP from '@/config'
 
 import { Loader } from '@/shared/components'
 import PageBackground from '@/shared/components/PageBackground'
@@ -53,6 +54,30 @@ export default function ChallengesPage() {
   if (data.loading) return <Loader fullscreen />
   if (!data.user) return null
 
+  const getSelectedEventName = () => {
+    if (data.eventId === 'all') return 'All Challenges'
+    if (data.eventId === null) return APP.eventMainLabel || 'Platform Default'
+    if (data.selectedEventObj) return data.selectedEventObj.name
+    return data.eventId ? 'Selected Event' : undefined
+  }
+
+  const getSelectedEventStats = () => {
+    if (!data.challenges) return null
+
+    const currentEventChallenges = data.eventId === 'all'
+      ? data.challenges
+      : data.eventId === null
+        ? data.challenges.filter(c => !c.event_id)
+        : data.challenges.filter(c => c.event_id === data.eventId)
+
+    const totalCount = currentEventChallenges.length
+    const solvedCount = currentEventChallenges.filter(c => c.is_solved).length
+
+    if (totalCount === 0) return null
+
+    return { solvedCount, totalCount }
+  }
+
   return (
     <PageBackground
       className="flex flex-col overflow-hidden"
@@ -64,6 +89,8 @@ export default function ChallengesPage() {
           <ChallengePageTabs
             currentTab={data.currentTab}
             onTabChange={data.setCurrentTab}
+            selectedEventName={getSelectedEventName()}
+            eventStats={getSelectedEventStats()}
           />
 
           {renderDeferredDecorations && <ChallengeWatermark />}

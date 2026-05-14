@@ -19,7 +19,7 @@ const MODAL_SIZE_CLASS = {
 } as const
 
 const BASE_MODAL_CONTENT_CLASS =
-  "w-[calc(100vw-32px)] sm:w-full h-[88vh] max-h-[90vh] flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/90 p-0 text-gray-900 shadow-2xl backdrop-blur-xl dark:border-gray-800 dark:bg-[#111827]/95 dark:text-gray-100 [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-gray-500 dark:[&_button.absolute.right-4.top-4]:text-gray-400"
+  "w-[calc(100vw-32px)] sm:w-full h-[88vh] max-h-[90vh] flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/70 p-0 text-gray-900 shadow-2xl backdrop-blur-xl dark:border-gray-800 dark:bg-[#0a0d14]/80 dark:text-gray-100 [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-gray-500 dark:[&_button.absolute.right-4.top-4]:text-gray-400"
 
 export type ModalSize = keyof typeof MODAL_SIZE_CLASS
 

@@ -74,7 +74,7 @@ export default function ChallengeFlagForm({
             }}
             maxLength={challenge.flag_placeholder && placeholders[challenge.id] ? placeholders[challenge.id].length : undefined}
             placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : 'Enter flag here...'}
-            className="w-full h-[38px] pl-4 pr-6 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-sm"
+            className="w-full h-[38px] pl-4 pr-6 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-base"
             autoFocus
           />
         </div>
@@ -85,7 +85,7 @@ export default function ChallengeFlagForm({
             !flagInputs[challenge.id]?.trim() ||
             (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
           }
-          className="flex items-center justify-center px-6 h-[38px] rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:from-pink-400 hover:to-pink-500 transition-all disabled:opacity-30 active:scale-95 shrink-0"
+          className="flex items-center justify-center px-6 h-[38px] rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 text-white text-[13px] font-black uppercase tracking-widest shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:from-pink-400 hover:to-pink-500 transition-all disabled:opacity-30 active:scale-95 shrink-0"
         >
           {submitting[challenge.id] ? '...' : 'Submit'}
         </button>

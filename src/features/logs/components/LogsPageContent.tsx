@@ -64,7 +64,7 @@ export default function LogsPageContent() {
           ]}
           value={tabType}
           onChange={setTabType}
-          variant="panelLarge"
+          variant="panel"
         />
       </div>
 

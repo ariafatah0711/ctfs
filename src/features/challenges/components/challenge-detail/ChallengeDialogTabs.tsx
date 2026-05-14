@@ -21,7 +21,7 @@ export default function ChallengeDialogTabs({
       items={tabs.map((tab) => ({ value: tab.key, label: tab.label }))}
       value={activeTab}
       onChange={(tab) => onTabChange(tab, challengeId)}
-      variant="compact"
+      variant="panel"
       stretch
     />
   )

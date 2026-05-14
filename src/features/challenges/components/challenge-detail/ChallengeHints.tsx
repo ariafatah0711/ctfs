@@ -21,15 +21,14 @@ export default function ChallengeHints({
         <button
           key={idx}
           type="button"
-          className="px-3 py-1 rounded bg-yellow-200 text-yellow-900 font-semibold text-xs hover:bg-yellow-300 transition"
+          className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold text-[13px] hover:bg-amber-500/20 transition flex items-center gap-2 shadow-sm"
           onClick={(event) => {
             event.stopPropagation()
             setShowHintModal({ challenge, hintIdx: idx })
           }}
         >
-          <span className="inline-flex items-center gap-1">
-            <Lightbulb className="h-3.5 w-3.5" /> Hint {(challenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}
-          </span>
+          <Lightbulb className="h-4 w-4" /> 
+          <span>Hint {(challenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}</span>
         </button>
       ))}
     </div>

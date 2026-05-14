@@ -2,6 +2,7 @@
 
 import { Settings } from 'lucide-react'
 import { Switch } from '@/shared/ui'
+import { SURFACE_FILTER_ITEM_CLASS } from '@/shared/styles'
 import type { ChallengeFilterSettings } from '../../types'
 
 type FilterSettingsMenuProps = {
@@ -23,11 +24,10 @@ export default function FilterSettingsMenu({
         type="button"
         onClick={() => onOpenChange(!open)}
         data-tour="challenge-filter-settings"
-        className={`inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition ${
-          open
-            ? 'border-orange-500 bg-orange-500 text-white'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
-        }`}
+        className={`inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-xl transition ${open
+            ? 'border-blue-600 bg-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600'
+            : SURFACE_FILTER_ITEM_CLASS
+          }`}
         aria-label="Open filter settings"
       >
         <Settings size={16} />

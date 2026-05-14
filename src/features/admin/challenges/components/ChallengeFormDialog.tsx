@@ -118,7 +118,6 @@ const ChallengeFormDialog: React.FC<ChallengeFormDialogProps> = (props) => {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
           className={DIALOG_FORM_CONTENT_CLASS}
-          style={{ boxShadow: '0 8px 32px #0008', border: '1.5px solid #35355e' }}
         >
           <DialogHeader>
             <DialogTitle className="text-gray-900 dark:text-gray-100">{editing ? 'Edit Challenge' : 'Add New Challenge'}</DialogTitle>

@@ -31,11 +31,11 @@ const containerClasses: Record<SegmentedTabsVariant, string> = {
 
 const buttonClasses: Record<SegmentedTabsVariant, string> = {
   pill:
-    'flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
+    'flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
   panel:
-    'flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-bold transition-all',
+    'flex items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-bold transition-all',
   panelLarge:
-    'flex items-center gap-2 rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all duration-300',
+    'flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all duration-300',
   compact:
     'rounded-lg px-3 py-1.5 text-center text-xs font-bold transition-all',
 }
@@ -76,7 +76,7 @@ export function SegmentedTabs<T extends string>({
   stretch = false,
 }: SegmentedTabsProps<T>) {
   return (
-    <div className={cn(containerClasses[variant], className)}>
+    <div className={cn(containerClasses[variant], stretch && 'w-full', className)}>
       {items.map((item) => {
         const Icon = item.icon
         const isActive = item.value === value

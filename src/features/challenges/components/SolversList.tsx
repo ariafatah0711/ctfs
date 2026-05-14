@@ -27,7 +27,7 @@ const SolversList: React.FC<SolversListProps> = ({ solvers }) => {
           const isFirstBlood = firstBloodTime && new Date(solver.solvedAt).getTime() === firstBloodTime;
 
           return (
-            <li key={idx} className="flex justify-between items-center text-gray-700 dark:text-gray-200">
+            <li key={idx} className="flex justify-between items-center text-gray-700 dark:text-gray-200 text-sm md:text-base">
               <div className="flex items-center gap-2">
                 {isFirstBlood && (
                   <span title="First Blood" className="text-red-500 dark:text-red-400 text-lg font-bold">🩸</span>

@@ -19,6 +19,12 @@ export const SURFACE_GLASS_FIELD_COMPACT_CLASS =
 export const SURFACE_GLASS_CONTROL_COMPACT_CLASS =
   "inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/60 px-3 py-2 text-sm text-gray-700 shadow-sm backdrop-blur-md transition-all hover:border-blue-500/30 hover:bg-white dark:border-gray-800 dark:bg-[#111622]/60 dark:text-gray-200 dark:hover:bg-gray-900"
 
+export const SURFACE_FILTER_ITEM_CLASS =
+  "bg-white/60 dark:bg-[#111622]/60 backdrop-blur-md border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-200 hover:border-blue-500/30 hover:bg-white dark:hover:bg-[#111622] transition-all shadow-sm"
+
+export const SURFACE_FILTER_ITEM_ACTIVE_CLASS =
+  "bg-blue-600 border border-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600 dark:text-white"
+
 export const SURFACE_GLASS_INPUT_CLASS =
   "h-12 w-full rounded-xl border border-gray-200 bg-white/60 px-4 text-sm text-gray-900 shadow-sm backdrop-blur-md outline-none transition-all placeholder:text-gray-500 hover:border-blue-500/30 focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-800 dark:bg-[#111622]/60 dark:text-gray-100"
 

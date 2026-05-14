@@ -81,11 +81,11 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       <div className={`absolute inset-0 rounded-2xl transition-all duration-500 pointer-events-none
         ${isSolved ? 'group-hover:bg-green-500/[0.08]' :
           isTeamSolved ? 'group-hover:bg-purple-500/[0.08]' :
-            'group-hover:bg-blue-500/[0.10]'}`} />
+            'group-hover:bg-blue-500/[0.04]'}`} />
 
       {/* Top Accent Line — only for unsolved */}
       {!isAnySolved && !isMaintenance && (
-        <div className="absolute top-0 left-4 right-4 h-[1px] rounded-full bg-gradient-to-r from-transparent via-blue-500/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-blue-500/80 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       )}
 
       <div className={`relative h-full flex flex-col p-4 md:p-5 rounded-2xl border backdrop-blur-sm transition-all duration-400 z-0
@@ -95,7 +95,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
             ? 'bg-gray-800/60 border-green-500/25 dark:border-green-500/20 shadow-none'
             : isTeamSolved
               ? 'bg-gray-800/60 border-purple-500/25 dark:border-purple-500/20 shadow-none'
-              : 'bg-gray-800/85 border-gray-600/50 shadow-md shadow-black/30 group-hover:shadow-xl group-hover:shadow-blue-500/20'}`}
+              : 'bg-gray-800/85 border-gray-600/50 shadow-sm shadow-black/30 group-hover:shadow-xl group-hover:shadow-black/40'}`}
       >
 
         {/* Subtle Background Category Icon */}

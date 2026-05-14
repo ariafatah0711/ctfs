@@ -52,11 +52,11 @@ export default function MainEventCard({
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 p-4 md:p-5 flex flex-col gap-3">
+        <div className="flex-1 p-4 md:p-5 flex flex-col justify-between gap-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <div className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md w-fit bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
-                Live
+                Main
               </div>
             </div>
 
@@ -65,21 +65,11 @@ export default function MainEventCard({
             </h4>
           </div>
 
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed flex-1">
-            Default challenges from this platform. Always available for practice.
-          </p>
-
           {/* Footer Metadata */}
-          <div className="pt-3 border-t border-gray-100 dark:border-gray-800/50 flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
-                <Calendar size={12} className="text-blue-500/40" />
-                <span>Permanent Event</span>
-              </div>
-              <div className="flex items-center gap-1 text-[10px] font-mono text-blue-600 dark:text-blue-400">
-                <Clock size={11} />
-                <span>Always active</span>
-              </div>
+          <div className="flex items-center justify-between mt-auto">
+            <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 dark:text-gray-400">
+              <Calendar size={12} className="text-blue-500/50" />
+              <span>Platform Default</span>
             </div>
           </div>
         </div>

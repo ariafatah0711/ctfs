@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import APP from '@/config'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/ui'
 import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
-import { DIALOG_CONTENT_CLASS } from '@/shared/styles'
+import { DIALOG_CONTENT_CLASS, DIALOG_CONTENT_CLASS_2XL } from '@/shared/styles'
 import type { Attachment, ChallengeWithSolve } from '@/shared/types'
 import ChallengeServicesPanel from './ChallengeServicesPanel'
 import HintDialog from './HintDialog'
@@ -156,7 +156,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <DialogContent
-        className="max-w-2xl w-[95vw] h-[90vh] flex flex-col overflow-hidden rounded-2xl bg-white/60 dark:bg-[#0a0d14]/80 border border-gray-200 dark:border-gray-800 backdrop-blur-xl p-0 shadow-2xl [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden [&_button.absolute.right-4.top-4]:text-gray-500 dark:[&_button.absolute.right-4.top-4]:text-gray-400"
+        className={`${DIALOG_CONTENT_CLASS_2XL} w-[95vw] h-[90vh] flex flex-col`}
         onClick={(event) => event.stopPropagation()}
       >
         {/* Fixed Header Section */}
@@ -180,14 +180,14 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             <div className={`flex items-center justify-between border-b pb-4 ${categoryBorderColor}`}>
               <div className="flex items-center gap-4">
                 {/* Category Badge */}
-                <div className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
+                <div className={`text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
                   {challenge.category}
                 </div>
 
                 {/* Difficulty */}
                 <div className="flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${diffTextColor.replace('text-', 'bg-').replace('-400', '-500')} shadow-sm`} />
-                  <span className="text-[11px] font-semibold text-gray-500 tracking-tight">
+                  <span className="text-[12px] font-semibold text-gray-500 tracking-tight">
                     {normalizedDiff}
                   </span>
                 </div>
@@ -198,17 +198,17 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
                 {isSolved && (
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/15 rounded-md border border-green-500/20">
                     <Flag size={12} className="text-green-400 fill-green-400" />
-                    <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest">Solved</span>
+                    <span className="text-[11px] font-bold text-green-400 uppercase tracking-widest">Solved</span>
                   </div>
                 )}
                 {!isSolved && isTeamSolved && (
                   <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/15 rounded-md border border-purple-500/20">
                     <CheckCircle2 size={12} className="text-purple-400" />
-                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Team Solved</span>
+                    <span className="text-[11px] font-bold text-purple-400 uppercase tracking-widest">Team Solved</span>
                   </div>
                 )}
                 <div className={`text-2xl font-black tracking-tighter ${isSolved ? 'text-green-400' : isTeamSolved ? 'text-purple-400' : 'text-gray-900 dark:text-white'}`}>
-                  {challenge.points} <span className="text-[12px] font-bold opacity-60 ml-0.5">pts</span>
+                  {challenge.points} <span className="text-[14px] font-bold opacity-60 ml-0.5">pts</span>
                 </div>
               </div>
             </div>

@@ -1,5 +1,7 @@
 'use client'
 
+import { Layers } from 'lucide-react'
+
 type AllEventsButtonProps = {
   selected: boolean
   onSelect: () => void
@@ -22,21 +24,28 @@ export default function AllEventsButton({
       <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/[0.03] rounded-2xl transition-colors duration-300 pointer-events-none" />
 
       <div className="flex items-center justify-between gap-4 relative z-10">
-        <div className="flex flex-col">
-          <h4 className="text-sm md:text-base font-bold text-gray-900 dark:text-white leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-            All Events & Challenges
-          </h4>
-          <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1 font-medium">
-            View unified challenge dashboard
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500/5 dark:bg-blue-400/5 border border-blue-500/10 dark:border-blue-400/10 shrink-0">
-          <div className="w-1 h-1 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)] animate-pulse" />
-          <div className="font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest text-[9px]">
-            Master View
+        <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300">
+            <Layers size={20} />
+          </div>
+          <div className="flex flex-col">
+            <h4 className="text-sm md:text-base font-bold text-gray-900 dark:text-white leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              All Challenges
+            </h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-medium">
+              Browse across all available events
+            </p>
           </div>
         </div>
+
+        {selected && (
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <div className="font-bold text-blue-600 dark:text-blue-400 text-[10px] uppercase tracking-wider">
+              Active
+            </div>
+          </div>
+        )}
       </div>
     </button>
   )

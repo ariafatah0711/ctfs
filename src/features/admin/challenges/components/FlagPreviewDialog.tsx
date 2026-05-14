@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Check, Flag, Copy } from 'lucide-react'
 import { Button, Dialog, DialogContent } from '@/shared/ui'
 import { cn } from '@/shared/lib/utils'
+import { DIALOG_GLASS_CONTENT_MD_CLASS } from '@/shared/styles'
 
 interface FlagPreviewDialogProps {
   open: boolean
@@ -59,7 +60,7 @@ export const FlagPreviewDialog: React.FC<FlagPreviewDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg rounded-2xl p-0 overflow-hidden">
+      <DialogContent className={DIALOG_GLASS_CONTENT_MD_CLASS}>
         <div className="p-5 space-y-5">
 
           {/* HEADER */}

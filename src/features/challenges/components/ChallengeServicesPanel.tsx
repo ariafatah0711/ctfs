@@ -96,8 +96,8 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
 
   return (
     <div>
-      <p className="text-xs text-gray-400 mb-1 inline-flex items-center gap-1 uppercase tracking-wider">
-        <span className="h-3.5 w-3.5">🌐</span> NXCTL Services
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5 opacity-80">
+        <span className="h-4 w-4">🌐</span> <span>NXCTL Services</span>
       </p>
       <div className="grid grid-cols-1 gap-1.5">
         {services.map((service, idx) => {
@@ -153,12 +153,12 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
           }
 
           return (
-            <div key={idx} className="flex flex-col gap-1.5 bg-[#1a1a33]/80 p-2.5 rounded border border-[#35355e] group hover:border-cyan-500/50 transition-colors shadow-sm">
+            <div key={idx} className="flex flex-col gap-2 bg-gray-50/50 dark:bg-[#1a1a33]/40 p-3 rounded-xl border border-gray-200 dark:border-[#35355e]/60 group hover:border-blue-500/30 transition-colors shadow-sm">
               <div className="flex items-center gap-2">
-                <code className="text-sm font-mono text-cyan-300 break-all flex-1">{service}</code>
+                <code className="text-[13px] md:text-sm font-mono text-gray-900 dark:text-cyan-300 break-all flex-1 font-semibold">{service}</code>
                 <button
                   type="button"
-                  className="p-1.5 bg-[#232344] hover:bg-[#35355e] rounded text-gray-400 hover:text-green-400 transition shadow-sm disabled:opacity-50"
+                  className="p-1.5 md:p-2 bg-white/50 dark:bg-[#232344]/50 hover:bg-gray-200/50 dark:hover:bg-[#35355e]/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition shadow-sm disabled:opacity-50"
                   onClick={() => handleServiceAction(service, 'up')}
                   title="Start Service"
                   disabled={serviceActionLoading[service] || isRunning}
@@ -167,7 +167,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                 </button>
                 <button
                   type="button"
-                  className="p-1.5 bg-[#232344] hover:bg-[#35355e] rounded text-gray-400 hover:text-yellow-400 transition shadow-sm disabled:opacity-50 flex items-center gap-1"
+                  className="p-1.5 md:p-2 bg-white/50 dark:bg-[#232344]/50 hover:bg-gray-200/50 dark:hover:bg-[#35355e]/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition shadow-sm disabled:opacity-50 flex items-center gap-1"
                   onClick={() => handleServiceAction(service, 'restart')}
                   title={(() => {
                     if (serviceActionLoading[service]) return 'Please wait...'
@@ -186,7 +186,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                 </button>
                 <button
                   type="button"
-                  className="p-1.5 bg-[#232344] hover:bg-[#35355e] rounded text-gray-400 hover:text-blue-400 transition shadow-sm disabled:opacity-50 flex items-center gap-1"
+                  className="p-1.5 md:p-2 bg-white/50 dark:bg-[#232344]/50 hover:bg-gray-200/50 dark:hover:bg-[#35355e]/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition shadow-sm disabled:opacity-50 flex items-center gap-1"
                   onClick={() => handleServiceAction(service, 'extend')}
                   title={(() => {
                     if (serviceActionLoading[service]) return 'Please wait...'
@@ -213,8 +213,8 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
               </div>
 
               {details && (
-                <div className="flex flex-col gap-1.5 border-t border-[#35355e]/50 pt-1.5">
-                  <div className="flex items-center gap-2 text-xs">
+                <div className="flex flex-col gap-2 border-t border-gray-200 dark:border-[#35355e]/50 pt-2 mt-1">
+                  <div className="flex items-center gap-2 text-[13px] md:text-sm">
                     <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-500' : 'bg-red-500'}`}></span>
                     <span className="text-gray-400">Status: {details.runtime?.status || 'stopped'}</span>
                     {isRunning && remainingSec !== null && (
@@ -230,11 +230,11 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                   {isRunning && (
                     isTcp && ncCommand ? (
                       <div className="flex items-center gap-2">
-                        <code className="text-xs bg-black/50 px-2 py-1 rounded text-green-300 flex-1 break-all select-all font-mono">
+                        <code className="text-[13px] bg-gray-200/50 dark:bg-black/50 px-2.5 py-1.5 rounded-md text-gray-900 dark:text-green-300 flex-1 break-all select-all font-mono shadow-inner border border-gray-300/50 dark:border-white/5">
                           {ncCommand}
                         </code>
                         <button
-                          className="p-1.5 bg-green-900/50 hover:bg-green-800 text-green-300 rounded text-xs px-2.5 font-semibold transition"
+                          className="py-1.5 px-3 bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-800 text-green-700 dark:text-green-300 rounded-md text-[13px] font-bold transition shadow-sm border border-green-200 dark:border-green-800/50"
                           onClick={() => {
                             navigator.clipboard.writeText(ncCommand)
                             toast.success('Copied nc command')
@@ -245,7 +245,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                       </div>
                     ) : displayUrl ? (
                       <div className="flex items-center gap-2">
-                        <a href={displayUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:text-blue-300 hover:underline flex-1 break-all bg-black/30 p-1.5 rounded transition">
+                        <a href={displayUrl} target="_blank" rel="noreferrer" className="text-[13px] md:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline flex-1 break-all bg-blue-50/50 dark:bg-black/30 p-2 rounded-md transition shadow-inner border border-blue-100 dark:border-white/5">
                           {displayUrl}
                         </a>
                       </div>

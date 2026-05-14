@@ -2,6 +2,7 @@
 
 import { LayoutGrid, List } from 'lucide-react'
 import { useFilterContext } from '@/features/challenges/contexts/FilterContext'
+import { SURFACE_FILTER_ITEM_CLASS } from '@/shared/styles'
 
 export default function LayoutToggle() {
   const { layoutMode, setLayoutMode } = useFilterContext()
@@ -13,11 +14,10 @@ export default function LayoutToggle() {
       data-tour="challenge-layout-toggle"
       onClick={() => setLayoutMode(layoutMode === 'compact' ? 'grouped' : 'compact')}
       title={layoutMode === 'compact' ? 'Switch to grouped view' : 'Switch to compact view'}
-      className={`inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border transition ${
-        isDefaultLayout
-          ? 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
-          : 'border-orange-500 bg-orange-500 text-white hover:bg-orange-600'
-      }`}
+      className={`inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition ${isDefaultLayout
+        ? SURFACE_FILTER_ITEM_CLASS
+        : 'border-blue-600 bg-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600'
+        }`}
     >
       {layoutMode === 'compact' ? <LayoutGrid size={16} /> : <List size={16} />}
     </button>

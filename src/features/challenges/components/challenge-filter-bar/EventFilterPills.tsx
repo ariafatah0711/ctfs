@@ -5,6 +5,10 @@ import { Lock, Zap } from 'lucide-react'
 import APP from '@/config'
 import { formatEventTimingLabel } from '@/shared/lib'
 import {
+  SURFACE_FILTER_ITEM_CLASS,
+  SURFACE_FILTER_ITEM_ACTIVE_CLASS,
+} from '@/shared/styles'
+import {
   getEventVisualState,
   getVisibleSortedEvents,
   shouldShowEventTimingAlways,
@@ -72,7 +76,7 @@ export default function EventFilterPills({
           <button
             type="button"
             onClick={() => onEventChange('all')}
-            className={`shrink-0 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border transition ${selectedEventId === 'all' ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition ${selectedEventId === 'all' ? SURFACE_FILTER_ITEM_ACTIVE_CLASS : SURFACE_FILTER_ITEM_CLASS} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
           >
             All
           </button>
@@ -81,7 +85,7 @@ export default function EventFilterPills({
           <button
             type="button"
             onClick={() => onEventChange(null)}
-            className={`shrink-0 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border transition ${!selectedEventId ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+            className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition ${!selectedEventId ? SURFACE_FILTER_ITEM_ACTIVE_CLASS : SURFACE_FILTER_ITEM_CLASS}`}
           >
             {mainLabel}
           </button>
@@ -102,12 +106,11 @@ export default function EventFilterPills({
               type="button"
               onClick={() => onEventChange(event.id)}
               className={`
-                shrink-0 whitespace-nowrap px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border transition flex items-center gap-1
+                shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition flex items-center gap-1
                 ${isEndedButAlwaysVisible && !isSelected ? 'text-[10px] opacity-40 border-dashed' : ''}
                 ${isSelected
-                  ? 'bg-blue-600 border-blue-600 text-white'
-                  : (`bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700
-                        hover:bg-gray-50 dark:hover:bg-gray-800` + (showEventState ? ` ${stateStyles[state]}` : ''))
+                  ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
+                  : (SURFACE_FILTER_ITEM_CLASS + (showEventState ? ` ${stateStyles[state]}` : ''))
                 }
               `}
               title={timing || undefined}

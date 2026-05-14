@@ -257,14 +257,14 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted,
             code: ({ inline, children, ...props }: any) =>
               inline ? (
                 <code
-                  className="bg-gray-800 text-blue-300 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium"
+                  className="bg-gray-800 text-blue-300 px-1.5 py-0.5 rounded text-[13px] font-mono font-medium"
                   {...props}
                 >
                   {children}
                 </code>
               ) : (
                 <CodeBlockWrapper isDark={false}>
-                  <pre className="bg-gray-900 p-3 rounded-lg text-[10px] leading-snug font-mono max-w-full border border-gray-800 overflow-x-auto mb-6">
+                  <pre className="bg-gray-900 p-3 rounded-lg text-[13px] leading-snug font-mono max-w-full border border-gray-800 overflow-x-auto mb-6">
                     <code className="text-gray-200" {...props}>
                       {children}
                     </code>
@@ -273,7 +273,7 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted,
               ),
             blockquote: ({ ...props }) => (
               <blockquote
-                className="border-l-4 border-blue-500/50 bg-blue-500/5 pl-3 py-1.5 text-[11px] opacity-90 mb-4 rounded-r-sm"
+                className="border-l-4 border-blue-500/50 bg-blue-500/5 pl-3 py-1.5 text-sm opacity-90 mb-4 rounded-r-sm"
                 {...props}
               />
             ),
@@ -286,7 +286,7 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted,
   }
 
   return (
-    <div className={`max-w-none text-gray-300 text-sm leading-relaxed ${className}`}>
+    <div className={`max-w-none text-gray-300 text-base leading-relaxed ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         components={{
@@ -301,7 +301,7 @@ export function MarkdownRenderer({ content, className = '', onCommentsExtracted,
           li: ({ ...props }) => <li className="ml-4 mb-2 list-item" {...props} />,
           code: ({ inline, children, ...props }: any) =>
             inline ? (
-              <code className="bg-gray-800 px-2 py-1 rounded text-xs font-mono text-blue-300 font-medium" {...props}>
+              <code className="bg-gray-800 px-2 py-1 rounded text-sm font-mono text-blue-300 font-medium" {...props}>
                 {children}
               </code>
             ) : (
@@ -350,7 +350,7 @@ export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRende
   const { filtered: sanitizedContent } = React.useMemo(() => parseCustomComments(normalizedContent), [normalizedContent])
 
   return (
-    <div className={`max-w-none text-gray-800 dark:text-gray-200 text-sm leading-relaxed ${className}`}>
+    <div className={`max-w-none text-gray-800 dark:text-gray-200 text-base leading-relaxed ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkBreaks]}
         components={{
@@ -361,7 +361,7 @@ export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRende
           a: ({ ...props }) => <a className={`${THEME_PRIMARY_TEXT_CLASS} hover:text-blue-700 dark:hover:text-blue-300 underline font-medium transition-colors`} target="_blank" rel="noopener noreferrer" {...props} />,
           code: ({ inline, children, ...props }: any) =>
             inline ? (
-              <code className="bg-blue-100 dark:bg-gray-800 px-2 py-1 rounded text-xs font-mono text-blue-800 dark:text-blue-300 font-semibold" {...props}>
+              <code className="bg-blue-100 dark:bg-gray-800 px-2 py-1 rounded text-sm font-mono text-blue-800 dark:text-blue-300 font-semibold" {...props}>
                 {children}
               </code>
             ) : (

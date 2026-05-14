@@ -3,9 +3,8 @@
 import APP from '@/config'
 import {
   SURFACE_GLASS_FIELD_COMPACT_CLASS,
-  THEME_SECONDARY_BG_CLASS,
-  THEME_SECONDARY_BG_HOVER_CLASS,
-  THEME_SECONDARY_RING_CLASS,
+  SURFACE_FILTER_ITEM_CLASS,
+  SURFACE_FILTER_ITEM_ACTIVE_CLASS,
 } from '@/shared/styles'
 import {
   getFeatureFilterTitle,
@@ -81,7 +80,7 @@ export default function ChallengeFilterControls({
           value={filters.search}
           onChange={(event) => onFilterChange({ ...filters, search: event.target.value })}
           placeholder="Search challenge..."
-          className={`${SURFACE_GLASS_FIELD_COMPACT_CLASS} ${THEME_SECONDARY_RING_CLASS} ${filters.search && String(filters.search).trim() !== '' ? `${THEME_SECONDARY_BG_CLASS} border-orange-500 text-white placeholder:text-white/70` : ''} ${dirtyState.isSearchDirty ? 'ring-2 ring-orange-500/30' : ''}`}
+          className={`${SURFACE_GLASS_FIELD_COMPACT_CLASS} focus:ring-blue-500 focus:border-blue-500 ${filters.search && String(filters.search).trim() !== '' ? `${SURFACE_FILTER_ITEM_ACTIVE_CLASS} placeholder:text-white/70 dark:placeholder:text-white/70` : ''} ${dirtyState.isSearchDirty ? 'ring-2 ring-blue-500/30 dark:ring-blue-500/30' : ''}`}
         />
       </div>
 
@@ -134,11 +133,11 @@ export default function ChallengeFilterControls({
           onClick={() => onFilterChange({ ...filters, feature: nextFeatureMode })}
           title={featureButtonTitle}
           aria-label={featureButtonTitle}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded border text-[11px] font-bold transition ${featureMode === 'N'
-            ? 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+          className={`inline-flex h-[38px] w-[38px] items-center justify-center rounded-xl text-[11px] font-bold transition ${featureMode === 'N'
+            ? SURFACE_FILTER_ITEM_CLASS
             : featureMode === 'T'
-              ? `${THEME_SECONDARY_BG_CLASS} border-orange-500 text-white`
-              : 'bg-blue-500 border-blue-500 text-white'
+              ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
+              : 'bg-indigo-600 border border-indigo-600 text-white shadow-inner'
             }`}
         >
           {featureMode}
@@ -149,7 +148,7 @@ export default function ChallengeFilterControls({
         <button
           type="button"
           onClick={onClear}
-          className={`w-full px-3 py-2 text-sm rounded transition ${dirtyState.anyFilterDirty ? `${THEME_SECONDARY_BG_CLASS} ${THEME_SECONDARY_BG_HOVER_CLASS} text-white` : 'text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900 hover:bg-blue-100 dark:hover:bg-blue-800'}`}
+          className={`w-full px-3 py-2 text-sm rounded-xl transition ${dirtyState.anyFilterDirty ? `${SURFACE_FILTER_ITEM_ACTIVE_CLASS} font-bold` : `${SURFACE_FILTER_ITEM_CLASS} opacity-80`}`}
           aria-label="Clear filters"
         >
           Clear

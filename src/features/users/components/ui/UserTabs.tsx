@@ -26,7 +26,7 @@ export function UserTabs<T extends string>({
       items={tabs}
       value={activeTab}
       onChange={onChange}
-      variant="pill"
+      variant="panel"
       className={cn(className)}
     />
   )
