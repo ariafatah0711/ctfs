@@ -63,7 +63,7 @@ export default function ChallengeFilterBar({
   return (
     <div
       data-tour="challenge-filter-bar"
-      className="relative z-20 w-full bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-2xl p-4 md:p-5"
+      className="relative z-20 w-full bg-white/50 dark:bg-gray-900/50 border border-blue-500/20 dark:border-blue-500/10 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-sm shadow-blue-500/5"
     >
       {events && onEventChange && (
         <EventFilterPills

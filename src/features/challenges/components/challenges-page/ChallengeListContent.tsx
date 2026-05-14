@@ -132,11 +132,11 @@ export default function ChallengeListContent({
     const visibleChallenges = sortedFilteredChallenges.slice(0, visibleCount)
 
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">
         {visibleChallenges.map((challenge) => (
           <div
             key={challenge.id}
-            className="relative [content-visibility:auto] [contain-intrinsic-size:180px]"
+            className="relative overflow-visible w-full"
           >
             <ChallengeCard
               challenge={challenge}
@@ -167,7 +167,7 @@ export default function ChallengeListContent({
         return (
           <div
             key={category}
-            className="mb-12 [content-visibility:auto] [contain-intrinsic-size:720px]"
+            className="mb-12 relative z-0"
           >
             <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">
               <div className="w-1.5 h-6 bg-blue-600 dark:bg-blue-500 rounded-full" />
@@ -177,11 +177,11 @@ export default function ChallengeListContent({
                   : category}
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">
               {visibleChallenges.map((challenge) => (
                 <div
                   key={challenge.id}
-                  className="[content-visibility:auto] [contain-intrinsic-size:180px]"
+                  className="relative overflow-visible w-full"
                 >
                   <ChallengeCard
                     challenge={challenge}

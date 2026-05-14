@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
-import { THEME_PRIMARY_RING_CLASS } from '@/shared/styles'
+import { SURFACE_GLASS_INPUT_CLASS } from '@/shared/styles'
 
 interface AuthInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   icon: LucideIcon
@@ -18,7 +18,8 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
           <input
             ref={ref}
             className={cn(
-              `h-12 w-full rounded-xl border border-gray-200 bg-white/70 px-11 text-sm text-gray-900 outline-none transition-all duration-200 placeholder:text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 ${THEME_PRIMARY_RING_CLASS}`,
+              SURFACE_GLASS_INPUT_CLASS,
+              'px-11',
               rightElement && 'pr-12',
               error && 'border-red-400/60 focus:border-red-400 focus:ring-red-500/20 dark:border-red-500/50',
               className

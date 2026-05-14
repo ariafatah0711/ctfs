@@ -18,7 +18,7 @@ export default function ScoreboardAllPage() {
     setSelectedEvent,
   } = useScoreboardAllPageData()
 
-  if (authLoading) return <Loader fullscreen color={THEME_PRIMARY_TEXT_CLASS} />
+  if (authLoading) return <Loader fullscreen />
   if (!user) return null
 
   return (
@@ -35,7 +35,7 @@ export default function ScoreboardAllPage() {
                 value={selectedEvent}
                 onChange={setSelectedEvent}
                 events={startedEvents}
-                className="min-w-[180px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm px-3 py-2 rounded"
+                className="min-w-[180px]"
               />
             </div>
           </div>

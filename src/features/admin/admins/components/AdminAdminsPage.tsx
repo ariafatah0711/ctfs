@@ -37,7 +37,7 @@ export default function AdminAdminsPage() {
     resetGrantForm,
   } = useAdminAdminsData()
 
-  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen />
   if (!user || !isAllowed) return null
 
   return (

@@ -150,7 +150,15 @@ export function useChallengeEventAccess({
   const selectedEventEnded = !!(selectedEventEnd && nowDate > selectedEventEnd)
 
   const closeEventsTabIfNeeded = useCallback(() => {
-    if (currentTab === 'events') setCurrentTab('challenges')
+    if (currentTab !== 'events') return
+
+    setCurrentTab('challenges')
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+      })
+    })
   }, [currentTab, setCurrentTab])
 
   const attemptEventSelect = useCallback(async (id: EventSelectorValue) => {

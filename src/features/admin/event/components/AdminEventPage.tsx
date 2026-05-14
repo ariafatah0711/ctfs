@@ -71,7 +71,7 @@ export default function AdminEventPage() {
     handleReviewRequest,
   } = useAdminEventData()
 
-  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen />
   if (!user || !isAdminUser) return null
 
   return (

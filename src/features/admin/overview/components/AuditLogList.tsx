@@ -83,7 +83,7 @@ const AuditLogList: React.FC<AuditLogListProps> = ({ logs: propLogs, isLoading: 
   if (isLoading) return (
     <Card className="bg-white dark:bg-gray-800 pt-5">
       <CardHeader><CardTitle className="text-lg font-semibold">Audit Logs</CardTitle></CardHeader>
-      <CardContent className="flex justify-center py-8"><Loader color="text-orange-500" /></CardContent>
+      <CardContent className="flex justify-center py-8"><Loader /></CardContent>
     </Card>
   )
 

@@ -23,7 +23,11 @@ export default function FilterSettingsMenu({
         type="button"
         onClick={() => onOpenChange(!open)}
         data-tour="challenge-filter-settings"
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+        className={`inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition ${
+          open
+            ? 'border-orange-500 bg-orange-500 text-white'
+            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+        }`}
         aria-label="Open filter settings"
       >
         <Settings size={16} />

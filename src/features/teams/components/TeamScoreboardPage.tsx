@@ -15,7 +15,6 @@ import { Card, CardHeader, CardTitle, CardContent, Table, TableBody, TableCell, 
 import {
   PAGE_MAIN_CONTAINER_6XL,
   SURFACE_GLASS_BASE_CLASS,
-  SURFACE_GLASS_FIELD_CLASS,
   THEME_PRIMARY_SELECTION_CLASS,
 } from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
@@ -67,7 +66,7 @@ export default function TeamScoreboardPage() {
               value={String(selectedEvent)}
               onChange={setSelectedEvent as any}
               events={startedEvents}
-              className={`min-w-[200px] ${SURFACE_GLASS_FIELD_CLASS}`}
+              className="min-w-[200px]"
               getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
             />
           </div>

@@ -50,7 +50,7 @@ export default function TeamProfileHeader({
           onChange={setSelectedEvent}
           events={teamEvents}
           showMain={showMainOption}
-          className="min-w-[180px] bg-white/60 dark:bg-[#111622]/60 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-xl text-sm px-4 py-2 shadow-sm transition-all hover:border-blue-500/30"
+          className="min-w-[180px]"
           getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
         />
       </div>

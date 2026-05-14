@@ -64,7 +64,7 @@ export default function Home() {
   const { user, loading } = useAuth()
 
   if (loading) {
-    return <Loader fullscreen color="text-blue-500" />
+    return <Loader fullscreen />
   }
 
   return (

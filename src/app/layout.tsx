@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { Settings } from 'lucide-react'
+// @ts-ignore: side-effect CSS import without type declarations
 import 'react-medium-image-zoom/dist/styles.css'
+// @ts-ignore: side-effect CSS import without type declarations
 import './globals.css'
 
 import { Toaster } from "react-hot-toast"
@@ -9,7 +11,8 @@ import Navbar from '@/_layouts/Navbar'
 import ScrollToggle from '@/_layouts/components/ScrollToggle'
 import { AuthProvider } from '@/shared/contexts/AuthContext'
 import { ThemeProvider } from '@/shared/contexts/ThemeContext'
-import { PAGE_BG_BASE_CLASS } from '@/shared/styles/page-background'
+import { PAGE_BG_BASE_CLASS, } from '@/shared/styles/page-background'
+import { THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles/theme-colors'
 import APP from '@/config'
 
 export const metadata: Metadata = {
@@ -82,7 +85,26 @@ export default async function RootLayout({
 
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className="antialiased" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var settings = JSON.parse(localStorage.getItem('nxctf_settings_v1'));
+                  var theme = settings ? settings.theme : 'dark';
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className={`antialiased ${THEME_PRIMARY_SELECTION_CLASS}`} suppressHydrationWarning>
         {isMaintenancePage ? (
           // Maintenance mode: no navbar, no providers, just raw content
           children
@@ -91,10 +113,10 @@ export default async function RootLayout({
           <div className={`min-h-screen ${PAGE_BG_BASE_CLASS}`}>
             <ThemeProvider>
               <AuthProvider>
-                  <Navbar />
-                  <div className="pt-14">{children}</div>
-                  <Toaster position="top-right" reverseOrder={false} />
-                  <ScrollToggle />
+                <Navbar />
+                <div className="pt-14">{children}</div>
+                <Toaster position="top-right" reverseOrder={false} />
+                <ScrollToggle />
               </AuthProvider>
             </ThemeProvider>
           </div>

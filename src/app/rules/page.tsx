@@ -16,7 +16,7 @@ import { THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 export default function RulesPage() {
   const { loading } = useAuth()
 
-  if (loading) return <Loader fullscreen color="text-blue-500" />
+  if (loading) return <Loader fullscreen />
 
   return (
     <PageBackground

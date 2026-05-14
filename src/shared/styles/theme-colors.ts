@@ -24,3 +24,27 @@ export const THEME_PRIMARY_SHADOW_CLASS =
 
 export const THEME_PRIMARY_PILL_CLASS =
   'border border-blue-500/20 bg-blue-500/10 text-blue-600 shadow-sm shadow-blue-500/5 dark:text-blue-400'
+
+export const THEME_SECONDARY_TEXT_CLASS =
+  'text-orange-600 dark:text-orange-400'
+
+export const THEME_SECONDARY_BG_CLASS =
+  'bg-orange-500'
+
+export const THEME_SECONDARY_BG_HOVER_CLASS =
+  'hover:bg-orange-600'
+
+export const THEME_SECONDARY_BORDER_CLASS =
+  'border-orange-500/30'
+
+export const THEME_SECONDARY_RING_CLASS =
+  'focus:border-orange-500/70 focus:ring-2 focus:ring-orange-500/30'
+
+export const THEME_SECONDARY_SHADOW_CLASS =
+  'shadow-orange-500/10 hover:shadow-orange-500/20'
+
+export const THEME_SECONDARY_SURFACE_CLASS =
+  'border-orange-500/20 shadow-sm shadow-orange-500/5'
+
+export const THEME_SECONDARY_PILL_CLASS =
+  'border border-orange-500/30 bg-orange-500/10 text-orange-700 shadow-sm shadow-orange-500/5 dark:text-orange-300'

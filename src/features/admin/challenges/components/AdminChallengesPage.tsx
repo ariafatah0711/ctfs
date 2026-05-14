@@ -129,7 +129,7 @@ export default function AdminChallengesPage() {
     })
   }, [challenges, adminScope, isGlobalAdmin, eventId, filters])
 
-  if (authLoading || dataLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || dataLoading) return <Loader fullscreen />
   if (!user) return null
 
   return (

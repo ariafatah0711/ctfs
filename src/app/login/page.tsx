@@ -18,7 +18,7 @@ export default function LoginPage() {
   }, [user, authLoading, router])
 
   if (authLoading) {
-    return <Loader fullscreen color="text-blue-500" />
+    return <Loader fullscreen />
   }
 
   return (

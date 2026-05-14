@@ -50,7 +50,7 @@ export default function ChallengesPage() {
   const renderDeferredDecorations = useIdleMount()
   const renderDialogs = data.isJoinDialogOpen || !!data.selectedChallenge
 
-  if (data.loading) return <Loader fullscreen color="text-blue-500" />
+  if (data.loading) return <Loader fullscreen />
   if (!data.user) return null
 
   return (

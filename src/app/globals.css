@@ -3,28 +3,42 @@
 @tailwind utilities;
 
 :root {
+  --background: 0 0% 98%;
+  --foreground: 0 0% 3.9%;
+
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-start-rgb: 250, 250, 250;
+  --background-end-rgb: 250, 250, 250;
+}
+
+.dark {
+  --background: 222.9 38.9% 7.1%;
+  --foreground: 0 0% 98%;
+
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 11, 15, 25;
+  --background-end-rgb: 11, 15, 25;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
+    --background: 222.9 38.9% 7.1%;
+    --foreground: 0 0% 98%;
+
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background-start-rgb: 11, 15, 25;
+    --background-end-rgb: 11, 15, 25;
   }
+}
+
+html {
+  background-color: hsl(var(--background));
 }
 
 body {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+  background-color: hsl(var(--background));
 }
 
 .bg-ctfd {
@@ -223,8 +237,6 @@ input[type='password']::-ms-clear {
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;

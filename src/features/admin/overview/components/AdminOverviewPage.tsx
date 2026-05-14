@@ -20,7 +20,7 @@ export default function AdminOverviewPage() {
     refreshStats,
   } = useAdminOverviewData()
 
-  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen />
   if (!user) return null
 
   return (

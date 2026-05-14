@@ -70,7 +70,7 @@ export default function TeamDetailPage() {
   if (authLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-blue-500" />
+        <Loader fullscreen />
       </div>
     )
   }
@@ -82,42 +82,42 @@ export default function TeamDetailPage() {
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
       contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}
     >
-        {loading && !team && (
-          <div className="flex justify-center py-16">
-            <Loader color="text-blue-500" />
-          </div>
+      {loading && !team && (
+        <div className="flex justify-center py-16">
+          <Loader />
+        </div>
+      )}
+
+      {loading && team && (
+        <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
+          <Loader />
+        </div>
+      )}
+
+      <>
+        {error ? (
+          <div className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/50">{error}</div>
+        ) : !team && !loading ? (
+          <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
+        ) : (
+          team && (
+            <TeamPageContent
+              key={effectiveSelectedEvent}
+              team={stableTeam || team}
+              members={stableMembers.length > 0 ? stableMembers : members}
+              summary={stableSummary || summary}
+              challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
+              currentUserId={user?.id}
+
+              effectiveSelectedEvent={effectiveSelectedEvent}
+              setSelectedEvent={setSelectedEvent}
+              teamEvents={teamEvents as any}
+              showMainOption={showMainOption}
+              onBack={() => router.back()}
+            />
+          )
         )}
-
-        {loading && team && (
-          <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
-            <Loader color="text-blue-500" />
-          </div>
-        )}
-
-        <>
-          {error ? (
-            <div className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/50">{error}</div>
-          ) : !team && !loading ? (
-            <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
-          ) : (
-            team && (
-              <TeamPageContent
-                key={effectiveSelectedEvent}
-                team={stableTeam || team}
-                members={stableMembers.length > 0 ? stableMembers : members}
-                summary={stableSummary || summary}
-                challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
-                currentUserId={user?.id}
-
-                effectiveSelectedEvent={effectiveSelectedEvent}
-                setSelectedEvent={setSelectedEvent}
-                teamEvents={teamEvents as any}
-                showMainOption={showMainOption}
-                onBack={() => router.back()}
-              />
-            )
-          )}
-        </>
+      </>
     </PageBackground>
   )
 }

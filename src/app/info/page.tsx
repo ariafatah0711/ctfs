@@ -85,7 +85,7 @@ export default function InfoPage() {
     }
   }, [])
 
-  if (loading) return <Loader fullscreen color="text-blue-500" />;
+  if (loading) return <Loader fullscreen />;
 
   return (
     <PageBackground

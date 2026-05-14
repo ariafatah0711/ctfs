@@ -71,35 +71,36 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       key={challenge.id}
       role={isMaintenance ? undefined : 'button'}
       tabIndex={isMaintenance ? undefined : 0}
-      className={`relative h-full group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer hover:-translate-y-0.5 active:scale-[0.99]'} transition-[opacity,transform] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950
+      className={`relative w-full h-full group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-110 hover:z-50'} transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950
         ${isAnySolved ? 'opacity-55 hover:opacity-85' : 'opacity-100'}`}
+      style={{ transformOrigin: 'center' }}
       onClick={isMaintenance ? undefined : handleOpen}
       onKeyDown={handleKeyDown}
     >
       {/* Hover Glow Overlay */}
-      <div className={`absolute inset-0 rounded-2xl transition-all duration-300 pointer-events-none
-        ${isSolved ? 'group-hover:bg-green-500/[0.05]' :
-          isTeamSolved ? 'group-hover:bg-purple-500/[0.05]' :
-            'group-hover:bg-blue-500/[0.06]'}`} />
+      <div className={`absolute inset-0 rounded-2xl transition-all duration-500 pointer-events-none
+        ${isSolved ? 'group-hover:bg-green-500/[0.08]' :
+          isTeamSolved ? 'group-hover:bg-purple-500/[0.08]' :
+            'group-hover:bg-blue-500/[0.10]'}`} />
 
       {/* Top Accent Line — only for unsolved */}
       {!isAnySolved && !isMaintenance && (
-        <div className="absolute top-0 left-4 right-4 h-[2px] rounded-full bg-gradient-to-r from-transparent via-blue-500/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute top-0 left-4 right-4 h-[1px] rounded-full bg-gradient-to-r from-transparent via-blue-500/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       )}
 
-      <div className={`relative h-full flex flex-col p-4 md:p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300
+      <div className={`relative h-full flex flex-col p-4 md:p-5 rounded-2xl border backdrop-blur-sm transition-all duration-400 z-0
         ${isMaintenance
           ? 'bg-amber-500/[0.02] border-amber-500/20 dark:border-amber-500/10 border-dashed shadow-none'
           : isSolved
             ? 'bg-gray-800/60 border-green-500/25 dark:border-green-500/20 shadow-none'
             : isTeamSolved
               ? 'bg-gray-800/60 border-purple-500/25 dark:border-purple-500/20 shadow-none'
-              : 'bg-gray-800/85 border-gray-600/50 group-hover:border-blue-400/60 shadow-md shadow-black/30 group-hover:shadow-blue-500/10'}`}
+              : 'bg-gray-800/85 border-gray-600/50 shadow-md shadow-black/30 group-hover:shadow-xl group-hover:shadow-blue-500/20'}`}
       >
 
         {/* Subtle Background Category Icon */}
-        <div className={`absolute right-0 bottom-0 pointer-events-none z-0 overflow-hidden rounded-br-2xl ${categoryIconColor}
-          ${isAnySolved ? 'opacity-[0.04]' : 'opacity-[0.15] group-hover:opacity-[0.16] transition-opacity duration-500'}`}>
+        <div className={`absolute right-0 bottom-0 pointer-events-none z-0 overflow-hidden rounded-br-2xl transition-transform duration-500 ${categoryIconColor}
+          ${isAnySolved ? 'opacity-[0.04]' : 'opacity-[0.15] group-hover:opacity-[0.22] group-hover:scale-110 group-hover:rotate-6 transition-all'}`}>
           <CategoryIcon size={110} strokeWidth={1.2} />
         </div>
 
@@ -120,7 +121,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         <div className="relative flex-1 flex flex-col z-10">
           {/* Maintenance Overlay Info */}
           {isMaintenance && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-white/70 dark:bg-gray-950 backdrop-blur-[4px] rounded-xl pointer-events-none">
+            <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-white/70 dark:bg-gray-950 backdrop-blur-[4px] rounded-xl pointer-events-none">
               <p className="text-[10px] font-black text-center px-4 text-amber-600 dark:text-amber-500 leading-relaxed uppercase tracking-wider">
                 This service is currently unavailable. Points remain awarded to those who solved it.
               </p>
@@ -132,7 +133,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
             {/* LEFT: Category Badge + Feature Badge */}
             <div className="flex items-center gap-2">
-              <div className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md w-fit
+              <div className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md w-fit transition-opacity duration-400
                 ${isAnySolved
                   ? `${categoryBadgeColor} opacity-60`
                   : categoryBadgeColor}`}>
@@ -149,7 +150,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
             {/* RIGHT: Points */}
             {/* mr-8 to avoid overlap with flag badge */}
-            <div className={`text-base font-black tracking-tight leading-none ${isSolved ? 'mr-8' : isTeamSolved ? 'mr-8' : ''}
+            <div className={`text-base font-black tracking-tight leading-none transition-colors duration-400 ${isSolved ? 'mr-8' : isTeamSolved ? 'mr-8' : ''}
                 ${isSolved
                 ? 'text-green-400'
                 : isTeamSolved
@@ -161,7 +162,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
           {/* Title */}
           <div className="mb-4 flex-1">
-            <h3 className={`text-sm font-bold leading-5 line-clamp-1 md:text-base md:leading-6 transition-colors duration-200
+            <h3 className={`text-sm font-bold leading-5 line-clamp-1 md:text-base md:leading-6 transition-colors duration-400
               ${isSolved
                 ? 'text-gray-400 group-hover:text-green-300'
                 : isTeamSolved
@@ -173,7 +174,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         </div>
 
         {/* Footer Area */}
-        <div className={`flex items-center justify-between pt-3 border-t z-10 relative ${categoryBorderColor}`}>
+        <div className={`flex items-center justify-between pt-3 border-t z-10 relative transition-colors duration-400 ${categoryBorderColor}`}>
           <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
             {isMaintenance ? (
               <span className="text-amber-500 flex items-center gap-1.5 font-black">

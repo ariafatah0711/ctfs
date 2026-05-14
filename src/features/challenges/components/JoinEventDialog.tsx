@@ -3,7 +3,11 @@
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog"
 import { Button } from "@/shared/ui/button"
-import { DIALOG_GLASS_CONTENT_MD_CLASS } from "@/shared/styles"
+import {
+  DIALOG_GLASS_CONTENT_MD_CLASS,
+  SURFACE_GLASS_INPUT_CLASS,
+  SURFACE_GLASS_TEXTAREA_CLASS,
+} from "@/shared/styles"
 import { Event } from "@/shared/types"
 import { joinEvent } from "@/features/events/services/event.service"
 import toast from "react-hot-toast"
@@ -89,7 +93,7 @@ export default function JoinEventDialog({
                 value={joinKey}
                 onChange={(e) => setJoinKey(e.target.value)}
                 placeholder="Enter access key..."
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2.5 bg-white/50 dark:bg-gray-900/50 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                className={SURFACE_GLASS_INPUT_CLASS}
                 autoFocus
               />
             </div>
@@ -105,7 +109,7 @@ export default function JoinEventDialog({
                 onChange={(e) => setJoinNote(e.target.value)}
                 placeholder="Tell us why you'd like to join..."
                 rows={3}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-800 px-4 py-2.5 bg-white/50 dark:bg-gray-900/50 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none"
+                className={`${SURFACE_GLASS_TEXTAREA_CLASS} resize-none`}
                 autoFocus
               />
             </div>

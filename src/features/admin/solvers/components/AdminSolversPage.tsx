@@ -32,7 +32,7 @@ export default function AdminSolversPage() {
     doDelete,
   } = useAdminSolversData()
 
-  if (authLoading || isLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading || isLoading) return <Loader fullscreen />
   if (!user || !isAdminUser) return null
 
   const clearPendingDelete = () => {

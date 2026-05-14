@@ -9,7 +9,11 @@ import BackButton from '@/shared/components/BackButton'
 import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import PageBackground from '@/shared/components/PageBackground'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
-import { PAGE_MAIN_CONTAINER_6XL, THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
+import {
+  PAGE_MAIN_CONTAINER_6XL,
+  SURFACE_GLASS_INPUT_CLASS,
+  THEME_PRIMARY_SELECTION_CLASS,
+} from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
 
@@ -167,7 +171,7 @@ export default function TeamsPage() {
   if (authLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-blue-500" />
+        <Loader fullscreen />
       </div>
     )
   }
@@ -179,13 +183,13 @@ export default function TeamsPage() {
       <div className={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}>
         {initialLoading ? (
           <div className="flex justify-center py-16">
-            <Loader color="text-blue-500" />
+            <Loader />
           </div>
         ) : (
           <>
             {loading && team && (
               <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
-                <Loader color="text-blue-500" />
+                <Loader />
               </div>
             )}
 
@@ -249,7 +253,7 @@ export default function TeamsPage() {
                           onChange={(e) => setTeamName(e.target.value)}
                           placeholder="CyberKnights, VoidWalkers, etc."
                           disabled={busy}
-                          className="rounded-xl bg-white/50 dark:bg-gray-900/50 h-12"
+                          className={SURFACE_GLASS_INPUT_CLASS}
                         />
                       </div>
                       <Button
@@ -283,7 +287,7 @@ export default function TeamsPage() {
                         onChange={(e) => setInviteCode(e.target.value)}
                         placeholder="Paste code here..."
                         disabled={busy}
-                        className="rounded-xl bg-white/50 dark:bg-gray-900/50 h-12 font-mono text-center tracking-widest"
+                        className={`${SURFACE_GLASS_INPUT_CLASS} font-mono text-center tracking-widest`}
                       />
                       <Button
                         onClick={onJoinTeam}

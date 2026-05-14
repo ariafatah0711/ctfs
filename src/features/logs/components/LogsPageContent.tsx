@@ -35,7 +35,7 @@ export default function LogsPageContent() {
     }
   }, [tabType, user, markAllRead, selectedEvent]);
 
-  if (authLoading) return <Loader fullscreen color="text-blue-500" />;
+  if (authLoading) return <Loader fullscreen />;
   if (!user) return null;
 
   return (
@@ -43,36 +43,36 @@ export default function LogsPageContent() {
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
       contentClassName={`${PAGE_MAIN_CONTAINER_4XL} space-y-6`}
     >
-        {/* Compact Navigation Row */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* Event Filter */}
-          <div className="flex items-center gap-3">
-            <EventSelect
-              value={selectedEvent}
-              onChange={setSelectedEvent}
-              events={startedEvents as any}
-              className="min-w-[180px] bg-white/60 dark:bg-[#111622]/60 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-xl text-sm px-4 py-2 shadow-sm transition-all hover:border-blue-500/30"
-              getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
-            />
-          </div>
-
-          {/* Tab Switcher */}
-          <SegmentedTabs
-            items={[
-              { value: 'solves', label: 'Solves Feed', icon: Target },
-              { value: 'challenges', label: 'Challenge Info', icon: Flag },
-            ]}
-            value={tabType}
-            onChange={setTabType}
-            variant="panelLarge"
+      {/* Compact Navigation Row */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Event Filter */}
+        <div className="flex items-center gap-3">
+          <EventSelect
+            value={selectedEvent}
+            onChange={setSelectedEvent}
+            events={startedEvents as any}
+            className="min-w-[180px]"
+            getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
           />
         </div>
 
-        <div
-          key={`${tabType}-${selectedEvent}`}
-        >
-          <LogsList tabType={tabType} eventId={selectedEvent} />
-        </div>
+        {/* Tab Switcher */}
+        <SegmentedTabs
+          items={[
+            { value: 'solves', label: 'Solves Feed', icon: Target },
+            { value: 'challenges', label: 'Challenge Info', icon: Flag },
+          ]}
+          value={tabType}
+          onChange={setTabType}
+          variant="panelLarge"
+        />
+      </div>
+
+      <div
+        key={`${tabType}-${selectedEvent}`}
+      >
+        <LogsList tabType={tabType} eventId={selectedEvent} />
+      </div>
     </PageBackground>
   );
 }
