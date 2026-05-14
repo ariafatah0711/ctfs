@@ -11,8 +11,7 @@ import { useAuth } from '@/shared/contexts'
 import { useEventContext } from '@/features/events/contexts/EventContext'
 import { useLogs } from '@/features/logs/contexts/LogsContext'
 import LogsList from "@/features/logs/components/LogsList";
-import { motion } from "framer-motion";
-import { PAGE_MAIN_CONTAINER_4XL } from '@/shared/styles'
+import { PAGE_MAIN_CONTAINER_4XL, THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 
 export default function LogsPageContent() {
   const router = useRouter();
@@ -41,7 +40,7 @@ export default function LogsPageContent() {
 
   return (
     <PageBackground
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
       contentClassName={`${PAGE_MAIN_CONTAINER_4XL} space-y-6`}
     >
         {/* Compact Navigation Row */}
@@ -69,14 +68,11 @@ export default function LogsPageContent() {
           />
         </div>
 
-        <motion.div
+        <div
           key={`${tabType}-${selectedEvent}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
         >
           <LogsList tabType={tabType} eventId={selectedEvent} />
-        </motion.div>
+        </div>
     </PageBackground>
   );
 }

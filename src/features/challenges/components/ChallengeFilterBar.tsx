@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 import { getChallengeFilterDirtyState } from '../lib'
 import type {
   ChallengeEventFilterItem,
@@ -62,10 +61,7 @@ export default function ChallengeFilterBar({
   const dirtyState = getChallengeFilterDirtyState(filters, selectedEventId)
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+    <div
       data-tour="challenge-filter-bar"
       className="relative z-20 w-full bg-white/40 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 backdrop-blur-sm rounded-2xl p-4 md:p-5"
     >
@@ -99,6 +95,6 @@ export default function ChallengeFilterBar({
         onClear={onClear}
         onSortModeChange={onSortModeChange}
       />
-    </motion.div>
+    </div>
   )
 }

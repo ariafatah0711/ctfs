@@ -5,6 +5,7 @@ import { Turnstile } from '@marsidev/react-turnstile'
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
 import { useRegister } from '../hooks'
 import { isValidUsername } from '../lib/auth-utils'
+import { THEME_PRIMARY_RING_CLASS } from '@/shared/styles'
 import GoogleLoginButton from './GoogleLoginButton'
 import {
   AuthButton,
@@ -83,7 +84,7 @@ export default function RegisterForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                className={`rounded-lg p-1 text-gray-400 transition-colors hover:text-blue-500 focus:outline-none ${THEME_PRIMARY_RING_CLASS}`}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -107,7 +108,7 @@ export default function RegisterForm() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((value) => !value)}
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                className={`rounded-lg p-1 text-gray-400 transition-colors hover:text-blue-500 focus:outline-none ${THEME_PRIMARY_RING_CLASS}`}
                 aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

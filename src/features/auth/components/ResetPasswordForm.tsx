@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 import { useResetPassword } from '../hooks'
+import { THEME_PRIMARY_RING_CLASS } from '@/shared/styles'
 import {
   AuthButton,
   AuthCard,
@@ -46,7 +47,7 @@ export default function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowNewPassword((value) => !value)}
-              className="rounded-lg p-1 text-gray-400 transition-colors hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+              className={`rounded-lg p-1 text-gray-400 transition-colors hover:text-blue-500 focus:outline-none ${THEME_PRIMARY_RING_CLASS}`}
               aria-label={showNewPassword ? 'Hide password' : 'Show password'}
             >
               {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -68,7 +69,7 @@ export default function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowConfirmPassword((value) => !value)}
-              className="rounded-lg p-1 text-gray-400 transition-colors hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+              className={`rounded-lg p-1 text-gray-400 transition-colors hover:text-blue-500 focus:outline-none ${THEME_PRIMARY_RING_CLASS}`}
               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
               {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -16,11 +16,11 @@ import {
   PAGE_MAIN_CONTAINER_6XL,
   SURFACE_GLASS_BASE_CLASS,
   SURFACE_GLASS_FIELD_CLASS,
+  THEME_PRIMARY_SELECTION_CLASS,
 } from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useTheme } from '@/shared/contexts/ThemeContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
-import { motion } from 'framer-motion'
 
 import TeamScoreboardChart from './TeamScoreboardChart'
 import { useTeamScoreboard } from '../hooks/useTeamScoreboard'
@@ -56,7 +56,7 @@ export default function TeamScoreboardPage() {
 
   return (
     <PageBackground
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
       contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}
     >
         {/* Modern Navigation Header */}
@@ -86,11 +86,8 @@ export default function TeamScoreboardPage() {
           />
         </div>
 
-        <motion.div
+        <div
           key={`${showTotalScore}-${selectedEvent}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
           className="space-y-8"
         >
           {series.length > 0 && !showTotalScore && (
@@ -174,7 +171,7 @@ export default function TeamScoreboardPage() {
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
     </PageBackground>
   )
 }

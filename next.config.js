@@ -12,7 +12,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 });
 
 const nextConfig = {
-  distDir: process.env.NODE_ENV === "development" ? ".next/dev" : ".next",
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
 
   reactStrictMode: true,
 

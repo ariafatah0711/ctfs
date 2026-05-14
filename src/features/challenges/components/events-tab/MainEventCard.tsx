@@ -1,8 +1,6 @@
 'use client'
 
 import { Clock } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { Card } from '@/shared/ui'
 import { Calendar } from 'lucide-react'
 import Image from 'next/image'
 
@@ -22,11 +20,9 @@ export default function MainEventCard({
   onSelect,
 }: MainEventCardProps) {
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
+    <div
       key="__main__"
-      className="relative group cursor-pointer h-full"
+      className="relative group cursor-pointer h-full transition-transform duration-200 hover:-translate-y-1 active:scale-[0.98]"
       onClick={onSelect}
     >
       {/* Glow Effect on Hover */}
@@ -88,6 +84,6 @@ export default function MainEventCard({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

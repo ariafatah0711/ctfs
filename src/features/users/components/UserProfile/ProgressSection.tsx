@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 import { BarChart3 } from 'lucide-react'
 import APP from '@/config'
 import { ChallengeWithSolve } from '@/shared/types'
@@ -107,10 +106,8 @@ export default function ProgressSection({
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.6, ease: 'easeInOut' }}
+                <div
+                  style={{ width: `${progress}%` }}
                   className="h-full rounded-full bg-blue-500 shadow-[0_0_18px_rgba(59,130,246,0.25)]"
                 />
               </div>
@@ -142,10 +139,8 @@ export default function ProgressSection({
                   title={`${difficulty}: ${solvedCount}/${total_challenges}`}
                 >
                   <div className="absolute inset-0 bg-black/5 dark:bg-white/5" />
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${segmentProgress}%` }}
-                    transition={{ duration: 0.6, ease: 'easeInOut', delay: 0.05 * index }}
+                  <div
+                    style={{ width: `${segmentProgress}%` }}
                     className={`h-full ${bgColor}`}
                   />
                 </div>

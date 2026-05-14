@@ -8,6 +8,7 @@ import { Calendar, Clock, Users, CheckCircle2, Trophy, Zap } from 'lucide-react'
 import ScoreboardTable from '@/features/scoreboard/components/ScoreboardTable'
 import { LeaderboardEntry, Event } from '@/shared/types'
 import { formatEventDurationCompact, formatRelativeDate } from '@/shared/lib/utils'
+import { THEME_PRIMARY_TEXT_CLASS } from '@/shared/styles'
 import APP from '@/config'
 import Link from 'next/link'
 
@@ -160,7 +161,7 @@ export default function PreviewPage() {
         <Card className="bg-white dark:bg-gray-800">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-              <Trophy size={18} className="text-yellow-500" /> Platform Preview
+              <Trophy size={18} className="text-blue-500" /> Platform Preview
             </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -195,7 +196,7 @@ export default function PreviewPage() {
           <button
             onClick={() => setCurrentTab('scoreboard')}
             className={`px-4 py-2 text-sm font-medium transition border-b-2 ${currentTab === 'scoreboard'
-              ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+              ? `border-blue-500 ${THEME_PRIMARY_TEXT_CLASS}`
               : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
               }`}
           >

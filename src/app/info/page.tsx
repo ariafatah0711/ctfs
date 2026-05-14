@@ -15,6 +15,7 @@ import BrandLogo from '@/shared/components/BrandLogo'
 import PageBackground from '@/shared/components/PageBackground'
 import Footer from "@/_layouts/Footer";
 import { useAuth } from '@/shared/contexts/AuthContext'
+import { THEME_PRIMARY_PILL_CLASS, THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 
 const CONTRIBUTORS = [
   "@ariafatah0711",
@@ -84,12 +85,12 @@ export default function InfoPage() {
     }
   }, [])
 
-  if (loading) return <Loader fullscreen color="text-orange-500" />;
+  if (loading) return <Loader fullscreen color="text-blue-500" />;
 
   return (
     <PageBackground
       className="flex flex-col overflow-hidden"
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
       {/* Faint Watermark Logo */}
       <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02] z-0">
@@ -148,15 +149,15 @@ export default function InfoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="w-full max-w-3xl mx-auto flex flex-col mb-12 p-5 rounded-2xl bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 backdrop-blur-xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(249,115,22,0.05)] transition-all duration-300"
+          className="w-full max-w-3xl mx-auto flex flex-col mb-12 p-5 rounded-2xl bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 backdrop-blur-xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)] transition-all duration-300"
         >
           {/* Top: GitHub Stats */}
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pb-5">
             {repoStats && (
               <>
                 <div className="flex items-center gap-4">
-                  <div className="p-2.5 bg-orange-100 dark:bg-orange-500/10 rounded-xl">
-                    <Star className="text-orange-600 dark:text-orange-400 w-5 h-5" />
+                  <div className={`p-2.5 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
+                    <Star className="w-5 h-5" />
                   </div>
                   <div className="text-left">
                     <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{repoStats.stars}</div>
@@ -165,8 +166,8 @@ export default function InfoPage() {
                 </div>
                 <div className="h-10 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
                 <div className="flex items-center gap-4">
-                  <div className="p-2.5 bg-orange-100 dark:bg-orange-500/10 rounded-xl">
-                    <GitBranch className="text-orange-600 dark:text-orange-400 w-5 h-5" />
+                  <div className={`p-2.5 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
+                    <GitBranch className="w-5 h-5" />
                   </div>
                   <div className="text-left">
                     <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{repoStats.forks}</div>
@@ -177,8 +178,8 @@ export default function InfoPage() {
               </>
             )}
             <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-orange-100 dark:bg-orange-500/10 rounded-xl">
-                <Users className="text-orange-600 dark:text-orange-400 w-5 h-5" />
+              <div className={`p-2.5 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
+                <Users className="w-5 h-5" />
               </div>
               <div className="text-left">
                 <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{CONTRIBUTORS.length}</div>

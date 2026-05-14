@@ -1,6 +1,5 @@
 // React Imports
-import React from "react";
-import { motion } from "framer-motion";
+import React, { memo } from "react";
 import { Flame, Sparkles, AlertTriangle, Globe, Bomb, Binary, Cpu, Search, Puzzle, Shield, Terminal, Lightbulb, Eye, Image as ImageIcon, Wifi, Flag, CheckCircle2 } from 'lucide-react';
 
 // Shared Imports
@@ -8,6 +7,19 @@ import APP from '@/config';
 import { ChallengeWithSolve } from '@/shared/types'
 import { getCategoryDetails, getDifficultyStyle } from '../lib'
 
+const CATEGORY_ICON_MAP: Record<string, React.ElementType> = {
+  'text-yellow-500': Lightbulb,
+  'text-emerald-500': Terminal,
+  'text-blue-500': Globe,
+  'text-teal-500': Search,
+  'text-cyan-500': Eye,
+  'text-purple-500': Binary,
+  'text-orange-500': Cpu,
+  'text-red-500': Bomb,
+  'text-pink-500': ImageIcon,
+  'text-indigo-500': Wifi,
+  'text-gray-500': Puzzle,
+};
 
 interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {
@@ -18,11 +30,10 @@ interface ChallengeCardProps {
     is_maintenance?: boolean;
   };
   highlightTeamSolves?: boolean;
-  showCategory?: boolean;
-  onClick: () => void;
+  onOpenChallenge: (challenge: ChallengeWithSolve) => void;
 }
 
-const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamSolves = true, showCategory = false, onClick }) => {
+const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamSolves = true, onOpenChallenge }) => {
   const isRecentlyCreated = challenge.is_new;
   const noFirstBlood = !challenge.has_first_blood;
   const isMaintenance = !!challenge.is_maintenance;
@@ -39,26 +50,31 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
   const rawDiff = (challenge.difficulty || '').toString().trim();
   const normalizedDiff = rawDiff === 'imposible' ? 'Impossible' : rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase();
   const colorName = (APP as any).difficultyStyles?.[normalizedDiff];
-  const { dotClass: diffDotColor, textClass: diffTextColor } = getDifficultyStyle(colorName);
+  const { textClass: diffTextColor } = getDifficultyStyle(colorName);
 
   // Icon lookup for background decoration (UI-layer only)
-  const categoryIconMap: Record<string, React.ElementType> = {
-    'text-yellow-500': Lightbulb, 'text-emerald-500': Terminal, 'text-blue-500': Globe,
-    'text-teal-500': Search, 'text-cyan-500': Eye, 'text-purple-500': Binary,
-    'text-orange-500': Cpu, 'text-red-500': Bomb, 'text-pink-500': ImageIcon,
-    'text-indigo-500': Wifi, 'text-gray-500': Puzzle,
-  };
   const { color: categoryIconColor, borderColor: categoryBorderColor, badgeColor: categoryBadgeColor } = getCategoryDetails(challenge.category);
-  const CategoryIcon = categoryIconMap[categoryIconColor] ?? Shield;
+  const CategoryIcon = CATEGORY_ICON_MAP[categoryIconColor] ?? Shield;
+
+  const handleOpen = () => {
+    if (!isMaintenance) onOpenChallenge(challenge);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isMaintenance || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    onOpenChallenge(challenge);
+  };
 
   return (
-    <motion.div
-      whileHover={{ y: -3, transition: { duration: 0.18 } }}
-      whileTap={{ scale: 0.98 }}
+    <div
       key={challenge.id}
-      className={`relative h-full group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer'} transition-opacity duration-300
+      role={isMaintenance ? undefined : 'button'}
+      tabIndex={isMaintenance ? undefined : 0}
+      className={`relative h-full group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer hover:-translate-y-0.5 active:scale-[0.99]'} transition-[opacity,transform] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950
         ${isAnySolved ? 'opacity-55 hover:opacity-85' : 'opacity-100'}`}
-      onClick={isMaintenance ? undefined : onClick}
+      onClick={isMaintenance ? undefined : handleOpen}
+      onKeyDown={handleKeyDown}
     >
       {/* Hover Glow Overlay */}
       <div className={`absolute inset-0 rounded-2xl transition-all duration-300 pointer-events-none
@@ -202,8 +218,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
         </div>
       </div>
 
-    </motion.div>
+    </div>
   );
 };
 
-export default ChallengeCard;
+export default memo(ChallengeCard);

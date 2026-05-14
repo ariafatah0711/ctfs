@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useDeferredValue, useMemo } from 'react'
 import APP from '@/config'
 import type { ChallengeWithSolve } from '@/shared/types'
 import {
@@ -34,6 +34,8 @@ export function useFilteredChallenges({
   filterSettings,
   sortMode,
 }: UseFilteredChallengesOptions) {
+  const deferredFilters = useDeferredValue(filters)
+  const deferredFilterSettings = useDeferredValue(filterSettings)
   const difficultyOrder = useMemo(() => getDifficultyOrder((APP as any).difficultyStyles), [])
   const preferredOrder = useMemo(() => APP.challengeCategories || [], [])
 
@@ -42,10 +44,10 @@ export function useFilteredChallenges({
       challenges,
       events,
       eventId,
-      filters,
-      settings: filterSettings,
+      filters: deferredFilters,
+      settings: deferredFilterSettings,
     })
-  }, [challenges, eventId, events, filterSettings, filters])
+  }, [challenges, deferredFilterSettings, deferredFilters, eventId, events])
 
   const { categories, difficulties } = useMemo(() => {
     return buildChallengeFilterOptions(challenges, preferredOrder)

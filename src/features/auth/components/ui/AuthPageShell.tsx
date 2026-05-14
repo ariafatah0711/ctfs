@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import APP from '@/config'
 import PageBackground from '@/shared/components/PageBackground'
 import { cn } from '@/shared/lib/utils'
+import { THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 
 interface AuthPageShellProps {
   children: React.ReactNode
@@ -21,7 +22,7 @@ export function AuthPageShell({ children, className, contentClassName }: AuthPag
         'relative flex !min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden',
         className
       )}
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
       {watermarkSrc && (
         <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">

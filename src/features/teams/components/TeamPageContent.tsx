@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 import { TeamMember, TeamInfo, TeamSummary, TeamChallenge } from '../types'
 import TeamProfileHeader from '@/features/teams/components/TeamProfileHeader'
@@ -87,56 +86,48 @@ export default function TeamPageContent({
         isMember={isMember}
       />
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-        >
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 gap-6">
-              <TeamMembersSection
-                members={members.slice(0, 5)}
-                canManage={canManage}
-                currentUserId={currentUserId}
-                onKickMember={onKickMember}
-                onTransferCaptain={onTransferCaptain}
-                busy={busy}
-                isOverview
-                onSeeAll={() => setActiveTab('members')}
-              />
-              <TeamSolves challenges={challenges} />
-            </div>
-          )}
-
-          {activeTab === 'members' && (
+      <div key={activeTab}>
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 gap-6">
             <TeamMembersSection
-              members={members}
+              members={members.slice(0, 5)}
               canManage={canManage}
               currentUserId={currentUserId}
               onKickMember={onKickMember}
               onTransferCaptain={onTransferCaptain}
               busy={busy}
+              isOverview
+              onSeeAll={() => setActiveTab('members')}
             />
-          )}
+            <TeamSolves challenges={challenges} />
+          </div>
+        )}
 
-          {activeTab === 'solves' && (
-            <TeamSolves challenges={challenges} title="Full Solves History" />
-          )}
+        {activeTab === 'members' && (
+          <TeamMembersSection
+            members={members}
+            canManage={canManage}
+            currentUserId={currentUserId}
+            onKickMember={onKickMember}
+            onTransferCaptain={onTransferCaptain}
+            busy={busy}
+          />
+        )}
 
-          {activeTab === 'manage' && canManage && (
-            <TeamManageSection
-              team={team}
-              onRenameTeam={onRenameTeam}
-              onLeaveTeam={onLeaveTeam}
-              onDeleteTeam={onDeleteTeam}
-              busy={busy}
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
+        {activeTab === 'solves' && (
+          <TeamSolves challenges={challenges} title="Full Solves History" />
+        )}
+
+        {activeTab === 'manage' && canManage && (
+          <TeamManageSection
+            team={team}
+            onRenameTeam={onRenameTeam}
+            onLeaveTeam={onLeaveTeam}
+            onDeleteTeam={onDeleteTeam}
+            busy={busy}
+          />
+        )}
+      </div>
     </div>
   )
 }

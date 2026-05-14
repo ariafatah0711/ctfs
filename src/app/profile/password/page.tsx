@@ -7,6 +7,11 @@ import { AuthCard } from '@/features/auth/components/ui/AuthCard'
 import { AuthHeader } from '@/features/auth/components/ui/AuthHeader'
 import { AuthPageShell } from '@/features/auth/components/ui/AuthPageShell'
 import ResetPasswordForm from '@/features/auth/components/ResetPasswordForm'
+import {
+  THEME_PRIMARY_BG_CLASS,
+  THEME_PRIMARY_BG_HOVER_CLASS,
+  THEME_PRIMARY_SHADOW_CLASS,
+} from '@/shared/styles'
 
 export default function ChangePasswordPage() {
   const { user, loading: authLoading } = useAuth()
@@ -14,7 +19,7 @@ export default function ChangePasswordPage() {
   if (authLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-orange-500" />
+        <Loader fullscreen color="text-blue-500" />
       </div>
     )
   }
@@ -31,7 +36,7 @@ export default function ChangePasswordPage() {
             />
             <Link
               href="/login"
-              className="relative flex w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:scale-[1.02] hover:shadow-orange-500/30 active:scale-[0.98]"
+              className={`relative flex w-full items-center justify-center overflow-hidden rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${THEME_PRIMARY_BG_CLASS} ${THEME_PRIMARY_BG_HOVER_CLASS} ${THEME_PRIMARY_SHADOW_CLASS}`}
             >
               Login
             </Link>

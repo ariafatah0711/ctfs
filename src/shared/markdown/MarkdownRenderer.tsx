@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
 import Zoom from 'react-medium-image-zoom'
 import { Copy, Check, ChevronsRight, ChevronsDown } from 'lucide-react'
+import { THEME_PRIMARY_TEXT_CLASS } from '@/shared/styles'
 
 interface MarkdownRendererProps {
   content: string
@@ -65,8 +66,8 @@ function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNo
             type="button"
             onClick={handleCopy}
             className={`p-1.5 rounded transition-colors ${isDark
-              ? 'bg-gray-800 hover:bg-gray-700 text-orange-300'
-              : 'bg-gray-200 hover:bg-gray-300 text-orange-600'
+              ? 'bg-gray-800 hover:bg-gray-700 text-blue-300'
+              : 'bg-gray-200 hover:bg-gray-300 text-blue-600'
               }`}
             title={copied ? 'Copied!' : 'Copy'}
           >
@@ -76,8 +77,8 @@ function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNo
             type="button"
             onClick={() => setIsWrapped(!isWrapped)}
             className={`p-1.5 rounded transition-colors ${isDark
-              ? 'bg-gray-800 hover:bg-gray-700 text-orange-300'
-              : 'bg-gray-200 hover:bg-gray-300 text-orange-600'
+              ? 'bg-gray-800 hover:bg-gray-700 text-blue-300'
+              : 'bg-gray-200 hover:bg-gray-300 text-blue-600'
               }`}
             title={isWrapped ? 'Horizontal scroll' : 'Wrap text'}
           >
@@ -127,8 +128,8 @@ function BlockquoteWrapper({ children, isDark = true }: { children: React.ReactN
             type="button"
             onClick={() => setIsWrapped(!isWrapped)}
             className={`p-1.5 rounded transition-colors ${isDark
-              ? 'bg-gray-800 hover:bg-gray-700 text-orange-300'
-              : 'bg-orange-100 hover:bg-orange-200 text-orange-600'
+              ? 'bg-gray-800 hover:bg-gray-700 text-blue-300'
+              : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
               }`}
             title={isWrapped ? 'Horizontal scroll' : 'Wrap text'}
           >
@@ -355,12 +356,12 @@ export function RulesMarkdownRenderer({ content, className = '' }: MarkdownRende
         components={{
           p: ({ ...props }) => <p className="mb-2 leading-relaxed" {...props} />,
           li: ({ ...props }) => <li className="ml-6 list-disc mb-1" {...props} />,
-          strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-orange-400" {...props} />,
+          strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-blue-400" {...props} />,
           em: ({ ...props }) => <em className="italic text-gray-700 dark:text-gray-300" {...props} />,
-          a: ({ ...props }) => <a className="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline font-medium transition-colors" target="_blank" rel="noopener noreferrer" {...props} />,
+          a: ({ ...props }) => <a className={`${THEME_PRIMARY_TEXT_CLASS} hover:text-blue-700 dark:hover:text-blue-300 underline font-medium transition-colors`} target="_blank" rel="noopener noreferrer" {...props} />,
           code: ({ inline, children, ...props }: any) =>
             inline ? (
-              <code className="bg-orange-100 dark:bg-gray-800 px-2 py-1 rounded text-xs font-mono text-orange-800 dark:text-orange-300 font-semibold" {...props}>
+              <code className="bg-blue-100 dark:bg-gray-800 px-2 py-1 rounded text-xs font-mono text-blue-800 dark:text-blue-300 font-semibold" {...props}>
                 {children}
               </code>
             ) : (

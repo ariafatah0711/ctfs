@@ -1,7 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
-
 type AllEventsButtonProps = {
   selected: boolean
   onSelect: () => void
@@ -12,11 +10,9 @@ export default function AllEventsButton({
   onSelect,
 }: AllEventsButtonProps) {
   return (
-    <motion.button
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
+    <button
       onClick={onSelect}
-      className={`relative w-full px-5 py-4 rounded-2xl border backdrop-blur-md transition-all duration-300 text-left group
+      className={`relative w-full px-5 py-4 rounded-2xl border backdrop-blur-md transition-all duration-200 text-left group hover:-translate-y-1 active:scale-[0.98]
         ${selected
           ? 'bg-blue-500/[0.03] border-blue-500/50 shadow-sm'
           : 'bg-white/40 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 hover:border-blue-500/50 shadow-sm'}
@@ -42,6 +38,6 @@ export default function AllEventsButton({
           </div>
         </div>
       </div>
-    </motion.button>
+    </button>
   )
 }

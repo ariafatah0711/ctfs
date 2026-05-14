@@ -15,6 +15,7 @@ import BrandLogo from '@/shared/components/BrandLogo'
 import PageBackground from '@/shared/components/PageBackground'
 import Footer from "@/_layouts/Footer"
 import { useAuth } from '@/shared/contexts/AuthContext'
+import { THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 
 const FEATURES = [
   {
@@ -69,7 +70,7 @@ export default function Home() {
   return (
     <PageBackground
       className="flex flex-col overflow-hidden"
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 w-full px-6 py-10 lg:py-16">
         {/* HERO SECTION */}

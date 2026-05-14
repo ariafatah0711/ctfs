@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Users, UserPlus, Sparkles, ShieldCheck } from 'lucide-react'
 
 import Loader from '@/shared/components/Loader'
@@ -10,7 +9,7 @@ import BackButton from '@/shared/components/BackButton'
 import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import PageBackground from '@/shared/components/PageBackground'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
-import { PAGE_MAIN_CONTAINER_6XL } from '@/shared/styles'
+import { PAGE_MAIN_CONTAINER_6XL, THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
 
@@ -168,7 +167,7 @@ export default function TeamsPage() {
   if (authLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-orange-500" />
+        <Loader fullscreen color="text-blue-500" />
       </div>
     )
   }
@@ -176,31 +175,29 @@ export default function TeamsPage() {
   if (!user) return null
 
   return (
-    <PageBackground selectionClassName="selection:bg-orange-500/30">
+    <PageBackground selectionClassName={THEME_PRIMARY_SELECTION_CLASS}>
       <div className={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}>
         {initialLoading ? (
           <div className="flex justify-center py-16">
-            <Loader color="text-orange-500" />
+            <Loader color="text-blue-500" />
           </div>
         ) : (
           <>
             {loading && team && (
               <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
-                <Loader color="text-orange-500" />
+                <Loader color="text-blue-500" />
               </div>
             )}
 
             {status && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
+              <div
                 className={`rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm border ${status.type === 'error'
                   ? 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-900/50'
                   : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50'
                   }`}
               >
                 {status.message}
-              </motion.div>
+              </div>
             )}
 
             {!team ? (
@@ -301,39 +298,30 @@ export default function TeamsPage() {
                 </div>
               </div>
             ) : (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={effectiveSelectedEvent}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <TeamPageContent
-                    team={stableTeam || team}
-                    members={stableMembers.length > 0 ? stableMembers : members}
-                    summary={stableSummary || summary}
-                    challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
-                    currentUserId={user.id}
-                    canManage={canManage}
-                    busy={busy}
-                    showManageActions
-                    onRenameTeam={onRenameTeamInternal}
-                    onCopyInvite={onCopyInvite}
-                    onRegenerateInvite={onRegenerateInviteClick}
-                    onLeaveTeam={onLeaveTeamClick}
-                    onDeleteTeam={onDeleteTeamClick}
-                    onKickMember={onKickMemberClick}
-                    onTransferCaptain={onTransferCaptainClick}
+              <TeamPageContent
+                key={effectiveSelectedEvent}
+                team={stableTeam || team}
+                members={stableMembers.length > 0 ? stableMembers : members}
+                summary={stableSummary || summary}
+                challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
+                currentUserId={user.id}
+                canManage={canManage}
+                busy={busy}
+                showManageActions
+                onRenameTeam={onRenameTeamInternal}
+                onCopyInvite={onCopyInvite}
+                onRegenerateInvite={onRegenerateInviteClick}
+                onLeaveTeam={onLeaveTeamClick}
+                onDeleteTeam={onDeleteTeamClick}
+                onKickMember={onKickMemberClick}
+                onTransferCaptain={onTransferCaptainClick}
 
-                    effectiveSelectedEvent={effectiveSelectedEvent}
-                    setSelectedEvent={setSelectedEvent}
-                    teamEvents={teamEvents as any}
-                    showMainOption={showMainOption}
-                    onBack={() => router.back()}
-                  />
-                </motion.div>
-              </AnimatePresence>
+                effectiveSelectedEvent={effectiveSelectedEvent}
+                setSelectedEvent={setSelectedEvent}
+                teamEvents={teamEvents as any}
+                showMainOption={showMainOption}
+                onBack={() => router.back()}
+              />
             )}
           </>
         )}

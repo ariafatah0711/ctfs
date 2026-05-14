@@ -9,7 +9,7 @@
     "setup": "node db/build-init-sql.js",
     "setting": "npm run dev",
     "clean": "rimraf .next",
-    "dev": "rimraf .next/dev && next dev",
+    "dev": "rimraf .next-dev && next dev",
     "build": "rimraf .next && next build",
     "start": "next start",
     "lint": "next lint"

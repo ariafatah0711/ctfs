@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useLogin } from '../hooks'
+import { THEME_PRIMARY_RING_CLASS, THEME_PRIMARY_TEXT_CLASS } from '@/shared/styles'
 import GoogleLoginButton from './GoogleLoginButton'
 import {
   AuthButton,
@@ -62,7 +63,7 @@ export default function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword((value) => !value)}
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:text-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/40"
+                className={`rounded-lg p-1 text-gray-400 transition-colors hover:text-blue-500 focus:outline-none ${THEME_PRIMARY_RING_CLASS}`}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -80,7 +81,7 @@ export default function LoginForm() {
         <div className="flex justify-end">
           <Link
             href="/forgot-password"
-            className="text-xs font-semibold text-orange-600 transition-colors hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300"
+            className={`text-xs font-semibold transition-colors hover:text-blue-500 dark:hover:text-blue-300 ${THEME_PRIMARY_TEXT_CLASS}`}
           >
             Forgot password?
           </Link>

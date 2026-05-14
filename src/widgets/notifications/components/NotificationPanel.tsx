@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Bell, Check, Plus, Loader2, X, Megaphone, Settings2, Trash2, Calendar } from 'lucide-react'
 import { Switch } from '@/shared/ui'
 import { formatRelativeDate } from '@/shared/lib/utils'
@@ -137,7 +137,7 @@ export default function NotificationPanel({
               >
                 Penonton
                 {activeTab === 'notifications' && (
-                  <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
                 )}
               </button>
               <button
@@ -150,7 +150,7 @@ export default function NotificationPanel({
               >
                 Admin Panel
                 {activeTab === 'admin' && (
-                  <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full" />
                 )}
               </button>
             </div>
@@ -178,49 +178,34 @@ export default function NotificationPanel({
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
-          <AnimatePresence mode="wait">
-            {activeTab === 'notifications' ? (
-              <motion.div
-                key="notifs"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-                className="p-3 flex flex-col gap-1"
-              >
-                {notifLoading ? (
-                  <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-500">
-                    <Loader2 size={24} className="animate-spin text-blue-500" />
-                    <span className="text-xs font-medium opacity-70">Loading...</span>
-                  </div>
-                ) : notifItems.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-30">
-                    <Bell size={40} strokeWidth={1} />
-                    <p className="text-xs font-medium">No notifications yet</p>
-                  </div>
-                ) : (
-                  notifItems.map((n) => (
-                    <NotificationItem
-                      key={n.id}
-                      notification={n}
-                      isRead={isNotifRead(n.id)}
-                      theme={theme}
-                      globalAdminStatus={globalAdminStatus}
-                      getLevelBadgeClass={getLevelBadgeClass}
-                      onDelete={handleDeleteNotif}
-                    />
-                  ))
-                )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key="admin"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -5 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-                className="p-5 space-y-6"
-              >
+          {activeTab === 'notifications' ? (
+            <div key="notifs" className="p-3 flex flex-col gap-1">
+              {notifLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3 text-gray-500">
+                  <Loader2 size={24} className="animate-spin text-blue-500" />
+                  <span className="text-xs font-medium opacity-70">Loading...</span>
+                </div>
+              ) : notifItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 gap-4 opacity-30">
+                  <Bell size={40} strokeWidth={1} />
+                  <p className="text-xs font-medium">No notifications yet</p>
+                </div>
+              ) : (
+                notifItems.map((n) => (
+                  <NotificationItem
+                    key={n.id}
+                    notification={n}
+                    isRead={isNotifRead(n.id)}
+                    theme={theme}
+                    globalAdminStatus={globalAdminStatus}
+                    getLevelBadgeClass={getLevelBadgeClass}
+                    onDelete={handleDeleteNotif}
+                  />
+                ))
+              )}
+            </div>
+          ) : (
+            <div key="admin" className="p-5 space-y-6">
                 {/* Broadcast Form */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -295,33 +280,24 @@ export default function NotificationPanel({
                           </button>
                         </div>
 
-                        <AnimatePresence>
-                          {hoveredNotifId === n.id && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2, ease: "easeOut" }}
-                              className="overflow-hidden"
-                            >
-                              <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-md border border-gray-100 dark:border-gray-700/50">
-                                <div className="whitespace-pre-line break-words line-clamp-3">
-                                  {formatNotificationText(n.message)}
-                                </div>
+                        {hoveredNotifId === n.id && (
+                          <div className="overflow-hidden">
+                            <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-md border border-gray-100 dark:border-gray-700/50">
+                              <div className="whitespace-pre-line break-words line-clamp-3">
+                                {formatNotificationText(n.message)}
                               </div>
-                              <div className="mt-1.5 text-[9px] text-gray-400 font-medium">
-                                {formatRelativeDate(n.created_at)}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                            </div>
+                            <div className="mt-1.5 text-[9px] text-gray-400 font-medium">
+                              {formatRelativeDate(n.created_at)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            </div>
+          )}
         </div>
       </motion.div>
     </>

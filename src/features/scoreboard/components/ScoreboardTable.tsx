@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { Button } from '@/shared/ui/button'
@@ -47,7 +46,7 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
           })()}
       </CardHeader>
       <CardContent>
-        <motion.div key={`table-${scoreColumnLabel ?? 'score'}-${leaderboard.length}-${leaderboard[0]?.username ?? ''}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+        <div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -82,16 +81,16 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
                       </Link>
                     </TableCell>
                     <TableCell className="w-24 text-center font-medium text-gray-900 dark:text-white">
-                      <motion.span key={`score-${entry.username}-${entry.score}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
+                      <span>
                         {scoreColumnRenderer ? scoreColumnRenderer(entry) : entry.score}
-                      </motion.span>
+                      </span>
                     </TableCell>
                   </TableRow>
                 )
               })}
             </TableBody>
           </Table>
-        </motion.div>
+        </div>
       </CardContent>
     </Card>
   )

@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
 
 import Loader from '@/shared/components/Loader'
 import PageBackground from '@/shared/components/PageBackground'
-import { PAGE_MAIN_CONTAINER_6XL } from '@/shared/styles'
+import { PAGE_MAIN_CONTAINER_6XL, THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
 
@@ -71,7 +70,7 @@ export default function TeamDetailPage() {
   if (authLoading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader fullscreen color="text-orange-500" />
+        <Loader fullscreen color="text-blue-500" />
       </div>
     )
   }
@@ -80,18 +79,18 @@ export default function TeamDetailPage() {
 
   return (
     <PageBackground
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
       contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}
     >
         {loading && !team && (
           <div className="flex justify-center py-16">
-            <Loader color="text-orange-500" />
+            <Loader color="text-blue-500" />
           </div>
         )}
 
         {loading && team && (
           <div className="fixed top-20 right-8 z-50 opacity-70 pointer-events-none">
-            <Loader color="text-orange-500" />
+            <Loader color="text-blue-500" />
           </div>
         )}
 
@@ -101,31 +100,22 @@ export default function TeamDetailPage() {
           ) : !team && !loading ? (
             <div className="text-sm text-gray-500 dark:text-gray-300">Team not found.</div>
           ) : (
-            <AnimatePresence mode="wait">
-              {team && (
-                <motion.div
-                  key={effectiveSelectedEvent}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <TeamPageContent
-                    team={stableTeam || team}
-                    members={stableMembers.length > 0 ? stableMembers : members}
-                    summary={stableSummary || summary}
-                    challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
-                    currentUserId={user?.id}
+            team && (
+              <TeamPageContent
+                key={effectiveSelectedEvent}
+                team={stableTeam || team}
+                members={stableMembers.length > 0 ? stableMembers : members}
+                summary={stableSummary || summary}
+                challenges={stableChallenges.length > 0 ? stableChallenges : challenges}
+                currentUserId={user?.id}
 
-                    effectiveSelectedEvent={effectiveSelectedEvent}
-                    setSelectedEvent={setSelectedEvent}
-                    teamEvents={teamEvents as any}
-                    showMainOption={showMainOption}
-                    onBack={() => router.back()}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                effectiveSelectedEvent={effectiveSelectedEvent}
+                setSelectedEvent={setSelectedEvent}
+                teamEvents={teamEvents as any}
+                showMainOption={showMainOption}
+                onBack={() => router.back()}
+              />
+            )
           )}
         </>
     </PageBackground>

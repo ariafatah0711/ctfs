@@ -7,7 +7,12 @@ import EmptyState from '@/shared/components/EmptyState'
 import PageBackground from '@/shared/components/PageBackground'
 import { SegmentedTabs } from '@/shared/components'
 import { Card, CardContent } from '@/shared/ui/card'
-import { PAGE_MAIN_CONTAINER_6XL } from '@/shared/styles'
+import {
+  PAGE_MAIN_CONTAINER_6XL,
+  THEME_PRIMARY_BG_CLASS,
+  THEME_PRIMARY_BG_HOVER_CLASS,
+  THEME_PRIMARY_SELECTION_CLASS,
+} from '@/shared/styles'
 import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
@@ -31,16 +36,14 @@ export default function ScoreboardPage() {
     eventParam,
   } = useScoreboardPageData()
 
-  if (authLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading) return <Loader fullscreen color="text-blue-500" />
   if (!user) return null
 
   return (
     <PageBackground
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
       contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-8`}
     >
-        {/* <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300 drop-shadow" />}>Scoreboard</TitlePage> */}
-
         <div className="mb-4 flex justify-between items-center">
           <div className="relative">
             {/* Event selector */}
@@ -68,7 +71,7 @@ export default function ScoreboardPage() {
 
         {loading && leaderboard.length === 0 ? (
           <div className="flex justify-center py-16">
-            <Loader color="text-orange-500" />
+            <Loader color="text-blue-500" />
           </div>
         ) : !user ? null : (
           <div className={`space-y-8 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
@@ -82,19 +85,19 @@ export default function ScoreboardPage() {
                 <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(249,115,22,0.05)] transition-all duration-300">
                   <CardContent>
                     <EmptyState
-                      icon={<Trophy className="w-full h-full text-orange-500" />}
+                      icon={<Trophy className="w-full h-full text-blue-500" />}
                       title="No challenges solved yet."
                       description={
                         <>
                           No submissions yet for this event. Start solving challenges and claim the top spot.
-                          <Rocket size={14} className="inline-block ml-1 text-orange-400/70" />
+                          <Rocket size={14} className="inline-block ml-1 text-blue-400/70" />
                         </>
                       }
                       containerHeight="py-16"
                       action={
                         <Link
                           href="/challenges"
-                          className="inline-flex items-center gap-2 px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                          className={`inline-flex items-center gap-2 px-6 py-2.5 text-white text-sm font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 ${THEME_PRIMARY_BG_CLASS} ${THEME_PRIMARY_BG_HOVER_CLASS}`}
                         >
                           Explore Challenges
                         </Link>

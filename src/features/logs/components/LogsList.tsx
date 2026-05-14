@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
   Loader as LucideLoader,
@@ -72,9 +71,7 @@ export default function LogsList({
 
   if (notifications.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+      <div
         className="flex flex-col items-center justify-center py-24 px-6 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20"
       >
         <div className="h-16 w-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
@@ -84,7 +81,7 @@ export default function LogsList({
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs mt-2">
           No activities recorded for this period. Stay tuned for incoming signals.
         </p>
-      </motion.div>
+      </div>
     );
   }
 
@@ -94,11 +91,9 @@ export default function LogsList({
   return (
     <div className="space-y-6">
       <div className="grid gap-4">
-        <AnimatePresence mode="popLayout">
-          {visibleNotifications.map((notif, index) => (
-            <LogItem key={`${notif.log_challenge_id}-${notif.log_created_at}-${index}`} notif={notif} />
-          ))}
-        </AnimatePresence>
+        {visibleNotifications.map((notif, index) => (
+          <LogItem key={`${notif.log_challenge_id}-${notif.log_created_at}-${index}`} notif={notif} />
+        ))}
       </div>
 
       {hasMore && (
@@ -157,13 +152,8 @@ function LogItem({ notif }: { notif: LogEntry }) {
   const details = getLogTypeDetails(notif.log_type);
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ x: 4 }}
-      className="group relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl p-4 transition-all duration-300 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5"
+    <div
+      className="group relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl p-4 transition-[border-color,box-shadow,transform] duration-200 hover:translate-x-1 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5"
     >
       <div className="flex items-center gap-4">
         {/* Type Icon */}
@@ -218,6 +208,6 @@ function LogItem({ notif }: { notif: LogEntry }) {
 
       {/* Decorative hover effect */}
       <div className={`absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-transparent via-${details.color.split('-')[1]}-500 to-transparent transition-all duration-500 group-hover:w-full`} />
-    </motion.div>
+    </div>
   );
 }

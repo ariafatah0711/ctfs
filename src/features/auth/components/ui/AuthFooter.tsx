@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { THEME_PRIMARY_TEXT_CLASS } from '@/shared/styles'
 
 interface AuthFooterProps {
   text: string
@@ -12,7 +13,7 @@ export function AuthFooter({ text, href, linkText }: AuthFooterProps) {
       {text}{' '}
       <Link
         href={href}
-        className="font-semibold text-orange-600 transition-colors hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300"
+        className={`font-semibold transition-colors hover:text-blue-500 dark:hover:text-blue-300 ${THEME_PRIMARY_TEXT_CLASS}`}
       >
         {linkText}
       </Link>

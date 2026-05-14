@@ -15,5 +15,5 @@ export default function NotFound() {
     }
   }, [user, loading, router])
 
-  return <Loader fullscreen color="text-orange-500" />
+  return <Loader fullscreen color="text-blue-500" />
 }

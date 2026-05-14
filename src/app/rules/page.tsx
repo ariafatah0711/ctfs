@@ -11,6 +11,7 @@ import Footer from "@/_layouts/Footer";
 import { rulesConfig } from "@/rules";
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { PAGE_BG_ORBS_WRAPPER_CLASS } from '@/shared/styles/page-background'
+import { THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
 
 export default function RulesPage() {
   const { loading } = useAuth()
@@ -20,7 +21,7 @@ export default function RulesPage() {
   return (
     <PageBackground
       className="flex flex-col overflow-hidden"
-      selectionClassName="selection:bg-orange-500/30"
+      selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
 
       <main className="flex-1 flex flex-col items-center justify-center pt-8 pb-8 relative z-10 w-full px-6">

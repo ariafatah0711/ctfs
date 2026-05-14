@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 import { CalendarDays, Clock3 } from 'lucide-react'
 import { ImageWithFallback } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
@@ -37,10 +36,7 @@ export default function ProfileHeader({
   onUpdateUserDetail
 }: ProfileHeaderProps) {
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
+    <section
       className="mx-auto flex w-full max-w-6xl flex-col gap-4 md:flex-row md:items-start md:justify-between"
     >
       <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
@@ -131,6 +127,6 @@ export default function ProfileHeader({
           </div>
         </div>
       </div>
-    </motion.section>
+    </section>
   )
 }

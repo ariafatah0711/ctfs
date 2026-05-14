@@ -1,9 +1,9 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import Loader from '@/shared/components/Loader'
 import BackButton from '@/shared/components/BackButton'
 import EventSelect from '@/features/events/components/EventSelect'
+import { THEME_PRIMARY_TEXT_CLASS } from '@/shared/styles'
 import { useScoreboardAllPageData } from '../hooks'
 import ScoreboardTable from './ScoreboardTable'
 
@@ -18,7 +18,7 @@ export default function ScoreboardAllPage() {
     setSelectedEvent,
   } = useScoreboardAllPageData()
 
-  if (authLoading) return <Loader fullscreen color="text-orange-500" />
+  if (authLoading) return <Loader fullscreen color={THEME_PRIMARY_TEXT_CLASS} />
   if (!user) return null
 
   return (
@@ -46,20 +46,17 @@ export default function ScoreboardAllPage() {
 
         {loading && leaderboard.length === 0 ? (
           <div className="flex justify-center py-16">
-            <Loader color="text-orange-500" />
+            <Loader color={THEME_PRIMARY_TEXT_CLASS} />
           </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+          <div
             className={loading ? 'opacity-70 transition-opacity' : 'opacity-100 transition-opacity'}
           >
             <ScoreboardTable
               leaderboard={leaderboard}
               currentUsername={user?.username}
             />
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

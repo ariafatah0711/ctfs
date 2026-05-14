@@ -2,7 +2,6 @@
 
 // React Imports
 import React from "react"
-import { motion } from "framer-motion"
 import dynamic from "next/dynamic"
 import { ChartColumnDecreasing } from "lucide-react"
 
@@ -112,20 +111,10 @@ export default function UserStatsPlotly({
     },
   }
 
-  const container = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-  }
-
-  const item = {
-    hidden: { opacity: 0, y: 8 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.36 } },
-  }
-
   return (
-    <motion.div className="space-y-6" variants={container} initial="hidden" animate="show">
+    <div className="space-y-6">
       {/* ================= PIE ================= */}
-      <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-6" variants={item}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* CATEGORY */}
         <UserSection title="Solves by Category" icon={ChartColumnDecreasing}>
             <Plot
@@ -177,10 +166,10 @@ export default function UserStatsPlotly({
               config={{ displayModeBar: false }}
             />
         </UserSection>
-      </motion.div>
+      </div>
 
       {/* ================= LINE ================= */}
-      <motion.div variants={item}>
+      <div>
         <UserSection
           title="Solves Over Time"
           description={`${firstBloodCount} first blood${firstBloodCount !== 1 ? 's' : ''} recorded in this event scope.`}
@@ -219,7 +208,7 @@ export default function UserStatsPlotly({
               config={{ scrollZoom: false, displayModeBar: false }}
             />
         </UserSection>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }

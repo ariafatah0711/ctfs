@@ -1,6 +1,5 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, ListChecks, Target, Sparkles } from 'lucide-react'
 import {
   BaseModal,
@@ -55,12 +54,7 @@ export default function SolvedChallenges({
   )
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25 }}
-    >
+    <div>
       <UserSection
         icon={CheckCircle2}
         title="Recent Solved Challenges"
@@ -76,15 +70,13 @@ export default function SolvedChallenges({
           />
         ) : (
           <div className="grid gap-3">
-            <AnimatePresence mode="popLayout">
-              {solvedChallenges.slice(0, 10).map((challenge) => (
-                <ChallengeRow
-                  key={challenge.id}
-                  challenge={challenge}
-                  firstBlood={firstBloodIds.includes(challenge.id)}
-                />
-              ))}
-            </AnimatePresence>
+            {solvedChallenges.slice(0, 10).map((challenge) => (
+              <ChallengeRow
+                key={challenge.id}
+                challenge={challenge}
+                firstBlood={firstBloodIds.includes(challenge.id)}
+              />
+            ))}
           </div>
         )}
       </UserSection>
@@ -139,7 +131,7 @@ export default function SolvedChallenges({
           </Button>
         </ModalFooter>
       </BaseModal>
-    </motion.div>
+    </div>
   )
 }
 
@@ -151,13 +143,7 @@ function ChallengeRow({
   firstBlood: boolean
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-      whileHover={{ y: -4 }}
-    >
+    <div className="transition-transform duration-200 hover:-translate-y-1">
       <ProfileChallengeListItem
         title={challenge.title}
         titleBadge={firstBlood ? (
@@ -177,6 +163,6 @@ function ChallengeRow({
           </span>
         )}
       />
-    </motion.div>
+    </div>
   )
 }

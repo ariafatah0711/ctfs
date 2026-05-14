@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Turnstile } from '@marsidev/react-turnstile'
 import { Mail } from 'lucide-react'
 import { useForgotPassword } from '../hooks'
+import { THEME_PRIMARY_TEXT_CLASS } from '@/shared/styles'
 import {
   AuthButton,
   AuthCard,
@@ -73,7 +74,7 @@ export default function ForgotPasswordForm() {
       <div className="mt-6 text-center">
         <Link
           href="/login"
-          className="text-sm font-semibold text-orange-600 transition-colors hover:text-orange-500 dark:text-orange-400 dark:hover:text-orange-300"
+          className={`text-sm font-semibold transition-colors hover:text-blue-500 dark:hover:text-blue-300 ${THEME_PRIMARY_TEXT_CLASS}`}
         >
           Back to Login
         </Link>

@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import Loader from '@/shared/components/Loader'
 import PageBackground from '@/shared/components/PageBackground'
@@ -179,45 +178,30 @@ export default function UserProfile({
           </>
         )}
 
-        <AnimatePresence mode="wait">
-          {activeTab === 'profile' ? (
-            <motion.div
-              key="profile-content"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
-            >
-              <ProgressSection
-                categoryTotals={categoryTotals}
-                difficultyTotals={difficultyTotals}
-                solvedChallenges={solvedChallenges}
-              />
+        {activeTab === 'profile' ? (
+          <div key="profile-content" className="space-y-6">
+            <ProgressSection
+              categoryTotals={categoryTotals}
+              difficultyTotals={difficultyTotals}
+              solvedChallenges={solvedChallenges}
+            />
 
-              <SolvedChallenges
-                solvedChallenges={solvedChallenges}
-                firstBloodIds={firstBloodIds}
-                showAllModal={showAllModal}
-                setShowAllModal={setShowAllModal}
-                onShowUnsolved={handleShowUnsolved}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="stats-content"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <UserStatsPlotly
-                solvedChallenges={solvedChallenges}
-                firstBloodIds={firstBloodIds}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            <SolvedChallenges
+              solvedChallenges={solvedChallenges}
+              firstBloodIds={firstBloodIds}
+              showAllModal={showAllModal}
+              setShowAllModal={setShowAllModal}
+              onShowUnsolved={handleShowUnsolved}
+            />
+          </div>
+        ) : (
+          <div key="stats-content">
+            <UserStatsPlotly
+              solvedChallenges={solvedChallenges}
+              firstBloodIds={firstBloodIds}
+            />
+          </div>
+        )}
 
         <UnsolvedChallengesModal
           open={showUnsolvedModal}

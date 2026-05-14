@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, Trophy, ListChecks, Sparkles } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
@@ -56,11 +55,9 @@ export default function TeamSolves({
             </CardContent>
           </Card>
         ) : (
-          <AnimatePresence mode="popLayout">
-            {challenges.slice(0, 10).map((c) => (
-              <TeamSolveRow key={c.challenge_id} challenge={c} />
-            ))}
-          </AnimatePresence>
+          challenges.slice(0, 10).map((c) => (
+            <TeamSolveRow key={c.challenge_id} challenge={c} />
+          ))
         )}
       </div>
 
@@ -99,13 +96,7 @@ export default function TeamSolves({
 
 function TeamSolveRow({ challenge }: { challenge: TeamChallenge }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-      whileHover={{ y: -2 }}
-    >
+    <div className="transition-transform duration-200 hover:-translate-y-0.5">
       <ProfileChallengeListItem
         title={challenge.title}
         subtitle={
@@ -123,6 +114,6 @@ function TeamSolveRow({ challenge }: { challenge: TeamChallenge }) {
           </span>
         )}
       />
-    </motion.div>
+    </div>
   )
 }
