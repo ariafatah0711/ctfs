@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@/shared/ui'
 import { ADMIN_NATIVE_SELECT_CLASS } from '@/features/admin/ui/form-field-styles'
+import { ADMIN_CARD_CLASS, ADMIN_CARD_TITLE_CLASS, ADMIN_LIST_PANEL_CLASS, ADMIN_PANEL_CLASS } from '@/features/admin/ui'
 import type { Event, EventMemberRow, UserLite } from '../types'
 
 interface EventMembersCardProps {
@@ -47,9 +48,9 @@ const EventMembersCard: React.FC<EventMembersCardProps> = ({
   onRemoveMember,
 }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Card className={ADMIN_CARD_CLASS}>
       <CardHeader>
-        <CardTitle className="text-gray-900 dark:text-white">Event Members</CardTitle>
+        <CardTitle className={ADMIN_CARD_TITLE_CLASS}>Event Members</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
@@ -103,7 +104,7 @@ const EventMembersCard: React.FC<EventMembersCardProps> = ({
                 Add Selected ({selectedCandidateUserIds.length})
               </Button>
             </div>
-            <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+            <div className={`mt-2 ${ADMIN_LIST_PANEL_CLASS}`}>
               {manageEventId === '' ? (
                 <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Select event first</div>
               ) : assignUserQuery.trim().length < 2 ? (
@@ -148,7 +149,7 @@ const EventMembersCard: React.FC<EventMembersCardProps> = ({
               onChange={(e) => onMemberQueryChange(e.target.value)}
               className="mt-2"
             />
-            <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-md max-h-[300px] overflow-auto">
+            <div className={`mt-2 ${ADMIN_PANEL_CLASS} max-h-[300px] overflow-auto`}>
               {loadingEventMembers ? (
                 <div className="py-4 px-3 text-sm text-gray-500 dark:text-gray-400">Loading members...</div>
               ) : filteredEventMembers.length === 0 ? (

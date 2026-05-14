@@ -6,6 +6,7 @@ import { Users, Crown, UserX, ArrowRight } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { EmptyState } from '@/shared/components'
+import { SURFACE_GLASS_CARD_INTERACTIVE_CLASS } from '@/shared/styles'
 import { TeamMember } from '../types'
 
 interface TeamMembersSectionProps {
@@ -30,7 +31,7 @@ export default function TeamMembersSection({
   onSeeAll
 }: TeamMembersSectionProps) {
   return (
-    <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300">
+    <Card className={SURFACE_GLASS_CARD_INTERACTIVE_CLASS}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
           <Users size={18} className="text-blue-500" /> 

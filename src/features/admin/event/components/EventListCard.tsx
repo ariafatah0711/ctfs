@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Inbox } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
 import { EmptyState } from '@/shared/components'
+import { ADMIN_CARD_CLASS, ADMIN_CARD_TITLE_CLASS, ADMIN_LIST_PANEL_CLASS } from '@/features/admin/ui'
 import type { Event } from '../types'
 
 interface EventListCardProps {
@@ -14,9 +15,9 @@ interface EventListCardProps {
 
 const EventListCard: React.FC<EventListCardProps> = ({ events, onAdd, onEdit, onDelete }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Card className={ADMIN_CARD_CLASS}>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-gray-900 dark:text-white">Event List</CardTitle>
+        <CardTitle className={ADMIN_CARD_TITLE_CLASS}>Event List</CardTitle>
         <Button onClick={onAdd} className="bg-primary-600 text-white hover:bg-primary-700">
           + Add Event
         </Button>
@@ -31,7 +32,7 @@ const EventListCard: React.FC<EventListCardProps> = ({ events, onAdd, onEdit, on
           />
         ) : (
           <motion.div
-            className="divide-y border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
+            className={`divide-y ${ADMIN_LIST_PANEL_CLASS}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}

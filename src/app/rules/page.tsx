@@ -6,9 +6,11 @@ import Link from "next/link";
 import { RulesMarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
 import Loader from '@/shared/components/Loader'
 import BrandLogo from '@/shared/components/BrandLogo'
+import PageBackground from '@/shared/components/PageBackground'
 import Footer from "@/_layouts/Footer";
 import { rulesConfig } from "@/rules";
 import { useAuth } from '@/shared/contexts/AuthContext'
+import { PAGE_BG_ORBS_WRAPPER_CLASS } from '@/shared/styles/page-background'
 
 export default function RulesPage() {
   const { loading } = useAuth()
@@ -16,13 +18,10 @@ export default function RulesPage() {
   if (loading) return <Loader fullscreen color="text-blue-500" />
 
   return (
-    <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-blue-500/30 overflow-hidden">
-
-      {/* Background Effects - Ultra Subtle */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-0 right-0 w-[30%] h-[30%] rounded-full bg-blue-500/5 blur-[100px]" />
-        <div className="absolute bottom-0 left-100 w-[50%] h-[30%] rounded-full bg-blue-500/5 blur-[100px]" />
-      </div>
+    <PageBackground
+      className="flex flex-col overflow-hidden"
+      selectionClassName="selection:bg-orange-500/30"
+    >
 
       <main className="flex-1 flex flex-col items-center justify-center pt-8 pb-8 relative z-10 w-full px-6">
 
@@ -78,6 +77,6 @@ export default function RulesPage() {
       </main>
 
       <Footer />
-    </div>
+    </PageBackground>
   )
 }

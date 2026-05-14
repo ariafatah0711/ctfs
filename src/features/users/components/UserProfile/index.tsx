@@ -3,8 +3,8 @@
 import React, { useMemo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
-import APP from '@/config'
 import Loader from '@/shared/components/Loader'
+import PageBackground from '@/shared/components/PageBackground'
 import { useUserProfile } from '../../hooks/useUserProfile'
 import { UserProfileProps } from '../../types'
 import { getUserBadges } from '../../lib/badge-utils'
@@ -72,17 +72,21 @@ export default function UserProfile({
 
   if (initialLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-blue-500/30 dark:bg-[#0b0f19] dark:text-gray-100">
-        <ProfileBackground />
+      <PageBackground
+        className="flex justify-center items-center overflow-hidden"
+        selectionClassName="selection:bg-blue-500/30"
+      >
         <Loader color="text-blue-500" />
-      </div>
+      </PageBackground>
     )
   }
 
   if (hasError) {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-blue-500/30 dark:bg-[#0b0f19] dark:text-gray-100">
-        <ProfileBackground />
+      <PageBackground
+        className="relative overflow-hidden"
+        selectionClassName="selection:bg-blue-500/30"
+      >
         <main className="relative z-10 mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl items-center justify-center px-6 py-16">
           <UserEmptyState
             icon={AlertTriangle}
@@ -100,13 +104,15 @@ export default function UserProfile({
             className="w-full max-w-md"
           />
         </main>
-      </div>
+      </PageBackground>
     )
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-blue-500/30 dark:bg-[#0b0f19] dark:text-gray-100">
-      <ProfileBackground />
+    <PageBackground
+      className="relative overflow-hidden"
+      selectionClassName="selection:bg-blue-500/30"
+    >
       <main className="relative z-10 mx-auto w-full max-w-6xl space-y-6 px-6 py-8">
         {loading || loadingDetail ? (
           <div className="flex justify-center py-4 opacity-70">
@@ -220,19 +226,6 @@ export default function UserProfile({
           unsolvedChallenges={unsolvedChallenges}
         />
       </main>
-    </div>
-  )
-}
-
-function ProfileBackground() {
-  const watermarkSrc = APP.nxctf?.nxctf_logo || APP.image_logo
-
-  return (
-    <>
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-    </>
+    </PageBackground>
   )
 }

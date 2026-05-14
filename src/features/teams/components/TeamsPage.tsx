@@ -8,7 +8,9 @@ import { Users, UserPlus, Sparkles, ShieldCheck } from 'lucide-react'
 import Loader from '@/shared/components/Loader'
 import BackButton from '@/shared/components/BackButton'
 import ConfirmDialog from '@/shared/components/ConfirmDialog'
+import PageBackground from '@/shared/components/PageBackground'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
+import { PAGE_MAIN_CONTAINER_6XL } from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
 
@@ -174,14 +176,8 @@ export default function TeamsPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+    <PageBackground selectionClassName="selection:bg-orange-500/30">
+      <div className={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}>
         {initialLoading ? (
           <div className="flex justify-center py-16">
             <Loader color="text-orange-500" />
@@ -389,6 +385,6 @@ export default function TeamsPage() {
           confirmInput.trim().toLowerCase() !== confirmExpected
         }
       />
-    </div>
+    </PageBackground>
   )
 }

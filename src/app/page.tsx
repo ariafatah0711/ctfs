@@ -12,6 +12,7 @@ import Link from "next/link"
 import APP from '@/config'
 import Loader from '@/shared/components/Loader'
 import BrandLogo from '@/shared/components/BrandLogo'
+import PageBackground from '@/shared/components/PageBackground'
 import Footer from "@/_layouts/Footer"
 import { useAuth } from '@/shared/contexts/AuthContext'
 
@@ -66,14 +67,10 @@ export default function Home() {
   }
 
   return (
-    // <div className="flex flex-col min-h-[calc(100lvh-60px)] bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-blue-500/30">
-    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30 overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
+    <PageBackground
+      className="flex flex-col overflow-hidden"
+      selectionClassName="selection:bg-orange-500/30"
+    >
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 w-full px-6 py-10 lg:py-16">
         {/* HERO SECTION */}
         <section className="w-full max-w-5xl mx-auto flex flex-col items-center text-center">
@@ -164,6 +161,6 @@ export default function Home() {
       </main>
 
       <Footer />
-    </div>
+    </PageBackground>
   )
 }

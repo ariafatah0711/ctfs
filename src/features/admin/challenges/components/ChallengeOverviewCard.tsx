@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui'
+import { ADMIN_CARD_TITLE_CLASS, ADMIN_STAT_TILE_CLASS } from '@/features/admin/ui/card-styles'
 import { Challenge, SiteInfo } from '../types'
 import { motion } from 'framer-motion'
 
@@ -15,7 +16,7 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
     // <Card className="shrink-0 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
     <Card className="shrink-0 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-gray-900 dark:text-white">Overview</CardTitle>
+        <CardTitle className={ADMIN_CARD_TITLE_CLASS}>Overview</CardTitle>
         {showViewAll && (
           <Link href="/admin/overview">
             <Button variant="default" size="sm">View All</Button>
@@ -25,30 +26,30 @@ const ChallengeOverviewCard: React.FC<ChallengeOverviewCardProps> = ({ challenge
       <CardContent>
         {info && (
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className={ADMIN_STAT_TILE_CLASS}>
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Users</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_users}</div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={ADMIN_STAT_TILE_CLASS}>
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Admins</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_admins ?? 0}</div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className={ADMIN_STAT_TILE_CLASS}>
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Uniq Solvers</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.unique_solvers ?? 0}</div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={ADMIN_STAT_TILE_CLASS}>
               <div className="text-xs text-muted-foreground dark:text-gray-300 truncate">Solves</div>
               <div className="text-xl font-semibold text-gray-900 dark:text-white">{info.total_solves}</div>
             </motion.div>
           </div>
         )}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className={ADMIN_STAT_TILE_CLASS}>
             <div className="text-xs text-muted-foreground dark:text-gray-300">Challenges</div>
             <div className="text-xl font-semibold text-gray-900 dark:text-white">{challenges.length}</div>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className={ADMIN_STAT_TILE_CLASS}>
             <div className="text-xs text-muted-foreground dark:text-gray-300">Active</div>
             <div className="text-xl font-semibold text-gray-900 dark:text-white">{challenges.filter(c => c.is_active).length}</div>
           </motion.div>

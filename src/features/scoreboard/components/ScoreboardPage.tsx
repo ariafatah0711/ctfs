@@ -4,8 +4,10 @@ import Link from 'next/link'
 import { Coins, Droplet, Trophy, Rocket } from 'lucide-react'
 import Loader from '@/shared/components/Loader'
 import EmptyState from '@/shared/components/EmptyState'
+import PageBackground from '@/shared/components/PageBackground'
 import { SegmentedTabs } from '@/shared/components'
 import { Card, CardContent } from '@/shared/ui/card'
+import { PAGE_MAIN_CONTAINER_6XL } from '@/shared/styles'
 import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
@@ -33,14 +35,10 @@ export default function ScoreboardPage() {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <PageBackground
+      selectionClassName="selection:bg-orange-500/30"
+      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-8`}
+    >
         {/* <TitlePage icon={<Trophy size={30} className="text-yellow-500 dark:text-yellow-300 drop-shadow" />}>Scoreboard</TitlePage> */}
 
         <div className="mb-4 flex justify-between items-center">
@@ -117,7 +115,6 @@ export default function ScoreboardPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </PageBackground>
   )
 }

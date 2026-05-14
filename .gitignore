@@ -10,7 +10,7 @@
 /coverage
 
 # next.js
-/.next/
+/.next*
 /out/
 
 # production
@@ -53,7 +53,7 @@ version.ts
 
 db/init.sql
 
-
+analyze
 
 AGENTS.md
 DESIGN.md

@@ -9,6 +9,7 @@ import Navbar from '@/_layouts/Navbar'
 import ScrollToggle from '@/_layouts/components/ScrollToggle'
 import { AuthProvider } from '@/shared/contexts/AuthContext'
 import { ThemeProvider } from '@/shared/contexts/ThemeContext'
+import { PAGE_BG_BASE_CLASS } from '@/shared/styles/page-background'
 import APP from '@/config'
 
 export const metadata: Metadata = {
@@ -87,16 +88,16 @@ export default async function RootLayout({
           children
         ) : (
           // Normal mode: with navbar and providers
-          <ThemeProvider>
-            <AuthProvider>
-              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-                <Navbar />
-                <div className="pt-14">{children}</div>
-                <Toaster position="top-right" reverseOrder={false} />
-                <ScrollToggle />
-              </div>
-            </AuthProvider>
-          </ThemeProvider>
+          <div className={`min-h-screen ${PAGE_BG_BASE_CLASS}`}>
+            <ThemeProvider>
+              <AuthProvider>
+                  <Navbar />
+                  <div className="pt-14">{children}</div>
+                  <Toaster position="top-right" reverseOrder={false} />
+                  <ScrollToggle />
+              </AuthProvider>
+            </ThemeProvider>
+          </div>
         )}
       </body>
     </html>

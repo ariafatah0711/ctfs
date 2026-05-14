@@ -4,6 +4,7 @@ import React from 'react'
 import { InfoIcon, Wrench, LogOut, Trash2, Edit2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
+import { SURFACE_GLASS_CARD_CLASS } from '@/shared/styles'
 import EditTeamModal from './EditTeamModal'
 import { TeamInfo } from '../types'
 
@@ -24,7 +25,7 @@ export default function TeamManageSection({
 }: TeamManageSectionProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
+      <Card className={SURFACE_GLASS_CARD_CLASS}>
         <CardHeader>
           <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
             <InfoIcon size={18} className="text-blue-500" /> Team Settings
@@ -56,7 +57,7 @@ export default function TeamManageSection({
         </CardContent>
       </Card>
 
-      <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm">
+      <Card className={SURFACE_GLASS_CARD_CLASS}>
         <CardHeader>
           <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
             <Wrench size={18} className="text-red-500" /> Danger Zone

@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui'
+import { ADMIN_CARD_PLAIN_CLASS } from '@/features/admin/ui'
 import type { Event, UserLite } from '../types'
 
 interface AddEventAdminCardProps {
@@ -47,7 +48,7 @@ const AddEventAdminCard: React.FC<AddEventAdminCardProps> = ({
   onReset,
 }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card className={ADMIN_CARD_PLAIN_CLASS}>
       <CardHeader>
         <CardTitle>Add Event Admin</CardTitle>
       </CardHeader>

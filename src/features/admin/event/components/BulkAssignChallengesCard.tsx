@@ -4,6 +4,7 @@ import { Search } from 'lucide-react'
 import { Button, Card, CardContent, CardHeader, CardTitle, Label } from '@/shared/ui'
 import { EmptyState } from '@/shared/components'
 import { ADMIN_NATIVE_SELECT_CLASS } from '@/features/admin/ui/form-field-styles'
+import { ADMIN_CARD_CLASS, ADMIN_CARD_TITLE_CLASS, ADMIN_PANEL_CLASS } from '@/features/admin/ui'
 import { DEFAULT_EVENT_FILTERS } from '../lib'
 import type { ChallengeLite, Event, FilterState } from '../types'
 
@@ -43,10 +44,10 @@ const BulkAssignChallengesCard: React.FC<BulkAssignChallengesCardProps> = ({
   onToggleSelect,
 }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Card className={ADMIN_CARD_CLASS}>
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <CardTitle className="text-gray-900 dark:text-white">Bulk Assign Challenges</CardTitle>
+          <CardTitle className={ADMIN_CARD_TITLE_CLASS}>Bulk Assign Challenges</CardTitle>
           <p className="text-xs text-gray-500 dark:text-gray-300">Select multiple challenges, then assign or remove event.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -86,7 +87,7 @@ const BulkAssignChallengesCard: React.FC<BulkAssignChallengesCardProps> = ({
           />
         </div>
 
-        <div className="mt-4 border border-gray-200 dark:border-gray-700 rounded-md max-h-[360px] overflow-auto bg-white dark:bg-gray-800">
+        <div className={`mt-4 ${ADMIN_PANEL_CLASS} max-h-[360px] overflow-auto bg-white dark:bg-gray-800`}>
           {filteredChallenges.length === 0 ? (
             <EmptyState
               icon={<Search className="w-full h-full" />}

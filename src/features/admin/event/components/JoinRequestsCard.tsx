@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button, Card, CardContent, CardHeader, CardTitle, Label } from '@/shared/ui'
 import { ADMIN_NATIVE_SELECT_CLASS } from '@/features/admin/ui/form-field-styles'
+import { ADMIN_CARD_CLASS, ADMIN_CARD_TITLE_CLASS, ADMIN_LIST_PANEL_CLASS } from '@/features/admin/ui'
 import type { Event, EventJoinRequestRow } from '../types'
 
 interface JoinRequestsCardProps {
@@ -23,9 +24,9 @@ const JoinRequestsCard: React.FC<JoinRequestsCardProps> = ({
   onReviewRequest,
 }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
+    <Card className={ADMIN_CARD_CLASS}>
       <CardHeader>
-        <CardTitle className="text-gray-900 dark:text-white">Join Requests</CardTitle>
+        <CardTitle className={ADMIN_CARD_TITLE_CLASS}>Join Requests</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div>
@@ -42,7 +43,7 @@ const JoinRequestsCard: React.FC<JoinRequestsCardProps> = ({
           </select>
         </div>
 
-        <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+        <div className={ADMIN_LIST_PANEL_CLASS}>
           {loadingJoinRequests ? (
             <div className="py-6 text-center text-sm text-gray-500 dark:text-gray-400">Loading requests...</div>
           ) : joinRequests.length === 0 ? (

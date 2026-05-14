@@ -8,6 +8,7 @@ import { useAuth } from '@/shared/contexts/AuthContext'
 import UserProfile from '@/features/users/components/UserProfile'
 import { UserEmptyState } from '@/features/users/components/ui/UserEmptyState'
 import APP from '@/config'
+import PageBackground from '@/shared/components/PageBackground'
 
 export default function UserProfilePage() {
   const router = useRouter()
@@ -94,11 +95,10 @@ export default function UserProfilePage() {
   // ❌ Error UI (ini boleh beda)
   if (error) {
     return (
-      <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-blue-500/30 dark:bg-[#0b0f19] dark:text-gray-100">
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-          <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-        </div>
+      <PageBackground
+        className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden"
+        selectionClassName="selection:bg-blue-500/30"
+      >
         {(APP.nxctf?.nxctf_logo || APP.image_logo) && (
           <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -127,7 +127,7 @@ export default function UserProfilePage() {
             className="w-full max-w-md"
           />
         </main>
-      </div>
+      </PageBackground>
     )
   }
 

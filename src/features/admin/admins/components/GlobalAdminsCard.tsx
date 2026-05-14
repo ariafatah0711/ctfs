@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui'
+import { ADMIN_CARD_PLAIN_CLASS } from '@/features/admin/ui'
 import type { UserLite } from '../types'
 
 interface GlobalAdminsCardProps {
@@ -19,7 +20,7 @@ interface GlobalAdminsCardProps {
 
 const GlobalAdminsCard: React.FC<GlobalAdminsCardProps> = ({ admins }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card className={ADMIN_CARD_PLAIN_CLASS}>
       <CardHeader>
         <CardTitle>Global Admins</CardTitle>
       </CardHeader>
@@ -50,4 +51,3 @@ const GlobalAdminsCard: React.FC<GlobalAdminsCardProps> = ({ admins }) => {
 }
 
 export default GlobalAdminsCard
-

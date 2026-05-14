@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Flag, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Loader } from '@/shared/components';
+import PageBackground from '@/shared/components/PageBackground'
 import { SegmentedTabs } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
 import { useAuth } from '@/shared/contexts'
@@ -11,6 +12,7 @@ import { useEventContext } from '@/features/events/contexts/EventContext'
 import { useLogs } from '@/features/logs/contexts/LogsContext'
 import LogsList from "@/features/logs/components/LogsList";
 import { motion } from "framer-motion";
+import { PAGE_MAIN_CONTAINER_4XL } from '@/shared/styles'
 
 export default function LogsPageContent() {
   const router = useRouter();
@@ -38,14 +40,10 @@ export default function LogsPageContent() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 py-10 space-y-6">
+    <PageBackground
+      selectionClassName="selection:bg-orange-500/30"
+      contentClassName={`${PAGE_MAIN_CONTAINER_4XL} space-y-6`}
+    >
         {/* Compact Navigation Row */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Event Filter */}
@@ -79,7 +77,6 @@ export default function LogsPageContent() {
         >
           <LogsList tabType={tabType} eventId={selectedEvent} />
         </motion.div>
-      </div>
-    </div>
+    </PageBackground>
   );
 }

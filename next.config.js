@@ -12,6 +12,8 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 });
 
 const nextConfig = {
+  distDir: process.env.NODE_ENV === "development" ? ".next/dev" : ".next",
+
   reactStrictMode: true,
 
   experimental: {
@@ -19,12 +21,7 @@ const nextConfig = {
   },
 
   compiler: {
-    removeConsole:
-      process.env.NODE_ENV === "production"
-        ? {
-            exclude: ["error"],
-          }
-        : false,
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
   },
 
   images: {

@@ -8,9 +8,15 @@ import { Coins, Sparkles, Users, Trophy, Rocket, LayoutDashboard } from 'lucide-
 import { APP } from '@/config'
 import Loader from '@/shared/components/Loader'
 import EmptyState from '@/shared/components/EmptyState'
+import PageBackground from '@/shared/components/PageBackground'
 import { SegmentedTabs } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
 import { Card, CardHeader, CardTitle, CardContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui'
+import {
+  PAGE_MAIN_CONTAINER_6XL,
+  SURFACE_GLASS_BASE_CLASS,
+  SURFACE_GLASS_FIELD_CLASS,
+} from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useTheme } from '@/shared/contexts/ThemeContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
@@ -49,14 +55,10 @@ export default function TeamScoreboardPage() {
   const isDark = theme === 'dark'
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+    <PageBackground
+      selectionClassName="selection:bg-orange-500/30"
+      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}
+    >
         {/* Modern Navigation Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Event Filter */}
@@ -65,7 +67,7 @@ export default function TeamScoreboardPage() {
               value={String(selectedEvent)}
               onChange={setSelectedEvent as any}
               events={startedEvents}
-              className="min-w-[200px] bg-white/60 dark:bg-[#111622]/60 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-xl text-sm px-4 py-2 shadow-sm transition-all hover:border-blue-500/30"
+              className={`min-w-[200px] ${SURFACE_GLASS_FIELD_CLASS}`}
               getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
             />
           </div>
@@ -99,7 +101,7 @@ export default function TeamScoreboardPage() {
             />
           )}
 
-          <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
+          <Card className={`${SURFACE_GLASS_BASE_CLASS} rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden`}>
             <CardHeader className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/20 px-8 py-6">
               <CardTitle className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
                 <LayoutDashboard size={20} className="text-blue-500" />
@@ -173,7 +175,6 @@ export default function TeamScoreboardPage() {
             </CardContent>
           </Card>
         </motion.div>
-      </div>
-    </div>
+    </PageBackground>
   )
 }

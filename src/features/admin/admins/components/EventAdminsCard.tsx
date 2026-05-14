@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui'
+import { ADMIN_CARD_PLAIN_CLASS } from '@/features/admin/ui'
 import type { EventAdminRow } from '../types'
 
 interface EventAdminsCardProps {
@@ -21,7 +22,7 @@ interface EventAdminsCardProps {
 
 const EventAdminsCard: React.FC<EventAdminsCardProps> = ({ admins, onAskRemove }) => {
   return (
-    <Card className="bg-white dark:bg-gray-800">
+    <Card className={ADMIN_CARD_PLAIN_CLASS}>
       <CardHeader>
         <CardTitle>Event Admins</CardTitle>
       </CardHeader>
@@ -58,4 +59,3 @@ const EventAdminsCard: React.FC<EventAdminsCardProps> = ({ admins, onAskRemove }
 }
 
 export default EventAdminsCard
-

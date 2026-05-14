@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import APP from '@/config'
+import PageBackground from '@/shared/components/PageBackground'
 import { cn } from '@/shared/lib/utils'
 
 interface AuthPageShellProps {
@@ -15,17 +16,13 @@ export function AuthPageShell({ children, className, contentClassName }: AuthPag
   const watermarkSrc = APP.nxctf?.nxctf_logo || APP.image_logo
 
   return (
-    <div
+    <PageBackground
       className={cn(
-        'relative flex min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden bg-[#fafafa] text-gray-900 selection:bg-orange-500/30 dark:bg-[#0b0f19] dark:text-gray-100',
+        'relative flex !min-h-[calc(100vh-3.5rem)] flex-col overflow-hidden',
         className
       )}
+      selectionClassName="selection:bg-orange-500/30"
     >
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute left-[-10%] top-[-10%] h-[40%] w-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] h-[40%] w-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
       {watermarkSrc && (
         <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -49,6 +46,6 @@ export function AuthPageShell({ children, className, contentClassName }: AuthPag
       >
         {children}
       </motion.main>
-    </div>
+    </PageBackground>
   )
 }

@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { Button } from '@/shared/ui/button'
 import { LeaderboardEntry } from '@/shared/types'
+import { SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS } from '@/shared/styles'
 
 interface ScoreboardTableProps {
   leaderboard: LeaderboardEntry[]
@@ -23,7 +24,7 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
   const pathname = usePathname()
 
   return (
-    <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)] transition-all duration-300">
+    <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Ranking</CardTitle>
         {pathname === '/scoreboard' &&

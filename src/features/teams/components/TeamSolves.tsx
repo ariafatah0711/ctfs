@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { EmptyState } from '@/shared/components'
-import { DIALOG_CONTENT_CLASS_3XL } from '@/shared/styles'
+import { DIALOG_CONTENT_CLASS_3XL, SURFACE_GLASS_BASE_CLASS } from '@/shared/styles'
 import { TeamChallenge } from '../types'
 import { formatDate } from '../lib/team-utils'
 import ProfileChallengeListItem from '@/features/users/components/UserProfile/ProfileChallengeListItem'
@@ -45,7 +45,7 @@ export default function TeamSolves({
 
       <div className="grid gap-3">
         {challenges.length === 0 ? (
-          <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl">
+          <Card className={`${SURFACE_GLASS_BASE_CLASS} rounded-2xl`}>
             <CardContent className="pt-6">
               <EmptyState
                 icon={<Trophy className="w-full h-full text-gray-400" />}

@@ -12,6 +12,7 @@ import { VERSION, BUILD_TIME } from "@/version";
 import Loader from '@/shared/components/Loader'
 import ImageWithFallback from '@/shared/components/ImageWithFallback'
 import BrandLogo from '@/shared/components/BrandLogo'
+import PageBackground from '@/shared/components/PageBackground'
 import Footer from "@/_layouts/Footer";
 import { useAuth } from '@/shared/contexts/AuthContext'
 
@@ -86,13 +87,10 @@ export default function InfoPage() {
   if (loading) return <Loader fullscreen color="text-orange-500" />;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-[#0b0f19] text-gray-900 dark:text-gray-100 selection:bg-orange-500/30 overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]" />
-      </div>
-
+    <PageBackground
+      className="flex flex-col overflow-hidden"
+      selectionClassName="selection:bg-orange-500/30"
+    >
       {/* Faint Watermark Logo */}
       <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02] z-0">
         <ImageWithFallback
@@ -312,7 +310,7 @@ export default function InfoPage() {
       </main>
 
       <Footer />
-    </div>
+    </PageBackground>
   );
 }
 
