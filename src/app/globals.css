@@ -83,6 +83,35 @@ code {
   .text-balance {
     text-wrap: balance;
   }
+
+  .challenge-card-reveal,
+  .event-card-reveal {
+    animation: challenge-card-reveal 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--card-reveal-delay, var(--challenge-reveal-delay, 0ms));
+    will-change: opacity, transform;
+  }
+}
+
+@keyframes challenge-card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+    filter: blur(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .challenge-card-reveal,
+  .event-card-reveal {
+    animation: none;
+    will-change: auto;
+  }
 }
 
 /* Scrollbar global */
@@ -185,11 +214,49 @@ select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  caret-color: transparent;
   background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.25rem;
   padding-right: 2rem;
+}
+
+:where(input:not([type='button']):not([type='submit']):not([type='reset']):not([type='checkbox']):not([type='radio']), textarea, [contenteditable='true']) {
+  caret-color: currentColor;
+}
+
+:where(input:not([type='button']):not([type='submit']):not([type='reset']):not([type='checkbox']):not([type='radio']), textarea, [contenteditable='true']):focus {
+  caret-color: #3b82f6;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  caret-color: #3b82f6;
+  -webkit-text-fill-color: #111827;
+  box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.72) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  caret-color: #3b82f6;
+  -webkit-text-fill-color: #f3f4f6;
+  box-shadow: 0 0 0 1000px #111622 inset;
+}
+
+:where(a, button, summary, select, [role='button'], [role='tab'], [role='combobox']):not(input):not(textarea):not([contenteditable='true']) {
+  caret-color: transparent;
+}
+
+:where(a, button, summary, select, [role='button'], [role='tab'], [role='combobox']):not(input):not(textarea):not([contenteditable='true']):focus-visible {
+  outline: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 }
 
 .dark select {

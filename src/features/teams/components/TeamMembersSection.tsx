@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Users, Crown, UserX, ArrowRight } from 'lucide-react'
+import { Users, Crown, UserX } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { EmptyState } from '@/shared/components'
@@ -17,7 +17,6 @@ interface TeamMembersSectionProps {
   onTransferCaptain?: (member: TeamMember) => void
   busy?: boolean
   isOverview?: boolean
-  onSeeAll?: () => void
 }
 
 export default function TeamMembersSection({
@@ -28,20 +27,14 @@ export default function TeamMembersSection({
   onTransferCaptain,
   busy,
   isOverview,
-  onSeeAll
 }: TeamMembersSectionProps) {
   return (
     <Card className={SURFACE_GLASS_CARD_INTERACTIVE_CLASS}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
           <Users size={18} className="text-blue-500" /> 
-          Members {isOverview && <span className="text-xs font-normal opacity-50">({members.length}+)</span>}
+          Members
         </CardTitle>
-        {isOverview && onSeeAll && (
-          <Button variant="ghost" size="sm" onClick={onSeeAll} className="text-blue-500 hover:text-blue-600 font-bold text-xs uppercase tracking-wider">
-            See All <ArrowRight size={14} className="ml-1" />
-          </Button>
-        )}
       </CardHeader>
       <CardContent className="space-y-1">
         {members.length === 0 ? (
@@ -58,11 +51,6 @@ export default function TeamMembersSection({
                 <div className="flex items-center gap-4">
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-bold text-lg text-gray-500 dark:text-gray-400">
                     {m.username.slice(0, 1).toUpperCase()}
-                    {m.role === 'captain' && (
-                      <div className="absolute -top-1 -right-1 bg-yellow-500 rounded-full p-1 border-2 border-white dark:border-gray-900">
-                        <Crown size={8} className="text-white" />
-                      </div>
-                    )}
                   </div>
                   
                   <div className="flex-1 min-w-0">

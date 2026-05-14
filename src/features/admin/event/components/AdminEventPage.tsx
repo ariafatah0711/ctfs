@@ -76,7 +76,7 @@ export default function AdminEventPage() {
 
   return (
     <>
-      <AdminPageShell mainClassName="py-6 space-y-6" backButtonClassName="">
+      <AdminPageShell mainClassName="space-y-5" backButtonClassName="">
         <EventListCard
           events={sortedEvents}
           onAdd={openAdd}

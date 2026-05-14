@@ -86,7 +86,7 @@ export default function UserProfile({
         className="relative overflow-hidden"
         selectionClassName="selection:bg-blue-500/30"
       >
-        <main className="relative z-10 mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl items-center justify-center px-6 py-16">
+        <main className="relative z-10 mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-5xl items-center justify-center px-4 py-10 sm:px-6">
           <UserEmptyState
             icon={AlertTriangle}
             title={error || 'User not found'}
@@ -112,7 +112,7 @@ export default function UserProfile({
       className="relative overflow-hidden"
       selectionClassName="selection:bg-blue-500/30"
     >
-      <main className="relative z-10 mx-auto w-full max-w-6xl space-y-6 px-6 py-8">
+      <main className="relative z-10 mx-auto w-full max-w-7xl space-y-5 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         {loading || loadingDetail ? (
           <div className="flex justify-center py-4 opacity-70">
             <Loader color="text-blue-500" />
@@ -179,7 +179,7 @@ export default function UserProfile({
         )}
 
         {activeTab === 'profile' ? (
-          <div key="profile-content" className="space-y-6">
+          <div key="profile-content" className="space-y-5">
             <ProgressSection
               categoryTotals={categoryTotals}
               difficultyTotals={difficultyTotals}

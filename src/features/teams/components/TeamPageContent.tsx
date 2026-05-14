@@ -57,18 +57,19 @@ export default function TeamPageContent({
   showMainOption,
   onBack
 }: TeamPageContentProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'solves' | 'manage'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'manage'>('overview')
 
   // Determine if the current user is a member of this team
   const isMember = members.some(m => m.user_id === currentUserId)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <TeamTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onBack={onBack}
         canManage={canManage}
+        isMember={isMember}
       />
 
       <TeamProfileHeader
@@ -88,40 +89,27 @@ export default function TeamPageContent({
 
       <div key={activeTab}>
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             <TeamMembersSection
-              members={members.slice(0, 5)}
+              members={members}
               canManage={canManage}
               currentUserId={currentUserId}
               onKickMember={onKickMember}
               onTransferCaptain={onTransferCaptain}
               busy={busy}
               isOverview
-              onSeeAll={() => setActiveTab('members')}
             />
             <TeamSolves challenges={challenges} />
           </div>
         )}
 
-        {activeTab === 'members' && (
-          <TeamMembersSection
-            members={members}
-            canManage={canManage}
-            currentUserId={currentUserId}
-            onKickMember={onKickMember}
-            onTransferCaptain={onTransferCaptain}
-            busy={busy}
-          />
-        )}
-
-        {activeTab === 'solves' && (
-          <TeamSolves challenges={challenges} title="Full Solves History" />
-        )}
-
-        {activeTab === 'manage' && canManage && (
+        {activeTab === 'manage' && isMember && (
           <TeamManageSection
             team={team}
+            canManage={canManage}
             onRenameTeam={onRenameTeam}
+            onCopyInvite={onCopyInvite}
+            onRegenerateInvite={onRegenerateInvite}
             onLeaveTeam={onLeaveTeam}
             onDeleteTeam={onDeleteTeam}
             busy={busy}

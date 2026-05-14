@@ -170,7 +170,7 @@ export default function TeamsPage() {
 
   if (authLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-10">
         <Loader fullscreen />
       </div>
     )
@@ -180,9 +180,9 @@ export default function TeamsPage() {
 
   return (
     <PageBackground selectionClassName={THEME_PRIMARY_SELECTION_CLASS}>
-      <div className={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}>
+      <div className={`${PAGE_MAIN_CONTAINER_6XL} space-y-5`}>
         {initialLoading ? (
-          <div className="flex justify-center py-16">
+          <div className="flex justify-center py-10">
             <Loader />
           </div>
         ) : (
@@ -205,20 +205,20 @@ export default function TeamsPage() {
             )}
 
             {!team ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-10">
-                <div className="space-y-6">
+              <div className="grid grid-cols-1 items-center gap-5 pt-2 md:grid-cols-2">
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <h2 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+                    <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-4xl">
                       Squad up for the <span className="text-blue-600 dark:text-blue-400">Next Conquest.</span>
                     </h2>
-                    <p className="text-lg text-gray-500 dark:text-gray-400 leading-relaxed">
+                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
                       Join an existing crew or build your own elite team of hackers. Solve together, win together.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-4 pt-4">
-                    <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-gray-800/50 p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
-                      <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                  <div className="flex flex-wrap gap-3 pt-1">
+                    <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-800/50">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30">
                         <Users size={20} />
                       </div>
                       <div>
@@ -226,8 +226,8 @@ export default function TeamsPage() {
                         <p className="text-sm font-bold">Shared Solves</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-gray-800/50 p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
-                      <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600">
+                    <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-800/50">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/30">
                         <ShieldCheck size={20} />
                       </div>
                       <div>
@@ -238,8 +238,8 @@ export default function TeamsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <Card className="bg-white/70 dark:bg-[#111622]/70 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl">
+                <div className="space-y-4">
+                  <Card className="rounded-2xl border border-gray-200 bg-white/70 shadow-lg backdrop-blur-xl dark:border-gray-800 dark:bg-[#111622]/70">
                     <CardHeader>
                       <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
                         <Sparkles size={18} className="text-blue-500" /> Start Your Team
@@ -259,7 +259,7 @@ export default function TeamsPage() {
                       <Button
                         onClick={onCreateTeam}
                         disabled={busy || !teamName.trim()}
-                        className="w-full h-12 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                        className="h-11 w-full rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/20"
                       >
                         Create Team
                       </Button>
@@ -275,7 +275,7 @@ export default function TeamsPage() {
                     </div>
                   </div>
 
-                  <Card className="bg-white/70 dark:bg-[#111622]/70 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-3xl shadow-xl">
+                  <Card className="rounded-2xl border border-gray-200 bg-white/70 shadow-lg backdrop-blur-xl dark:border-gray-800 dark:bg-[#111622]/70">
                     <CardHeader>
                       <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
                         <UserPlus size={18} className="text-emerald-500" /> Enter Invite Code
@@ -293,7 +293,7 @@ export default function TeamsPage() {
                         onClick={onJoinTeam}
                         disabled={busy || !inviteCode.trim()}
                         variant="secondary"
-                        className="w-full h-12 rounded-xl font-black uppercase tracking-widest"
+                        className="h-11 w-full rounded-xl font-black uppercase tracking-widest"
                       >
                         Join Team
                       </Button>

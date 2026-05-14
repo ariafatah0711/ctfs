@@ -30,7 +30,7 @@ export function UserEmptyState({
         title={title}
         description={description}
         action={action}
-        containerHeight="py-12"
+        containerHeight="py-8"
         className="[&_div:first-child]:bg-blue-500/10 [&_div:first-child]:text-blue-500 [&_div:first-child]:ring-1 [&_div:first-child]:ring-blue-500/20"
       />
     </div>

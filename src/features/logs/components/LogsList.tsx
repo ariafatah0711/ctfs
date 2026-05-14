@@ -60,7 +60,7 @@ export default function LogsList({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
+      <div className="flex flex-col items-center justify-center space-y-3 py-10">
         <Loader color="text-blue-500" />
         <p className="text-xs font-black uppercase tracking-widest text-gray-400 animate-pulse">
           Retrieving intelligence...
@@ -72,10 +72,10 @@ export default function LogsList({
   if (notifications.length === 0) {
     return (
       <div
-        className="flex flex-col items-center justify-center py-24 px-6 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/20"
+        className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 px-4 py-12 dark:border-gray-800 dark:bg-gray-900/20"
       >
-        <div className="h-16 w-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-          <Clock className="text-gray-400" size={32} />
+        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800">
+          <Clock className="text-gray-400" size={24} />
         </div>
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Silence in the Wire</h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs mt-2">
@@ -89,19 +89,19 @@ export default function LogsList({
   const hasMore = visibleCount < notifications.length;
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4">
+    <div className="space-y-4">
+      <div className="grid gap-2.5">
         {visibleNotifications.map((notif, index) => (
           <LogItem key={`${notif.log_challenge_id}-${notif.log_created_at}-${index}`} notif={notif} />
         ))}
       </div>
 
       {hasMore && (
-        <div className="flex justify-center pt-4">
+        <div className="flex justify-center pt-2">
           <Button
             onClick={() => setVisibleCount(prev => prev + 50)}
             variant="outline"
-            className="rounded-xl border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-[#111622]/50 backdrop-blur-sm px-8 py-6 text-xs font-black uppercase tracking-widest text-gray-600 dark:text-gray-400 hover:border-blue-500/50 hover:text-blue-500 transition-all shadow-sm"
+            className="rounded-xl border-gray-200 bg-white/50 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-600 shadow-sm backdrop-blur-sm transition-all hover:border-blue-500/50 hover:text-blue-500 dark:border-gray-800 dark:bg-[#111622]/50 dark:text-gray-400"
           >
             Load More Intelligence ({notifications.length - visibleCount} remaining)
           </Button>
@@ -153,11 +153,11 @@ function LogItem({ notif }: { notif: LogEntry }) {
 
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl p-4 transition-[border-color,box-shadow,transform] duration-200 hover:translate-x-1 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5"
+      className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white/60 p-3 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-200 hover:translate-x-0.5 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 dark:border-gray-800 dark:bg-[#111622]/60"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Type Icon */}
-        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${details.bgColor} ${details.color} ${details.borderColor} border shadow-sm transition-transform group-hover:scale-110`}>
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${details.bgColor} ${details.color} ${details.borderColor} border shadow-sm transition-transform group-hover:scale-105`}>
           {details.icon}
         </div>
 

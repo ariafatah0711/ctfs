@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Lock } from 'lucide-react'
 import APP from '@/config'
 import { Loader, EmptyState } from '@/shared/components'
@@ -34,6 +35,14 @@ type ChallengeListContentProps = {
 
 const INITIAL_CHALLENGE_RENDER_COUNT = 28
 const CHALLENGE_RENDER_CHUNK_SIZE = 36
+const CHALLENGE_REVEAL_DELAY_STEP_MS = 28
+const CHALLENGE_REVEAL_DELAY_LIMIT = 12
+
+function getChallengeRevealStyle(index: number): CSSProperties {
+  return {
+    '--challenge-reveal-delay': `${Math.min(index, CHALLENGE_REVEAL_DELAY_LIMIT) * CHALLENGE_REVEAL_DELAY_STEP_MS}ms`,
+  } as CSSProperties
+}
 
 function scheduleChallengeRender(callback: () => void) {
   if ('requestIdleCallback' in window) {
@@ -138,10 +147,11 @@ export default function ChallengeListContent({
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">
-        {visibleChallenges.map((challenge) => (
+        {visibleChallenges.map((challenge, index) => (
           <div
             key={challenge.id}
-            className="relative overflow-visible w-full"
+            className="challenge-card-reveal relative w-full overflow-visible"
+            style={getChallengeRevealStyle(index)}
           >
             <ChallengeCard
               challenge={challenge}
@@ -159,10 +169,11 @@ export default function ChallengeListContent({
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">
-        {visibleChallenges.map((challenge) => (
+        {visibleChallenges.map((challenge, index) => (
           <div
             key={challenge.id}
-            className="relative overflow-visible w-full"
+            className="challenge-card-reveal relative w-full overflow-visible"
+            style={getChallengeRevealStyle(index)}
           >
             <ChallengeCard
               challenge={challenge}
@@ -204,10 +215,11 @@ export default function ChallengeListContent({
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-max">
-              {visibleChallenges.map((challenge) => (
+              {visibleChallenges.map((challenge, index) => (
                 <div
                   key={challenge.id}
-                  className="relative overflow-visible w-full"
+                  className="challenge-card-reveal relative w-full overflow-visible"
+                  style={getChallengeRevealStyle(index)}
                 >
                   <ChallengeCard
                     challenge={challenge}

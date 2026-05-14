@@ -404,11 +404,11 @@ GRANT EXECUTE ON FUNCTION get_solve_info(UUID, UUID) TO authenticated;
 CREATE OR REPLACE FUNCTION create_profile(p_id uuid, p_username text)
 RETURNS void AS $$
 DECLARE
-  v_username text := p_username;
+  v_username text := substring(p_username from 1 for 28);
   v_suffix int := 1;
 BEGIN
   WHILE EXISTS (SELECT 1 FROM public.users WHERE username = v_username) LOOP
-    v_username := p_username || '_' || v_suffix;
+    v_username := substring(p_username from 1 for 28) || '_' || v_suffix;
     v_suffix := v_suffix + 1;
   END LOOP;
 
@@ -419,11 +419,11 @@ BEGIN
   WITH base AS (
     SELECT
       au.id,
-      COALESCE(
+      SUBSTRING(COALESCE(
         au.raw_user_meta_data->>'username',
         au.raw_user_meta_data->>'display_name',
         split_part(au.email, '@', 1)
-      ) AS base_username
+      ) FROM 1 FOR 28) AS base_username
     FROM auth.users au
     LEFT JOIN public.users pu ON pu.id = au.id
     WHERE pu.id IS NULL
@@ -486,6 +486,10 @@ BEGIN
     RETURN json_build_object('success', false, 'message', 'Cannot change other user''s username');
   END IF;
 
+  IF length(v_username) > 32 THEN
+    RETURN json_build_object('success', false, 'message', 'Username cannot exceed 32 characters');
+  END IF;
+
   SELECT username INTO v_old_username FROM public.users WHERE id = p_id;
   IF NOT FOUND THEN
     RETURN json_build_object('success', false, 'message', 'User not found');
@@ -511,6 +515,10 @@ DECLARE
 BEGIN
   IF p_id IS DISTINCT FROM v_user_id THEN
     RETURN json_build_object('success', false, 'message', 'Cannot change other user''s bio');
+  END IF;
+
+  IF length(p_bio) > 255 THEN
+    RETURN json_build_object('success', false, 'message', 'Bio cannot exceed 255 characters');
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM public.users WHERE id = p_id) THEN

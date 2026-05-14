@@ -60,7 +60,7 @@ export default function SolvedChallenges({
         title="Recent Solved Challenges"
         description="A compact view of the latest completed challenges."
         action={actions}
-        contentClassName="space-y-3"
+        contentClassName="space-y-2.5"
       >
         {solvedChallenges.length === 0 ? (
           <UserEmptyState
@@ -69,7 +69,7 @@ export default function SolvedChallenges({
             description="Solved challenges will appear here."
           />
         ) : (
-          <div className="grid gap-3">
+          <div className="grid gap-2.5">
             {solvedChallenges.slice(0, 10).map((challenge) => (
               <ChallengeRow
                 key={challenge.id}
@@ -143,7 +143,7 @@ function ChallengeRow({
   firstBlood: boolean
 }) {
   return (
-    <div className="transition-transform duration-200 hover:-translate-y-1">
+    <div className="transition-transform duration-200 hover:-translate-y-0.5">
       <ProfileChallengeListItem
         title={challenge.title}
         titleBadge={firstBlood ? (

@@ -17,32 +17,32 @@ export default function EmptyState({
   description,
   action,
   className = "",
-  containerHeight = "py-16"
+  containerHeight = "py-10"
 }: EmptyStateProps) {
   return (
     <div className={`flex flex-col items-center justify-center text-center px-4 ${containerHeight} ${className}`}>
       <div
-        className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400 dark:text-gray-500"
+        className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500 sm:h-16 sm:w-16"
       >
-        <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+        <div className="flex h-7 w-7 items-center justify-center sm:h-8 sm:w-8">
           {icon}
         </div>
       </div>
       <h3
-        className="text-lg font-medium text-gray-900 dark:text-white mb-2"
+        className="mb-2 text-base font-medium text-gray-900 dark:text-white"
       >
         {title}
       </h3>
       {description && (
         <div
-          className="text-gray-500 dark:text-gray-400 text-sm sm:text-base max-w-md mx-auto"
+          className="mx-auto max-w-md text-sm text-gray-500 dark:text-gray-400"
         >
           {description}
         </div>
       )}
       {action && (
         <div
-          className="mt-6"
+          className="mt-4"
         >
           {action}
         </div>

@@ -1,25 +1,26 @@
 'use client'
 
 import React from 'react'
-import { ArrowLeft, Flag, Users, Wrench, LayoutDashboard } from 'lucide-react'
+import { ArrowLeft, Wrench, LayoutDashboard } from 'lucide-react'
 import { UserTabs } from '@/features/users/components/ui/UserTabs'
 
+type TeamTabValue = 'overview' | 'manage'
+
 type TeamTabsProps = {
-  activeTab: 'overview' | 'members' | 'solves' | 'manage'
-  setActiveTab: (tab: 'overview' | 'members' | 'solves' | 'manage') => void
+  activeTab: TeamTabValue
+  setActiveTab: (tab: TeamTabValue) => void
   onBack?: () => void
   canManage?: boolean
+  isMember?: boolean
 }
 
-export default function TeamTabs({ activeTab, setActiveTab, onBack, canManage }: TeamTabsProps) {
+export default function TeamTabs({ activeTab, setActiveTab, onBack, canManage, isMember }: TeamTabsProps) {
   const tabs = [
     { value: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { value: 'members', label: 'Members', icon: Users },
-    { value: 'solves', label: 'Solves', icon: Flag },
   ]
 
-  if (canManage) {
-    tabs.push({ value: 'manage', label: 'Manage', icon: Wrench })
+  if (isMember) {
+    tabs.push({ value: 'manage', label: canManage ? 'Admin' : 'Settings', icon: Wrench })
   }
 
   return (

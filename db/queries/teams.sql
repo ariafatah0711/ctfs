@@ -531,6 +531,10 @@ BEGIN
     RAISE EXCEPTION 'User already in a team';
   END IF;
 
+  IF length(p_name) > 64 THEN
+    RAISE EXCEPTION 'Team name cannot exceed 64 characters';
+  END IF;
+
   INSERT INTO public.teams(name, invite_code, captain_user_id)
   VALUES (p_name, generate_team_invite_code(), v_user_id)
   RETURNING id INTO v_team_id;
@@ -585,6 +589,10 @@ BEGIN
 
   IF p_new_name IS NULL OR trim(p_new_name) = '' THEN
     RAISE EXCEPTION 'Team name cannot be empty';
+  END IF;
+
+  IF length(p_new_name) > 64 THEN
+    RAISE EXCEPTION 'Team name cannot exceed 64 characters';
   END IF;
 
   UPDATE public.teams

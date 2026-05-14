@@ -11,7 +11,6 @@ import {
   AuthInput,
   AuthStatusMessage,
   PasswordMatchIndicator,
-  PasswordStrength,
 } from './ui'
 
 export default function ResetPasswordForm() {
@@ -31,9 +30,7 @@ export default function ResetPasswordForm() {
   return (
     <AuthCard>
       <AuthHeader
-        badge="Security"
-        title="Set a new password"
-        subtitle="Choose something strong and hard to guess"
+        title="Change Password"
       />
 
       <form className="space-y-5" onSubmit={handleResetPassword}>
@@ -56,8 +53,6 @@ export default function ResetPasswordForm() {
           value={newPassword}
           onChange={e => setNewPassword(e.target.value)}
         />
-
-        {/* <PasswordStrength password={newPassword} /> */}
 
         <AuthInput
           type={showConfirmPassword ? 'text' : 'password'}

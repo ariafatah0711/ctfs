@@ -114,7 +114,11 @@ export default function EventSelect({
     })
   }, [events, sortMode, nowMs, getEventLabel])
 
-  const resolvedClassName = cn(SURFACE_GLASS_FIELD_CLASS, className)
+  const resolvedClassName = cn(
+    SURFACE_GLASS_FIELD_CLASS,
+    'cursor-pointer caret-transparent focus-visible:outline-none focus-visible:border-blue-500/70 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0',
+    className
+  )
 
   return (
     <select

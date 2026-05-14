@@ -9,6 +9,7 @@ import { SegmentedTabs } from '@/shared/components'
 import { Card, CardContent } from '@/shared/ui/card'
 import {
   PAGE_MAIN_CONTAINER_6XL,
+  SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS,
   THEME_PRIMARY_BG_CLASS,
   THEME_PRIMARY_BG_HOVER_CLASS,
   THEME_PRIMARY_SELECTION_CLASS,
@@ -42,17 +43,17 @@ export default function ScoreboardPage() {
   return (
     <PageBackground
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
-      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-8`}
+      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-5`}
     >
-      <div className="mb-4 flex justify-between items-center">
-        <div className="relative">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="w-full sm:w-auto">
           {/* Event selector */}
-          <div className="inline-block">
+          <div className="w-full sm:w-auto">
             <EventSelect
               value={selectedEvent}
               onChange={setSelectedEvent}
               events={startedEvents}
-              className="min-w-[180px]"
+              className="w-full max-w-full sm:w-[180px]"
               getEventLabel={(event: any) => String(event?.name ?? event?.title ?? 'Untitled')}
             />
           </div>
@@ -66,15 +67,17 @@ export default function ScoreboardPage() {
           value={firstBloodMode ? 'first-blood' : 'points'}
           onChange={(tab) => setFirstBloodMode(tab === 'first-blood')}
           variant="panel"
+          className="w-full sm:w-fit"
+          stretch
         />
       </div>
 
       {loading && leaderboard.length === 0 ? (
-        <div className="flex justify-center py-16">
+        <div className="flex justify-center py-10">
           <Loader color="text-blue-500" />
         </div>
       ) : !user ? null : (
-        <div className={`space-y-8 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
+        <div className={`space-y-6 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
           {stableLeaderboard.length > 0 && !isEmpty && (
             <div>
               <ScoreboardChart leaderboard={stableLeaderboard.length > 0 ? stableLeaderboard : leaderboard} isDark={isDark} />
@@ -82,7 +85,7 @@ export default function ScoreboardPage() {
           )}
           <div>
             {isEmpty ? (
-              <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(249,115,22,0.05)] transition-all duration-300">
+              <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
                 <CardContent>
                   <EmptyState
                     icon={<Trophy className="w-full h-full text-blue-500" />}
@@ -93,7 +96,7 @@ export default function ScoreboardPage() {
                         <Rocket size={14} className="inline-block ml-1 text-blue-400/70" />
                       </>
                     }
-                    containerHeight="py-16"
+                    containerHeight="py-12"
                     action={
                       <Link
                         href="/challenges"

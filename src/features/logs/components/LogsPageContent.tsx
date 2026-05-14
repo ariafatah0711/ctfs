@@ -41,7 +41,7 @@ export default function LogsPageContent() {
   return (
     <PageBackground
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
-      contentClassName={`${PAGE_MAIN_CONTAINER_4XL} space-y-6`}
+      contentClassName={`${PAGE_MAIN_CONTAINER_4XL} space-y-5`}
     >
       {/* Compact Navigation Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

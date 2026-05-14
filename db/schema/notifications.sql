@@ -4,9 +4,9 @@
 
 CREATE TABLE public.notifications (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
+  title VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
-  level TEXT DEFAULT 'info',
+  level VARCHAR(16) DEFAULT 'info',
   created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );

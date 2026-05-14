@@ -1,20 +1,135 @@
-"use client";
+"use client"
 
-// React Imports
-import { useState } from "react";
-import Link from "next/link";
+import { useState } from "react"
+import Link from "next/link"
+import type { LucideIcon } from "lucide-react"
+import {
+  AlertCircle,
+  CheckCircle2,
+  Globe,
+  ImageIcon,
+  Instagram,
+  KeyRound,
+  Linkedin,
+  MessageCircle,
+  PencilLine,
+  Save,
+  User,
+} from "lucide-react"
 
-// Shared Imports
 import {
   BaseModal,
   ModalBody,
   ModalFooter,
   ModalHeader,
-} from "@/shared/components";
-import { Input, Button } from "@/shared/ui";
-import AuthProviders from "@/features/auth/components/AuthProviders";
-import { updateUsername, updateBio, updateSosmed, updateProfilePicture } from "@/features/users/services/user-profile.service";
-import { isValidUsername } from "@/features/auth";
+} from "@/shared/components"
+import { Button, Input } from "@/shared/ui"
+import { cn } from "@/shared/lib/utils"
+import { SURFACE_GLASS_INPUT_CLASS } from "@/shared/styles"
+import AuthProviders from "@/features/auth/components/AuthProviders"
+import { isValidUsername } from "@/features/auth"
+import {
+  updateBio,
+  updateProfilePicture,
+  updateSosmed,
+  updateUsername,
+} from "@/features/users/services/user-profile.service"
+
+type SocialLinks = {
+  linkedin?: string
+  instagram?: string
+  discord?: string
+  web?: string
+}
+
+type EditProfileModalProps = {
+  userId: string
+  currentUsername: string
+  currentBio?: string
+  currentProfilePictureUrl?: string
+  currentSosmed?: SocialLinks
+  onUsernameChange?: (username: string) => void
+  onProfileChange?: (profile: {
+    username: string
+    bio: string
+    profile_picture_url?: string | null
+    sosmed: SocialLinks
+  }) => void
+  onSaved?: () => void
+  triggerButtonClass?: string
+  authInfo?: Array<{ provider: string; email: string }>
+}
+
+type ProfileFieldProps = {
+  id: string
+  label: string
+  icon: LucideIcon
+  value: string
+  placeholder: string
+  disabled: boolean
+  maxLength: number
+  autoComplete?: string
+  type?: string
+  onChange: (value: string) => void
+}
+
+function ProfileSection({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center gap-3">
+        <h3 className="shrink-0 text-[11px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
+          {title}
+        </h3>
+        <div className="h-px flex-1 bg-gray-200/80 dark:bg-gray-800/80" />
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function ProfileField({
+  id,
+  label,
+  icon: Icon,
+  value,
+  placeholder,
+  disabled,
+  maxLength,
+  autoComplete = "off",
+  type = "text",
+  onChange,
+}: ProfileFieldProps) {
+  return (
+    <div className="space-y-1.5">
+      <label
+        htmlFor={id}
+        className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+      >
+        {label}
+      </label>
+      <div className="group relative">
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400" />
+        <Input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn(SURFACE_GLASS_INPUT_CLASS, "pl-10")}
+          autoComplete={autoComplete}
+          maxLength={maxLength}
+        />
+      </div>
+    </div>
+  )
+}
 
 export default function EditProfileModal({
   userId,
@@ -26,271 +141,245 @@ export default function EditProfileModal({
   onProfileChange,
   onSaved,
   triggerButtonClass = "",
-  authInfo = []
-}: {
-  userId: string;
-  currentUsername: string;
-  currentBio?: string;
-  currentProfilePictureUrl?: string;
-  currentSosmed?: { linkedin?: string; instagram?: string; discord?: string; web?: string };
-  onUsernameChange?: (username: string) => void;
-  onProfileChange?: (profile: {
-    username: string;
-    bio: string;
-    profile_picture_url?: string | null;
-    sosmed: { linkedin?: string; instagram?: string; discord?: string; web?: string };
-  }) => void;
-  onSaved?: () => void;
-  triggerButtonClass?: string;
-  authInfo?: Array<{ provider: string; email: string }>;
-}) {
-  const [open, setOpen] = useState(false);
-  const [username, setUsername] = useState(currentUsername);
-  const [bio, setBio] = useState(currentBio);
-  const [profilePictureUrl, setProfilePictureUrl] = useState(currentProfilePictureUrl || "");
-  const [sosmed, setSosmed] = useState<{ linkedin?: string; instagram?: string; discord?: string; web?: string }>(
-    currentSosmed || {}
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  authInfo = [],
+}: EditProfileModalProps) {
+  const [open, setOpen] = useState(false)
+  const [username, setUsername] = useState(currentUsername)
+  const [bio, setBio] = useState(currentBio)
+  const [profilePictureUrl, setProfilePictureUrl] = useState(currentProfilePictureUrl || "")
+  const [sosmed, setSosmed] = useState<SocialLinks>(currentSosmed || {})
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-    // Username
-    const usernameTrimmed = username.trim();
-    const usernameError = isValidUsername(usernameTrimmed);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError("")
+    setSuccess("")
+    setLoading(true)
+
+    const usernameTrimmed = username.trim()
+    const usernameError = isValidUsername(usernameTrimmed)
     if (usernameError) {
-      setError(usernameError);
-      setLoading(false);
-      return;
+      setError(usernameError)
+      setLoading(false)
+      return
     }
-    // Update username
-    const { error: errUsername, username: newUsername } = await updateUsername(userId, usernameTrimmed);
+
+    const { error: errUsername, username: newUsername } = await updateUsername(userId, usernameTrimmed)
     if (errUsername) {
-      setError(errUsername);
-      setLoading(false);
-      return;
+      setError(errUsername)
+      setLoading(false)
+      return
     }
 
-    setUsername(newUsername || username);
-    onUsernameChange?.(newUsername || username);
+    setUsername(newUsername || username)
+    onUsernameChange?.(newUsername || username)
 
-    // Call onProfileChange with all updated data
     onProfileChange?.({
       username: newUsername || username,
       bio,
       profile_picture_url: profilePictureUrl.trim() || null,
       sosmed,
-    });
+    })
 
-    // Update profile picture URL (allow clearing)
-    if (profilePictureUrl.trim() !== (currentProfilePictureUrl || '').trim()) {
-      const { error: errPicture } = await updateProfilePicture(userId, profilePictureUrl);
+    if (profilePictureUrl.trim() !== (currentProfilePictureUrl || "").trim()) {
+      const { error: errPicture } = await updateProfilePicture(userId, profilePictureUrl)
       if (errPicture) {
-        setError(errPicture);
-        setLoading(false);
-        return;
+        setError(errPicture)
+        setLoading(false)
+        return
       }
     }
 
-    // Update bio
     if (bio.trim() !== "") {
-      const { error: errBio } = await updateBio(userId, bio);
+      const { error: errBio } = await updateBio(userId, bio)
       if (errBio) {
-        setError(errBio);
-        setLoading(false);
-        return;
+        setError(errBio)
+        setLoading(false)
+        return
       }
     }
 
-    // Update sosmed
-    if (Object.values(sosmed).some((v) => v && v.trim() !== "")) {
-      const { error: errSosmed } = await updateSosmed(userId, sosmed);
+    if (Object.values(sosmed).some((value) => value && value.trim() !== "")) {
+      const { error: errSosmed } = await updateSosmed(userId, sosmed)
       if (errSosmed) {
-        setError(errSosmed);
-        setLoading(false);
-        return;
+        setError(errSosmed)
+        setLoading(false)
+        return
       }
     }
 
-    setSuccess("Profile updated!");
-    onSaved?.();
-    setLoading(false);
-  };
+    setSuccess("Profile updated!")
+    onSaved?.()
+    setLoading(false)
+  }
 
-  // Reset fields to current values when modal opened
-  const handleOpenChange = (val: boolean) => {
-    setOpen(val);
-    if (val) {
-      setError("");
-      setSuccess("");
-      setUsername(currentUsername);
-      setBio(currentBio || "");
-      setProfilePictureUrl(currentProfilePictureUrl || "");
-      setSosmed(currentSosmed || {});
+  const handleOpenChange = (value: boolean) => {
+    setOpen(value)
+    if (value) {
+      setError("")
+      setSuccess("")
+      setUsername(currentUsername)
+      setBio(currentBio || "")
+      setProfilePictureUrl(currentProfilePictureUrl || "")
+      setSosmed(currentSosmed || {})
     }
-  };
+  }
 
   return (
     <BaseModal
       open={open}
       onOpenChange={handleOpenChange}
       size="2xl"
-      trigger={<Button className={triggerButtonClass}>Edit Profile</Button>}
+      contentClassName="h-auto max-h-[82vh]"
+      trigger={
+        <Button className={triggerButtonClass}>
+          <PencilLine size={16} aria-hidden="true" />
+          Edit Profile
+        </Button>
+      }
     >
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
         <ModalHeader
-          title="Edit Profile"
-          description="Update your profile info below."
+          title={
+            <span className="inline-flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-500">
+                <PencilLine size={17} />
+              </span>
+              Edit Profile
+            </span>
+          }
+          description="Keep your handle, bio, and public links clean for the scoreboard."
+          className="bg-white/80 px-4 py-3 dark:bg-[#0d1220]/90 md:px-5"
+          titleClassName="text-lg font-black"
+          descriptionClassName="text-xs"
         />
 
-        <ModalBody>
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <label htmlFor="edit-username" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Username
-              </label>
-              <Input
+        <ModalBody className="space-y-4 px-4 py-4 md:px-5">
+          <ProfileSection title="Profile">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ProfileField
                 id="edit-username"
+                label="Username"
+                icon={User}
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={setUsername}
                 placeholder="Username"
                 disabled={loading}
-                className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                autoComplete="off"
                 maxLength={32}
               />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="edit-bio" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Bio
-              </label>
-              <Input
-                id="edit-bio"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Bio (deskripsi singkat)"
-                disabled={loading}
-                className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                maxLength={200}
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="edit-profile-picture" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Profile Picture URL (optional)
-              </label>
-              <Input
+              <ProfileField
                 id="edit-profile-picture"
+                label="Avatar URL"
+                icon={ImageIcon}
                 value={profilePictureUrl}
-                onChange={(e) => setProfilePictureUrl(e.target.value)}
+                onChange={setProfilePictureUrl}
                 placeholder="https://..."
                 disabled={loading}
-                className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                 maxLength={512}
+                type="url"
+              />
+              <div className="sm:col-span-2">
+              <ProfileField
+                id="edit-bio"
+                label="Bio"
+                icon={MessageCircle}
+                value={bio}
+                onChange={setBio}
+                placeholder="Short player bio"
+                disabled={loading}
+                maxLength={200}
+              />
+              </div>
+            </div>
+          </ProfileSection>
+
+          <ProfileSection title="Social Links">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ProfileField
+                id="edit-linkedin"
+                label="LinkedIn"
+                icon={Linkedin}
+                value={sosmed.linkedin || ""}
+                onChange={(value) => setSosmed((current) => ({ ...current, linkedin: value }))}
+                placeholder="LinkedIn username/link"
+                disabled={loading}
+                maxLength={64}
+              />
+              <ProfileField
+                id="edit-instagram"
+                label="Instagram"
+                icon={Instagram}
+                value={sosmed.instagram || ""}
+                onChange={(value) => setSosmed((current) => ({ ...current, instagram: value }))}
+                placeholder="Instagram username/link"
+                disabled={loading}
+                maxLength={64}
+              />
+              <ProfileField
+                id="edit-discord"
+                label="Discord"
+                icon={MessageCircle}
+                value={sosmed.discord || ""}
+                onChange={(value) => setSosmed((current) => ({ ...current, discord: value }))}
+                placeholder="Discord username"
+                disabled={loading}
+                maxLength={64}
+              />
+              <ProfileField
+                id="edit-web"
+                label="Website"
+                icon={Globe}
+                value={sosmed.web || ""}
+                onChange={(value) => setSosmed((current) => ({ ...current, web: value }))}
+                placeholder="Website link"
+                disabled={loading}
+                maxLength={128}
               />
             </div>
+          </ProfileSection>
 
-            <div className="space-y-2">
-              <div className="mb-1 mt-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Sosial Media</div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <label htmlFor="edit-linkedin" className="block text-xs font-medium text-gray-600 dark:text-gray-300">
-                    LinkedIn
-                  </label>
-                  <Input
-                    id="edit-linkedin"
-                    value={sosmed.linkedin || ""}
-                    onChange={(e) => setSosmed((s) => ({ ...s, linkedin: e.target.value }))}
-                    placeholder="LinkedIn username/link"
-                    disabled={loading}
-                    className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                    maxLength={64}
-                  />
-                </div>
+          {authInfo.length > 0 ? (
+            <ProfileSection title="Login Methods">
+              <AuthProviders authInfo={authInfo} />
+            </ProfileSection>
+          ) : null}
 
-                <div className="space-y-1">
-                  <label htmlFor="edit-instagram" className="block text-xs font-medium text-gray-600 dark:text-gray-300">
-                    Instagram
-                  </label>
-                  <Input
-                    id="edit-instagram"
-                    value={sosmed.instagram || ""}
-                    onChange={(e) => setSosmed((s) => ({ ...s, instagram: e.target.value }))}
-                    placeholder="Instagram username/link"
-                    disabled={loading}
-                    className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                    maxLength={64}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="edit-discord" className="block text-xs font-medium text-gray-600 dark:text-gray-300">
-                    Discord
-                  </label>
-                  <Input
-                    id="edit-discord"
-                    value={sosmed.discord || ""}
-                    onChange={(e) => setSosmed((s) => ({ ...s, discord: e.target.value }))}
-                    placeholder="Discord username#tag"
-                    disabled={loading}
-                    className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                    maxLength={64}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label htmlFor="edit-web" className="block text-xs font-medium text-gray-600 dark:text-gray-300">
-                    Website
-                  </label>
-                  <Input
-                    id="edit-web"
-                    value={sosmed.web || ""}
-                    onChange={(e) => setSosmed((s) => ({ ...s, web: e.target.value }))}
-                    placeholder="Website link"
-                    disabled={loading}
-                    className="border-gray-300 bg-white text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-                    maxLength={128}
-                  />
-                </div>
-              </div>
+          {error ? (
+            <div className="flex items-start gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 p-3 text-sm font-semibold text-red-600 dark:text-red-400">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
             </div>
+          ) : null}
 
-            <AuthProviders authInfo={authInfo} />
-
-            {error ? (
-              <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-sm font-semibold text-blue-600 dark:text-blue-400">
-                {error}
-              </div>
-            ) : null}
-
-            {success ? (
-              <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-sm font-semibold text-blue-600 dark:text-blue-400">
-                {success}
-              </div>
-            ) : null}
-          </div>
+          {success ? (
+            <div className="flex items-start gap-2 rounded-2xl border border-green-500/20 bg-green-500/10 p-3 text-sm font-semibold text-green-600 dark:text-green-400">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{success}</span>
+            </div>
+          ) : null}
         </ModalBody>
 
-        <ModalFooter contentClassName="sm:justify-between">
-          <Link href="/profile/password" className="text-sm text-primary-600 hover:underline dark:text-primary-400">
+        <ModalFooter className="px-4 py-3 md:px-5" contentClassName="sm:justify-between">
+          <Link
+            href="/profile/password"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white/60 px-3 text-sm font-semibold text-gray-600 shadow-sm backdrop-blur transition hover:border-blue-500/30 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:border-gray-800 dark:bg-[#111622]/60 dark:text-gray-300 dark:hover:text-blue-400"
+          >
+            <KeyRound size={15} />
             Change Password
           </Link>
 
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 font-semibold text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400 sm:w-auto"
+            className="h-10 w-full gap-2 rounded-xl bg-blue-600 px-5 font-bold text-white shadow-lg shadow-blue-500/15 transition hover:bg-blue-500 disabled:opacity-60 sm:w-auto"
           >
-            {loading ? "Saving..." : "Save"}
+            <Save size={15} />
+            {loading ? "Saving..." : "Save Changes"}
           </Button>
         </ModalFooter>
       </form>
     </BaseModal>
-  );
+  )
 }

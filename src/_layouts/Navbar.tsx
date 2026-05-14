@@ -105,7 +105,11 @@ export default function Navbar() {
           <div className="flex justify-between h-14 items-center">
             {/* Logo */}
             <div className="flex items-center space-x-8">
-              <Link href="/" className="flex items-center gap-2 group" data-tour="navbar-logo">
+              <Link
+                href="/"
+                className="group flex items-center gap-2 caret-transparent rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0"
+                data-tour="navbar-logo"
+              >
                 <ImageWithFallback
                   src={APP.image_logo}
                   alt={`${APP.shortName} logo`}
@@ -268,7 +272,11 @@ export default function Navbar() {
               <div className="hidden sm:flex items-center space-x-3">
                 {user ? (
                   <>
-                    <Link href="/profile" className="flex items-center gap-2 group" data-tour="navbar-profile">
+                    <Link
+                      href="/profile"
+                      className="group flex items-center gap-2 caret-transparent rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0"
+                      data-tour="navbar-profile"
+                    >
                       <ImageWithFallback src={avatarSrc} alt={user.username} size={36} className="rounded-full" />
                       <span
                         className={`text-[15px] font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition-all duration-150 group-hover:text-blue-500 dark:group-hover:text-blue-400 truncate whitespace-nowrap max-w-[100px] md:max-w-[160px] block`}

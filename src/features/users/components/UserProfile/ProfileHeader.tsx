@@ -37,10 +37,10 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   return (
     <section
-      className="mx-auto flex w-full max-w-6xl flex-col gap-4 md:flex-row md:items-start md:justify-between"
+      className="mx-auto flex w-full max-w-7xl flex-col gap-3 md:flex-row md:items-start md:justify-between"
     >
-      <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-        <div className="relative mx-auto flex h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md dark:border-gray-900 sm:mx-0 aspect-square">
+      <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+        <div className="relative mx-auto flex h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md dark:border-gray-900 sm:mx-0 sm:h-28 sm:w-28 aspect-square">
           <ImageWithFallback
             src={avatarSrc}
             alt={userDetail.username}
@@ -67,17 +67,17 @@ export default function ProfileHeader({
             />
           </div>
 
-          <p className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base">
+          <p className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">
             {userDetail.bio?.trim() || 'CTF player on NXCTF'}
           </p>
 
-          <div className="mt-2 flex flex-col items-center justify-between gap-4 w-full sm:flex-row sm:items-start">
+          <div className="mt-1 flex w-full flex-col items-center justify-between gap-3 sm:flex-row sm:items-start">
             <div className="flex flex-wrap justify-center items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 sm:flex-nowrap sm:justify-start sm:text-xs">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-3 py-1.5 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-2.5 py-1 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
                 <CalendarDays className="h-3.5 w-3.5 text-blue-500" />
                 Joined {userDetail.created_at ? formatRelativeDate(userDetail.created_at) : '-'}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-3 py-1.5 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-2.5 py-1 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
                 <Clock3 className="h-3.5 w-3.5 text-blue-500" />
                 Last login {userDetail.last_login_at ? formatRelativeDate(userDetail.last_login_at) : 'Never'}
               </span>

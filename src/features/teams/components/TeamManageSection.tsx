@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
-import { InfoIcon, Wrench, LogOut, Trash2, Edit2 } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
+import { Copy, Edit2, Eye, EyeOff, KeyRound, LogOut, RefreshCw, Settings2, Trash2 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { SURFACE_GLASS_CARD_CLASS } from '@/shared/styles'
 import EditTeamModal from './EditTeamModal'
@@ -10,7 +10,10 @@ import { TeamInfo } from '../types'
 
 interface TeamManageSectionProps {
   team: TeamInfo
+  canManage?: boolean
   onRenameTeam?: (newName: string) => Promise<{ success: boolean; error?: string }>
+  onCopyInvite?: () => void
+  onRegenerateInvite?: () => void
   onLeaveTeam?: () => void
   onDeleteTeam?: () => void
   busy?: boolean
@@ -18,87 +21,155 @@ interface TeamManageSectionProps {
 
 export default function TeamManageSection({
   team,
+  canManage = false,
   onRenameTeam,
+  onCopyInvite,
+  onRegenerateInvite,
   onLeaveTeam,
   onDeleteTeam,
-  busy
+  busy,
 }: TeamManageSectionProps) {
+  const [showToken, setShowToken] = React.useState(false)
+  const token = team.invite_code || ''
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card className={SURFACE_GLASS_CARD_CLASS}>
-        <CardHeader>
-          <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
-            <InfoIcon size={18} className="text-blue-500" /> Team Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 block mb-2">
-                Display Name
-              </label>
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800">
-                <span className="text-xl font-bold text-gray-900 dark:text-white">{team.name}</span>
-                {onRenameTeam && (
-                  <EditTeamModal
-                    currentName={team.name}
-                    onSave={onRenameTeam}
-                    disabled={busy}
-                    trigger={
-                      <Button variant="ghost" size="icon" disabled={busy} className="h-9 w-9 rounded-xl hover:bg-white dark:hover:bg-gray-800 shadow-sm transition-all">
-                        <Edit2 size={16} className="text-blue-500" />
-                      </Button>
-                    }
-                  />
-                )}
-              </div>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {canManage && (
+        <ManageCard
+          title="Team Settings"
+          icon={<Settings2 size={18} className="text-blue-500" />}
+        >
+          <div className="space-y-2">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+              Display Name
+            </label>
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900/50">
+              <span className="min-w-0 truncate text-lg font-bold text-gray-900 dark:text-white">
+                {team.name}
+              </span>
+              {onRenameTeam && (
+                <EditTeamModal
+                  currentName={team.name}
+                  onSave={onRenameTeam}
+                  disabled={busy}
+                  trigger={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={busy}
+                      className="h-9 w-9 shrink-0 rounded-xl shadow-sm transition-all hover:bg-white dark:hover:bg-gray-800"
+                    >
+                      <Edit2 size={16} className="text-blue-500" />
+                    </Button>
+                  }
+                />
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </ManageCard>
+      )}
 
-      <Card className={SURFACE_GLASS_CARD_CLASS}>
-        <CardHeader>
-          <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
-            <Wrench size={18} className="text-red-500" /> Danger Zone
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="p-4 rounded-2xl border border-red-100 dark:border-red-900/20 bg-red-50/30 dark:bg-red-900/10 space-y-4">
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-red-600 dark:text-red-400">Exit Team</h4>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                You will lose access to team solves and progress. If you are the captain, you must transfer ownership first.
-              </p>
-            </div>
+      <ManageCard
+        title="Token"
+        icon={<KeyRound size={18} className="text-emerald-500" />}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 p-3 font-mono text-xs dark:border-gray-800 dark:bg-gray-900/50">
+            <span className="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-200">
+              {showToken ? token || '-' : token ? '••••••••' : '-'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowToken((value) => !value)}
+              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:text-blue-500"
+              title={showToken ? 'Hide token' : 'Show token'}
+            >
+              {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+            <button
+              type="button"
+              onClick={onCopyInvite}
+              disabled={busy || !token}
+              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:text-blue-500 disabled:opacity-50"
+              title="Copy token"
+            >
+              <Copy size={14} />
+            </button>
+          </div>
+          {canManage && (
             <Button
               variant="outline"
-              onClick={onLeaveTeam}
+              onClick={onRegenerateInvite}
               disabled={busy}
-              className="w-full border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
+              className="w-full border-emerald-500/30 bg-emerald-500/10 text-xs font-bold uppercase tracking-widest text-emerald-600 hover:bg-emerald-600 hover:text-white dark:text-emerald-400"
             >
-              <LogOut size={14} className="mr-2" /> Leave Team
+              <RefreshCw size={14} className="mr-2" /> Regenerate Token
             </Button>
-          </div>
+          )}
+        </div>
+      </ManageCard>
 
-          <div className="p-4 rounded-2xl border border-red-200 dark:border-red-900/30 bg-red-100/10 dark:bg-red-900/20 space-y-4">
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-red-700 dark:text-red-300">Delete Team</h4>
-              <p className="text-xs text-red-600/60 dark:text-red-400/60 leading-relaxed">
-                Permanently remove the team and all associated data. This action is irreversible.
-              </p>
-            </div>
+      <ManageCard
+        title="Exit Team"
+        icon={<LogOut size={18} className="text-red-500" />}
+      >
+        <div className="space-y-3">
+          <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            Leave this team. If you are the captain, transfer ownership before exiting.
+          </p>
+          <Button
+            variant="outline"
+            onClick={onLeaveTeam}
+            disabled={busy}
+            className="w-full border-red-200 text-xs font-bold uppercase tracking-widest text-red-600 transition-all hover:bg-red-600 hover:text-white dark:border-red-900/30 dark:text-red-400"
+          >
+            <LogOut size={14} className="mr-2" /> Leave Team
+          </Button>
+        </div>
+      </ManageCard>
+
+      {canManage && (
+        <ManageCard
+          title="Delete Team"
+          icon={<Trash2 size={18} className="text-red-600" />}
+        >
+          <div className="space-y-3">
+            <p className="text-xs leading-relaxed text-red-600/70 dark:text-red-400/70">
+              Permanently remove the team and its associated data. This action cannot be undone.
+            </p>
             <Button
               variant="destructive"
               onClick={onDeleteTeam}
               disabled={busy}
-              className="w-full font-bold text-xs uppercase tracking-widest shadow-lg shadow-red-500/20"
+              className="w-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-red-500/20"
             >
-              <Trash2 size={14} className="mr-2" /> Delete Permanently
+              <Trash2 size={14} className="mr-2" /> Delete Team
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </ManageCard>
+      )}
     </div>
+  )
+}
+
+function ManageCard({
+  title,
+  icon,
+  children,
+}: {
+  title: string
+  icon: React.ReactNode
+  children: React.ReactNode
+}) {
+  return (
+    <Card className={SURFACE_GLASS_CARD_CLASS}>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">
+          {icon}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   )
 }

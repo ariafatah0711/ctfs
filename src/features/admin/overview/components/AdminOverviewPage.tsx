@@ -25,10 +25,10 @@ export default function AdminOverviewPage() {
 
   return (
     <AdminPageShell>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <OverviewStatsCards siteInfo={siteInfo} challengeCount={challenges.length} />
 
-        <Card className="bg-white dark:bg-gray-800 pt-5">
+        <Card className="bg-white pt-4 dark:bg-gray-800">
           <CardContent>
             <StatsGraph
               data={activityData}

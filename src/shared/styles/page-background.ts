@@ -14,10 +14,16 @@ export const PAGE_BG_ORB_BOTTOM_RIGHT_CLASS =
   "absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/5 blur-[120px]"
 
 export const PAGE_MAIN_CONTAINER_4XL =
-  "relative z-10 mx-auto max-w-4xl px-4 sm:px-6 py-10"
+  "relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 py-3 sm:py-4"
 
 export const PAGE_MAIN_CONTAINER_5XL =
-  "relative z-10 mx-auto w-full max-w-5xl px-6 py-16"
+  "relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 py-3 sm:py-4"
 
 export const PAGE_MAIN_CONTAINER_6XL =
-  "relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
+  "relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-3 sm:py-4"
+
+export const PAGE_SECTION_GAP_CLASS =
+  "space-y-5"
+
+export const PAGE_SECTION_GAP_COMPACT_CLASS =
+  "space-y-3 md:space-y-4"

@@ -1,5 +1,6 @@
 "use client"
 
+import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/shared/ui/button"
 
@@ -10,7 +11,7 @@ type Props = {
   className?: string
 }
 
-export default function BackButton({ href, label = "Back", onClick, className = '' }: Props) {
+export default function BackButton({ href, label = "Back", onClick, className = "" }: Props) {
   const router = useRouter()
 
   const handleClick = () => {
@@ -29,7 +30,8 @@ export default function BackButton({ href, label = "Back", onClick, className = 
       variant="ghost"
       className={`flex items-center gap-2 text-gray-700 dark:text-gray-200 ${className}`}
     >
-      â† {label}
+      <ArrowLeft size={16} aria-hidden="true" />
+      {label}
     </Button>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Trophy, ListChecks, Sparkles } from 'lucide-react'
+import { CheckCircle2, Trophy, ListChecks } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
@@ -23,7 +23,7 @@ export default function TeamSolves({
   const [showAllSolves, setShowAllSolves] = useState(false)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between px-2">
         <h2 className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
           <CheckCircle2 size={18} className="text-green-500" />
@@ -42,15 +42,15 @@ export default function TeamSolves({
         )}
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid gap-2.5">
         {challenges.length === 0 ? (
           <Card className={`${SURFACE_GLASS_BASE_CLASS} rounded-2xl`}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4">
               <EmptyState
                 icon={<Trophy className="w-full h-full text-gray-400" />}
                 title="No solves yet"
                 description="Challenges solved by your team will appear here."
-                containerHeight="py-8"
+                containerHeight="py-6"
               />
             </CardContent>
           </Card>
@@ -62,9 +62,9 @@ export default function TeamSolves({
       </div>
 
       <Dialog open={showAllSolves} onOpenChange={setShowAllSolves}>
-        <DialogContent className={DIALOG_CONTENT_CLASS_3XL + " fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 !rounded-3xl border-none p-0 overflow-hidden"}>
-          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur-xl sticky top-0 z-10">
-            <DialogTitle className="text-xl font-black uppercase tracking-widest text-gray-900 dark:text-white">
+        <DialogContent className={DIALOG_CONTENT_CLASS_3XL + " fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 !rounded-2xl border-none p-0 overflow-hidden"}>
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white/80 px-5 py-4 backdrop-blur-xl dark:border-gray-800 dark:bg-[#0b0f19]/80">
+            <DialogTitle className="text-base font-black uppercase tracking-widest text-gray-900 dark:text-white sm:text-lg">
               All Team Solves ({challenges.length})
             </DialogTitle>
             <Button
@@ -77,11 +77,11 @@ export default function TeamSolves({
             </Button>
           </div>
 
-          <div className="p-8 pt-4">
+          <div className="p-5 pt-3">
             {challenges.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">No solves yet.</div>
+              <div className="py-8 text-center text-gray-500 dark:text-gray-400">No solves yet.</div>
             ) : (
-              <div className="overflow-y-auto max-h-[60vh] space-y-3 pr-2 scroll-hidden">
+              <div className="scroll-hidden max-h-[60vh] space-y-2.5 overflow-y-auto pr-2">
                 {challenges.map((c) => (
                   <TeamSolveRow key={c.challenge_id} challenge={c} />
                 ))}

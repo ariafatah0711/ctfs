@@ -14,12 +14,12 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
     return (
       <div className="space-y-2">
         <div className="group relative">
-          <Icon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400" />
+          <Icon className="pointer-events-none absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400" />
           <input
             ref={ref}
             className={cn(
               SURFACE_GLASS_INPUT_CLASS,
-              'px-11',
+              'relative z-0 px-11',
               rightElement && 'pr-12',
               error && 'border-red-400/60 focus:border-red-400 focus:ring-red-500/20 dark:border-red-500/50',
               className

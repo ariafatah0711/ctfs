@@ -1,5 +1,6 @@
 'use client'
 
+import type { CSSProperties } from 'react'
 import { Calendar, Clock } from 'lucide-react'
 import Image from 'next/image'
 import {
@@ -40,7 +41,8 @@ export default function EventCard({
   return (
     <div
       key={event.id}
-      className="relative group cursor-pointer h-full transition-transform duration-200 hover:-translate-y-1 active:scale-[0.98]"
+      style={{ '--card-reveal-delay': `${delay}s` } as CSSProperties}
+      className="event-card-reveal relative group cursor-pointer h-full transition-transform duration-200 hover:-translate-y-1 active:scale-[0.98]"
       onClick={onSelect}
     >
       {/* Glow Effect on Hover */}

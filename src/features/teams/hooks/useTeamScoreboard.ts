@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/features/teams/services/team.service'
+import { getMyTeam, getTeamScoreboard, getTopTeamProgressByNames, getTopTeamUniqueProgressByNames } from '@/features/teams/services/team.service'
 import { buildScoreboard, getOrderedProgressSeries } from '@/features/scoreboard/lib/build-scoreboard'
 import { TeamScoreboardEntry, TeamProgressSeries } from '../types'
 
@@ -7,6 +7,7 @@ export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEv
   const [loading, setLoading] = useState(true)
   const [entries, setEntries] = useState<TeamScoreboardEntry[]>([])
   const [series, setSeries] = useState<TeamProgressSeries[]>([])
+  const [currentTeamName, setCurrentTeamName] = useState<string | null>(null)
   const entriesCountRef = useRef(0)
 
   useEffect(() => {
@@ -18,7 +19,13 @@ export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEv
       const p_event_id = (selectedEvent === 'all' || selectedEvent === 'main') ? null : String(selectedEvent)
       const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
 
-      const { entries: data, error: scoreboardError } = await getTeamScoreboard(200, 0, p_event_id, p_event_mode)
+      const [{ entries: data, error: scoreboardError }, teamResult] = await Promise.all([
+        getTeamScoreboard(200, 0, p_event_id, p_event_mode),
+        getMyTeam(p_event_id, p_event_mode),
+      ])
+
+      setCurrentTeamName(teamResult.team?.name ?? null)
+
       if (scoreboardError) {
         entriesCountRef.current = 0
         setEntries([])
@@ -63,6 +70,7 @@ export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEv
   return {
     loading,
     entries,
-    series
+    series,
+    currentTeamName,
   }
 }

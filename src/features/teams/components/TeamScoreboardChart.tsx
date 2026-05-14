@@ -1,12 +1,5 @@
-import dynamic from 'next/dynamic'
-import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
-import { Skeleton } from '@/shared/ui/skeleton'
+import { BaseScoreboardChart } from '@/features/scoreboard/components/base'
 import { TeamProgressSeries } from '../types'
-
-const Plot = dynamic(() => import('react-plotly.js'), {
-  ssr: false,
-  loading: () => <Skeleton className="h-80 w-full" />,
-})
 
 interface TeamScoreboardChartProps {
   series: TeamProgressSeries[]
@@ -42,53 +35,12 @@ const TeamScoreboardChart: React.FC<TeamScoreboardChartProps> = ({ series, isDar
   })
 
   return (
-    <Card className="bg-white/60 dark:bg-[#111622]/60 backdrop-blur-xl border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)] transition-all duration-300">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold text-center text-gray-900 dark:text-white">
-          Top 10 Teams
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Plot
-          data={chartData}
-          layout={{
-            dragmode: false,
-            autosize: true,
-            xaxis: {
-              type: 'date',
-              autorange: true,
-              tickfont: { size: 10, color: isDark ? '#e5e7eb' : '#111' },
-              tickformat: '%Y-%m-%d %H:%M',
-              gridcolor: isDark ? '#374151' : '#e5e7eb',
-              linecolor: isDark ? '#e5e7eb' : '#111',
-            },
-            yaxis: {
-              autorange: true,
-              rangemode: 'tozero',
-              automargin: true,
-              title: { text: scoreLabel, font: { size: 12, color: isDark ? '#e5e7eb' : '#111' } },
-              tickfont: { size: 10, color: isDark ? '#e5e7eb' : '#111' },
-              gridcolor: isDark ? '#374151' : '#e5e7eb',
-              linecolor: isDark ? '#e5e7eb' : '#111',
-            },
-            legend: {
-              orientation: 'h',
-              x: 0.5,
-              xanchor: 'center',
-              y: -0.2,
-              font: { size: 10, color: isDark ? '#e5e7eb' : '#111' },
-            },
-            margin: { t: 20, r: 10, l: 30, b: 40 },
-            plot_bgcolor: 'transparent',
-            paper_bgcolor: 'transparent',
-          }}
-          style={{ width: '100%', height: '320px' }}
-          useResizeHandler
-          config={{ scrollZoom: false, displayModeBar: false }}
-          className="dark:!bg-gray-900 dark:!text-gray-100"
-        />
-      </CardContent>
-    </Card>
+    <BaseScoreboardChart
+      title="Top 10 Teams"
+      traces={chartData}
+      isDark={isDark}
+      yAxisTitle={scoreLabel}
+    />
   )
 }
 

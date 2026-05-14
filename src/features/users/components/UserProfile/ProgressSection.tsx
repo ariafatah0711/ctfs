@@ -82,7 +82,7 @@ export default function ProgressSection({
       icon={BarChart3}
       title="Progress"
       description="Solved challenge coverage by category and difficulty."
-      contentClassName="space-y-6"
+      contentClassName="space-y-4"
     >
       {visibleCategories.length === 0 ? (
         <UserEmptyState
@@ -91,11 +91,11 @@ export default function ProgressSection({
           description="Solve a challenge to start filling this progress board."
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {visibleCategories.map(({ category, total_challenges, solvedCount, progress }) => (
             <div
               key={category}
-              className="rounded-xl border border-gray-200 bg-white/40 p-4 backdrop-blur-sm dark:border-white/10 dark:bg-white/5"
+              className="rounded-xl border border-gray-200 bg-white/40 p-3 backdrop-blur-sm dark:border-white/10 dark:bg-white/5"
             >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <span className="truncate text-sm font-semibold text-gray-900 dark:text-white">
@@ -117,7 +117,7 @@ export default function ProgressSection({
       )}
 
       {activeDifficulties.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white/40 p-4 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
+        <div className="rounded-xl border border-gray-200 bg-white/40 p-3 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-900 dark:text-white">
               Difficulty Progress

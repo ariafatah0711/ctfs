@@ -69,7 +69,7 @@ export default function TeamDetailPage() {
 
   if (authLoading) {
     return (
-      <div className="flex justify-center py-16">
+      <div className="flex justify-center py-10">
         <Loader fullscreen />
       </div>
     )
@@ -80,10 +80,10 @@ export default function TeamDetailPage() {
   return (
     <PageBackground
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
-      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-6`}
+      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-5`}
     >
       {loading && !team && (
-        <div className="flex justify-center py-16">
+        <div className="flex justify-center py-10">
           <Loader />
         </div>
       )}

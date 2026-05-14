@@ -43,7 +43,7 @@ export default function AdminAdminsPage() {
   return (
     <>
       <AdminPageShell>
-        <div className="space-y-6">
+        <div className="space-y-5">
           <GlobalAdminsCard admins={globalAdmins} />
 
           <EventAdminsCard admins={eventAdmins} onAskRemove={askRemove} />

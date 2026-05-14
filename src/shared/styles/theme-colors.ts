@@ -14,7 +14,13 @@ export const THEME_PRIMARY_BORDER_CLASS =
   'border-blue-500/30'
 
 export const THEME_PRIMARY_RING_CLASS =
-  'focus:border-blue-500/70 focus:ring-2 focus:ring-blue-500/30'
+  'focus-visible:outline-none focus-visible:border-blue-500/70 focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0'
+
+export const THEME_CONTROL_FOCUS_CLASS =
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0'
+
+export const THEME_CONTROL_CARET_CLASS =
+  'caret-transparent'
 
 export const THEME_PRIMARY_SELECTION_CLASS =
   'selection:bg-blue-500/30'
@@ -38,7 +44,7 @@ export const THEME_SECONDARY_BORDER_CLASS =
   'border-orange-500/30'
 
 export const THEME_SECONDARY_RING_CLASS =
-  'focus:border-orange-500/70 focus:ring-2 focus:ring-orange-500/30'
+  'focus-visible:outline-none focus-visible:border-orange-500/70 focus-visible:ring-2 focus-visible:ring-orange-500/40 focus-visible:ring-offset-0'
 
 export const THEME_SECONDARY_SHADOW_CLASS =
   'shadow-orange-500/10 hover:shadow-orange-500/20'

@@ -23,19 +23,19 @@ export default function ScoreboardAllPage() {
 
   return (
     <div className="">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-4">
+      <div className="mx-auto w-full max-w-7xl px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+        <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
             {
               // Back to top 100 (selection is persisted globally; no URL param)
             }
             <BackButton href={'/scoreboard'} label="Back to Top 100" />
-            <div>
+            <div className="w-full sm:w-auto">
               <EventSelect
                 value={selectedEvent}
                 onChange={setSelectedEvent}
                 events={startedEvents}
-                className="min-w-[180px]"
+                className="w-full max-w-full sm:w-[180px]"
               />
             </div>
           </div>
@@ -45,7 +45,7 @@ export default function ScoreboardAllPage() {
         </div>
 
         {loading && leaderboard.length === 0 ? (
-          <div className="flex justify-center py-16">
+          <div className="flex justify-center py-10">
             <Loader color={THEME_PRIMARY_TEXT_CLASS} />
           </div>
         ) : (

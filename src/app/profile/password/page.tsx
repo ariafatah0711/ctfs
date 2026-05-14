@@ -30,9 +30,7 @@ export default function ChangePasswordPage() {
         <div className="w-full max-w-md">
           <AuthCard>
             <AuthHeader
-              badge="Security"
               title="Login required"
-              subtitle="You need to sign in before changing your password"
             />
             <Link
               href="/login"

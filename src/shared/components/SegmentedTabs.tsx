@@ -20,24 +20,24 @@ type SegmentedTabsProps<T extends string> = {
 
 const containerClasses: Record<SegmentedTabsVariant, string> = {
   pill:
-    'inline-flex rounded-full border border-gray-200 bg-white/50 p-1 backdrop-blur dark:border-white/10 dark:bg-gray-800/50',
+    'inline-flex max-w-full flex-nowrap overflow-x-auto rounded-full border border-gray-200 bg-white/50 p-1 backdrop-blur scroll-hidden dark:border-white/10 dark:bg-gray-800/50',
   panel:
-    'flex w-fit gap-1 rounded-xl border border-gray-200 bg-white/40 p-1.5 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/40',
+    'flex w-fit max-w-full flex-nowrap gap-1 overflow-x-auto rounded-xl border border-gray-200 bg-white/40 p-1.5 backdrop-blur-sm scroll-hidden dark:border-gray-800 dark:bg-gray-900/40',
   panelLarge:
-    'flex gap-1 rounded-2xl border border-gray-200 bg-white/40 p-1 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/40',
+    'flex max-w-full flex-nowrap gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white/40 p-1 backdrop-blur-sm scroll-hidden dark:border-gray-800 dark:bg-gray-900/40',
   compact:
-    'flex gap-1 rounded-xl border border-gray-200 bg-black/5 p-1 dark:border-gray-800 dark:bg-white/5',
+    'flex max-w-full flex-nowrap gap-1 overflow-x-auto rounded-xl border border-gray-200 bg-black/5 p-1 scroll-hidden dark:border-gray-800 dark:bg-white/5',
 }
 
 const buttonClasses: Record<SegmentedTabsVariant, string> = {
   pill:
-    'flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200',
+    'flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold caret-transparent transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0',
   panel:
-    'flex items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-bold transition-all',
+    'flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold caret-transparent transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0 sm:px-5',
   panelLarge:
-    'flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all duration-300',
+    'flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-6 py-2.5 text-[10px] font-black uppercase tracking-widest caret-transparent transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0',
   compact:
-    'rounded-lg px-3 py-1.5 text-center text-xs font-bold transition-all',
+    'shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-center text-xs font-bold caret-transparent transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-0',
 }
 
 const activeClasses: Record<SegmentedTabsVariant, string> = {
@@ -88,7 +88,7 @@ export function SegmentedTabs<T extends string>({
             onClick={() => onChange(item.value)}
             className={cn(
               buttonClasses[variant],
-              stretch && 'flex-1',
+              stretch && 'flex-1 basis-0',
               isActive ? activeClasses[variant] : inactiveClasses[variant]
             )}
           >

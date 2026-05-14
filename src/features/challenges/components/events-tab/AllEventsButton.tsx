@@ -1,20 +1,24 @@
 'use client'
 
+import type { CSSProperties } from 'react'
 import { Layers } from 'lucide-react'
 
 type AllEventsButtonProps = {
   selected: boolean
+  delay?: number
   onSelect: () => void
 }
 
 export default function AllEventsButton({
   selected,
+  delay = 0,
   onSelect,
 }: AllEventsButtonProps) {
   return (
     <button
       onClick={onSelect}
-      className={`relative w-full px-5 py-4 rounded-2xl border backdrop-blur-md transition-all duration-200 text-left group hover:-translate-y-1 active:scale-[0.98]
+      style={{ '--card-reveal-delay': `${delay}s` } as CSSProperties}
+      className={`event-card-reveal relative w-full px-5 py-4 rounded-2xl border backdrop-blur-md transition-all duration-200 text-left group hover:-translate-y-1 active:scale-[0.98]
         ${selected
           ? 'bg-blue-500/[0.03] border-blue-500/50 shadow-sm'
           : 'bg-white/40 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 hover:border-blue-500/50 shadow-sm'}
