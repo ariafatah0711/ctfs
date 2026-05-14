@@ -1,9 +1,10 @@
 'use client'
 
 import React from 'react'
-import { Lock, Zap } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, Zap } from 'lucide-react'
 import APP from '@/config'
 import { formatEventTimingLabel } from '@/shared/lib'
+import { cn } from '@/shared/lib/utils'
 import {
   SURFACE_FILTER_ITEM_CLASS,
   SURFACE_FILTER_ITEM_ACTIVE_CLASS,
@@ -26,6 +27,7 @@ type EventFilterPillsProps = {
   upcomingVisibilityWindowDays: number | null
   isEventDirty: boolean
   anyFilterDirty: boolean
+  className?: string
 }
 
 export default function EventFilterPills({
@@ -39,7 +41,14 @@ export default function EventFilterPills({
   upcomingVisibilityWindowDays,
   isEventDirty,
   anyFilterDirty,
+  className,
 }: EventFilterPillsProps) {
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const [scrollState, setScrollState] = React.useState({
+    hasOverflow: false,
+    canScrollLeft: false,
+    canScrollRight: false,
+  })
   const mainLabel = String(APP.eventMainLabel || 'Main')
   const sortedEvents = React.useMemo(() => {
     return getVisibleSortedEvents({
@@ -69,14 +78,69 @@ export default function EventFilterPills({
     upcoming: '',
   }
 
+  const updateScrollState = React.useCallback(() => {
+    const node = scrollRef.current
+    if (!node) return
+
+    const maxScrollLeft = node.scrollWidth - node.clientWidth
+    setScrollState({
+      hasOverflow: maxScrollLeft > 2,
+      canScrollLeft: node.scrollLeft > 2,
+      canScrollRight: node.scrollLeft < maxScrollLeft - 2,
+    })
+  }, [])
+
+  React.useEffect(() => {
+    updateScrollState()
+
+    const node = scrollRef.current
+    if (!node) return
+
+    const resizeObserver = new ResizeObserver(updateScrollState)
+    resizeObserver.observe(node)
+    window.addEventListener('resize', updateScrollState)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateScrollState)
+    }
+  }, [sortedEvents, hideAllEventOption, hideMainEventOption, updateScrollState])
+
+  const scrollEvents = (direction: 'left' | 'right') => {
+    const node = scrollRef.current
+    if (!node) return
+
+    node.scrollBy({
+      left: direction === 'left' ? -220 : 220,
+      behavior: 'smooth',
+    })
+  }
+
   return (
-    <div data-tour="challenge-event-selector" className="mb-3">
-      <div className="w-full flex flex-row flex-nowrap sm:flex-wrap gap-2 overflow-x-auto sm:overflow-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 py-2">
+    <div data-tour="challenge-event-selector" className={cn('flex min-w-0 items-center gap-1.5', className)}>
+      {scrollState.hasOverflow && (
+        <button
+          type="button"
+          onClick={() => scrollEvents('left')}
+          disabled={!scrollState.canScrollLeft}
+          className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition disabled:opacity-35 ${SURFACE_FILTER_ITEM_CLASS}`}
+          aria-label="Scroll events left"
+          title="Scroll events left"
+        >
+          <ChevronLeft size={15} />
+        </button>
+      )}
+
+      <div
+        ref={scrollRef}
+        onScroll={updateScrollState}
+        className="scroll-hidden flex min-w-0 flex-1 flex-row flex-nowrap gap-1.5 overflow-x-auto py-0.5"
+      >
         {!hideAllEventOption && (
           <button
             type="button"
             onClick={() => onEventChange('all')}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition ${selectedEventId === 'all' ? SURFACE_FILTER_ITEM_ACTIVE_CLASS : SURFACE_FILTER_ITEM_CLASS} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
+            className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide transition ${selectedEventId === 'all' ? SURFACE_FILTER_ITEM_ACTIVE_CLASS : SURFACE_FILTER_ITEM_CLASS} ${!isEventDirty && anyFilterDirty ? 'opacity-90' : ''}`}
           >
             All
           </button>
@@ -85,7 +149,7 @@ export default function EventFilterPills({
           <button
             type="button"
             onClick={() => onEventChange(null)}
-            className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition ${!selectedEventId ? SURFACE_FILTER_ITEM_ACTIVE_CLASS : SURFACE_FILTER_ITEM_CLASS}`}
+            className={`shrink-0 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide transition ${!selectedEventId ? SURFACE_FILTER_ITEM_ACTIVE_CLASS : SURFACE_FILTER_ITEM_CLASS}`}
           >
             {mainLabel}
           </button>
@@ -106,7 +170,7 @@ export default function EventFilterPills({
               type="button"
               onClick={() => onEventChange(event.id)}
               className={`
-                shrink-0 whitespace-nowrap px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition flex items-center gap-1
+                flex shrink-0 items-center gap-1 whitespace-nowrap rounded-lg px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide transition
                 ${isEndedButAlwaysVisible && !isSelected ? 'text-[10px] opacity-40 border-dashed' : ''}
                 ${isSelected
                   ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
@@ -143,6 +207,19 @@ export default function EventFilterPills({
           )
         })}
       </div>
+
+      {scrollState.hasOverflow && (
+        <button
+          type="button"
+          onClick={() => scrollEvents('right')}
+          disabled={!scrollState.canScrollRight}
+          className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition disabled:opacity-35 ${SURFACE_FILTER_ITEM_CLASS}`}
+          aria-label="Scroll events right"
+          title="Scroll events right"
+        >
+          <ChevronRight size={15} />
+        </button>
+      )}
 
       {showEventState && selectedTimingLabel && (
         <div className="sm:hidden mt-2 text-xs text-gray-600 dark:text-gray-300">

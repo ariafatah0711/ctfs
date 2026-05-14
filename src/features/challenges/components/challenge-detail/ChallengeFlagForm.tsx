@@ -51,7 +51,7 @@ export default function ChallengeFlagForm({
           {challenge.flag_placeholder && placeholders[challenge.id] && (
             <div
               ref={overlayRef}
-              className="absolute inset-0 pl-4 pr-6 py-2.5 pointer-events-none text-gray-400 dark:text-gray-600 opacity-50 font-mono text-sm overflow-hidden whitespace-pre flex items-center"
+              className="pointer-events-none absolute inset-0 flex select-none items-center overflow-hidden whitespace-pre pl-4 pr-6 py-2.5 font-mono text-sm text-gray-400 opacity-50 dark:text-gray-600"
             >
               <span className="invisible">{flagInputs[challenge.id] || ''}</span>
               <span>{placeholders[challenge.id].slice((flagInputs[challenge.id] || '').length)}</span>
@@ -85,7 +85,7 @@ export default function ChallengeFlagForm({
             !flagInputs[challenge.id]?.trim() ||
             (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
           }
-          className="flex items-center justify-center px-6 h-[38px] rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 text-white text-[13px] font-black uppercase tracking-widest shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:from-pink-400 hover:to-pink-500 transition-all disabled:opacity-30 active:scale-95 shrink-0"
+          className="flex h-[38px] shrink-0 select-none items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 px-6 text-[13px] font-black uppercase tracking-widest text-white shadow-lg shadow-pink-500/20 transition-all hover:from-pink-400 hover:to-pink-500 hover:shadow-pink-500/40 active:scale-95 disabled:opacity-30"
         >
           {submitting[challenge.id] ? '...' : 'Submit'}
         </button>

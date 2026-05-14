@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import APP from '@/config'
 
 import { Loader } from '@/shared/components'
 import PageBackground from '@/shared/components/PageBackground'
-import { useChallengeFocusMode } from '../hooks/useChallengeFocusMode'
+import { getChallengeGuideSeenSetting } from '@/shared/lib'
 import { useChallengesPageData } from '../hooks/useChallengesPageData'
-import EventsTab from './EventsTab'
-import ChallengePageTabs from './challenges-page/ChallengePageTabs'
+import {
+  CHALLENGE_TOUR_RESTART_EVENT,
+  CHALLENGE_TOUR_VERSION,
+} from '../lib/challenge-tour-steps'
 import ChallengesTabPanel from './challenges-page/ChallengesTabPanel'
+import EventsTabPanel from './challenges-page/EventsTabPanel'
 
 const ChallengeDialogs = dynamic(() => import('./challenges-page/ChallengeDialogs'), {
   ssr: false,
@@ -50,11 +52,26 @@ function useIdleMount(delay = 1200) {
 export default function ChallengesPage() {
   const data = useChallengesPageData()
   const renderDeferredDecorations = useIdleMount()
+  const [renderJoyride, setRenderJoyride] = useState(false)
   const renderDialogs = data.isJoinDialogOpen || !!data.selectedChallenge
-  const { focusMode, setFocusMode } = useChallengeFocusMode({
-    currentTab: data.currentTab,
-    eventId: data.eventId,
-  })
+
+  useEffect(() => {
+    if (!data.user || data.currentTab !== 'challenges') return
+    if (!window.matchMedia('(min-width: 1280px)').matches) return
+
+    const shouldRenderTour = !getChallengeGuideSeenSetting(data.user.id, CHALLENGE_TOUR_VERSION)
+    if (shouldRenderTour) setRenderJoyride(true)
+  }, [data.currentTab, data.user])
+
+  useEffect(() => {
+    const handleTourRestart = () => {
+      if (!window.matchMedia('(min-width: 1280px)').matches) return
+      setRenderJoyride(true)
+    }
+
+    window.addEventListener(CHALLENGE_TOUR_RESTART_EVENT, handleTourRestart)
+    return () => window.removeEventListener(CHALLENGE_TOUR_RESTART_EVENT, handleTourRestart)
+  }, [])
 
   useEffect(() => {
     if (data.currentTab !== 'challenges') return
@@ -91,30 +108,6 @@ export default function ChallengesPage() {
   if (data.loading) return <Loader fullscreen />
   if (!data.user) return null
 
-  const getSelectedEventName = () => {
-    if (data.eventId === 'all') return 'All Challenges'
-    if (data.eventId === null) return APP.eventMainLabel || 'Platform Default'
-    if (data.selectedEventObj) return data.selectedEventObj.name
-    return data.eventId ? 'Selected Event' : undefined
-  }
-
-  const getSelectedEventStats = () => {
-    if (!data.challenges) return null
-
-    const currentEventChallenges = data.eventId === 'all'
-      ? data.challenges
-      : data.eventId === null
-        ? data.challenges.filter(c => !c.event_id)
-        : data.challenges.filter(c => c.event_id === data.eventId)
-
-    const totalCount = currentEventChallenges.length
-    const solvedCount = currentEventChallenges.filter(c => c.is_solved).length
-
-    if (totalCount === 0) return null
-
-    return { solvedCount, totalCount }
-  }
-
   return (
     <PageBackground
       className="flex flex-col"
@@ -122,35 +115,21 @@ export default function ChallengesPage() {
       showOrbs={false}
     >
       <main className="flex-1 flex flex-col relative z-10">
-        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full ${focusMode
-          ? 'py-2 lg:py-3 space-y-3 md:space-y-4'
-          : 'py-6 lg:py-8 space-y-6 md:space-y-8'
-        }`}>
-          {!focusMode && (
-            <ChallengePageTabs
-              currentTab={data.currentTab}
-              onTabChange={data.setCurrentTab}
-              selectedEventName={getSelectedEventName()}
-              eventStats={getSelectedEventStats()}
-            />
-          )}
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-2 lg:py-2 space-y-3 md:space-y-3">
           {renderDeferredDecorations && <ChallengeWatermark />}
 
           {data.currentTab === 'challenges' && (
             <ChallengesTabPanel
               data={data}
-              focusMode={focusMode}
-              onFocusModeChange={setFocusMode}
-              selectedEventName={getSelectedEventName()}
-              eventStats={getSelectedEventStats()}
             />
           )}
 
           {data.currentTab === 'events' && (
-            <EventsTab
+            <EventsTabPanel
+              currentTab={data.currentTab}
               events={data.enrichedEvents}
               selectedEventId={data.eventId}
+              onTabChange={data.setCurrentTab}
               onEventSelect={data.attemptEventSelect}
             />
           )}
@@ -158,7 +137,7 @@ export default function ChallengesPage() {
       </main>
 
       {renderDialogs && <ChallengeDialogs data={data} />}
-      {renderDeferredDecorations && <ChallengeJoyride />}
+      {renderDeferredDecorations && renderJoyride && <ChallengeJoyride />}
     </PageBackground>
   )
 }

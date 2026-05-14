@@ -49,9 +49,43 @@ export function useFilteredChallenges({
     })
   }, [challenges, deferredFilterSettings, deferredFilters, eventId, events])
 
+  const challengesForFilterOptions = useMemo(() => {
+    return filterChallengesByState({
+      challenges,
+      events,
+      eventId,
+      filters: {
+        status: 'all',
+        category: 'all',
+        difficulty: 'all',
+        search: '',
+        feature: 'N',
+      },
+      settings: deferredFilterSettings,
+    })
+  }, [challenges, deferredFilterSettings, eventId, events])
+
   const { categories, difficulties } = useMemo(() => {
-    return buildChallengeFilterOptions(challenges, preferredOrder)
-  }, [challenges, preferredOrder])
+    const options = buildChallengeFilterOptions(challengesForFilterOptions, preferredOrder)
+    const selectedCategory = deferredFilters.category
+    const selectedDifficulty = deferredFilters.difficulty
+
+    return {
+      categories:
+        selectedCategory !== 'all' && !options.categories.includes(selectedCategory)
+          ? [...options.categories, selectedCategory]
+          : options.categories,
+      difficulties:
+        selectedDifficulty !== 'all' && !options.difficulties.includes(selectedDifficulty)
+          ? [...options.difficulties, selectedDifficulty]
+          : options.difficulties,
+    }
+  }, [
+    challengesForFilterOptions,
+    deferredFilters.category,
+    deferredFilters.difficulty,
+    preferredOrder,
+  ])
 
   const { sortedFilteredChallenges, grouped, orderedKeys } = useMemo(() => {
     return sortAndGroupChallenges({

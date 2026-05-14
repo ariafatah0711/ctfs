@@ -25,7 +25,7 @@ export default function LayoutToggle() {
       onClick={() => setLayoutMode(nextLayoutMode)}
       title={title}
       aria-label={title}
-      className={`inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition ${isDefaultLayout
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${isDefaultLayout
         ? SURFACE_FILTER_ITEM_CLASS
         : 'border-blue-600 bg-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600'
         }`}

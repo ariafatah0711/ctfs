@@ -58,7 +58,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
       key={challenge.id}
       role={isMaintenance ? undefined : 'button'}
       tabIndex={isMaintenance ? undefined : 0}
-      className={`relative w-full h-full group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-110 hover:z-50'} transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950
+      className={`relative w-full h-full group ${isMaintenance ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105 hover:z-50'} transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-950
         ${isAnySolved ? 'opacity-55 hover:opacity-85' : 'opacity-100'}`}
       style={{ transformOrigin: 'center' }}
       onClick={isMaintenance ? undefined : handleOpen}

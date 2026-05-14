@@ -19,7 +19,7 @@ export default function SortToggle({ sortMode, onToggle }: SortToggleProps) {
       onClick={onToggle}
       title={sortMode === 'default' ? 'Switch to newest first' : 'Switch to default sort'}
       aria-label="Toggle challenge sorting"
-      className={`inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition ${isDefaultSort
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${isDefaultSort
         ? SURFACE_FILTER_ITEM_CLASS
         : SURFACE_FILTER_ITEM_ACTIVE_CLASS
         }`}

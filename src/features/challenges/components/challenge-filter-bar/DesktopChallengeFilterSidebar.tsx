@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { EyeOff, ListFilter, Puzzle, Search, X } from 'lucide-react'
+import { CheckCircle2, EyeOff, LayoutGrid, ListFilter, Search, X } from 'lucide-react'
 import type { ElementType } from 'react'
 import APP from '@/config'
 import {
@@ -18,27 +18,40 @@ import type { ChallengeFilterState } from '../../types'
 type DesktopChallengeFilterSidebarProps = {
   filters: ChallengeFilterState
   categories: string[]
-  categoryCounts: Record<string, number>
-  totalCount: number
+  difficulties: string[]
   onFilterChange: (filters: any) => void
 }
 
 export default function DesktopChallengeFilterSidebar({
   filters,
   categories,
-  categoryCounts,
-  totalCount,
+  difficulties,
   onFilterChange,
 }: DesktopChallengeFilterSidebarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const categoryOrder = APP.challengeCategories || []
+  const difficultyOrder = Object.keys(APP.difficultyStyles || {})
   const selectedCategory = filters.category || 'all'
+  const selectedDifficulty = filters.difficulty || 'all'
+  const selectedFeature = filters.feature || 'N'
+  const searchQuery = String(filters.search || '').trim()
+  const searchTitle = searchQuery
+    ? `Search: ${searchQuery}. Click to edit search.`
+    : 'Search challenges'
   const showUnsolvedOnly = filters.status === 'unsolved'
-  const { sortedCategories } = getSortedFilterValues({
+  const showSolvedOnly = filters.status === 'solved'
+  const statusLabel = showSolvedOnly ? 'Solved' : showUnsolvedOnly ? 'Unsolved' : 'All Status'
+  const statusTitle = showSolvedOnly
+    ? 'Showing solved only. Click to show unsolved only.'
+    : showUnsolvedOnly
+      ? 'Showing unsolved only. Click to show all statuses.'
+      : 'Showing all statuses. Click to show unsolved only.'
+  const StatusIcon = showSolvedOnly ? CheckCircle2 : showUnsolvedOnly ? EyeOff : ListFilter
+  const { sortedCategories, sortedDifficulties } = getSortedFilterValues({
     categories,
-    difficulties: [],
+    difficulties,
     categoryOrder,
-    difficultyOrder: [],
+    difficultyOrder,
   })
 
   useEffect(() => {
@@ -73,41 +86,99 @@ export default function DesktopChallengeFilterSidebar({
     scrollToChallengeFilter()
   }
 
+  const handleDifficultyChange = (difficulty: string) => {
+    onFilterChange({ ...filters, difficulty })
+    scrollToChallengeFilter()
+  }
+
+  const handleFeatureChange = (feature: string) => {
+    onFilterChange({ ...filters, feature })
+    scrollToChallengeFilter()
+  }
+
   return (
     <>
       <aside
         data-tour="challenge-sidebar-filters"
-        className="sticky top-[4.5rem] hidden max-h-[calc(100vh-5.5rem)] overflow-y-auto pr-1 xl:block"
+        className="relative z-20 hidden max-h-[calc(100vh-8.75rem)] overflow-y-auto xl:block"
       >
-        <div className="flex w-[64px] flex-col items-center gap-2 rounded-2xl border border-blue-500/20 bg-white/60 p-2 shadow-sm shadow-blue-500/5 backdrop-blur-md dark:border-blue-500/10 dark:bg-gray-900/60">
+        <div className="flex w-[176px] flex-col gap-1.5 rounded-2xl border border-blue-500/20 bg-white/60 p-2 shadow-sm shadow-blue-500/5 backdrop-blur-md dark:border-blue-500/10 dark:bg-gray-900/60">
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            title="Search challenges"
-            aria-label="Search challenges"
-            className={iconButtonClass(Boolean(filters.search))}
+            title={searchTitle}
+            aria-label={searchTitle}
+            className={iconButtonClass(Boolean(searchQuery))}
           >
             <Search size={19} />
+            <span className={searchQuery ? 'truncate normal-case' : 'truncate'}>
+              {searchQuery || 'Search'}
+            </span>
           </button>
 
           <button
             type="button"
             onClick={handleStatusToggle}
-            title={showUnsolvedOnly ? 'Show all challenges' : 'Show unsolved only'}
-            aria-label={showUnsolvedOnly ? 'Show all challenges' : 'Show unsolved only'}
-            className={iconButtonClass(showUnsolvedOnly)}
+            title={statusTitle}
+            aria-label={statusTitle}
+            className={iconButtonClass(showUnsolvedOnly || showSolvedOnly)}
           >
-            {showUnsolvedOnly ? <EyeOff size={19} /> : <ListFilter size={19} />}
+            <StatusIcon size={19} />
+            <span className="truncate">{statusLabel}</span>
           </button>
 
-          <div className="h-px w-8 bg-gray-200 dark:bg-gray-800" />
+          <label htmlFor="desktop-sidebar-difficulty" className="sr-only">
+            Difficulty
+          </label>
+          <select
+            id="desktop-sidebar-difficulty"
+            value={selectedDifficulty}
+            onChange={(event) => handleDifficultyChange(event.target.value)}
+            className={`h-9 w-full rounded-xl border px-3 text-xs font-semibold outline-none transition focus:ring-2 focus:ring-blue-500/30 ${selectedDifficulty !== 'all'
+              ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
+              : SURFACE_FILTER_ITEM_CLASS
+            }`}
+            title="Filter by difficulty"
+            aria-label="Filter by difficulty"
+          >
+            <option value="all">All Difficulties</option>
+            {sortedDifficulties.map((difficulty) => (
+              <option key={difficulty} value={difficulty}>
+                {difficulty}
+              </option>
+            ))}
+          </select>
 
-          <div className="flex flex-col items-center gap-2">
+          <label htmlFor="desktop-sidebar-feature" className="sr-only">
+            Feature
+          </label>
+          <select
+            id="desktop-sidebar-feature"
+            value={selectedFeature}
+            onChange={(event) => handleFeatureChange(event.target.value)}
+            className={`h-9 w-full rounded-xl border px-3 text-xs font-semibold outline-none transition focus:ring-2 focus:ring-blue-500/30 ${selectedFeature !== 'N'
+              ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
+              : SURFACE_FILTER_ITEM_CLASS
+            }`}
+            title="Filter by challenge feature"
+            aria-label="Filter by challenge feature"
+          >
+            <option value="N">All Features</option>
+            <option value="T">Tasks</option>
+            <option value="S">Services</option>
+          </select>
+
+          <div className="h-px w-full bg-gray-200 dark:bg-gray-800" />
+
+          <div className="px-2 pt-1 text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            Categories
+          </div>
+
+          <div className="flex flex-col gap-2">
             <CategoryButton
-              label="All"
-              count={totalCount}
+              label="All Categories"
               active={selectedCategory === 'all'}
-              icon={Puzzle}
+              icon={LayoutGrid}
               iconClassName="text-current"
               onClick={() => handleCategoryChange('all')}
             />
@@ -120,7 +191,6 @@ export default function DesktopChallengeFilterSidebar({
                 <CategoryButton
                   key={category}
                   label={category}
-                  count={categoryCounts[category] ?? 0}
                   active={selectedCategory === category}
                   icon={CategoryIcon}
                   iconClassName={color}
@@ -182,7 +252,7 @@ export default function DesktopChallengeFilterSidebar({
 }
 
 function iconButtonClass(active: boolean) {
-  return `relative inline-flex h-11 w-11 items-center justify-center rounded-xl border text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${active
+  return `relative inline-flex h-9 w-full items-center gap-2 rounded-xl border px-3 text-left text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${active
     ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
     : SURFACE_FILTER_ITEM_CLASS
   }`
@@ -190,7 +260,6 @@ function iconButtonClass(active: boolean) {
 
 type CategoryButtonProps = {
   label: string
-  count: number
   active: boolean
   icon: ElementType
   iconClassName: string
@@ -199,7 +268,6 @@ type CategoryButtonProps = {
 
 function CategoryButton({
   label,
-  count,
   active,
   icon: Icon,
   iconClassName,
@@ -210,15 +278,11 @@ function CategoryButton({
       type="button"
       onClick={onClick}
       className={iconButtonClass(active)}
-      title={`${label} (${count})`}
-      aria-label={`Filter by ${label}, ${count} challenges`}
+      title={`Filter by ${label}`}
+      aria-label={`Filter by ${label}`}
     >
       <Icon size={19} className={`shrink-0 ${active ? 'text-white' : iconClassName}`} />
-      {active && count > 0 && (
-        <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-white px-1 text-center font-mono text-[10px] leading-5 text-blue-600">
-          {count > 99 ? '99+' : count}
-        </span>
-      )}
+      <span className="truncate">{label}</span>
     </button>
   )
 }

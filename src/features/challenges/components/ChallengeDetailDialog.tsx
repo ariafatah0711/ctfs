@@ -1,12 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Check, Copy, Flag, CheckCircle2 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { Flag, CheckCircle2 } from 'lucide-react'
 import APP from '@/config'
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shared/ui'
+import { Dialog, DialogContent, DialogTitle } from '@/shared/ui'
 import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
-import { DIALOG_CONTENT_CLASS, DIALOG_CONTENT_CLASS_2XL } from '@/shared/styles'
+import { DIALOG_CONTENT_CLASS_2XL } from '@/shared/styles'
 import type { Attachment, ChallengeWithSolve } from '@/shared/types'
 import ChallengeServicesPanel from './ChallengeServicesPanel'
 import HintDialog from './HintDialog'
@@ -39,7 +38,7 @@ const ChallengeDescription = React.memo(function ChallengeDescription({ descript
   return (
     <MarkdownRenderer
       content={description}
-      className="max-w-full break-words text-gray-700 dark:text-gray-300 leading-relaxed [&_p:last-child]:mb-0 [&_ul:last-child]:mb-0 [&_ol:last-child]:mb-0 [&_blockquote:last-child]:my-0"
+      className="max-w-full select-text break-words text-gray-700 dark:text-gray-300 leading-relaxed [&_p:last-child]:mb-0 [&_ul:last-child]:mb-0 [&_ol:last-child]:mb-0 [&_blockquote:last-child]:my-0"
     />
   )
 })
@@ -136,12 +135,6 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
 
   if (!challenge) return null
 
-  const handleSubChallengeResetConfirm = () => {
-    if (confirm('Are you sure you want to reset your progress?')) {
-      onSubChallengeReset()
-    }
-  }
-
   const isSolved = !!challenge.is_solved;
   const isTeamSolved = !!challenge.is_team_solved;
 
@@ -149,7 +142,7 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
   const rawDiff = (challenge.difficulty || '').toString().trim();
   const normalizedDiff = rawDiff === 'imposible' ? 'Impossible' : rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1).toLowerCase();
   const colorName = (APP as any).difficultyStyles?.[normalizedDiff];
-  const { dotClass: diffDotColor, textClass: diffTextColor } = getDifficultyStyle(colorName);
+  const { textClass: diffTextColor } = getDifficultyStyle(colorName);
   const { borderColor: categoryBorderColor, badgeColor: categoryBadgeColor } = getCategoryDetails(challenge.category);
   const eventName = events.find(e => e.id === challenge.event_id)?.name || '';
 
@@ -161,16 +154,16 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
       >
         {/* Fixed Header Section */}
         <div className="p-4 md:px-6 pb-0 shrink-0">
-          <div className="flex flex-col gap-3 mb-5 pointer-events-none select-none">
+          <div className="flex flex-col gap-3 mb-5">
             {/* ROW 1: Title & Event */}
             <div className="flex items-start justify-between gap-4">
               <DialogTitle asChild>
-                <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
+                <h2 className="select-text text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
                   {challenge.title}
                 </h2>
               </DialogTitle>
               {eventName && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mt-2 shrink-0 font-medium">
+                <span className="select-none text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mt-2 shrink-0 font-medium">
                   {eventName}
                 </span>
               )}
@@ -180,12 +173,12 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             <div className={`flex items-center justify-between border-b pb-4 ${categoryBorderColor}`}>
               <div className="flex items-center gap-4">
                 {/* Category Badge */}
-                <div className={`text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
+                <div className={`select-none text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
                   {challenge.category}
                 </div>
 
                 {/* Difficulty */}
-                <div className="flex items-center gap-1.5">
+                <div className="select-none flex items-center gap-1.5">
                   <div className={`w-2 h-2 rounded-full ${diffTextColor.replace('text-', 'bg-').replace('-400', '-500')} shadow-sm`} />
                   <span className="text-[12px] font-semibold text-gray-500 tracking-tight">
                     {normalizedDiff}
@@ -196,18 +189,18 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
               {/* Points & Solved Status */}
               <div className="flex items-center gap-4">
                 {isSolved && (
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-green-500/15 rounded-md border border-green-500/20">
+                  <div className="select-none flex items-center gap-1.5 px-2 py-1 bg-green-500/15 rounded-md border border-green-500/20">
                     <Flag size={12} className="text-green-400 fill-green-400" />
                     <span className="text-[11px] font-bold text-green-400 uppercase tracking-widest">Solved</span>
                   </div>
                 )}
                 {!isSolved && isTeamSolved && (
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-purple-500/15 rounded-md border border-purple-500/20">
+                  <div className="select-none flex items-center gap-1.5 px-2 py-1 bg-purple-500/15 rounded-md border border-purple-500/20">
                     <CheckCircle2 size={12} className="text-purple-400" />
                     <span className="text-[11px] font-bold text-purple-400 uppercase tracking-widest">Team Solved</span>
                   </div>
                 )}
-                <div className={`text-2xl font-black tracking-tighter ${isSolved ? 'text-green-400' : isTeamSolved ? 'text-purple-400' : 'text-gray-900 dark:text-white'}`}>
+                <div className={`select-text text-2xl font-black tracking-tighter ${isSolved ? 'text-green-400' : isTeamSolved ? 'text-purple-400' : 'text-gray-900 dark:text-white'}`}>
                   {challenge.points} <span className="text-[14px] font-bold opacity-60 ml-0.5">pts</span>
                 </div>
               </div>

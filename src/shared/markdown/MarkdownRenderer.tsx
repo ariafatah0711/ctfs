@@ -65,7 +65,7 @@ function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNo
           <button
             type="button"
             onClick={handleCopy}
-            className={`p-1.5 rounded transition-colors ${isDark
+            className={`select-none p-1.5 rounded transition-colors ${isDark
               ? 'bg-gray-800 hover:bg-gray-700 text-blue-300'
               : 'bg-gray-200 hover:bg-gray-300 text-blue-600'
               }`}
@@ -76,7 +76,7 @@ function CodeBlockWrapper({ children, isDark = true }: { children: React.ReactNo
           <button
             type="button"
             onClick={() => setIsWrapped(!isWrapped)}
-            className={`p-1.5 rounded transition-colors ${isDark
+            className={`select-none p-1.5 rounded transition-colors ${isDark
               ? 'bg-gray-800 hover:bg-gray-700 text-blue-300'
               : 'bg-gray-200 hover:bg-gray-300 text-blue-600'
               }`}
@@ -127,7 +127,7 @@ function BlockquoteWrapper({ children, isDark = true }: { children: React.ReactN
           <button
             type="button"
             onClick={() => setIsWrapped(!isWrapped)}
-            className={`p-1.5 rounded transition-colors ${isDark
+            className={`select-none p-1.5 rounded transition-colors ${isDark
               ? 'bg-gray-800 hover:bg-gray-700 text-blue-300'
               : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
               }`}

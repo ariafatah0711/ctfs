@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Joyride, { STATUS } from 'react-joyride'
 import type { CallBackProps, Step, StoreHelpers } from 'react-joyride'
 
@@ -9,6 +9,7 @@ import type { CallBackProps, Step, StoreHelpers } from 'react-joyride'
 import { useAuth } from '@/shared/contexts'
 import { getChallengeGuideSeenSetting, setChallengeGuideSeenSetting } from '@/shared/lib'
 import {
+  CHALLENGE_TOUR_RESTART_EVENT,
   CHALLENGE_TOUR_VERSION,
   buildChallengeTourSteps,
   getAvailableChallengeTourSteps,
@@ -21,6 +22,23 @@ export default function ChallengeJoyride() {
   const [stepIndex, setStepIndex] = useState(0)
   const [steps, setSteps] = useState<Step[]>([])
   const storeRef = useRef<StoreHelpers | null>(null)
+
+  const startTour = useCallback(() => {
+    const isDesktop = window.matchMedia('(min-width: 1280px)').matches
+    const isChallengesTab = document.querySelector('[data-challenge-list-anchor]')
+
+    if (!isDesktop || !isChallengesTab) return
+
+    const nextSteps = getAvailableChallengeTourSteps(
+      buildChallengeTourSteps()
+    )
+
+    if (nextSteps.length > 0) {
+      setStepIndex(0)
+      setSteps(nextSteps)
+      setRunTour(true)
+    }
+  }, [])
 
   useEffect(() => {
     setMounted(true)
@@ -35,20 +53,24 @@ export default function ChallengeJoyride() {
 
     if (!hasSeenGuide) {
       const timer = setTimeout(() => {
-        const showDesktopSidebar = window.matchMedia('(min-width: 1280px)').matches
-        const nextSteps = getAvailableChallengeTourSteps(
-          buildChallengeTourSteps({ showDesktopSidebar })
-        )
-
-        if (nextSteps.length > 0) {
-          setSteps(nextSteps)
-          setRunTour(true)
-        }
+        startTour()
       }, 1000)
 
       return () => clearTimeout(timer)
     }
-  }, [user, mounted])
+  }, [user, mounted, startTour])
+
+  useEffect(() => {
+    if (!mounted || !user) return
+
+    const handleRestartTour = () => {
+      setChallengeGuideSeenSetting(false, CHALLENGE_TOUR_VERSION)
+      startTour()
+    }
+
+    window.addEventListener(CHALLENGE_TOUR_RESTART_EVENT, handleRestartTour)
+    return () => window.removeEventListener(CHALLENGE_TOUR_RESTART_EVENT, handleRestartTour)
+  }, [mounted, user, startTour])
 
   // Track element clicks
   useEffect(() => {

@@ -1,8 +1,13 @@
 'use client'
 
-import { Settings } from 'lucide-react'
+import { RotateCcw, Settings } from 'lucide-react'
 import { Switch } from '@/shared/ui'
+import { setChallengeGuideSeenSetting } from '@/shared/lib'
 import { SURFACE_FILTER_ITEM_CLASS } from '@/shared/styles'
+import {
+  CHALLENGE_TOUR_RESTART_EVENT,
+  CHALLENGE_TOUR_VERSION,
+} from '../../lib/challenge-tour-steps'
 import type { ChallengeFilterSettings } from '../../types'
 
 type FilterSettingsMenuProps = {
@@ -18,13 +23,19 @@ export default function FilterSettingsMenu({
   onOpenChange,
   onSettingsChange,
 }: FilterSettingsMenuProps) {
+  const handleRestartTour = () => {
+    setChallengeGuideSeenSetting(false, CHALLENGE_TOUR_VERSION)
+    window.dispatchEvent(new Event(CHALLENGE_TOUR_RESTART_EVENT))
+    onOpenChange(false)
+  }
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => onOpenChange(!open)}
         data-tour="challenge-filter-settings"
-        className={`inline-flex items-center gap-2 px-3 py-2 text-sm border rounded-xl transition ${open
+        className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${open
             ? 'border-blue-600 bg-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600'
             : SURFACE_FILTER_ITEM_CLASS
           }`}
@@ -58,6 +69,17 @@ export default function FilterSettingsMenu({
                 onSettingsChange({ ...settings, highlightTeamSolves: checked })
               }
             />
+          </div>
+
+          <div className="mt-2 border-t border-gray-200 pt-3 dark:border-gray-800">
+            <button
+              type="button"
+              onClick={handleRestartTour}
+              className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-blue-500/20 bg-blue-600/10 px-3 text-xs font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-600 dark:hover:text-white"
+            >
+              <RotateCcw size={15} />
+              Reset tutorial
+            </button>
           </div>
         </div>
       )}

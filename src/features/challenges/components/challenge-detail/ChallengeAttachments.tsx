@@ -25,7 +25,7 @@ export default function ChallengeAttachments({
     <div className="space-y-3">
       {challenge.attachments.some((attachment) => attachment.type === 'file') && (
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5 opacity-80">
+          <p className="select-none text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5 opacity-80">
             <FileText className="h-4 w-4" />
             <span>Files</span>
           </p>
@@ -34,7 +34,7 @@ export default function ChallengeAttachments({
               key="copy-wget-all"
               type="button"
               title="Copy wget commands for all files"
-              className="px-2.5 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 text-[11px] font-bold uppercase tracking-wider rounded-lg shadow-sm transition hover:bg-green-500/20"
+              className="select-none px-2.5 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 text-[11px] font-bold uppercase tracking-wider rounded-lg shadow-sm transition hover:bg-green-500/20"
               onClick={(event) => {
                 event.stopPropagation()
                 const fileAttachments = challenge.attachments!.filter((attachment) => attachment.type === 'file' && (attachment.url || attachment.name))
@@ -67,7 +67,7 @@ export default function ChallengeAttachments({
               </span>
             </button>
 
-            <span className="text-gray-500">|</span>
+            <span className="select-none text-gray-500">|</span>
 
             {challenge.attachments.filter((attachment) => attachment.type === 'file').map((attachment, idx) => {
               const displayName = attachment.name?.length > 40 ? attachment.name.slice(0, 37) + '...' : attachment.name || 'file'
@@ -77,7 +77,7 @@ export default function ChallengeAttachments({
                   key={key}
                   type="button"
                   title={attachment.name}
-                  className="px-4 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700 text-sm font-bold rounded-lg shadow-sm transition hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 flex items-center gap-2"
+                  className="flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
                   onClick={(event) => {
                     event.stopPropagation()
                     downloadFile(attachment, key)
@@ -95,7 +95,7 @@ export default function ChallengeAttachments({
 
       {challenge.attachments.some((attachment) => attachment.type !== 'file') && (
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5 opacity-80">
+          <p className="select-none text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 flex items-center gap-1.5 opacity-80">
             <LinkIcon className="h-4 w-4" />
             <span>Links</span>
           </p>
@@ -109,7 +109,7 @@ export default function ChallengeAttachments({
                   target="_blank"
                   rel="noopener noreferrer"
                   title={attachment.url}
-                  className="px-4 py-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-sm font-bold rounded-lg shadow-sm transition hover:bg-indigo-500/20"
+                  className="select-none px-4 py-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-sm font-bold rounded-lg shadow-sm transition hover:bg-indigo-500/20"
                 >
                   {displayName}
                 </a>

@@ -82,24 +82,23 @@ export function useChallengeDialogState({
     }
 
     const cached = challengeDetailCache.get(challenge.id)
-    if (cached) {
-      setSelectedChallenge({ ...challenge, ...cached, hint: normalizeChallengeHints((cached as any).hint) } as any)
-      return
-    }
+    setSelectedChallenge(
+      cached
+        ? { ...challenge, ...cached, hint: normalizeChallengeHints((cached as any).hint) } as any
+        : {
+          ...challenge,
+          description: challenge.description || 'Loading...',
+          hint: Array.isArray((challenge as any).hint) ? (challenge as any).hint : [],
+          attachments: Array.isArray((challenge as any).attachments) ? (challenge as any).attachments : [],
+        } as any
+    )
 
-    setSelectedChallenge({
-      ...challenge,
-      description: challenge.description || 'Loading...',
-      hint: Array.isArray((challenge as any).hint) ? (challenge as any).hint : [],
-      attachments: Array.isArray((challenge as any).attachments) ? (challenge as any).attachments : [],
-    } as any)
-
-    const detail = await getChallengeDetail(challenge.id)
-    if (!detail) return
-    challengeDetailCache.set(challenge.id, detail)
+    const freshDetail = await getChallengeDetail(challenge.id)
+    if (!freshDetail) return
+    challengeDetailCache.set(challenge.id, freshDetail)
     setSelectedChallenge((prev) => {
       if (!prev || prev.id !== challenge.id) return prev
-      return { ...prev, ...detail, hint: normalizeChallengeHints((detail as any).hint) } as any
+      return { ...prev, ...freshDetail, hint: normalizeChallengeHints((freshDetail as any).hint) } as any
     })
   }, [challengeDetailCache, placeholders, refreshSubChallenges])
 

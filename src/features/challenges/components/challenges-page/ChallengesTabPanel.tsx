@@ -1,61 +1,40 @@
 'use client'
 
-import { useMemo } from 'react'
 import APP from '@/config'
-import { filterChallengesByState } from '../../lib'
 import type { useChallengesPageData } from '../../hooks/useChallengesPageData'
 import ChallengeFilterBar from '../ChallengeFilterBar'
 import DesktopChallengeFilterSidebar from '../challenge-filter-bar/DesktopChallengeFilterSidebar'
 import ChallengeListContent from './ChallengeListContent'
+import ChallengePageTabs from './ChallengePageTabs'
 
 type ChallengesPageData = ReturnType<typeof useChallengesPageData>
 
 type ChallengesTabPanelProps = {
   data: ChallengesPageData
-  focusMode: boolean
-  onFocusModeChange: (enabled: boolean) => void
-  selectedEventName?: string
-  eventStats?: { solvedCount: number; totalCount: number } | null
 }
 
 export default function ChallengesTabPanel({
   data,
-  focusMode,
-  onFocusModeChange,
-  selectedEventName,
-  eventStats,
 }: ChallengesTabPanelProps) {
-  const sidebarCounts = useMemo(() => {
-    const challengesForCounts = filterChallengesByState({
-      challenges: data.challenges,
-      events: data.enrichedEvents,
-      eventId: data.eventId,
-      filters: { ...data.filters, category: 'all' },
-      settings: data.filterSettings,
-      nowMs: data.nowDate.getTime(),
-    })
-
-    return challengesForCounts.reduce(
-      (acc, challenge) => {
-        acc.totalCount += 1
-        acc.categoryCounts[challenge.category] = (acc.categoryCounts[challenge.category] ?? 0) + 1
-        return acc
-      },
-      { categoryCounts: {} as Record<string, number>, totalCount: 0 }
-    )
-  }, [data.challenges, data.enrichedEvents, data.eventId, data.filterSettings, data.filters, data.nowDate])
-
   return (
-    <div className="xl:grid xl:grid-cols-[72px_minmax(0,1fr)] xl:gap-4 2xl:gap-5">
-      <DesktopChallengeFilterSidebar
-        filters={data.filters}
-        categories={data.categories}
-        categoryCounts={sidebarCounts.categoryCounts}
-        totalCount={sidebarCounts.totalCount}
-        onFilterChange={data.setFilters}
-      />
+    <div className="xl:grid xl:grid-cols-[176px_minmax(0,1fr)] xl:gap-4 2xl:gap-5">
+      <div className="relative z-30 mb-4 flex flex-col gap-4 xl:sticky xl:top-[4.5rem] xl:mb-0 xl:self-start 2xl:gap-5">
+        <ChallengePageTabs
+          currentTab={data.currentTab}
+          onTabChange={data.setCurrentTab}
+          showSummary={false}
+          className="xl:w-[176px] [&_button]:xl:w-[176px]"
+        />
 
-      <div className="min-w-0 space-y-6">
+        <DesktopChallengeFilterSidebar
+          filters={data.filters}
+          categories={data.categories}
+          difficulties={data.difficulties}
+          onFilterChange={data.setFilters}
+        />
+      </div>
+
+      <div className="min-w-0 space-y-4 2xl:space-y-5">
         <ChallengeFilterBar
           filters={data.filters}
           events={data.enrichedEvents}
@@ -64,6 +43,7 @@ export default function ChallengesTabPanel({
           sortMode={data.sortMode}
           onSortModeChange={() => data.setSortMode((prev) => prev === 'default' ? 'newest' : 'default')}
           hideMainEventOption={APP.hideEventMain}
+          showSearch={false}
           settings={data.filterSettings}
           categories={data.categories}
           difficulties={data.difficulties}
@@ -71,13 +51,9 @@ export default function ChallengesTabPanel({
           onSettingsChange={data.setFilterSettings}
           onClear={() => data.setFilters({ status: 'all', category: 'all', difficulty: 'all', search: '', feature: 'N' })}
           hideSidebarFiltersOnDesktop
-          focusMode={focusMode}
-          onFocusModeChange={onFocusModeChange}
-          selectedEventName={selectedEventName}
-          eventStats={eventStats}
         />
 
-        <div data-tour="challenge-list" data-challenge-list-anchor>
+        <div data-tour="challenge-list" data-challenge-list-anchor className="min-w-0">
           <ChallengeListContent
             initialLoading={data.initialLoading}
             eventMembershipLoading={data.eventMembershipLoading}

@@ -33,13 +33,10 @@ type Props = {
   onSettingsChange?: (settings: ChallengeFilterSettings) => void
   onClear: () => void
   showStatusFilter?: boolean
+  showSearch?: boolean
   hideSidebarFiltersOnDesktop?: boolean
-  focusMode?: boolean
-  selectedEventName?: string
-  eventStats?: { solvedCount: number; totalCount: number } | null
   sortMode?: ChallengeSortMode
   onSortModeChange?: () => void
-  onFocusModeChange?: (enabled: boolean) => void
 }
 
 export default function ChallengeFilterBar({
@@ -59,57 +56,55 @@ export default function ChallengeFilterBar({
   onSettingsChange,
   onClear,
   showStatusFilter = true,
+  showSearch = true,
   hideSidebarFiltersOnDesktop = false,
-  focusMode = false,
-  selectedEventName,
-  eventStats,
   sortMode = 'default',
   onSortModeChange,
-  onFocusModeChange,
 }: Props) {
   const [settingsOpen, setSettingsOpen] = React.useState(false)
   const dirtyState = getChallengeFilterDirtyState(filters, selectedEventId)
+  const showEventFilters = events && onEventChange
 
   return (
     <div
       data-tour="challenge-filter-bar"
-      className="relative z-20 w-full bg-white/50 dark:bg-gray-900/50 border border-blue-500/20 dark:border-blue-500/10 backdrop-blur-sm rounded-2xl p-4 md:p-5 shadow-sm shadow-blue-500/5"
+      className="relative z-10 w-full bg-white/50 dark:bg-gray-900/50 border border-blue-500/20 dark:border-blue-500/10 backdrop-blur-sm rounded-2xl p-2 shadow-sm shadow-blue-500/5"
     >
-      {!focusMode && events && onEventChange && (
-        <EventFilterPills
-          events={events}
-          selectedEventId={selectedEventId}
-          onEventChange={onEventChange}
-          hideAllEventOption={hideAllEventOption}
-          hideMainEventOption={hideMainEventOption}
-          includeEndedEvents={includeEndedEvents}
-          showEventState={showEventState}
-          upcomingVisibilityWindowDays={upcomingVisibilityWindowDays}
-          isEventDirty={dirtyState.isEventDirty}
-          anyFilterDirty={dirtyState.anyFilterDirty}
-        />
-      )}
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+        {showEventFilters && (
+          <EventFilterPills
+            events={events}
+            selectedEventId={selectedEventId}
+            onEventChange={onEventChange}
+            hideAllEventOption={hideAllEventOption}
+            hideMainEventOption={hideMainEventOption}
+            includeEndedEvents={includeEndedEvents}
+            showEventState={showEventState}
+            upcomingVisibilityWindowDays={upcomingVisibilityWindowDays}
+            isEventDirty={dirtyState.isEventDirty}
+            anyFilterDirty={dirtyState.anyFilterDirty}
+            className="flex-1"
+          />
+        )}
 
-      <ChallengeFilterControls
-        filters={filters}
-        settings={settings}
-        categories={categories}
-        difficulties={difficulties}
-        dirtyState={dirtyState}
-        settingsOpen={settingsOpen}
-        showStatusFilter={showStatusFilter}
-        hideSidebarFiltersOnDesktop={hideSidebarFiltersOnDesktop}
-        focusMode={focusMode}
-        selectedEventName={selectedEventName}
-        eventStats={eventStats}
-        sortMode={sortMode}
-        onFilterChange={onFilterChange}
-        onSettingsOpenChange={setSettingsOpen}
-        onSettingsChange={onSettingsChange}
-        onClear={onClear}
-        onSortModeChange={onSortModeChange}
-        onFocusModeChange={onFocusModeChange}
-      />
+        <ChallengeFilterControls
+          filters={filters}
+          settings={settings}
+          categories={categories}
+          difficulties={difficulties}
+          dirtyState={dirtyState}
+          settingsOpen={settingsOpen}
+          showStatusFilter={showStatusFilter}
+          hideSidebarFiltersOnDesktop={hideSidebarFiltersOnDesktop}
+          sortMode={sortMode}
+          showSearch={showSearch}
+          onFilterChange={onFilterChange}
+          onSettingsOpenChange={setSettingsOpen}
+          onSettingsChange={onSettingsChange}
+          onClear={onClear}
+          onSortModeChange={onSortModeChange}
+        />
+      </div>
     </div>
   )
 }
