@@ -45,7 +45,7 @@ export default function ChallengePageTabs({
         aria-label={`Switch to ${nextTab === 'challenges' ? 'Challenges' : 'Events'}`}
         title={`Switch to ${nextTab === 'challenges' ? 'Challenges' : 'Events'}`}
         className={cn(
-          'inline-flex min-w-0 select-none items-center rounded-xl border border-gray-200 bg-white/40 p-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition hover:border-blue-500/30 hover:bg-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-800 dark:bg-gray-900/40 dark:hover:bg-gray-900/70',
+          'inline-flex min-w-0 select-none items-center rounded-xl border border-gray-200 bg-white/40 p-2 text-xs font-semibold shadow-sm backdrop-blur-sm transition hover:border-blue-500/30 hover:bg-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-800 dark:bg-gray-900/40 dark:hover:bg-gray-900/70',
           compact ? 'h-11' : 'h-12',
           iconOnly ? 'w-auto' : 'w-full sm:w-auto xl:w-full'
         )}

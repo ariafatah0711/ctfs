@@ -107,6 +107,7 @@ code {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .challenge-card-reveal,
   .event-card-reveal {
     animation: none;
@@ -127,7 +128,7 @@ body {
 
 html body[data-scroll-locked] {
   margin-right: 0 !important;
-  overflow: auto !important;
+  overflow: hidden !important;
   padding-right: 0 !important;
 }
 

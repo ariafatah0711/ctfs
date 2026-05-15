@@ -1,4 +1,4 @@
-import { Globe, Bomb, Binary, Cpu, Search, Puzzle, Shield, Terminal, Lightbulb, Eye, Wifi } from 'lucide-react'
+import { Globe, Bomb, Binary, Cpu, Search, Puzzle, Shield, Terminal, Lightbulb, Eye, Wifi, Bot, Link2 } from 'lucide-react'
 import type { ElementType } from 'react'
 import { ImageIcon } from 'lucide-react'
 import type { ChallengeWithSolve } from '@/shared/types'
@@ -21,6 +21,8 @@ export function getCategoryDetails(category: string): CategoryDetails {
   if (cat.includes('pwn') || cat.includes('exploit')) return { color: 'text-red-500', borderColor: 'border-red-500/30', badgeColor: 'bg-red-500/15 text-red-400' }
   if (cat.includes('steg'))         return { color: 'text-pink-500',    borderColor: 'border-pink-500/30',    badgeColor: 'bg-pink-500/15 text-pink-400'        }
   if (cat.includes('network'))      return { color: 'text-indigo-500',  borderColor: 'border-indigo-500/30',  badgeColor: 'bg-indigo-500/15 text-indigo-400'    }
+  if (cat.includes('blockchain') || cat.includes('web3')) return { color: 'text-fuchsia-500', borderColor: 'border-fuchsia-500/30', badgeColor: 'bg-fuchsia-500/15 text-fuchsia-400' }
+  if (cat.includes('ai'))           return { color: 'text-violet-500',  borderColor: 'border-violet-500/30',  badgeColor: 'bg-violet-500/15 text-violet-400'    }
   if (cat.includes('misc'))         return { color: 'text-gray-500',    borderColor: 'border-gray-500/30',    badgeColor: 'bg-gray-500/15 text-gray-400'        }
   return                                   { color: 'text-gray-500',    borderColor: 'border-gray-500/30',    badgeColor: 'bg-gray-500/15 text-gray-400'        }
 }
@@ -36,6 +38,8 @@ const CATEGORY_ICON_MAP: Record<string, ElementType> = {
   'text-red-500': Bomb,
   'text-pink-500': ImageIcon,
   'text-indigo-500': Wifi,
+  'text-violet-500': Bot,
+  'text-fuchsia-500': Link2,
   'text-gray-500': Puzzle,
 }
 

@@ -97,29 +97,19 @@ export default function InfoPage() {
       className="flex flex-col overflow-hidden"
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
-      {/* Faint Watermark Logo */}
-      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.015] dark:opacity-[0.01]">
-        <ImageWithFallback
-          src={APP.nxctf?.nxctf_logo}
-          alt={`${APP.shortName} watermark`}
-          size={760}
-          rounded={false}
-        />
-      </div>
-
-      <main className="flex-1 flex flex-col items-center relative z-10 w-full px-4 py-8 sm:px-6 lg:py-10">
+      <main className="flex-1 flex flex-col items-center relative z-10 w-full px-4 py-6 sm:px-6 lg:py-8">
         {/* HERO SECTION */}
-        <section className="w-full max-w-4xl mx-auto flex flex-col items-center text-center">
+        <section className="w-full max-w-3xl mx-auto flex flex-col items-center text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-3 flex flex-row items-center justify-center gap-3 text-3xl font-black tracking-tight sm:text-5xl"
+            className="mb-2 flex flex-row items-center justify-center gap-3 text-3xl font-black tracking-tight sm:text-5xl"
           >
             <ImageWithFallback
               src={APP.image_logo}
               alt={`${APP.shortName} logo`}
-              size={96}
+              size={80}
               rounded={false}
             />
             <motion.span
@@ -135,7 +125,7 @@ export default function InfoPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base"
+            className="max-w-5xl text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base pb-5"
           >
             A modern Capture The Flag (CTF) platform built for security competitions, workshops, and training.
           </motion.p>
@@ -143,7 +133,7 @@ export default function InfoPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mb-6 font-mono text-xs text-gray-500 dark:text-gray-500 sm:text-sm"
+            className="mb-4 font-mono text-[10px] text-gray-500 dark:text-gray-500 sm:text-xs"
           >
             &gt; {APP.description || "Ngehack untuk senang-senang, bukan buat nyari profit"}
           </motion.p>
@@ -154,41 +144,41 @@ export default function InfoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className={`mb-8 flex w-full max-w-3xl flex-col p-4 sm:p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}
+          className={`mb-6 flex w-full max-w-3xl flex-col p-3 sm:p-4 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}
         >
           {/* Top: GitHub Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pb-5">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pb-4">
             {repoStats && (
               <>
-                <div className="flex items-center gap-4">
-                  <div className={`p-2.5 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
-                    <Star className="w-5 h-5" />
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
+                    <Star className="w-4 h-4" />
                   </div>
                   <div className="text-left">
-                    <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{repoStats.stars}</div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">Stars</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{repoStats.stars}</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Stars</div>
                   </div>
                 </div>
-                <div className="h-10 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
-                <div className="flex items-center gap-4">
-                  <div className={`p-2.5 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
-                    <GitBranch className="w-5 h-5" />
+                <div className="h-8 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
+                    <GitBranch className="w-4 h-4" />
                   </div>
                   <div className="text-left">
-                    <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{repoStats.forks}</div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">Forks</div>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{repoStats.forks}</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Forks</div>
                   </div>
                 </div>
-                <div className="h-10 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+                <div className="h-8 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
               </>
             )}
-            <div className="flex items-center gap-4">
-              <div className={`p-2.5 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
-                <Users className="w-5 h-5" />
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl ${THEME_PRIMARY_PILL_CLASS}`}>
+                <Users className="w-4 h-4" />
               </div>
               <div className="text-left">
-                <div className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{CONTRIBUTORS.length}</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">Contributors</div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{CONTRIBUTORS.length}</div>
+                <div className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Contributors</div>
               </div>
             </div>
           </div>
@@ -197,23 +187,23 @@ export default function InfoPage() {
           <div className="w-full h-px bg-gray-200 dark:bg-gray-800"></div>
 
           {/* Bottom: Technical Details */}
-          <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 sm:gap-x-8 pt-4 text-sm font-mono text-gray-500 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <Info size={16} className="text-blue-500" />
+          <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-4 sm:gap-x-6 pt-3 text-[11px] font-mono text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1.5">
+              <Info size={14} className="text-blue-500" />
               <span className="font-medium text-gray-700 dark:text-gray-300">v{VERSION}</span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Clock size={16} className="text-blue-500" />
+            <div className="flex items-center gap-1.5">
+              <Clock size={14} className="text-blue-500" />
               <span>{BUILD_TIME}</span>
             </div>
 
-            <a href={`${APP.nxctf.nxctf_github}/blob/main/LICENSE` || "https://www.apache.org/licenses/LICENSE-2.0"} target="_blank" rel="noopener" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
-              <ScrollText size={16} className="group-hover:text-blue-500 transition-colors" /> Apache 2.0
+            <a href={`${APP.nxctf.nxctf_github}/blob/main/LICENSE` || "https://www.apache.org/licenses/LICENSE-2.0"} target="_blank" rel="noopener" className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+              <ScrollText size={14} className="group-hover:text-blue-500 transition-colors" /> Apache 2.0
             </a>
 
-            <a href={`${APP.nxctf.nxctf_github}/blob/main/CHANGELOG.md` || '#'} target="_blank" rel="noopener" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
-              <ListOrdered size={16} className="group-hover:text-blue-500 transition-colors" /> Changelog
+            <a href={`${APP.nxctf.nxctf_github}/blob/main/CHANGELOG.md` || '#'} target="_blank" rel="noopener" className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+              <ListOrdered size={14} className="group-hover:text-blue-500 transition-colors" /> Changelog
             </a>
           </div>
         </motion.div>
@@ -223,7 +213,7 @@ export default function InfoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="mb-10 grid w-full max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3"
+          className="mb-8 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3"
         >
           {LINKS.map((link, i) => {
             const Icon = link.icon;
@@ -234,14 +224,17 @@ export default function InfoPage() {
                 href={link.href}
                 target="_blank"
                 rel="noopener"
-                className={`group flex flex-col items-center justify-center p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}
+                className={`group flex flex-row items-center gap-4 p-3.5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}
               >
-                <div className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 group-hover:text-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                  <Icon className="w-6 h-6" />
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 group-hover:text-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 group-hover:scale-110 transition-all duration-300">
+                  <Icon className="w-5 h-5" />
                 </div>
-                <span className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">
-                  {link.name}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">
+                    {link.name}
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-medium">Join our {link.name}</span>
+                </div>
               </a>
             );
           })}
@@ -254,13 +247,13 @@ export default function InfoPage() {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="relative mb-6 w-full max-w-5xl"
         >
-          <div className="mb-5 text-center">
-            <h2 className="flex items-center justify-center gap-2 text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white">
-              <Users size={24} className="text-blue-500" /> Built by the Community
+          <div className="mb-4 text-center">
+            <h2 className="flex items-center justify-center gap-2 text-sm sm:text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white">
+              <Users size={20} className="text-blue-500 sm:w-6 sm:h-6" /> Built by the Community
             </h2>
           </div>
 
-          <div className="marquee-group relative w-full overflow-hidden space-y-4 py-2">
+          <div className="marquee-group relative w-full overflow-hidden space-y-3 py-2">
             {/* Gradient Fades for Marquee */}
             <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#fafafa] dark:from-[#0b0f19] to-transparent z-10" />
             <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#fafafa] dark:from-[#0b0f19] to-transparent z-10" />

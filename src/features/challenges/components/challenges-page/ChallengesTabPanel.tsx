@@ -18,7 +18,7 @@ export default function ChallengesTabPanel({
 }: ChallengesTabPanelProps) {
   return (
     <div className="xl:grid xl:grid-cols-[176px_minmax(0,1fr)] xl:gap-4 2xl:gap-5">
-      <div className="relative z-30 mb-4 flex flex-col gap-4 xl:sticky xl:top-[4.5rem] xl:mb-0 xl:self-start 2xl:gap-5">
+      <div className="relative z-30 mb-4 flex flex-col gap-4 xl:sticky xl:top-[4rem] xl:mb-0 xl:self-start 2xl:gap-5">
         <ChallengePageTabs
           currentTab={data.currentTab}
           onTabChange={data.setCurrentTab}

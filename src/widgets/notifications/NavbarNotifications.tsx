@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
+import { createPortal } from 'react-dom'
 
 import NotificationBell from './components/NotificationBell'
 import NotificationToast from './components/NotificationToast'
@@ -25,6 +26,8 @@ export default function NavbarNotifications({
 }: NavbarNotificationsProps) {
   const pathname = usePathname()
   const previousPathnameRef = useRef(pathname)
+  const [mounted, setMounted] = React.useState(false)
+
   const {
     notifOpen,
     setNotifOpen,
@@ -54,6 +57,7 @@ export default function NavbarNotifications({
   } = useNotifications()
 
   useEffect(() => {
+    setMounted(true)
     if (previousPathnameRef.current !== pathname) {
       setNotifOpen(false)
     }
@@ -63,13 +67,6 @@ export default function NavbarNotifications({
 
   return (
     <>
-      <NotificationToast
-        solveNotif={solveNotif}
-        notifToast={notifToast}
-        onDismissSolve={dismissSolveNotif}
-        onDismissToast={dismissNotifToast}
-      />
-
       <NotificationBell
         notifButtonRef={notifButtonRef}
         notifOpen={notifOpen}
@@ -78,31 +75,43 @@ export default function NavbarNotifications({
         onToggle={openNotifPanel}
       />
 
-      <AnimatePresence>
-        {notifOpen && (
-          <NotificationPanel
-            theme={theme}
-            notifPanelRef={notifPanelRef}
-            setNotifOpen={setNotifOpen}
-            markAllNotificationsRead={markAllNotificationsRead}
-            solveSoundEnabled={solveSoundEnabled}
-            setSolveSoundEnabled={setSolveSoundEnabled}
-            globalAdminStatus={globalAdminStatus}
-            notifTitle={notifTitle}
-            setNotifTitle={setNotifTitle}
-            notifMessage={notifMessage}
-            setNotifMessage={setNotifMessage}
-            notifLevel={notifLevel}
-            setNotifLevel={setNotifLevel}
-            handleSendNotif={handleSendNotif}
-            notifLoading={notifLoading}
-            notifItems={notifItems}
-            isNotifRead={isNotifRead}
-            getLevelBadgeClass={getLevelBadgeClass}
-            handleDeleteNotif={handleDeleteNotif}
+      {mounted && createPortal(
+        <>
+          <NotificationToast
+            solveNotif={solveNotif}
+            notifToast={notifToast}
+            onDismissSolve={dismissSolveNotif}
+            onDismissToast={dismissNotifToast}
           />
-        )}
-      </AnimatePresence>
+
+          <AnimatePresence>
+            {notifOpen && (
+              <NotificationPanel
+                theme={theme}
+                notifPanelRef={notifPanelRef}
+                setNotifOpen={setNotifOpen}
+                markAllNotificationsRead={markAllNotificationsRead}
+                solveSoundEnabled={solveSoundEnabled}
+                setSolveSoundEnabled={setSolveSoundEnabled}
+                globalAdminStatus={globalAdminStatus}
+                notifTitle={notifTitle}
+                setNotifTitle={setNotifTitle}
+                notifMessage={notifMessage}
+                setNotifMessage={setNotifMessage}
+                notifLevel={notifLevel}
+                setNotifLevel={setNotifLevel}
+                handleSendNotif={handleSendNotif}
+                notifLoading={notifLoading}
+                notifItems={notifItems}
+                isNotifRead={isNotifRead}
+                getLevelBadgeClass={getLevelBadgeClass}
+                handleDeleteNotif={handleDeleteNotif}
+              />
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </>
   )
 }

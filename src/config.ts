@@ -11,13 +11,15 @@ export const APP = {
     "Boot To Root",
     "Web",
     "Forensics",
+    "AI",
     "Osint",
     "Crypto",
     "Reverse",
     "Pwn",
     "Stegnography",
     "Misc",
-    "Network"
+    "Blockchain",
+    "Network",
   ],
 
   // Base URL (ambil dari env kalau ada). Prefer changing NEXT_PUBLIC_SITE_URL in .env.local.

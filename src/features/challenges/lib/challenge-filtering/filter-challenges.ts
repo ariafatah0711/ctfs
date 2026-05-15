@@ -76,6 +76,13 @@ export function filterChallengesByState({
 
     if (settings.hideMaintenance && challenge.is_maintenance) return false
 
+    // Hide solved Intro challenges if setting is enabled and not specifically filtering for solved
+    const isIntro = String(challenge.category || '').toLowerCase() === 'intro'
+    const isFilteringSolved = filters.status === 'solved'
+    if (isIntro && challenge.is_solved && settings.hideSolvedIntro && !isFilteringSolved) {
+      return false
+    }
+
     const featureType = getChallengeFeatureType(challenge)
     if (filters.feature === 'T' && !(featureType === 'T' || featureType === 'TS')) return false
     if (filters.feature === 'S' && !(featureType === 'S' || featureType === 'TS')) return false

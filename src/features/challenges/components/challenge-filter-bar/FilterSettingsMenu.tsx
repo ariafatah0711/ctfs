@@ -36,8 +36,8 @@ export default function FilterSettingsMenu({
         onClick={() => onOpenChange(!open)}
         data-tour="challenge-filter-settings"
         className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${open
-            ? 'border-blue-600 bg-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600'
-            : SURFACE_FILTER_ITEM_CLASS
+          ? 'border-blue-600 bg-blue-600 text-white shadow-inner dark:bg-blue-600 dark:border-blue-600'
+          : SURFACE_FILTER_ITEM_CLASS
           }`}
         aria-label="Open filter settings"
       >
@@ -55,6 +55,18 @@ export default function FilterSettingsMenu({
               checked={settings.hideMaintenance}
               onCheckedChange={(checked) =>
                 onSettingsChange({ ...settings, hideMaintenance: checked })
+              }
+            />
+          </div>
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Hide solved Intro</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Exclude completed intro tasks</p>
+            </div>
+            <Switch
+              checked={settings.hideSolvedIntro}
+              onCheckedChange={(checked) =>
+                onSettingsChange({ ...settings, hideSolvedIntro: checked })
               }
             />
           </div>

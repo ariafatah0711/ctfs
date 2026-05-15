@@ -109,7 +109,7 @@ export default function DesktopChallengeFilterSidebar({
     <>
       <aside
         data-tour="challenge-sidebar-filters"
-        className="relative z-20 hidden max-h-[calc(100vh-8.75rem)] overflow-y-auto xl:block"
+        className="relative z-20 hidden max-h-[calc(100vh-8.75rem)] overflow-y-auto xl:block scroll-hidden"
       >
         <div className="flex w-[176px] flex-col gap-1.5 rounded-2xl border border-blue-500/20 bg-white/60 p-2 shadow-sm shadow-blue-500/5 backdrop-blur-md dark:border-blue-500/10 dark:bg-gray-900/60">
           <button
@@ -159,7 +159,7 @@ export default function DesktopChallengeFilterSidebar({
               className={`pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 ${difficultyActive
                 ? 'text-white'
                 : 'text-gray-500 dark:text-gray-400'
-              }`}
+                }`}
             />
             <select
               id="desktop-sidebar-difficulty"
@@ -168,7 +168,7 @@ export default function DesktopChallengeFilterSidebar({
               className={`h-9 w-full rounded-xl border pl-10 pr-3 text-xs font-semibold outline-none transition focus:ring-2 focus:ring-blue-500/30 ${difficultyActive
                 ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
                 : SURFACE_FILTER_ITEM_CLASS
-              }`}
+                }`}
               title="Filter by difficulty"
               aria-label="Filter by difficulty"
             >
@@ -268,7 +268,7 @@ function iconButtonClass(active: boolean) {
   return `relative inline-flex h-9 w-full items-center gap-2 rounded-xl border px-3 text-left text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${active
     ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
     : SURFACE_FILTER_ITEM_CLASS
-  }`
+    }`
 }
 
 type CategoryButtonProps = {

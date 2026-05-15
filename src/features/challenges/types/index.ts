@@ -36,6 +36,7 @@ export type Solver = {
 export type ChallengeFilterSettings = {
   hideMaintenance: boolean
   highlightTeamSolves: boolean
+  hideSolvedIntro: boolean
 }
 
 export type FlagFeedback = {
