@@ -20,7 +20,7 @@ const BrandLogo = ({ name = "", className }: BrandLogoProps) => {
                 <span className="text-gray-900 dark:text-white transition-colors">
                     {prefix}
                 </span>
-                <span className="text-blue-600 dark:text-blue-500 drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">
+                <span className="text-blue-600 dark:text-blue-500 drop-shadow-[0_0_6px_rgba(59,130,246,0.18)]">
                     {suffix}
                 </span>
             </span>

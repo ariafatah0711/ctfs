@@ -42,7 +42,7 @@ const buttonClasses: Record<SegmentedTabsVariant, string> = {
 
 const activeClasses: Record<SegmentedTabsVariant, string> = {
   pill:
-    'bg-blue-500/20 text-blue-600 shadow-[0_0_18px_rgba(59,130,246,0.12)] dark:text-blue-400',
+    'bg-blue-500/15 text-blue-600 shadow-sm dark:text-blue-400',
   panel:
     'bg-white text-blue-600 shadow-sm dark:bg-gray-800 dark:text-blue-400',
   panelLarge:
@@ -60,11 +60,6 @@ const inactiveClasses: Record<SegmentedTabsVariant, string> = {
     'text-gray-500 hover:bg-white/50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-200',
   compact:
     'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200',
-}
-
-const activeIconClasses: Partial<Record<SegmentedTabsVariant, string>> = {
-  panel: 'animate-pulse',
-  panelLarge: 'animate-pulse',
 }
 
 export function SegmentedTabs<T extends string>({
@@ -96,7 +91,7 @@ export function SegmentedTabs<T extends string>({
               <Icon
                 className={cn(
                   variant === 'compact' ? 'h-4 w-4' : 'h-4 w-4',
-                  isActive && activeIconClasses[variant]
+                  isActive && 'text-blue-600 dark:text-blue-400'
                 )}
               />
             ) : null}

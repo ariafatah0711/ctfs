@@ -25,7 +25,7 @@ export default function BaseScoreboardRankBadge({
   return (
     <div
       className={cn(
-        'flex min-h-9 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs shadow-[0_0_18px_rgba(59,130,246,0.08)]',
+        'flex min-h-9 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs shadow-[0_0_10px_rgba(59,130,246,0.06)]',
         className
       )}
     >

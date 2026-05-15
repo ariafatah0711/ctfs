@@ -2,10 +2,11 @@ import React from 'react'
 import APP from '@/config'
 import { VERSION, BUILD_TIME } from "@/version";
 import { Github, Coffee, Code2, Shield } from 'lucide-react'
+import { SURFACE_GLASS_CARD_COMPACT_CLASS } from '@/shared/styles'
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full mt-auto relative z-10 py-12 border-t border-gray-100 dark:border-gray-900/50">
+    <footer className="relative z-10 mt-auto w-full border-t border-gray-200/70 py-8 dark:border-gray-800/80">
       <div className="max-w-6xl mx-auto px-6">
 
         {/* Layout 3 Kolom Presisi (33% masing-masing) */}
@@ -41,9 +42,9 @@ const Footer: React.FC = () => {
               href={APP.nxctf.nxctf_donation}
               target="_blank"
               rel="noopener"
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600/5 dark:bg-blue-400/5 border border-blue-500/20 hover:border-orange-500/50 hover:bg-orange-500/5 text-blue-600 dark:text-blue-400 hover:text-orange-600 dark:hover:text-orange-400 rounded-full transition-all duration-300 group shadow-sm"
+              className="group flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-600/5 px-3 py-2 text-blue-600 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-blue-700 dark:bg-blue-400/5 dark:text-blue-400 dark:hover:text-blue-300"
             >
-              <Coffee size={14} className="animate-bounce text-orange-500" />
+              <Coffee size={14} className="text-blue-500" />
               <span className="text-[11px] font-bold uppercase tracking-wider">Support Dev</span>
             </a>
           </div>
@@ -54,7 +55,7 @@ const Footer: React.FC = () => {
             <a
               href={APP.nxctf.nxctf_github_org}
               target="_blank"
-              className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 hover:border-blue-500 transition-all group shadow-sm"
+              className={`group flex items-center gap-3 py-3 pl-3 pr-4 ${SURFACE_GLASS_CARD_COMPACT_CLASS} hover:border-blue-500/40`}
               title="Organization"
             >
               <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-colors">
@@ -70,7 +71,7 @@ const Footer: React.FC = () => {
             <a
               href={APP.nxctf.nxctf_author}
               target="_blank"
-              className="flex items-center gap-3 pl-3 pr-4 py-3 rounded-xl bg-white/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 hover:border-blue-500 transition-all group shadow-sm"
+              className={`group flex items-center gap-3 py-3 pl-3 pr-4 ${SURFACE_GLASS_CARD_COMPACT_CLASS} hover:border-blue-500/40`}
             >
               <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-colors">
                 <Code2 size={16} />

@@ -44,7 +44,7 @@ export default function AllEventsButton({
 
         {selected && (
           <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
             <div className="font-bold text-blue-600 dark:text-blue-400 text-[10px] uppercase tracking-wider">
               Active
             </div>

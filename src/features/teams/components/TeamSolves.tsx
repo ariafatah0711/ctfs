@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Trophy, ListChecks } from 'lucide-react'
+import { CheckCircle2, Trophy, ListChecks, X } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@/shared/ui/dialog'
 import { EmptyState } from '@/shared/components'
-import { DIALOG_CONTENT_CLASS_3XL, SURFACE_GLASS_BASE_CLASS } from '@/shared/styles'
+import { DIALOG_CONTENT_CLASS_3XL, SURFACE_GLASS_CARD_COMPACT_CLASS } from '@/shared/styles'
 import { TeamChallenge } from '../types'
 import { formatDate } from '../lib/team-utils'
 import ProfileChallengeListItem from '@/features/users/components/UserProfile/ProfileChallengeListItem'
@@ -44,7 +44,7 @@ export default function TeamSolves({
 
       <div className="grid gap-2.5">
         {challenges.length === 0 ? (
-          <Card className={`${SURFACE_GLASS_BASE_CLASS} rounded-2xl`}>
+            <Card className={SURFACE_GLASS_CARD_COMPACT_CLASS}>
             <CardContent className="pt-4">
               <EmptyState
                 icon={<Trophy className="w-full h-full text-gray-400" />}
@@ -73,7 +73,7 @@ export default function TeamSolves({
               onClick={() => setShowAllSolves(false)}
               className="rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all"
             >
-              ✕
+              <X className="h-4 w-4" />
             </Button>
           </div>
 

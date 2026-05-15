@@ -4,6 +4,7 @@ import React from 'react'
 import { Calendar, Flag, Hash, LogOut, Trophy } from 'lucide-react'
 import EventSelect from '@/features/events/components/EventSelect'
 import { Button } from '@/shared/ui/button'
+import { SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS } from '@/shared/styles'
 import { TeamInfo, TeamSummary } from '../types'
 
 interface TeamProfileHeaderProps {
@@ -35,8 +36,8 @@ export default function TeamProfileHeader({
   const teamInitials = team.name.slice(0, 2).toUpperCase()
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white/50 p-4 backdrop-blur-xl dark:border-white/10 dark:bg-[#111622]/50 sm:p-5">
-      <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
+    <div className={`relative overflow-hidden p-4 sm:p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
 
       <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">

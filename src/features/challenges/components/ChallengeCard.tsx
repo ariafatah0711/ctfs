@@ -87,7 +87,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
 
         {/* Subtle Background Category Icon */}
         <div className={`absolute right-0 bottom-0 pointer-events-none z-0 overflow-hidden rounded-br-2xl transition-transform duration-500 ${categoryIconColor}
-          ${isAnySolved ? 'opacity-[0.04]' : 'opacity-[0.15] group-hover:opacity-[0.22] group-hover:scale-110 group-hover:rotate-6 transition-all'}`}>
+          ${isAnySolved ? 'opacity-[0.04]' : 'opacity-[0.10] group-hover:opacity-[0.16] group-hover:scale-105 transition-all'}`}>
           <CategoryIcon size={110} strokeWidth={1.2} />
         </div>
 
@@ -165,7 +165,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
           <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
             {isMaintenance ? (
               <span className="text-amber-500 flex items-center gap-1.5 font-black">
-                <AlertTriangle size={12} className="animate-pulse" />
+                <AlertTriangle size={12} />
                 Maintenance
               </span>
             ) : (

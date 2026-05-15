@@ -2,6 +2,7 @@
 
 import React from 'react'
 import type { ChallengeWithSolve } from '@/shared/types'
+import { SURFACE_GLASS_CARD_COMPACT_CLASS } from '@/shared/styles'
 import { formatSmartFlag } from '../../lib/flag-formatting'
 import type { KeyedBooleanMap, KeyedFlagFeedbackMap, KeyedStringMap } from '../../types'
 
@@ -47,7 +48,7 @@ export default function ChallengeFlagForm({
           handleFlagSubmit(challenge.id)
         }}
       >
-        <div className="relative flex-1 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 overflow-hidden focus-within:ring-2 focus-within:ring-pink-400 transition-all">
+        <div className={`relative flex-1 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/40 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
           {challenge.flag_placeholder && placeholders[challenge.id] && (
             <div
               ref={overlayRef}
@@ -85,7 +86,7 @@ export default function ChallengeFlagForm({
             !flagInputs[challenge.id]?.trim() ||
             (challenge.flag_placeholder && placeholders[challenge.id] ? (flagInputs[challenge.id] || '').length !== placeholders[challenge.id].length : false)
           }
-          className="flex h-[38px] shrink-0 select-none items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 px-6 text-[13px] font-black uppercase tracking-widest text-white shadow-lg shadow-pink-500/20 transition-all hover:from-pink-400 hover:to-pink-500 hover:shadow-pink-500/40 active:scale-95 disabled:opacity-30"
+          className="flex h-[38px] shrink-0 select-none items-center justify-center rounded-xl bg-blue-600 px-6 text-[13px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-500 hover:shadow-blue-500/30 active:scale-95 disabled:opacity-30"
         >
           {submitting[challenge.id] ? '...' : 'Submit'}
         </button>

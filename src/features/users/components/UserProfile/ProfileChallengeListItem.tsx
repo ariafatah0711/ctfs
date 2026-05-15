@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { cn } from '@/shared/lib/utils'
+import { SURFACE_GLASS_CARD_COMPACT_CLASS, SURFACE_INTERACTIVE_HOVER_CLASS } from '@/shared/styles'
 
 type ProfileChallengeListItemProps = {
   title: string
@@ -21,7 +22,9 @@ export default function ProfileChallengeListItem({
   return (
     <div
       className={cn(
-        'flex min-h-[72px] flex-col justify-between gap-2.5 rounded-xl border border-gray-200 bg-white/40 p-3 backdrop-blur-sm transition-all duration-300 hover:border-blue-500/50 hover:bg-white/80 hover:shadow-[0_10px_20px_rgba(59,130,246,0.1)] dark:border-white/10 dark:bg-white/5 dark:hover:bg-gray-800/80 sm:flex-row sm:items-center',
+        'flex min-h-[72px] flex-col justify-between gap-2.5 p-3 sm:flex-row sm:items-center',
+        SURFACE_GLASS_CARD_COMPACT_CLASS,
+        SURFACE_INTERACTIVE_HOVER_CLASS,
         className
       )}
     >

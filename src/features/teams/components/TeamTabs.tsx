@@ -3,6 +3,7 @@
 import React from 'react'
 import { ArrowLeft, Wrench, LayoutDashboard } from 'lucide-react'
 import { UserTabs } from '@/features/users/components/ui/UserTabs'
+import { SURFACE_GLASS_CONTROL_COMPACT_CLASS } from '@/shared/styles'
 
 type TeamTabValue = 'overview' | 'manage'
 
@@ -30,7 +31,7 @@ export default function TeamTabs({ activeTab, setActiveTab, onBack, canManage, i
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white/50 px-4 text-xs font-semibold text-gray-600 backdrop-blur transition hover:border-blue-500/40 hover:text-blue-600 dark:border-white/10 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:text-blue-400 sm:h-10 sm:px-4 sm:text-sm"
+            className={`inline-flex h-9 items-center gap-2 px-4 text-xs font-semibold sm:h-10 sm:px-4 sm:text-sm ${SURFACE_GLASS_CONTROL_COMPACT_CLASS} rounded-full`}
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden xs:inline">Go Back</span>

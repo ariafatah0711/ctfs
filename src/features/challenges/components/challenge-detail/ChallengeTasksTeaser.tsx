@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowRight, ClipboardList } from 'lucide-react'
+import { SURFACE_GLASS_CONTROL_COMPACT_CLASS } from '@/shared/styles'
 import type { ChallengeDialogTab } from '../../types'
 
 type ChallengeTasksTeaserProps = {
@@ -24,7 +25,7 @@ export default function ChallengeTasksTeaser({
           title="Answer all questions to get the flag"
           aria-label="Answer all questions to get the flag"
           onClick={() => onTabChange('question', challengeId)}
-          className="flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+          className={`flex select-none items-center gap-2 px-4 py-2 text-sm font-bold ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`}
         >
           <ClipboardList className="h-4 w-4 text-gray-400" />
           <span>Answer Questions to Get the Flag</span>

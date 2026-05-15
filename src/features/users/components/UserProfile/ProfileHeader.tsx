@@ -6,6 +6,7 @@ import { ImageWithFallback } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
 import SocialIcon from '@/features/users/components/ui/SocialIcon'
 import { formatRelativeDate } from '@/shared/lib'
+import { SURFACE_GLASS_CARD_COMPACT_CLASS } from '@/shared/styles'
 import { UserDetail, Badge } from '../../types'
 import EditProfileModal from './EditProfileModal'
 
@@ -37,7 +38,7 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   return (
     <section
-      className="mx-auto flex w-full max-w-7xl flex-col gap-3 md:flex-row md:items-start md:justify-between"
+      className={`mx-auto flex w-full max-w-7xl flex-col gap-3 p-4 md:flex-row md:items-start md:justify-between ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}
     >
       <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
         <div className="relative mx-auto flex h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md dark:border-gray-900 sm:mx-0 sm:h-28 sm:w-28 aspect-square">

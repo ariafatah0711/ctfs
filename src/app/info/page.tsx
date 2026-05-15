@@ -15,7 +15,12 @@ import BrandLogo from '@/shared/components/BrandLogo'
 import PageBackground from '@/shared/components/PageBackground'
 import Footer from "@/_layouts/Footer";
 import { useAuth } from '@/shared/contexts/AuthContext'
-import { THEME_PRIMARY_PILL_CLASS, THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS,
+  THEME_PRIMARY_PILL_CLASS,
+  THEME_PRIMARY_SELECTION_CLASS,
+} from '@/shared/styles'
 
 const CONTRIBUTORS = [
   "@ariafatah0711",
@@ -93,44 +98,44 @@ export default function InfoPage() {
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
       {/* Faint Watermark Logo */}
-      <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02] z-0">
+      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.015] dark:opacity-[0.01]">
         <ImageWithFallback
           src={APP.nxctf?.nxctf_logo}
           alt={`${APP.shortName} watermark`}
-          size={1000}
+          size={760}
           rounded={false}
         />
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 w-full px-6 py-12 lg:py-16">
+      <main className="flex-1 flex flex-col items-center relative z-10 w-full px-4 py-8 sm:px-6 lg:py-10">
         {/* HERO SECTION */}
         <section className="w-full max-w-4xl mx-auto flex flex-col items-center text-center">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl font-extrabold tracking-tight mb-4 flex flex-row items-center justify-center gap-4"
+            className="mb-3 flex flex-row items-center justify-center gap-3 text-3xl font-black tracking-tight sm:text-5xl"
           >
             <ImageWithFallback
               src={APP.image_logo}
               alt={`${APP.shortName} logo`}
-              size={160}
+              size={96}
               rounded={false}
             />
-            <motion.h1
+            <motion.span
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl sm:text-6xl mb-2"
+              className="text-3xl sm:text-5xl"
             >
               <BrandLogo name={APP.nxctf.nxctf_title} />
-            </motion.h1>
+            </motion.span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mb-2 leading-relaxed"
+            className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base"
           >
             A modern Capture The Flag (CTF) platform built for security competitions, workshops, and training.
           </motion.p>
@@ -138,7 +143,7 @@ export default function InfoPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="font-mono text-sm text-gray-500 dark:text-gray-500 mb-8"
+            className="mb-6 font-mono text-xs text-gray-500 dark:text-gray-500 sm:text-sm"
           >
             &gt; {APP.description || "Ngehack untuk senang-senang, bukan buat nyari profit"}
           </motion.p>
@@ -149,7 +154,7 @@ export default function InfoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="w-full max-w-3xl mx-auto flex flex-col mb-12 p-5 rounded-2xl bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 backdrop-blur-xl shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)] transition-all duration-300"
+          className={`mb-8 flex w-full max-w-3xl flex-col p-4 sm:p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}
         >
           {/* Top: GitHub Stats */}
           <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 pb-5">
@@ -218,7 +223,7 @@ export default function InfoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16"
+          className="mb-10 grid w-full max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3"
         >
           {LINKS.map((link, i) => {
             const Icon = link.icon;
@@ -229,7 +234,7 @@ export default function InfoPage() {
                 href={link.href}
                 target="_blank"
                 rel="noopener"
-                className="group flex flex-col items-center justify-center p-6 transition-all duration-300 bg-white/60 dark:bg-[#111622]/60 border border-gray-200 dark:border-gray-800 rounded-2xl backdrop-blur-xl hover:bg-white dark:hover:bg-[#151a28] hover:-translate-y-1 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.05)]"
+                className={`group flex flex-col items-center justify-center p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}
               >
                 <div className="mb-3 inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 group-hover:text-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                   <Icon className="w-6 h-6" />
@@ -247,10 +252,10 @@ export default function InfoPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="w-full max-w-5xl mx-auto mb-8 relative"
+          className="relative mb-6 w-full max-w-5xl"
         >
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
+          <div className="mb-5 text-center">
+            <h2 className="flex items-center justify-center gap-2 text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white">
               <Users size={24} className="text-blue-500" /> Built by the Community
             </h2>
           </div>
@@ -271,7 +276,7 @@ export default function InfoPage() {
                       href={`https://github.com/${username}`}
                       target="_blank"
                       rel="noopener"
-                      className="flex items-center gap-3 shrink-0 group px-4 py-2 mx-2 rounded-full bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 backdrop-blur-md hover:bg-white dark:hover:bg-gray-800 hover:border-blue-500/50 hover:shadow-sm transition-all"
+                      className={`group mx-2 flex shrink-0 items-center gap-3 px-4 py-2 ${SURFACE_GLASS_CARD_COMPACT_CLASS} rounded-full hover:border-blue-500/40`}
                     >
                       <ProfileAvatar username={username} />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-500 transition-colors">
@@ -294,7 +299,7 @@ export default function InfoPage() {
                       href={`https://github.com/${username}`}
                       target="_blank"
                       rel="noopener"
-                      className="flex items-center gap-3 shrink-0 group px-4 py-2 mx-2 rounded-full bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 backdrop-blur-md hover:bg-white dark:hover:bg-gray-800 hover:border-blue-500/50 hover:shadow-sm transition-all"
+                      className={`group mx-2 flex shrink-0 items-center gap-3 px-4 py-2 ${SURFACE_GLASS_CARD_COMPACT_CLASS} rounded-full hover:border-blue-500/40`}
                     >
                       <ProfileAvatar username={username} />
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-500 transition-colors">

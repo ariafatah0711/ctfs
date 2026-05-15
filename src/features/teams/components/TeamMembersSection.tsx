@@ -6,7 +6,7 @@ import { Users, Crown, UserX } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
 import { EmptyState } from '@/shared/components'
-import { SURFACE_GLASS_CARD_INTERACTIVE_CLASS } from '@/shared/styles'
+import { SURFACE_GLASS_CARD_COMPACT_CLASS, SURFACE_GLASS_CARD_INTERACTIVE_CLASS, SURFACE_INTERACTIVE_HOVER_CLASS } from '@/shared/styles'
 import { TeamMember } from '../types'
 
 interface TeamMembersSectionProps {
@@ -47,7 +47,7 @@ export default function TeamMembersSection({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             {members.map((m) => (
-              <div key={m.user_id} className="relative group overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 p-4 transition-all hover:border-blue-500/30 hover:shadow-lg">
+              <div key={m.user_id} className={`group relative overflow-hidden p-4 ${SURFACE_GLASS_CARD_COMPACT_CLASS} ${SURFACE_INTERACTIVE_HOVER_CLASS}`}>
                 <div className="flex items-center gap-4">
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-bold text-lg text-gray-500 dark:text-gray-400">
                     {m.username.slice(0, 1).toUpperCase()}

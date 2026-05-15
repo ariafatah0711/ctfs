@@ -4,6 +4,10 @@ import { memo, useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { MarkdownRenderer } from '@/shared/markdown/MarkdownRenderer'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_GLASS_FIELD_COMPACT_CLASS,
+} from '@/shared/styles'
 import type { SubChallengeMode, SubChallengeQuestion } from '../../types'
 
 type SubChallengePanelProps = {
@@ -61,17 +65,17 @@ function QuestionCard({
 }: QuestionCardProps) {
   const questionContent = normalizeQuestionMarkdown(question.question)
   const cardClassName = completed
-    ? 'min-w-0 overflow-x-hidden space-y-2 rounded-md border border-[#35355e] bg-[#1a1a33]/50 p-2.5 opacity-90'
+    ? `min-w-0 overflow-x-hidden space-y-2 p-2.5 opacity-90 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`
     : current
-      ? 'min-w-0 overflow-x-hidden space-y-2 rounded-md border border-pink-500/30 bg-[#1a1a33] p-2.5 shadow-lg shadow-pink-500/5'
-      : 'min-w-0 overflow-x-hidden space-y-2 rounded-md p-2.5 border border-pink-500/10 bg-[#1a1a33]'
+      ? `min-w-0 overflow-x-hidden space-y-2 p-2.5 border-blue-500/40 shadow-lg shadow-blue-500/10 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`
+      : `min-w-0 overflow-x-hidden space-y-2 p-2.5 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`
 
   return (
     <div className={cardClassName}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex select-none items-center gap-2">
-            <p className={`text-[10px] uppercase tracking-[0.18em] ${completed ? 'text-gray-500' : 'text-pink-300/70'}`}>
+            <p className={`text-[10px] uppercase tracking-[0.18em] ${completed ? 'text-gray-500' : 'text-blue-400/80'}`}>
               Question #{question.order_number}
             </p>
             {completed && (
@@ -80,7 +84,7 @@ function QuestionCard({
               </span>
             )}
             {!completed && !current && (
-              <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border bg-pink-900/30 text-pink-200 border-pink-700/40">
+              <span className="shrink-0 rounded border border-blue-500/20 bg-blue-500/10 px-1.5 py-0.5 text-[10px] text-blue-300">
                 Pending
               </span>
             )}
@@ -100,10 +104,10 @@ function QuestionCard({
           readOnly={completed}
           className={
             completed
-              ? 'flex-1 px-3 py-2 rounded border border-[#35355e] bg-[#1a1a33] text-gray-400 focus:outline-none cursor-not-allowed text-sm'
+              ? `${SURFACE_GLASS_FIELD_COMPACT_CLASS} flex-1 cursor-not-allowed text-gray-400`
               : current
-                ? 'flex-1 px-3 py-2 rounded border border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-pink-400'
-                : 'flex-1 px-3 py-2 rounded border text-sm focus:outline-none border-[#35355e] dark:border-gray-700 bg-[#181829] dark:bg-gray-800 text-white focus:ring-2 focus:ring-pink-400'
+                ? `${SURFACE_GLASS_FIELD_COMPACT_CLASS} flex-1`
+                : `${SURFACE_GLASS_FIELD_COMPACT_CLASS} flex-1`
           }
           onKeyDown={(event) => {
             if (!completed && event.key === 'Enter') {
@@ -117,7 +121,7 @@ function QuestionCard({
             type="button"
             onClick={onSubmit}
             disabled={submitting || !answer?.trim()}
-            className="select-none px-4 py-2 rounded bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition disabled:opacity-50"
+            className="select-none rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm shadow-blue-500/20 transition hover:bg-blue-500 disabled:opacity-50"
           >
             {submitting ? '...' : 'Check'}
           </button>
@@ -227,14 +231,14 @@ export default function SubChallengePanel({
           type="button"
           disabled={submitting || !Object.values(answers).some((value) => value?.trim())}
           onClick={() => onSubmit()}
-          className="select-none px-5 py-2 rounded bg-gradient-to-br from-[#35355e] to-[#232344] text-white font-bold shadow hover:from-[#4a4a7a] transition disabled:opacity-50 border border-gray-600"
+          className="select-none rounded-xl border border-blue-500/30 bg-blue-600/90 px-5 py-2 font-bold text-white shadow-sm shadow-blue-500/20 transition hover:bg-blue-500 disabled:opacity-50"
         >
           {submitting ? '...' : 'Submit All Answers'}
         </button>
       )}
 
       {message && !isShowingEmptyQuestionMessage && (
-        <div className="select-none p-2 rounded text-sm font-semibold bg-[#2c2c52] text-gray-100">
+        <div className="select-none rounded-xl border border-blue-500/20 bg-blue-500/10 p-2 text-sm font-semibold text-gray-100">
           {message}
         </div>
       )}

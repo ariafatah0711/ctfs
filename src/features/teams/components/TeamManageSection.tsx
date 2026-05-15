@@ -4,7 +4,7 @@ import React from 'react'
 import { Copy, Edit2, Eye, EyeOff, KeyRound, LogOut, RefreshCw, Settings2, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Button } from '@/shared/ui/button'
-import { SURFACE_GLASS_CARD_CLASS } from '@/shared/styles'
+import { SURFACE_GLASS_CARD_CLASS, SURFACE_GLASS_CARD_COMPACT_CLASS } from '@/shared/styles'
 import EditTeamModal from './EditTeamModal'
 import { TeamInfo } from '../types'
 
@@ -43,7 +43,7 @@ export default function TeamManageSection({
             <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
               Display Name
             </label>
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900/50">
+            <div className={`flex items-center justify-between gap-3 p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
               <span className="min-w-0 truncate text-lg font-bold text-gray-900 dark:text-white">
                 {team.name}
               </span>
@@ -74,9 +74,9 @@ export default function TeamManageSection({
         icon={<KeyRound size={18} className="text-emerald-500" />}
       >
         <div className="space-y-3">
-          <div className="flex items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 p-3 font-mono text-xs dark:border-gray-800 dark:bg-gray-900/50">
+          <div className={`flex items-center gap-2 p-3 font-mono text-xs ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
             <span className="min-w-0 flex-1 truncate text-gray-700 dark:text-gray-200">
-              {showToken ? token || '-' : token ? '••••••••' : '-'}
+              {showToken ? token || '-' : token ? '********' : '-'}
             </span>
             <button
               type="button"

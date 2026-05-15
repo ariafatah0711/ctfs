@@ -25,13 +25,13 @@ export function AuthPageShell({ children, className, contentClassName }: AuthPag
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
       {watermarkSrc && (
-        <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">
+        <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.015] dark:opacity-[0.01]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={watermarkSrc}
             alt=""
             aria-hidden="true"
-            className="h-auto w-[min(72vw,720px)] select-none object-contain"
+            className="h-auto w-[min(56vw,520px)] select-none object-contain"
           />
         </div>
       )}

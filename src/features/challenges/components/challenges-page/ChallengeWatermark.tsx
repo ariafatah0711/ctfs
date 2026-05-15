@@ -5,11 +5,11 @@ import { ImageWithFallback } from '@/shared/components'
 
 export default function ChallengeWatermark() {
   return (
-    <div className="pointer-events-none fixed inset-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02] z-0">
+    <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.015] dark:opacity-[0.01]">
       <ImageWithFallback
         src={APP.image_logo}
         alt={`${APP.shortName} watermark`}
-        size={1000}
+        size={760}
         rounded={false}
       />
     </div>

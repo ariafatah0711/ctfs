@@ -24,7 +24,7 @@ export default function SortToggle({ sortMode, onToggle }: SortToggleProps) {
         : SURFACE_FILTER_ITEM_ACTIVE_CLASS
         }`}
     >
-      <Clock3 size={16} className={isDefaultSort ? 'opacity-70' : 'animate-pulse'} />
+      <Clock3 size={16} className={isDefaultSort ? 'opacity-70' : 'text-blue-600 dark:text-blue-400'} />
     </button>
   )
 }

@@ -13,9 +13,9 @@ export default function Loader({
   return (
     <div className={containerClass}>
       <div className="relative">
-        {/* Glow effect for fullscreen */}
+        {/* Soft depth for fullscreen loader */}
         {fullscreen && (
-          <div className="absolute inset-0 rounded-full bg-blue-500/20 blur-xl animate-pulse" />
+          <div className="absolute inset-0 rounded-full bg-blue-500/10 blur-md" />
         )}
 
         <svg
@@ -49,7 +49,7 @@ export default function Loader({
       </div>
 
       {fullscreen && (
-        <div className="mt-4 animate-pulse">
+        <div className="mt-4">
           <span className={`text-xs font-bold uppercase tracking-[0.2em] ${color}`}>
             Loading Arena
           </span>

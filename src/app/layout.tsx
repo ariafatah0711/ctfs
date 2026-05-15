@@ -10,7 +10,7 @@ import Navbar from '@/_layouts/Navbar'
 import ScrollToggle from '@/_layouts/components/ScrollToggle'
 import { AuthProvider } from '@/shared/contexts/AuthContext'
 import { ThemeProvider } from '@/shared/contexts/ThemeContext'
-import { PAGE_BG_BASE_CLASS, } from '@/shared/styles/page-background'
+import { getPageMinHeightStyle, PAGE_BG_BASE_CLASS } from '@/shared/styles/page-background'
 import { THEME_PRIMARY_SELECTION_CLASS } from '@/shared/styles/theme-colors'
 import APP from '@/config'
 
@@ -109,7 +109,7 @@ export default async function RootLayout({
           children
         ) : (
           // Normal mode: with navbar and providers
-          <div className={`min-h-screen ${PAGE_BG_BASE_CLASS}`}>
+          <div className={PAGE_BG_BASE_CLASS} style={getPageMinHeightStyle()}>
             <ThemeProvider>
               <AuthProvider>
                 <Navbar />

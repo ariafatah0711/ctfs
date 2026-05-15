@@ -3,6 +3,10 @@
 import React, { useEffect, useState } from 'react'
 import { Clock, Loader2, Play, RefreshCcw } from 'lucide-react'
 import toast from 'react-hot-toast'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_GLASS_CONTROL_COMPACT_CLASS,
+} from '@/shared/styles'
 
 type ServiceAction = 'up' | 'restart' | 'extend'
 
@@ -153,12 +157,12 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
           }
 
           return (
-            <div key={idx} className="flex flex-col gap-2 bg-gray-50/50 dark:bg-[#1a1a33]/40 p-3 rounded-xl border border-gray-200 dark:border-[#35355e]/60 group hover:border-blue-500/30 transition-colors shadow-sm">
+            <div key={idx} className={`group flex flex-col gap-2 p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS} hover:border-blue-500/40`}>
               <div className="flex items-center gap-2">
                 <code className="select-none text-[13px] md:text-sm font-mono text-gray-900 dark:text-cyan-300 break-all flex-1 font-semibold">{service}</code>
                 <button
                   type="button"
-                  className="select-none p-1.5 md:p-2 bg-white/50 dark:bg-[#232344]/50 hover:bg-gray-200/50 dark:hover:bg-[#35355e]/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition shadow-sm disabled:opacity-50"
+                  className={`select-none p-1.5 text-gray-500 hover:text-green-600 disabled:opacity-50 dark:text-gray-400 dark:hover:text-green-400 md:p-2 ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`}
                   onClick={() => handleServiceAction(service, 'up')}
                   title="Start Service"
                   disabled={serviceActionLoading[service] || isRunning}
@@ -167,7 +171,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                 </button>
                 <button
                   type="button"
-                  className="flex select-none items-center gap-1 p-1.5 md:p-2 bg-white/50 dark:bg-[#232344]/50 hover:bg-gray-200/50 dark:hover:bg-[#35355e]/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition shadow-sm disabled:opacity-50"
+                  className={`flex select-none items-center gap-1 p-1.5 text-gray-500 hover:text-yellow-600 disabled:opacity-50 dark:text-gray-400 dark:hover:text-yellow-400 md:p-2 ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`}
                   onClick={() => handleServiceAction(service, 'restart')}
                   title={(() => {
                     if (serviceActionLoading[service]) return 'Please wait...'
@@ -186,7 +190,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                 </button>
                 <button
                   type="button"
-                  className="flex select-none items-center gap-1 p-1.5 md:p-2 bg-white/50 dark:bg-[#232344]/50 hover:bg-gray-200/50 dark:hover:bg-[#35355e]/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition shadow-sm disabled:opacity-50"
+                  className={`flex select-none items-center gap-1 p-1.5 text-gray-500 hover:text-blue-600 disabled:opacity-50 dark:text-gray-400 dark:hover:text-blue-400 md:p-2 ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`}
                   onClick={() => handleServiceAction(service, 'extend')}
                   title={(() => {
                     if (serviceActionLoading[service]) return 'Please wait...'
@@ -213,7 +217,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
               </div>
 
               {details && (
-                <div className="flex flex-col gap-2 border-t border-gray-200 dark:border-[#35355e]/50 pt-2 mt-1">
+                <div className="mt-1 flex flex-col gap-2 border-t border-gray-200/80 pt-2 dark:border-gray-700/70">
                   <div className="flex select-none items-center gap-2 text-[13px] md:text-sm">
                     <span className={`w-2 h-2 rounded-full ${isRunning ? 'bg-green-500' : 'bg-red-500'}`}></span>
                     <span className="text-gray-400">Status: {details.runtime?.status || 'stopped'}</span>
@@ -230,11 +234,11 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                   {isRunning && (
                     isTcp && ncCommand ? (
                       <div className="flex items-center gap-2">
-                        <code className="text-[13px] bg-gray-200/50 dark:bg-black/50 px-2.5 py-1.5 rounded-md text-gray-900 dark:text-green-300 flex-1 break-all select-all font-mono shadow-inner border border-gray-300/50 dark:border-white/5">
+                        <code className="flex-1 select-all break-all rounded-lg border border-gray-300/60 bg-gray-200/50 px-2.5 py-1.5 font-mono text-[13px] text-gray-900 shadow-inner dark:border-gray-700/70 dark:bg-black/40 dark:text-green-300">
                           {ncCommand}
                         </code>
                         <button
-                          className="select-none py-1.5 px-3 bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-800 text-green-700 dark:text-green-300 rounded-md text-[13px] font-bold transition shadow-sm border border-green-200 dark:border-green-800/50"
+                          className="select-none rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-1.5 text-[13px] font-bold text-green-700 shadow-sm transition hover:bg-green-500/20 dark:text-green-300"
                           onClick={() => {
                             navigator.clipboard.writeText(ncCommand)
                             toast.success('Copied nc command')
@@ -245,7 +249,7 @@ const ChallengeServicesPanel: React.FC<ChallengeServicesPanelProps> = ({
                       </div>
                     ) : displayUrl ? (
                       <div className="flex items-center gap-2">
-                        <a href={displayUrl} target="_blank" rel="noreferrer" className="select-none text-[13px] md:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline flex-1 break-all bg-blue-50/50 dark:bg-black/30 p-2 rounded-md transition shadow-inner border border-blue-100 dark:border-white/5">
+                        <a href={displayUrl} target="_blank" rel="noreferrer" className="flex-1 select-none break-all rounded-lg border border-blue-500/20 bg-blue-500/10 p-2 text-[13px] font-semibold text-blue-600 shadow-inner transition hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300 md:text-sm">
                           {displayUrl}
                         </a>
                       </div>

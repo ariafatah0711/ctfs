@@ -1,6 +1,7 @@
 import type React from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
+import { SURFACE_GLASS_CARD_COMPACT_CLASS, SURFACE_INTERACTIVE_HOVER_CLASS } from '@/shared/styles'
 
 type UserStatProps = {
   icon: LucideIcon
@@ -19,7 +20,9 @@ export function UserStat({ icon: Icon, label, value, detail, onClick, className 
       type={onClick ? 'button' : undefined}
       onClick={onClick}
       className={cn(
-        'group flex min-h-[72px] w-full items-center gap-3 rounded-xl border border-gray-200 bg-white/40 p-3 text-left backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-500/50 hover:bg-white/80 hover:shadow-[0_10px_20px_rgba(59,130,246,0.1)] dark:border-white/10 dark:bg-gray-900/40 dark:hover:bg-gray-800/80 sm:min-h-[84px]',
+        'group flex min-h-[72px] w-full items-center gap-3 p-3 text-left sm:min-h-[84px]',
+        SURFACE_GLASS_CARD_COMPACT_CLASS,
+        SURFACE_INTERACTIVE_HOVER_CLASS,
         onClick && 'cursor-pointer',
         className
       )}

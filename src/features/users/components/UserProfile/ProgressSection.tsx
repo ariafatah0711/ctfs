@@ -108,7 +108,7 @@ export default function ProgressSection({
               <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
                 <div
                   style={{ width: `${progress}%` }}
-                  className="h-full rounded-full bg-blue-500 shadow-[0_0_18px_rgba(59,130,246,0.25)]"
+                  className="h-full rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.12)]"
                 />
               </div>
             </div>

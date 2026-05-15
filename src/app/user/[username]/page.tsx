@@ -100,13 +100,13 @@ export default function UserProfilePage() {
         selectionClassName="selection:bg-blue-500/30"
       >
         {(APP.nxctf?.nxctf_logo || APP.image_logo) && (
-          <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.03] dark:opacity-[0.02]">
+          <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center opacity-[0.015] dark:opacity-[0.01]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={APP.nxctf?.nxctf_logo || APP.image_logo}
               alt=""
               aria-hidden="true"
-              className="h-auto w-[min(72vw,720px)] select-none object-contain"
+              className="h-auto w-[min(56vw,520px)] select-none object-contain"
             />
           </div>
         )}

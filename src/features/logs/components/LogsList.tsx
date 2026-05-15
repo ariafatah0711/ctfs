@@ -3,13 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Loader as LucideLoader,
   Flag,
   Sparkles,
   CheckCircle2,
   Clock,
   ExternalLink,
-  ChevronRight,
   Target
 } from "lucide-react";
 
@@ -17,6 +15,11 @@ import { Loader } from '@/shared/components';
 import { formatRelativeDate } from '@/shared/lib'
 import { useLogs } from '@/features/logs/contexts/LogsContext';
 import { Button } from "@/shared/ui";
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_GLASS_CONTROL_COMPACT_CLASS,
+  SURFACE_INTERACTIVE_HOVER_CLASS,
+} from "@/shared/styles";
 
 export type LogEntry = {
   log_type: "new_challenge" | "first_blood" | "solve";
@@ -72,7 +75,7 @@ export default function LogsList({
   if (notifications.length === 0) {
     return (
       <div
-        className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/50 px-4 py-12 dark:border-gray-800 dark:bg-gray-900/20"
+        className={`flex flex-col items-center justify-center border-dashed px-4 py-12 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}
       >
         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800">
           <Clock className="text-gray-400" size={24} />
@@ -101,7 +104,7 @@ export default function LogsList({
           <Button
             onClick={() => setVisibleCount(prev => prev + 50)}
             variant="outline"
-            className="rounded-xl border-gray-200 bg-white/50 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-600 shadow-sm backdrop-blur-sm transition-all hover:border-blue-500/50 hover:text-blue-500 dark:border-gray-800 dark:bg-[#111622]/50 dark:text-gray-400"
+            className={`px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-600 hover:text-blue-500 dark:text-gray-300 ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`}
           >
             Load More Intelligence ({notifications.length - visibleCount} remaining)
           </Button>
@@ -153,7 +156,7 @@ function LogItem({ notif }: { notif: LogEntry }) {
 
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white/60 p-3 backdrop-blur-xl transition-[border-color,box-shadow,transform] duration-200 hover:translate-x-0.5 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 dark:border-gray-800 dark:bg-[#111622]/60"
+      className={`group relative overflow-hidden p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS} ${SURFACE_INTERACTIVE_HOVER_CLASS}`}
     >
       <div className="flex items-center gap-3">
         {/* Type Icon */}
@@ -207,7 +210,7 @@ function LogItem({ notif }: { notif: LogEntry }) {
       </div>
 
       {/* Decorative hover effect */}
-      <div className={`absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-transparent via-${details.color.split('-')[1]}-500 to-transparent transition-all duration-500 group-hover:w-full`} />
+      <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-500 group-hover:w-full" />
     </div>
   );
 }

@@ -87,7 +87,7 @@ export default function MaintenancePage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center p-4 font-sans antialiased relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-orange-600/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-orange-600/[0.025] blur-2xl" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.98, y: 10 }}

@@ -11,6 +11,8 @@ import PageBackground from '@/shared/components/PageBackground'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
 import {
   PAGE_MAIN_CONTAINER_6XL,
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS,
   SURFACE_GLASS_INPUT_CLASS,
   THEME_PRIMARY_SELECTION_CLASS,
 } from '@/shared/styles'
@@ -205,19 +207,19 @@ export default function TeamsPage() {
             )}
 
             {!team ? (
-              <div className="grid grid-cols-1 items-center gap-5 pt-2 md:grid-cols-2">
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 items-start gap-5 pt-2 md:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.75fr)]">
+                <div className={`space-y-4 p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}>
                   <div className="space-y-2">
-                    <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                    <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white sm:text-3xl">
                       Squad up for the <span className="text-blue-600 dark:text-blue-400">Next Conquest.</span>
                     </h2>
-                    <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                    <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
                       Join an existing crew or build your own elite team of hackers. Solve together, win together.
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-3 pt-1">
-                    <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-800/50">
+                    <div className={`flex items-center gap-3 p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30">
                         <Users size={20} />
                       </div>
@@ -226,7 +228,7 @@ export default function TeamsPage() {
                         <p className="text-sm font-bold">Shared Solves</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-800/50">
+                    <div className={`flex items-center gap-3 p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
                       <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/30">
                         <ShieldCheck size={20} />
                       </div>
@@ -239,7 +241,7 @@ export default function TeamsPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <Card className="rounded-2xl border border-gray-200 bg-white/70 shadow-lg backdrop-blur-xl dark:border-gray-800 dark:bg-[#111622]/70">
+                  <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
                     <CardHeader>
                       <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
                         <Sparkles size={18} className="text-blue-500" /> Start Your Team
@@ -275,7 +277,7 @@ export default function TeamsPage() {
                     </div>
                   </div>
 
-                  <Card className="rounded-2xl border border-gray-200 bg-white/70 shadow-lg backdrop-blur-xl dark:border-gray-800 dark:bg-[#111622]/70">
+                  <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
                     <CardHeader>
                       <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
                         <UserPlus size={18} className="text-emerald-500" /> Enter Invite Code

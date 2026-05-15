@@ -59,7 +59,7 @@ export default function ChallengePageTabs({
             iconOnly ? 'w-8' : isChallengesActive ? 'w-11 shrink-0' : 'flex-1 px-2'
           )}
         >
-          <Flag className={cn('h-4 w-4 shrink-0', isChallengesActive && 'animate-pulse')} />
+          <Flag className={cn('h-4 w-4 shrink-0', isChallengesActive && 'text-blue-600 dark:text-blue-400')} />
           {!iconOnly && !isChallengesActive && <span className="truncate">Challenges</span>}
         </span>
 
@@ -74,7 +74,7 @@ export default function ChallengePageTabs({
             iconOnly ? 'w-8' : !isChallengesActive ? 'w-11 shrink-0' : 'flex-1 px-2'
           )}
         >
-          <Zap className={cn('h-4 w-4 shrink-0', !isChallengesActive && 'animate-pulse')} />
+          <Zap className={cn('h-4 w-4 shrink-0', !isChallengesActive && 'text-blue-600 dark:text-blue-400')} />
           {!iconOnly && isChallengesActive && <span className="truncate">Events</span>}
         </span>
       </button>

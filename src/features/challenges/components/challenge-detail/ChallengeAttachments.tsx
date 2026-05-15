@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { ClipboardCopy, Download, ExternalLink, FileText, Link as LinkIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Attachment, ChallengeWithSolve } from '@/shared/types'
+import { SURFACE_GLASS_CONTROL_COMPACT_CLASS } from '@/shared/styles'
 import type { KeyedBooleanMap } from '../../types'
 
 const RESOURCE_ACTION_CLASS =
-  'flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700'
+  `flex select-none items-center gap-2 px-4 py-2 text-sm font-bold disabled:opacity-50 ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`
 
 type ChallengeAttachmentsProps = {
   challenge: ChallengeWithSolve

@@ -116,7 +116,7 @@ export default function ChallengesPage() {
     >
       <main className="flex-1 flex flex-col relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-2 lg:py-2 space-y-3 md:space-y-3">
-          {renderDeferredDecorations && <ChallengeWatermark />}
+          {/* {renderDeferredDecorations && <ChallengeWatermark />} */}
 
           {data.currentTab === 'challenges' && (
             <ChallengesTabPanel

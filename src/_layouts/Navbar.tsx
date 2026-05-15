@@ -3,7 +3,7 @@
 // React Imports
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { Info, BookOpen, Flag, Trophy, Shield, Users, Scale, User, Settings2 } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, Users, Scale, User, Settings2, ChevronDown, Menu, X } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 
@@ -12,6 +12,14 @@ import APP from '@/config'
 import ImageWithFallback from '@/shared/components/ImageWithFallback'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useTheme } from '@/shared/contexts/ThemeContext'
+import {
+  SURFACE_NAVBAR_CLASS,
+  SURFACE_NAV_DROPDOWN_CLASS,
+  SURFACE_NAV_DROPDOWN_ITEM_CLASS,
+  SURFACE_NAV_LINK_ACTIVE_CLASS,
+  SURFACE_NAV_LINK_BASE_CLASS,
+  SURFACE_NAV_LINK_IDLE_CLASS,
+} from '@/shared/styles'
 
 // Internal Imports
 const NavbarLogsButton = dynamic(() => import('./components/NavbarLogsButton'), {
@@ -89,6 +97,11 @@ export default function Navbar() {
   const showTeamScoreboard = APP.teams.enabled
   const showUserScoreboard = !showTeamScoreboard || !APP.teams.hideScoreboardIndividual
   const scoreboardOptionCount = Number(showUserScoreboard) + Number(showTeamScoreboard)
+  const routeActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
+  const scoreboardActive = routeActive('/scoreboard') || routeActive('/teams/scoreboard')
+  const infoActive = routeActive('/info') || routeActive('/rules')
+  const navLinkClass = (active = false) =>
+    `${SURFACE_NAV_LINK_BASE_CLASS} ${active ? SURFACE_NAV_LINK_ACTIVE_CLASS : SURFACE_NAV_LINK_IDLE_CLASS}`
 
   useEffect(() => {
     if (!scoreboardOpen) return
@@ -122,7 +135,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`shadow-sm fixed top-0 left-0 w-full z-50 ${theme === 'dark' ? 'bg-gray-950' : 'bg-white'}`}>
+      <nav className={SURFACE_NAVBAR_CLASS}>
         <div className="max-w-7xl mx-auto px-4 sm:px-0">
           <div className="flex justify-between h-14 items-center">
             {/* Logo */}
@@ -146,7 +159,7 @@ export default function Navbar() {
                 {user && (
                   <Link
                     href="/challenges"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    className={navLinkClass(routeActive('/challenges'))}
                     data-tour="navbar-challenges"
                   >
                     <Flag size={18} className="mr-1" /> Challenges
@@ -157,7 +170,7 @@ export default function Navbar() {
                   scoreboardOptionCount === 1 ? (
                     <Link
                       href={showTeamScoreboard ? '/teams/scoreboard' : '/scoreboard'}
-                      className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                      className={navLinkClass(scoreboardActive)}
                       data-tour="navbar-scoreboard"
                     >
                       <Trophy size={18} className="mr-1" /> Scoreboard
@@ -168,20 +181,18 @@ export default function Navbar() {
                         type="button"
                         data-tour="navbar-scoreboard"
                         onClick={() => setScoreboardOpen((v) => !v)}
-                        className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                        className={navLinkClass(scoreboardActive)}
                       >
                         <Trophy size={18} className="mr-1" /> Scoreboard
-                        <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${scoreboardOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
-                        </svg>
+                        <ChevronDown className={`ml-1 h-3.5 w-3.5 opacity-70 transition-transform ${scoreboardOpen ? 'rotate-180' : ''}`} aria-hidden />
                       </button>
                       {scoreboardOpen && (
-                        <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+                        <div className={SURFACE_NAV_DROPDOWN_CLASS}>
                           {showUserScoreboard && (
                             <Link
                               href="/scoreboard"
                               onClick={() => setScoreboardOpen(false)}
-                              className={`block px-3 py-2 text-sm ${showTeamScoreboard ? 'rounded-t-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                              className={SURFACE_NAV_DROPDOWN_ITEM_CLASS}
                             >
                               <span className="flex items-center">
                                 <User size={18} className="mr-1" />
@@ -193,7 +204,7 @@ export default function Navbar() {
                             <Link
                               href="/teams/scoreboard"
                               onClick={() => setScoreboardOpen(false)}
-                              className={`block px-3 py-2 text-sm ${showUserScoreboard ? 'rounded-b-lg' : 'rounded-lg'} ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                              className={SURFACE_NAV_DROPDOWN_ITEM_CLASS}
                             >
                               <span className="flex items-center">
                                 <Users size={18} className="mr-1" />
@@ -210,7 +221,7 @@ export default function Navbar() {
                 {user && APP.teams.enabled && (
                   <Link
                     href="/teams"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    className={navLinkClass(routeActive('/teams') && !routeActive('/teams/scoreboard'))}
                   >
                     <Users size={18} className="mr-1" /> Teams
                   </Link>
@@ -222,19 +233,17 @@ export default function Navbar() {
                     type="button"
                     data-tour="navbar-docs"
                     onClick={() => setDocsOpen((v) => !v)}
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    className={navLinkClass(infoActive)}
                   >
                     <Info size={18} className="mr-1" /> Info
-                    <svg className={`ml-1 h-3 w-3 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.25 8.29a.75.75 0 0 1-.02-1.08Z" />
-                    </svg>
+                    <ChevronDown className={`ml-1 h-3.5 w-3.5 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} aria-hidden />
                   </button>
                   {docsOpen && (
-                    <div className={`absolute left-0 mt-2 min-w-[200px] rounded-lg border shadow-lg z-50 ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`}>
+                    <div className={SURFACE_NAV_DROPDOWN_CLASS}>
                       <Link
                         href="/info"
                         onClick={() => setDocsOpen(false)}
-                        className={`block px-3 py-2 text-sm rounded-t-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                        className={SURFACE_NAV_DROPDOWN_ITEM_CLASS}
                         data-tour="navbar-info"
                       >
                         <span className="flex items-center">
@@ -245,7 +254,7 @@ export default function Navbar() {
                       <Link
                         href="/rules"
                         onClick={() => setDocsOpen(false)}
-                        className={`block px-3 py-2 text-sm ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                        className={SURFACE_NAV_DROPDOWN_ITEM_CLASS}
                         data-tour="navbar-rules"
                       >
                         <span className="flex items-center">
@@ -257,7 +266,7 @@ export default function Navbar() {
                         href={APP.nxctf.nxctf_docs}
                         target="_blank"
                         onClick={() => setDocsOpen(false)}
-                        className={`block px-3 py-2 text-sm rounded-b-lg ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                        className={SURFACE_NAV_DROPDOWN_ITEM_CLASS}
                         data-tour="navbar-docs"
                       >
                         <span className="flex items-center">
@@ -272,7 +281,7 @@ export default function Navbar() {
                 {adminStatus && user && (
                   <Link
                     href="/admin"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
+                    className={navLinkClass(routeActive('/admin'))}
                   >
                     <Shield size={18} className="mr-1" /> Admin
                   </Link>
@@ -375,29 +384,21 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {mobileMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
 
           {/* Mobile menu */}
           {mobileMenuOpen && (
-            <div className={`md:hidden fixed inset-0 z-60 ${theme === 'dark' ? 'bg-gray-950/95' : 'bg-white/95'} transition-all duration-200 backdrop-blur-sm`}>
-              <div className={`flex items-center justify-between px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+            <div className="fixed inset-0 z-[60] bg-white/95 backdrop-blur-xl transition-all duration-200 dark:bg-[#0b0f19]/95 md:hidden">
+              <div className="flex items-center justify-between border-b border-gray-200/80 px-4 py-3 dark:border-gray-800/90">
                 <span className={`text-lg font-bold tracking-wide ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Menu</span>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-150"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="h-6 w-6" />
                 </button>
               </div>
 
