@@ -11,7 +11,6 @@ export type nxctfettingsV1 = {
       hideMaintenance: boolean
       highlightTeamSolves: boolean
       hideSolvedIntro: boolean
-      hideFlagPlaceholders: boolean
     }
   }
   events?: {
@@ -93,7 +92,6 @@ const migrateLegacyNonUserKeysIfNeeded = (): nxctfettingsV1 => {
               hideMaintenance: parsed.hideMaintenance,
               highlightTeamSolves: parsed.highlightTeamSolves,
               hideSolvedIntro: true,
-              hideFlagPlaceholders: false,
             },
           }
           changed = true
@@ -199,12 +197,12 @@ export const setSolveSoundEnabledSetting = (enabled: boolean) => {
   }))
 }
 
-export const getChallengeFilterSettings = (): { hideMaintenance: boolean; highlightTeamSolves: boolean; hideSolvedIntro: boolean; hideFlagPlaceholders: boolean } | null => {
+export const getChallengeFilterSettings = (): { hideMaintenance: boolean; highlightTeamSolves: boolean; hideSolvedIntro: boolean } | null => {
   const settings = getSettings()
   return settings.challenges?.filterSettings ?? null
 }
 
-export const setChallengeFilterSettings = (filterSettings: { hideMaintenance: boolean; highlightTeamSolves: boolean; hideSolvedIntro: boolean; hideFlagPlaceholders: boolean }) => {
+export const setChallengeFilterSettings = (filterSettings: { hideMaintenance: boolean; highlightTeamSolves: boolean; hideSolvedIntro: boolean }) => {
   updateSettings((prev) => ({
     ...prev,
     challenges: { ...(prev.challenges || {}), filterSettings },

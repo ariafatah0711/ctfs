@@ -78,7 +78,6 @@ export function filterChallengesByState({
     }
 
     if (settings.hideMaintenance && challenge.is_maintenance) return false
-    if (settings.hideFlagPlaceholders && challenge.flag_placeholder) return false
 
     // Hide solved Intro challenges if setting is enabled and not specifically filtering for solved
     const isIntro = String(challenge.category || '').toLowerCase() === 'intro'

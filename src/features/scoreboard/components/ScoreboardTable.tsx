@@ -20,12 +20,21 @@ interface ScoreboardTableProps {
   scoreColumnLabel?: string
   /** Optional renderer for the score column; receives the entry and should return a node */
   scoreColumnRenderer?: (entry: LeaderboardEntry) => React.ReactNode
-  /** Whether to show the "Show All" link when on the main scoreboard page (defaults to true) */
-  showAllLink?: boolean
+  /** Callback to trigger when showing all entries */
+  onShowAll?: () => void
+  /** Custom label for missing rank badge */
+  missingLabel?: string
 }
 
-const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentUsername, eventId, scoreColumnLabel, scoreColumnRenderer, showAllLink = true }) => {
-  const pathname = usePathname()
+const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
+  leaderboard,
+  currentUsername,
+  eventId,
+  scoreColumnLabel,
+  scoreColumnRenderer,
+  onShowAll,
+  missingLabel
+}) => {
   const currentUserIndex = currentUsername
     ? leaderboard.findIndex((entry) => entry.username === currentUsername)
     : -1
@@ -83,29 +92,18 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
             score={currentUserEntry?.score}
             scoreLabel={resolvedScoreLabel}
             rowHref={rowHref}
-            missingLabel={pathname === '/scoreboard' ? 'Not in top 100' : 'Not ranked yet'}
+            missingLabel={missingLabel ?? 'Not ranked yet'}
           />
         ) : null
       }
       action={
-        pathname === '/scoreboard' &&
-        showAllLink &&
+        onShowAll &&
         leaderboard.length >= 100 &&
-        (() => {
-          let href = '/scoreboard/all'
-          if (eventId !== undefined && eventId !== 'all') {
-            if (eventId === null) {
-              href += '?event_id=main'
-            } else {
-              href += `?event_id=${encodeURIComponent(String(eventId))}`
-            }
-          }
-          return (
-            <Link href={href}>
-              <Button variant="default" size="sm">Show All</Button>
-            </Link>
-          )
-        })()
+        (
+          <Button variant="default" size="sm" onClick={onShowAll}>
+            Show All
+          </Button>
+        )
       }
       contentClassName="p-0"
     >

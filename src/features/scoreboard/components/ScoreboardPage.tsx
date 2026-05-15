@@ -21,6 +21,7 @@ import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
 import ScoreboardTable from './ScoreboardTable'
+import ScoreboardScopeTabs from './ScoreboardScopeTabs'
 import { cn } from '@/shared/lib/utils'
 
 export default function ScoreboardPage() {
@@ -31,6 +32,8 @@ export default function ScoreboardPage() {
     loading,
     firstBloodMode,
     setFirstBloodMode,
+    view,
+    setView,
     startedEvents,
     selectedEvent,
     setSelectedEvent,
@@ -44,22 +47,19 @@ export default function ScoreboardPage() {
   if (authLoading) return <Loader fullscreen />
   if (!user) return null
 
+  const isAllView = view === 'all'
+
   return (
     <PageBackground
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
-      contentClassName={cn(PAGE_MAIN_CONTAINER_6XL, "space-y-6 py-6")}
+      contentClassName={cn(PAGE_MAIN_CONTAINER_6XL, "space-y-4 py-4 sm:py-6")}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-col">
-            <h1 className={TYPO_PAGE_TITLE_CLASS}>
-              Scoreboard
-            </h1>
-            <div className={cn("flex items-center gap-1.5", TYPO_METADATA_CLASS)}>
-              <div className="h-1 w-1 rounded-full bg-blue-500" />
-              Live event rankings
-            </div>
-          </div>
+          <ScoreboardScopeTabs
+            view={view}
+            onViewChange={setView}
+          />
 
           <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-800 hidden sm:block mx-1" />
 
@@ -91,13 +91,14 @@ export default function ScoreboardPage() {
         <div className="flex justify-center py-10">
           <Loader color="text-blue-500" />
         </div>
-      ) : !user ? null : (
-        <div className={`space-y-6 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
-          {stableLeaderboard.length > 0 && !isEmpty && (
+      ) : (
+        <div className={`space-y-4 ${hasMounted ? '' : 'opacity-0'} transition-opacity duration-500`}>
+          {!isAllView && stableLeaderboard.length > 0 && !isEmpty && (
             <div>
               <ScoreboardChart leaderboard={stableLeaderboard.length > 0 ? stableLeaderboard : leaderboard} isDark={isDark} />
             </div>
           )}
+
           <div>
             {isEmpty ? (
               <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
@@ -130,7 +131,8 @@ export default function ScoreboardPage() {
                 eventId={eventParam}
                 scoreColumnLabel={firstBloodMode ? 'First Blood' : undefined}
                 scoreColumnRenderer={(entry) => entry.score}
-                showAllLink={!firstBloodMode}
+                onShowAll={isAllView ? undefined : () => setView('all')}
+                missingLabel={isAllView ? 'Not ranked yet' : 'Not in top 100'}
               />
             )}
           </div>

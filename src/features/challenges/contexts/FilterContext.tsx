@@ -11,7 +11,8 @@ export type ChallengeFilters = {
   category: string
   difficulty: string
   search: string
-  feature: 'T' | 'S' | 'N'
+  feature: 'T' | 'S' | 'F' | 'N'
+
 }
 
 const STORAGE_KEY = 'nxctf:challengeFilters'
@@ -45,7 +46,7 @@ function readStored(): { filters: ChallengeFilters; layoutMode: ChallengeLayoutM
     if (!raw) return { filters: defaultFilters, layoutMode: CHALLENGE_LAYOUT_MODES.GROUPED, sortMode: 'default' }
     const parsed = JSON.parse(raw)
     const storedFeature = parsed?.filters?.feature ?? parsed?.feature
-    const normalizedFeature = storedFeature === 'T' || storedFeature === 'S' || storedFeature === 'N' ? storedFeature : 'N'
+    const normalizedFeature = storedFeature === 'T' || storedFeature === 'S' || storedFeature === 'F' || storedFeature === 'N' ? storedFeature : 'N'
     const normalizedSortMode = parsed.sortMode === 'newest' ? 'newest' : 'default'
     return {
       filters: { ...defaultFilters, ...(parsed.filters || parsed), feature: normalizedFeature },

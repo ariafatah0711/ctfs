@@ -60,18 +60,6 @@ export default function FilterSettingsMenu({
           </div>
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Hide flag placeholders</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Exclude placeholder challenges</p>
-            </div>
-            <Switch
-              checked={settings.hideFlagPlaceholders}
-              onCheckedChange={(checked) =>
-                onSettingsChange({ ...settings, hideFlagPlaceholders: checked })
-              }
-            />
-          </div>
-          <div className="flex items-center justify-between py-2">
-            <div>
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Hide solved Intro</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Exclude completed intro tasks</p>
             </div>

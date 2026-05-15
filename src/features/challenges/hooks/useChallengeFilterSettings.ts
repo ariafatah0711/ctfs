@@ -12,7 +12,6 @@ export function useChallengeFilterSettings() {
     hideMaintenance: false,
     highlightTeamSolves: true,
     hideSolvedIntro: true,
-    hideFlagPlaceholders: false,
   })
   const [settingsLoaded, setSettingsLoaded] = useState(false)
 

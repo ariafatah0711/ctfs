@@ -1,5 +1,5 @@
-export { default as ScoreboardAllPage } from './ScoreboardAllPage'
 export { default as ScoreboardChart } from './ScoreboardChart'
 export { default as ScoreboardPage } from './ScoreboardPage'
 export { default as ScoreboardTable } from './ScoreboardTable'
+export { default as ScoreboardScopeTabs } from './ScoreboardScopeTabs'
 export * from './base'

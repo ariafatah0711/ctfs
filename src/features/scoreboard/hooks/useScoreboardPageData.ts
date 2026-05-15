@@ -24,10 +24,12 @@ export function useScoreboardPageData() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [firstBloodMode, setFirstBloodMode] = useState(false)
+  const [view, setView] = useState<'top' | 'all'>('top')
   const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
   const [hasMounted, setHasMounted] = useState(false)
   const [stableLeaderboard, setStableLeaderboard] = useState<LeaderboardEntry[]>([])
   const leaderboardLengthRef = useRef(0)
+  const fetchStateRef = useRef({ event: selectedEvent, fb: firstBloodMode, limit: 100 })
 
   useEffect(() => {
     setHasMounted(true)
@@ -49,6 +51,15 @@ export function useScoreboardPageData() {
   useEffect(() => {
     const fetchData = async () => {
       const isFirstLoad = leaderboardLengthRef.current === 0
+      const targetLimit = view === 'all' ? 1000 : 100
+      const lastFetch = fetchStateRef.current
+
+      // Check if we already have sufficient data for the current context to avoid refetching
+      const isSameContext = lastFetch.event === selectedEvent && lastFetch.fb === firstBloodMode
+      if (isSameContext && lastFetch.limit >= targetLimit && leaderboard.length > 0) {
+        return
+      }
+
       if (isFirstLoad) setLoading(true)
       if (!user) {
         if (isFirstLoad) setLoading(false)
@@ -58,46 +69,53 @@ export function useScoreboardPageData() {
       const eventParam = getScoreboardEventParam(selectedEvent)
 
       if (firstBloodMode) {
-        const firstBloodLeaderboard = await getFirstBloodLeaderboard(100, 0, eventParam)
+        const firstBloodLeaderboard = await getFirstBloodLeaderboard(targetLimit, 0, eventParam)
         setLeaderboard(firstBloodLeaderboard)
+        fetchStateRef.current = { event: selectedEvent, fb: firstBloodMode, limit: targetLimit }
         if (isFirstLoad) setLoading(false)
         return
       }
 
-      const summary = await getLeaderboardSummary(100, 0, eventParam)
+      const summary = await getLeaderboardSummary(targetLimit, 0, eventParam)
       const topUsernames = summary.slice(0, 10).map((row: LeaderboardSummaryRow) => row.username)
       const progressMap = await getTopProgressByUsernames(topUsernames, eventParam)
 
       const result = buildScoreboard(summary, {
         nameKey: 'username',
         scoreKey: 'score',
-        limit: 100,
+        limit: targetLimit,
         progressMap
       })
 
       setLeaderboard(result.entries)
+      fetchStateRef.current = { event: selectedEvent, fb: firstBloodMode, limit: targetLimit }
       if (isFirstLoad) setLoading(false)
     }
 
     fetchData()
-  }, [user, firstBloodMode, selectedEvent])
+  }, [user, firstBloodMode, selectedEvent, view])
 
   const eventParam = getScoreboardEventParam(selectedEvent)
+
+  const displayedLeaderboard = view === 'top' ? leaderboard.slice(0, 100) : leaderboard
+  const displayedStableLeaderboard = view === 'top' ? stableLeaderboard.slice(0, 100) : stableLeaderboard
 
   return {
     user,
     authLoading,
     theme,
-    leaderboard,
+    leaderboard: displayedLeaderboard,
     loading,
     firstBloodMode,
     setFirstBloodMode,
+    view,
+    setView,
     startedEvents,
     selectedEvent,
     setSelectedEvent,
     hasMounted,
-    stableLeaderboard,
-    isEmpty: isScoreboardEmpty(leaderboard),
+    stableLeaderboard: displayedStableLeaderboard,
+    isEmpty: isScoreboardEmpty(displayedLeaderboard),
     isDark: theme === 'dark',
     eventParam,
   }
