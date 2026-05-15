@@ -17,8 +17,8 @@ export default function ChallengesTabPanel({
   data,
 }: ChallengesTabPanelProps) {
   return (
-    <div className="xl:grid xl:grid-cols-[176px_minmax(0,1fr)] xl:gap-4 2xl:gap-5">
-      <div className="relative z-30 mb-4 flex flex-col gap-4 xl:sticky xl:top-[4rem] xl:mb-0 xl:self-start 2xl:gap-5">
+    <div className="xl:grid xl:grid-cols-[176px_minmax(0,1fr)] xl:gap-8 2xl:gap-10 items-start">
+      <div className="relative z-30 flex flex-col gap-4 xl:sticky xl:top-[80px] xl:self-start 2xl:gap-5 [will-change:transform]">
         <ChallengePageTabs
           currentTab={data.currentTab}
           onTabChange={data.setCurrentTab}
@@ -34,7 +34,7 @@ export default function ChallengesTabPanel({
         />
       </div>
 
-      <div className="min-w-0 space-y-4 2xl:space-y-5">
+      <div className="min-w-0 space-y-4 2xl:space-y-5 [will-change:transform]">
         <ChallengeFilterBar
           filters={data.filters}
           events={data.enrichedEvents}

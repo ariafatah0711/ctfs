@@ -76,7 +76,7 @@ export default function DesktopChallengeFilterSidebar({
 
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
-        const top = anchor.getBoundingClientRect().top + window.scrollY - 72
+        const top = anchor.getBoundingClientRect().top + window.scrollY - 80
         window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
       })
     })

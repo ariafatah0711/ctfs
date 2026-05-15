@@ -12,6 +12,7 @@ type Props = {
   selectedEventId?: string | null | 'all'
   onEventSelect: (eventId: string | null | 'all') => void
   showAllEventsButton?: boolean
+  showMain?: boolean
 }
 
 export default function EventsTab({
@@ -19,11 +20,13 @@ export default function EventsTab({
   selectedEventId,
   onEventSelect,
   showAllEventsButton = true,
+  showMain: showMainProp,
 }: Props) {
   const mainLabel = String(APP.eventMainLabel || 'Main')
   const fallbackImageUrl = normalizeEventImageUrl((APP as any).eventFallbackImageUrl)
   const mainImageUrl = normalizeEventImageUrl((APP as any).eventMainImageUrl) || fallbackImageUrl
-  const showMain = !APP.hideEventMain
+  const showMain = showMainProp !== undefined ? showMainProp : !APP.hideEventMain
+
   const now = new Date()
   const { availableEvents, upcomingList, endedEvents } = getEventSections(events, now)
   const hasAvailableSection = showMain || availableEvents.length > 0
