@@ -1,7 +1,6 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
-import { AuthService } from '@/features/auth'
-import { User } from '@/shared/types'
+import type { User } from '@/shared/types'
 
 type AuthContextType = {
   user: User | null
@@ -16,9 +15,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    AuthService.getCurrentUser()
-      .then(setUser)
-      .finally(() => setLoading(false))
+    let active = true
+
+    import('@/features/auth/services/auth.service')
+      .then(({ AuthService }) => AuthService.getCurrentUser())
+      .then((currentUser) => {
+        if (active) setUser(currentUser)
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+
+    return () => {
+      active = false
+    }
   }, [])
 
   return (

@@ -3,16 +3,13 @@
 // React Imports
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { Info, BookOpen, Flag, Trophy, Shield, FileText, Users, Scale, User, Settings2 } from 'lucide-react';
+import { Info, BookOpen, Flag, Trophy, Shield, Users, Scale, User, Settings2 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 
 // Shared Imports
 import APP from '@/config'
 import ImageWithFallback from '@/shared/components/ImageWithFallback'
-import DevConfigDialog from './components/DevConfigDialog'
-import { isAdmin, isGlobalAdmin } from '@/features/admin/services/admin.service'
-import { AuthService } from '@/features/auth/services/auth.service'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useTheme } from '@/shared/contexts/ThemeContext'
 
@@ -22,6 +19,10 @@ const NavbarLogsButton = dynamic(() => import('./components/NavbarLogsButton'), 
 })
 
 const NavbarNotifications = dynamic(() => import('@/widgets/notifications/NavbarNotifications'), {
+  ssr: false,
+})
+
+const DevConfigDialog = dynamic(() => import('./components/DevConfigDialog'), {
   ssr: false,
 })
 
@@ -47,8 +48,28 @@ export default function Navbar() {
 
   useEffect(() => {
     if (user) {
-      isAdmin().then(setAdminStatus)
-      isGlobalAdmin().then(setGlobalAdminStatus)
+      let active = true
+
+      import('@/features/admin/services/admin.service')
+        .then(async ({ isAdmin, isGlobalAdmin }) => {
+          const [admin, globalAdmin] = await Promise.all([
+            isAdmin(),
+            isGlobalAdmin(),
+          ])
+
+          if (!active) return
+          setAdminStatus(admin)
+          setGlobalAdminStatus(globalAdmin)
+        })
+        .catch(() => {
+          if (!active) return
+          setAdminStatus(false)
+          setGlobalAdminStatus(false)
+        })
+
+      return () => {
+        active = false
+      }
     } else {
       setAdminStatus(false)
       setGlobalAdminStatus(false)
@@ -57,6 +78,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setMobileMenuOpen(false)
+    const { AuthService } = await import('@/features/auth/services/auth.service')
     await AuthService.signOut()
     setUser(null)
     setAdminStatus(false)
@@ -191,15 +213,6 @@ export default function Navbar() {
                     className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
                   >
                     <Users size={18} className="mr-1" /> Teams
-                  </Link>
-                )}
-
-                {!user && (
-                  <Link
-                    href="/preview"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                  >
-                    <FileText size={18} className="mr-1" /> Preview
                   </Link>
                 )}
 
@@ -468,16 +481,6 @@ export default function Navbar() {
                       </Link>
                     )}
                   </>
-                )}
-
-                {!user && (
-                  <Link
-                    href="/preview"
-                    className={`px-3 py-2 rounded-lg flex items-center gap-1 text-[15px] font-medium transition-all duration-150 ${theme === 'dark' ? 'text-gray-200 hover:text-blue-400 hover:bg-gray-800 focus:ring-2 focus:ring-blue-700' : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400'}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <FileText size={18} className="mr-1" /> Preview
-                  </Link>
                 )}
 
                 {/* Info Menu - Mobile */}

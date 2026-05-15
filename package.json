@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "predev": "node src/scripts/gen-version.js",
-    "prebuild": "node src/scripts/gen-version.js",
-    "prestart": "node src/scripts/gen-version.js",
+    "predev": "node src/lib/scripts/gen-version.js",
+    "prebuild": "node src/lib/scripts/gen-version.js",
+    "prestart": "node src/lib/scripts/gen-version.js",
     "setup": "node db/build-init-sql.js",
     "setting": "npm run dev",
     "clean": "rimraf .next",

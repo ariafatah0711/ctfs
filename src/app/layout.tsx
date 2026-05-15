@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { Settings } from 'lucide-react'
 // @ts-ignore: side-effect CSS import without type declarations
 import 'react-medium-image-zoom/dist/styles.css'
 // @ts-ignore: side-effect CSS import without type declarations

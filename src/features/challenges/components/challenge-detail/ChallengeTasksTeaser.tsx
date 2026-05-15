@@ -1,6 +1,6 @@
 'use client'
 
-import { ClipboardList, ArrowBigRightDash } from 'lucide-react'
+import { ArrowRight, ClipboardList } from 'lucide-react'
 import type { ChallengeDialogTab } from '../../types'
 
 type ChallengeTasksTeaserProps = {
@@ -21,11 +21,14 @@ export default function ChallengeTasksTeaser({
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
+          title="Answer all questions to get the flag"
+          aria-label="Answer all questions to get the flag"
           onClick={() => onTabChange('question', challengeId)}
-          className="select-none px-4 py-2.5 bg-pink-500/10 hover:bg-pink-500/20 text-pink-600 dark:text-pink-400 border border-pink-500/20 font-bold text-sm rounded-lg shadow-sm flex items-center gap-2 group transition-all"
+          className="flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
         >
-          <span>Jawab semua questions untuk mendapatkan flag</span>
-          <ArrowBigRightDash className="h-4 w-4" />
+          <ClipboardList className="h-4 w-4 text-gray-400" />
+          <span>Answer Questions to Get the Flag</span>
+          <ArrowRight className="h-4 w-4 text-gray-400" />
         </button>
       </div>
     </div>

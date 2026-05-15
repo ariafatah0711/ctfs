@@ -73,6 +73,12 @@ type ProfileFieldProps = {
   onChange: (value: string) => void
 }
 
+const PROFILE_FIELD_LABEL_CLASS =
+  "text-xs font-extrabold uppercase tracking-wider text-gray-700 dark:text-gray-200"
+
+const PROFILE_FIELD_INPUT_CLASS =
+  "relative z-0 h-12 rounded-xl bg-white/80 pl-10 pr-4 text-sm font-medium text-gray-950 placeholder:text-gray-400 hover:bg-white focus:bg-white dark:bg-[#111622]/85 dark:text-white dark:placeholder:text-gray-500 dark:hover:bg-[#141b2a] dark:focus:bg-[#141b2a]"
+
 function ProfileSection({
   title,
   children,
@@ -109,12 +115,12 @@ function ProfileField({
     <div className="space-y-1.5">
       <label
         htmlFor={id}
-        className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+        className={PROFILE_FIELD_LABEL_CLASS}
       >
         {label}
       </label>
       <div className="group relative">
-        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400" />
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-blue-500 dark:text-gray-400 dark:group-focus-within:text-blue-400" />
         <Input
           id={id}
           type={type}
@@ -122,7 +128,7 @@ function ProfileField({
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className={cn(SURFACE_GLASS_INPUT_CLASS, "pl-10")}
+          className={cn(SURFACE_GLASS_INPUT_CLASS, PROFILE_FIELD_INPUT_CLASS)}
           autoComplete={autoComplete}
           maxLength={maxLength}
         />
@@ -281,16 +287,16 @@ export default function EditProfileModal({
                 type="url"
               />
               <div className="sm:col-span-2">
-              <ProfileField
-                id="edit-bio"
-                label="Bio"
-                icon={MessageCircle}
-                value={bio}
-                onChange={setBio}
-                placeholder="Short player bio"
-                disabled={loading}
-                maxLength={200}
-              />
+                <ProfileField
+                  id="edit-bio"
+                  label="Bio"
+                  icon={MessageCircle}
+                  value={bio}
+                  onChange={setBio}
+                  placeholder="Short player bio"
+                  disabled={loading}
+                  maxLength={200}
+                />
               </div>
             </div>
           </ProfileSection>

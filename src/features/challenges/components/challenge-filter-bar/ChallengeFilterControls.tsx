@@ -7,6 +7,7 @@ import {
   SURFACE_FILTER_ITEM_ACTIVE_CLASS,
 } from '@/shared/styles'
 import {
+  getFeatureFilterLabel,
   getFeatureFilterTitle,
   getNextFeatureFilterMode,
   getSortedFilterValues,
@@ -69,6 +70,7 @@ export default function ChallengeFilterControls({
   })
   const featureMode = filters.feature || 'N'
   const nextFeatureMode = getNextFeatureFilterMode(featureMode as ChallengeFeatureFilter)
+  const featureButtonLabel = getFeatureFilterLabel(featureMode as ChallengeFeatureFilter)
   const featureButtonTitle = getFeatureFilterTitle(featureMode as ChallengeFeatureFilter)
   const sidebarFilterClassName = hideSidebarFiltersOnDesktop ? 'xl:hidden' : ''
 
@@ -169,14 +171,14 @@ export default function ChallengeFilterControls({
           onClick={() => onFilterChange({ ...filters, feature: nextFeatureMode })}
           title={featureButtonTitle}
           aria-label={featureButtonTitle}
-          className={`inline-flex h-[38px] w-[38px] items-center justify-center rounded-xl text-[11px] font-bold transition ${featureMode === 'N'
+          className={`inline-flex h-[38px] min-w-[112px] items-center justify-center rounded-xl px-3 text-xs font-bold transition ${featureMode === 'N'
             ? SURFACE_FILTER_ITEM_CLASS
             : featureMode === 'T'
               ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
               : 'bg-indigo-600 border border-indigo-600 text-white shadow-inner'
             }`}
         >
-          {featureMode}
+          <span className="truncate">{featureButtonLabel}</span>
         </button>
       </div>
 

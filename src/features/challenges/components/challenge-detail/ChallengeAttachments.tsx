@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Link as LinkIcon, Download } from 'lucide-react'
+import { ClipboardCopy, Download, ExternalLink, FileText, Link as LinkIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Attachment, ChallengeWithSolve } from '@/shared/types'
 import type { KeyedBooleanMap } from '../../types'
+
+const RESOURCE_ACTION_CLASS =
+  'flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700'
 
 type ChallengeAttachmentsProps = {
   challenge: ChallengeWithSolve
@@ -34,7 +37,7 @@ export default function ChallengeAttachments({
               key="copy-wget-all"
               type="button"
               title="Copy wget commands for all files"
-              className="select-none px-2.5 py-1.5 bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 text-[11px] font-bold uppercase tracking-wider rounded-lg shadow-sm transition hover:bg-green-500/20"
+              className={RESOURCE_ACTION_CLASS}
               onClick={(event) => {
                 event.stopPropagation()
                 const fileAttachments = challenge.attachments!.filter((attachment) => attachment.type === 'file' && (attachment.url || attachment.name))
@@ -62,12 +65,16 @@ export default function ChallengeAttachments({
                 })
               }}
             >
-              <span className="font-mono">
+              <ClipboardCopy className="h-4 w-4 text-green-500 dark:text-green-400" />
+              <span className="font-mono text-xs uppercase tracking-wider">
                 {copiedAll[`${challenge.id}-copied`] ? 'Copied!' : 'copy wget'}
               </span>
             </button>
 
-            <span className="select-none text-gray-500">|</span>
+            <span
+              aria-hidden="true"
+              className="mx-1 hidden h-8 w-px self-center bg-gray-200 dark:bg-gray-700 sm:block"
+            />
 
             {challenge.attachments.filter((attachment) => attachment.type === 'file').map((attachment, idx) => {
               const displayName = attachment.name?.length > 40 ? attachment.name.slice(0, 37) + '...' : attachment.name || 'file'
@@ -77,7 +84,7 @@ export default function ChallengeAttachments({
                   key={key}
                   type="button"
                   title={attachment.name}
-                  className="flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+                  className={RESOURCE_ACTION_CLASS}
                   onClick={(event) => {
                     event.stopPropagation()
                     downloadFile(attachment, key)
@@ -109,9 +116,11 @@ export default function ChallengeAttachments({
                   target="_blank"
                   rel="noopener noreferrer"
                   title={attachment.url}
-                  className="select-none px-4 py-2 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-sm font-bold rounded-lg shadow-sm transition hover:bg-indigo-500/20"
+                  className={RESOURCE_ACTION_CLASS}
                 >
-                  {displayName}
+                  <LinkIcon className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />
+                  <span>{displayName}</span>
+                  <ExternalLink className="h-4 w-4 text-gray-400" />
                 </a>
               )
             })}

@@ -1,6 +1,6 @@
 import type { Step } from 'react-joyride'
 
-export const CHALLENGE_TOUR_VERSION = 2
+export const CHALLENGE_TOUR_VERSION = 4
 export const CHALLENGE_TOUR_RESTART_EVENT = 'challenge-tour-restart'
 
 export function buildChallengeTourSteps(): Step[] {
@@ -28,7 +28,27 @@ export function buildChallengeTourSteps(): Step[] {
     },
     {
       target: '[data-tour="challenge-sidebar-filters"]',
-      content: 'Desktop filters live in this sticky sidebar: search, solved status, difficulty, feature type, and categories.',
+      content: 'Desktop filters live in this sticky sidebar. Use it for search, status, feature type, difficulty, and categories.',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="challenge-sidebar-search-filter"]',
+      content: 'Open search here to find challenges by title or description. You can also press / anywhere on the challenges page for quick search.',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="challenge-sidebar-status-filter"]',
+      content: 'Cycle status between All Status, Unsolved, and Solved without opening a dropdown.',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="challenge-sidebar-feature-filter"]',
+      content: 'Cycle feature type between All Features, Tasks, and Services. Challenges with both still appear in Tasks or Services.',
+      placement: 'right',
+    },
+    {
+      target: '[data-tour="challenge-sidebar-difficulty-filter"]',
+      content: 'Pick a difficulty here. The gauge icon marks this as the difficulty filter even when it is set to All Difficulties.',
       placement: 'right',
     },
     {

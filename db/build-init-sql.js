@@ -38,7 +38,6 @@ const orderedFiles = [
   "queries/team_members.sql",
   "queries/notifications.sql",
   "queries/keep-alive.sql",
-  "queries/preview.sql",
   "queries/system.sql",
 
   // 4) Seed / maintenance last

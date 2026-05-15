@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const rootDir = path.resolve(__dirname, "../..");
+const rootDir = path.resolve(__dirname, "../../..");
 const envExamplePath = path.join(rootDir, "env.example");
 const envLocalPath = path.join(rootDir, ".env.local");
 const configPath = path.join(rootDir, "src/config.ts");

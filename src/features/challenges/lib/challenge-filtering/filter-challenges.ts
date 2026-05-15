@@ -139,7 +139,7 @@ export function getChallengeFilterDirtyState(
   const isCategoryDirty = (filters.category || 'all') !== DEFAULT_FILTERS.category
   const isDifficultyDirty = (filters.difficulty || 'all') !== DEFAULT_FILTERS.difficulty
   const isSearchDirty = String(filters.search || '').trim() !== DEFAULT_FILTERS.search
-  const isFeatureDirty = (filters.feature || 'all') !== DEFAULT_FILTERS.feature
+  const isFeatureDirty = (filters.feature || DEFAULT_FILTERS.feature) !== DEFAULT_FILTERS.feature
   const isEventDirty = selectedEventId !== 'all' && selectedEventId !== undefined && selectedEventId !== null
   const anyFilterDirty = isStatusDirty || isCategoryDirty || isDifficultyDirty || isSearchDirty || isFeatureDirty
 
@@ -161,7 +161,13 @@ export function getNextFeatureFilterMode(featureMode: ChallengeFeatureFilter): C
 }
 
 export function getFeatureFilterTitle(featureMode: ChallengeFeatureFilter): string {
-  if (featureMode === 'N') return 'Feature filter: N. Click to switch to T'
-  if (featureMode === 'T') return 'Feature filter: T. Click to switch to S'
-  return 'Feature filter: S. Click to switch to N'
+  if (featureMode === 'N') return 'Showing all features. Click to show tasks.'
+  if (featureMode === 'T') return 'Showing tasks. Click to show services.'
+  return 'Showing services. Click to show all features.'
+}
+
+export function getFeatureFilterLabel(featureMode: ChallengeFeatureFilter): string {
+  if (featureMode === 'T') return 'Tasks'
+  if (featureMode === 'S') return 'Services'
+  return 'All Features'
 }

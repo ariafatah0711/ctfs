@@ -4,6 +4,9 @@ import { Lightbulb } from 'lucide-react'
 import type { ChallengeWithSolve } from '@/shared/types'
 import type { HintModalState } from '../../types'
 
+const RESOURCE_ACTION_CLASS =
+  'flex select-none items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700'
+
 type ChallengeHintsProps = {
   challenge: ChallengeWithSolve
   setShowHintModal: (modal: HintModalState) => void
@@ -26,13 +29,13 @@ export default function ChallengeHints({
           <button
             key={idx}
             type="button"
-            className="flex select-none items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-sm font-bold text-amber-600 shadow-sm transition hover:bg-amber-500/20 dark:text-amber-400"
+            className={RESOURCE_ACTION_CLASS}
             onClick={(event) => {
               event.stopPropagation()
               setShowHintModal({ challenge, hintIdx: idx })
             }}
           >
-            <Lightbulb className="h-4 w-4" />
+            <Lightbulb className="h-4 w-4 text-amber-500 dark:text-amber-400" />
             <span>Hint {(challenge.hint?.length ?? 0) > 1 ? idx + 1 : ''}</span>
           </button>
         ))}

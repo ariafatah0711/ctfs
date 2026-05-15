@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle2, EyeOff, LayoutGrid, ListFilter, Search, X } from 'lucide-react'
+import { CheckCircle2, EyeOff, Gauge, Layers, LayoutGrid, ListChecks, ListFilter, Search, ServerCog, X } from 'lucide-react'
 import type { ElementType } from 'react'
 import APP from '@/config'
 import {
@@ -11,9 +11,12 @@ import {
 import {
   getCategoryDetails,
   getCategoryIcon,
+  getFeatureFilterLabel,
+  getFeatureFilterTitle,
+  getNextFeatureFilterMode,
   getSortedFilterValues,
 } from '../../lib'
-import type { ChallengeFilterState } from '../../types'
+import type { ChallengeFeatureFilter, ChallengeFilterState } from '../../types'
 
 type DesktopChallengeFilterSidebarProps = {
   filters: ChallengeFilterState
@@ -33,7 +36,9 @@ export default function DesktopChallengeFilterSidebar({
   const difficultyOrder = Object.keys(APP.difficultyStyles || {})
   const selectedCategory = filters.category || 'all'
   const selectedDifficulty = filters.difficulty || 'all'
+  const difficultyActive = selectedDifficulty !== 'all'
   const selectedFeature = filters.feature || 'N'
+  const selectedFeatureMode = selectedFeature as ChallengeFeatureFilter
   const searchQuery = String(filters.search || '').trim()
   const searchTitle = searchQuery
     ? `Search: ${searchQuery}. Click to edit search.`
@@ -42,11 +47,15 @@ export default function DesktopChallengeFilterSidebar({
   const showSolvedOnly = filters.status === 'solved'
   const statusLabel = showSolvedOnly ? 'Solved' : showUnsolvedOnly ? 'Unsolved' : 'All Status'
   const statusTitle = showSolvedOnly
-    ? 'Showing solved only. Click to show unsolved only.'
+    ? 'Showing solved only. Click to show all statuses.'
     : showUnsolvedOnly
-      ? 'Showing unsolved only. Click to show all statuses.'
+      ? 'Showing unsolved only. Click to show solved only.'
       : 'Showing all statuses. Click to show unsolved only.'
   const StatusIcon = showSolvedOnly ? CheckCircle2 : showUnsolvedOnly ? EyeOff : ListFilter
+  const nextFeatureMode = getNextFeatureFilterMode(selectedFeatureMode)
+  const featureLabel = getFeatureFilterLabel(selectedFeatureMode)
+  const featureTitle = getFeatureFilterTitle(selectedFeatureMode)
+  const FeatureIcon = selectedFeatureMode === 'T' ? ListChecks : selectedFeatureMode === 'S' ? ServerCog : Layers
   const { sortedCategories, sortedDifficulties } = getSortedFilterValues({
     categories,
     difficulties,
@@ -81,7 +90,7 @@ export default function DesktopChallengeFilterSidebar({
   const handleStatusToggle = () => {
     onFilterChange({
       ...filters,
-      status: showUnsolvedOnly ? 'all' : 'unsolved',
+      status: showSolvedOnly ? 'all' : showUnsolvedOnly ? 'solved' : 'unsolved',
     })
     scrollToChallengeFilter()
   }
@@ -91,8 +100,8 @@ export default function DesktopChallengeFilterSidebar({
     scrollToChallengeFilter()
   }
 
-  const handleFeatureChange = (feature: string) => {
-    onFilterChange({ ...filters, feature })
+  const handleFeatureToggle = () => {
+    onFilterChange({ ...filters, feature: nextFeatureMode })
     scrollToChallengeFilter()
   }
 
@@ -105,6 +114,7 @@ export default function DesktopChallengeFilterSidebar({
         <div className="flex w-[176px] flex-col gap-1.5 rounded-2xl border border-blue-500/20 bg-white/60 p-2 shadow-sm shadow-blue-500/5 backdrop-blur-md dark:border-blue-500/10 dark:bg-gray-900/60">
           <button
             type="button"
+            data-tour="challenge-sidebar-search-filter"
             onClick={() => setSearchOpen(true)}
             title={searchTitle}
             aria-label={searchTitle}
@@ -118,6 +128,7 @@ export default function DesktopChallengeFilterSidebar({
 
           <button
             type="button"
+            data-tour="challenge-sidebar-status-filter"
             onClick={handleStatusToggle}
             title={statusTitle}
             aria-label={statusTitle}
@@ -127,46 +138,48 @@ export default function DesktopChallengeFilterSidebar({
             <span className="truncate">{statusLabel}</span>
           </button>
 
+          <button
+            type="button"
+            data-tour="challenge-sidebar-feature-filter"
+            onClick={handleFeatureToggle}
+            title={featureTitle}
+            aria-label={featureTitle}
+            className={iconButtonClass(selectedFeature !== 'N')}
+          >
+            <FeatureIcon size={19} />
+            <span className="truncate">{featureLabel}</span>
+          </button>
+
           <label htmlFor="desktop-sidebar-difficulty" className="sr-only">
             Difficulty
           </label>
-          <select
-            id="desktop-sidebar-difficulty"
-            value={selectedDifficulty}
-            onChange={(event) => handleDifficultyChange(event.target.value)}
-            className={`h-9 w-full rounded-xl border px-3 text-xs font-semibold outline-none transition focus:ring-2 focus:ring-blue-500/30 ${selectedDifficulty !== 'all'
-              ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
-              : SURFACE_FILTER_ITEM_CLASS
-            }`}
-            title="Filter by difficulty"
-            aria-label="Filter by difficulty"
-          >
-            <option value="all">All Difficulties</option>
-            {sortedDifficulties.map((difficulty) => (
-              <option key={difficulty} value={difficulty}>
-                {difficulty}
-              </option>
-            ))}
-          </select>
-
-          <label htmlFor="desktop-sidebar-feature" className="sr-only">
-            Feature
-          </label>
-          <select
-            id="desktop-sidebar-feature"
-            value={selectedFeature}
-            onChange={(event) => handleFeatureChange(event.target.value)}
-            className={`h-9 w-full rounded-xl border px-3 text-xs font-semibold outline-none transition focus:ring-2 focus:ring-blue-500/30 ${selectedFeature !== 'N'
-              ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
-              : SURFACE_FILTER_ITEM_CLASS
-            }`}
-            title="Filter by challenge feature"
-            aria-label="Filter by challenge feature"
-          >
-            <option value="N">All Features</option>
-            <option value="T">Tasks</option>
-            <option value="S">Services</option>
-          </select>
+          <div data-tour="challenge-sidebar-difficulty-filter" className="relative">
+            <Gauge
+              size={19}
+              className={`pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 ${difficultyActive
+                ? 'text-white'
+                : 'text-gray-500 dark:text-gray-400'
+              }`}
+            />
+            <select
+              id="desktop-sidebar-difficulty"
+              value={selectedDifficulty}
+              onChange={(event) => handleDifficultyChange(event.target.value)}
+              className={`h-9 w-full rounded-xl border pl-10 pr-3 text-xs font-semibold outline-none transition focus:ring-2 focus:ring-blue-500/30 ${difficultyActive
+                ? SURFACE_FILTER_ITEM_ACTIVE_CLASS
+                : SURFACE_FILTER_ITEM_CLASS
+              }`}
+              title="Filter by difficulty"
+              aria-label="Filter by difficulty"
+            >
+              <option value="all">All Difficulties</option>
+              {sortedDifficulties.map((difficulty) => (
+                <option key={difficulty} value={difficulty}>
+                  {difficulty}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="h-px w-full bg-gray-200 dark:bg-gray-800" />
 
