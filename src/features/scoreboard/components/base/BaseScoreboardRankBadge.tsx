@@ -41,13 +41,25 @@ export default function BaseScoreboardRankBadge({
             </span>
           )}
           {rowHref && (
-            <a
-              href={rowHref}
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                const id = rowHref.startsWith('#') ? rowHref.slice(1) : rowHref
+                const element = document.getElementById(id)
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  // Optional: highlight effect
+                  element.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50')
+                  setTimeout(() => {
+                    element.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50')
+                  }, 2000)
+                }
+              }}
               className="inline-flex h-6 shrink-0 items-center justify-center gap-1 rounded-lg border border-blue-500/20 bg-blue-500/10 px-2 text-[10px] font-black uppercase tracking-widest text-blue-600 transition hover:bg-blue-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:text-blue-400 dark:hover:text-white"
             >
               <LocateFixed size={12} />
               Jump
-            </a>
+            </button>
           )}
         </>
       ) : (

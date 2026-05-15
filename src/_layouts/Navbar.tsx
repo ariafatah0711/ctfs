@@ -3,7 +3,7 @@
 // React Imports
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { Info, BookOpen, Flag, Trophy, Shield, Users, Scale, User, Settings2, ChevronDown, Menu, X } from 'lucide-react';
+import { Compass, BookOpen, Flag, Trophy, Shield, Users, Gavel, User, Settings2, ChevronDown, Menu, X } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 
@@ -235,7 +235,7 @@ export default function Navbar() {
                     onClick={() => setDocsOpen((v) => !v)}
                     className={navLinkClass(infoActive)}
                   >
-                    <Info size={18} className="mr-1" /> Info
+                    <Compass size={18} className="mr-1" /> Info
                     <ChevronDown className={`ml-1 h-3.5 w-3.5 opacity-70 transition-transform ${docsOpen ? 'rotate-180' : ''}`} aria-hidden />
                   </button>
                   {docsOpen && (
@@ -247,7 +247,7 @@ export default function Navbar() {
                         data-tour="navbar-info"
                       >
                         <span className="flex items-center">
-                          <Info size={18} className="mr-1" />
+                          <Compass size={18} className="mr-1" />
                           Info
                         </span>
                       </Link>
@@ -258,7 +258,7 @@ export default function Navbar() {
                         data-tour="navbar-rules"
                       >
                         <span className="flex items-center">
-                          <Scale size={18} className="mr-1" />
+                          <Gavel size={18} className="mr-1" />
                           Rules
                         </span>
                       </Link>
@@ -499,7 +499,7 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="flex items-center">
-                    <Info size={18} className="mr-1" /> Info
+                    <Compass size={18} className="mr-1" /> Info
                   </span>
                 </Link>
                 <Link
@@ -508,7 +508,7 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span className="flex items-center">
-                    <Scale size={18} className="mr-1" /> Rules
+                    <Gavel size={18} className="mr-1" /> Rules
                   </span>
                 </Link>
                 <Link

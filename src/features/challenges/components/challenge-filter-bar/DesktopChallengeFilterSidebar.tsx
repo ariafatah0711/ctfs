@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CheckCircle2, EyeOff, Gauge, Layers, LayoutGrid, ListChecks, ListFilter, Search, ServerCog, X } from 'lucide-react'
+import { CheckCircle2, EyeOff, Flag, Gauge, Layers, LayoutGrid, ListChecks, ListFilter, Search, ServerCog, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import type { ElementType } from 'react'
 import APP from '@/config'
 import {
@@ -32,6 +33,11 @@ export default function DesktopChallengeFilterSidebar({
   onFilterChange,
 }: DesktopChallengeFilterSidebarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const categoryOrder = APP.challengeCategories || []
   const difficultyOrder = Object.keys(APP.difficultyStyles || {})
   const selectedCategory = filters.category || 'all'
@@ -55,7 +61,7 @@ export default function DesktopChallengeFilterSidebar({
   const nextFeatureMode = getNextFeatureFilterMode(selectedFeatureMode)
   const featureLabel = getFeatureFilterLabel(selectedFeatureMode)
   const featureTitle = getFeatureFilterTitle(selectedFeatureMode)
-  const FeatureIcon = selectedFeatureMode === 'T' ? ListChecks : selectedFeatureMode === 'S' ? ServerCog : Layers
+  const FeatureIcon = selectedFeatureMode === 'T' ? ListChecks : selectedFeatureMode === 'S' ? ServerCog : selectedFeatureMode === 'F' ? Flag : Layers
   const { sortedCategories, sortedDifficulties } = getSortedFilterValues({
     categories,
     difficulties,
@@ -215,9 +221,9 @@ export default function DesktopChallengeFilterSidebar({
         </div>
       </aside>
 
-      {searchOpen && (
+      {searchOpen && mounted && createPortal(
         <div
-          className="fixed inset-0 z-50 hidden items-start justify-center bg-gray-950/20 px-4 pt-28 backdrop-blur-sm xl:flex"
+          className="fixed inset-0 z-[999] hidden items-start justify-center bg-gray-950/40 px-4 pt-28 backdrop-blur-sm xl:flex"
           onClick={() => setSearchOpen(false)}
         >
           <form
@@ -258,7 +264,8 @@ export default function DesktopChallengeFilterSidebar({
               <X size={17} />
             </button>
           </form>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   )

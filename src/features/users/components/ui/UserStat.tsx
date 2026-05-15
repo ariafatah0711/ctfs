@@ -1,7 +1,12 @@
 import type React from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
-import { SURFACE_GLASS_CARD_COMPACT_CLASS, SURFACE_INTERACTIVE_HOVER_CLASS } from '@/shared/styles'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_INTERACTIVE_HOVER_CLASS,
+  TYPO_STAT_VALUE_CLASS,
+  TYPO_SECTION_TITLE_CLASS
+} from '@/shared/styles'
 
 type UserStatProps = {
   icon: LucideIcon
@@ -31,14 +36,14 @@ export function UserStat({ icon: Icon, label, value, detail, onClick, className 
         <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-xl font-extrabold leading-tight text-gray-900 dark:text-white sm:text-2xl">
+        <div className={cn(TYPO_STAT_VALUE_CLASS, "leading-tight")}>
           {value}
         </div>
-        <div className="mt-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+        <div className={cn(TYPO_SECTION_TITLE_CLASS, "mt-1 !text-[10px]")}>
           {label}
         </div>
         {detail && (
-          <div className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400 font-medium">
             {detail}
           </div>
         )}

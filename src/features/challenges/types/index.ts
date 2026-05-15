@@ -4,7 +4,7 @@ export type ChallengesMainTab = 'challenges' | 'events'
 export type ChallengeDialogTab = 'challenge' | 'question' | 'solvers'
 export type EventSelectorValue = string | null | 'all'
 export type ChallengeSortMode = 'default' | 'newest'
-export type ChallengeFeatureFilter = 'T' | 'S' | 'N'
+export type ChallengeFeatureFilter = 'T' | 'S' | 'F' | 'N'
 export type SubChallengeMode = 'none' | 'non_sequential' | 'sequential'
 
 export type SubChallengeQuestion = {
@@ -37,6 +37,7 @@ export type ChallengeFilterSettings = {
   hideMaintenance: boolean
   highlightTeamSolves: boolean
   hideSolvedIntro: boolean
+  hideFlagPlaceholders: boolean
 }
 
 export type FlagFeedback = {

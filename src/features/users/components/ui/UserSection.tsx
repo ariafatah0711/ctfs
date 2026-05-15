@@ -4,6 +4,10 @@ import React from 'react'
 import type { LucideIcon } from 'lucide-react'
 import { UserCard } from './UserCard'
 import { cn } from '@/shared/lib/utils'
+import {
+  TYPO_CARD_TITLE_CLASS,
+  TYPO_MUTED_CLASS
+} from '@/shared/styles'
 
 type UserSectionProps = {
   title?: string
@@ -36,12 +40,12 @@ export function UserSection({
             )}
             <div>
               {title && (
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white">
+                <h2 className={TYPO_CARD_TITLE_CLASS}>
                   {title}
                 </h2>
               )}
               {description && (
-                <p className="mt-1 text-xs leading-5 text-gray-500 dark:text-gray-400">
+                <p className={cn(TYPO_MUTED_CLASS, "mt-1")}>
                   {description}
                 </p>
               )}
@@ -50,7 +54,9 @@ export function UserSection({
           {action}
         </div>
       )}
-      <div className={cn('p-4', contentClassName)}>{children}</div>
+      <div className={cn("p-4 sm:p-5", contentClassName)}>
+        {children}
+      </div>
     </UserCard>
   )
 }

@@ -26,14 +26,17 @@ export type ChallengeFilterDirtyState = {
   anyFilterDirty: boolean
 }
 
-export function getChallengeFeatureType(challenge: ChallengeWithSolve): ChallengeFeatureFilter | 'TS' {
+export function getChallengeFeatureType(challenge: ChallengeWithSolve): string {
   const hasQuestions = !!(challenge as any).has_questions
   const hasServices = Array.isArray((challenge as any).services) && (challenge as any).services.length > 0
+  const hasFlagPlaceholder = !!challenge.flag_placeholder
 
-  if (hasQuestions && hasServices) return 'TS'
-  if (hasQuestions) return 'T'
-  if (hasServices) return 'S'
-  return 'N'
+  let type = ''
+  if (hasQuestions) type += 'T'
+  if (hasServices) type += 'S'
+  if (hasFlagPlaceholder) type += 'F'
+
+  return type || 'N'
 }
 
 export function filterChallengesByState({
@@ -75,6 +78,7 @@ export function filterChallengesByState({
     }
 
     if (settings.hideMaintenance && challenge.is_maintenance) return false
+    if (settings.hideFlagPlaceholders && challenge.flag_placeholder) return false
 
     // Hide solved Intro challenges if setting is enabled and not specifically filtering for solved
     const isIntro = String(challenge.category || '').toLowerCase() === 'intro'
@@ -84,8 +88,9 @@ export function filterChallengesByState({
     }
 
     const featureType = getChallengeFeatureType(challenge)
-    if (filters.feature === 'T' && !(featureType === 'T' || featureType === 'TS')) return false
-    if (filters.feature === 'S' && !(featureType === 'S' || featureType === 'TS')) return false
+    if (filters.feature === 'T' && !featureType.includes('T')) return false
+    if (filters.feature === 'S' && !featureType.includes('S')) return false
+    if (filters.feature === 'F' && !featureType.includes('F')) return false
     if (filters.status === 'solved' && !challenge.is_solved) return false
     if (filters.status === 'unsolved' && challenge.is_solved) return false
     if (filters.category !== 'all' && challenge.category !== filters.category) return false
@@ -164,17 +169,20 @@ export function getChallengeFilterDirtyState(
 export function getNextFeatureFilterMode(featureMode: ChallengeFeatureFilter): ChallengeFeatureFilter {
   if (featureMode === 'N') return 'T'
   if (featureMode === 'T') return 'S'
+  if (featureMode === 'S') return 'F'
   return 'N'
 }
 
 export function getFeatureFilterTitle(featureMode: ChallengeFeatureFilter): string {
   if (featureMode === 'N') return 'Showing all features. Click to show tasks.'
   if (featureMode === 'T') return 'Showing tasks. Click to show services.'
-  return 'Showing services. Click to show all features.'
+  if (featureMode === 'S') return 'Showing services. Click to show flag placeholders.'
+  return 'Showing flag placeholders. Click to show all features.'
 }
 
 export function getFeatureFilterLabel(featureMode: ChallengeFeatureFilter): string {
   if (featureMode === 'T') return 'Tasks'
   if (featureMode === 'S') return 'Services'
+  if (featureMode === 'F') return 'Placeholder'
   return 'All Features'
 }

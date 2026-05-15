@@ -15,6 +15,9 @@ import {
   SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS,
   SURFACE_GLASS_INPUT_CLASS,
   THEME_PRIMARY_SELECTION_CLASS,
+  TYPO_PAGE_TITLE_CLASS,
+  TYPO_SECTION_TITLE_CLASS,
+  TYPO_MUTED_CLASS
 } from '@/shared/styles'
 import { useAuth } from '@/shared/contexts/AuthContext'
 import { useEventContext } from '@/features/events/contexts/EventContext'
@@ -23,6 +26,7 @@ import TeamPageContent from './TeamPageContent'
 import { useMyTeam } from '../hooks/useMyTeam'
 import { useTeamEvents } from '../hooks/useTeamEvents'
 import { TeamMember } from '../types'
+import { cn } from '@/shared/lib/utils'
 
 export default function TeamsPage() {
   const { user, loading: authLoading } = useAuth()
@@ -182,7 +186,7 @@ export default function TeamsPage() {
 
   return (
     <PageBackground selectionClassName={THEME_PRIMARY_SELECTION_CLASS}>
-      <div className={`${PAGE_MAIN_CONTAINER_6XL} space-y-5`}>
+      <div className={cn(PAGE_MAIN_CONTAINER_6XL, "space-y-6 py-6")}>
         {initialLoading ? (
           <div className="flex justify-center py-10">
             <Loader />
@@ -197,59 +201,60 @@ export default function TeamsPage() {
 
             {status && (
               <div
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm border ${status.type === 'error'
-                  ? 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-900/50'
-                  : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50'
-                  }`}
+                className={cn("rounded-2xl px-4 py-3 text-sm font-semibold shadow-sm border",
+                  status.type === 'error'
+                    ? 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-900/50'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50'
+                )}
               >
                 {status.message}
               </div>
             )}
 
             {!team ? (
-              <div className="grid grid-cols-1 items-start gap-5 pt-2 md:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.75fr)]">
-                <div className={`space-y-4 p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}>
+              <div className="grid grid-cols-1 items-start gap-6 pt-2 md:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.75fr)]">
+                <div className={cn("space-y-4 p-6", SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS)}>
                   <div className="space-y-2">
-                    <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                    <h2 className={TYPO_PAGE_TITLE_CLASS}>
                       Squad up for the <span className="text-blue-600 dark:text-blue-400">Next Conquest.</span>
                     </h2>
-                    <p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
+                    <p className={cn(TYPO_MUTED_CLASS, "text-sm leading-6")}>
                       Join an existing crew or build your own elite team of hackers. Solve together, win together.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 pt-1">
-                    <div className={`flex items-center gap-3 p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30">
-                        <Users size={20} />
+                  <div className="flex flex-wrap gap-4 pt-1">
+                    <div className={cn("flex items-center gap-3 p-4", SURFACE_GLASS_CARD_COMPACT_CLASS)}>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500 ring-1 ring-blue-500/20">
+                        <Users size={18} />
                       </div>
                       <div>
-                        <p className="text-xs font-black uppercase tracking-widest text-gray-400">Collaboration</p>
+                        <p className={TYPO_SECTION_TITLE_CLASS}>Collaboration</p>
                         <p className="text-sm font-bold">Shared Solves</p>
                       </div>
                     </div>
-                    <div className={`flex items-center gap-3 p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}>
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-900/30">
-                        <ShieldCheck size={20} />
+                    <div className={cn("flex items-center gap-3 p-4", SURFACE_GLASS_CARD_COMPACT_CLASS)}>
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 ring-1 ring-purple-500/20">
+                        <ShieldCheck size={18} />
                       </div>
                       <div>
-                        <p className="text-xs font-black uppercase tracking-widest text-gray-400">Competition</p>
+                        <p className={TYPO_SECTION_TITLE_CLASS}>Competition</p>
                         <p className="text-sm font-bold">Team Rank</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
                     <CardHeader>
-                      <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
-                        <Sparkles size={18} className="text-blue-500" /> Start Your Team
+                      <CardTitle className={cn(TYPO_SECTION_TITLE_CLASS, "flex items-center gap-2 !text-gray-900 dark:!text-white")}>
+                        <Sparkles size={16} className="text-blue-500" /> Start Your Team
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Team Name</label>
+                        <label className={cn(TYPO_SECTION_TITLE_CLASS, "ml-1 !text-[10px]")}>Team Name</label>
                         <Input
                           value={teamName}
                           onChange={(e) => setTeamName(e.target.value)}
@@ -268,19 +273,19 @@ export default function TeamsPage() {
                     </CardContent>
                   </Card>
 
-                  <div className="relative">
+                  <div className="relative py-2">
                     <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-gray-200 dark:border-gray-800" />
+                      <span className="w-full border-t border-gray-200 dark:border-gray-800/60" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-[#fafafa] dark:bg-[#0b0f19] px-2 text-gray-500 font-black">Or Join One</span>
+                    <div className="relative flex justify-center text-[10px] uppercase">
+                      <span className="bg-[#fafafa] dark:bg-[#0b0f19] px-3 text-gray-400 font-black tracking-[0.2em]">Or Join One</span>
                     </div>
                   </div>
 
                   <Card className={SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}>
                     <CardHeader>
-                      <CardTitle className="text-lg font-black uppercase tracking-widest text-gray-900 dark:text-white flex items-center gap-2">
-                        <UserPlus size={18} className="text-emerald-500" /> Enter Invite Code
+                      <CardTitle className={cn(TYPO_SECTION_TITLE_CLASS, "flex items-center gap-2 !text-gray-900 dark:!text-white")}>
+                        <UserPlus size={16} className="text-emerald-500" /> Enter Invite Code
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">

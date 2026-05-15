@@ -1,43 +1,56 @@
 export const formatSmartFlag = (input: string, mask: string): string => {
-  let result = '';
-  let i = 0;
-  let m = 0;
+  if (!input) return ''
 
-  while (i < input.length && m < mask.length) {
-    const maskChar = mask[m];
-    const inputChar = input[i];
+  let result = ''
+  let i = 0 // input index
 
-    if (maskChar === '_' || maskChar === '{' || maskChar === '}' || maskChar === '-') {
-      if (inputChar === maskChar) {
-        result += inputChar;
-        i++;
-      } else {
-        result += maskChar;
+  for (let m = 0; m < mask.length; m++) {
+    const maskChar = mask[m]
+    const isPlaceholder = ['*', '?', 'X', 'x', '0'].includes(maskChar)
+
+    if (!isPlaceholder) {
+      // 1. Handle Literal character first
+      result += maskChar
+      // If user actually typed this literal at the current position, consume it
+      if (input[i] === maskChar) {
+        i++
       }
-      m++;
-    } else if (maskChar === 'X') {
-      if (/[a-zA-Z]/.test(inputChar)) {
-        result += inputChar.toUpperCase();
-        m++;
-      }
-      i++;
-    } else if (maskChar === 'x') {
-      if (/[a-zA-Z]/.test(inputChar)) {
-        result += inputChar.toLowerCase();
-        m++;
-      }
-      i++;
-    } else if (maskChar === '0') {
-      if (/[0-9]/.test(inputChar)) {
-        result += inputChar;
-        m++;
-      }
-      i++;
     } else {
-      result += inputChar;
-      i++;
-      m++;
+      // 2. Handle Placeholder: find exactly one valid char for this spot
+      let found = false
+      while (i < input.length) {
+        let char = input[i++]
+        let accepted = false
+
+        if (maskChar === '*' || maskChar === '?') {
+          accepted = true
+        } else if (maskChar === '0') {
+          accepted = /[0-9]/.test(char)
+        } else if (maskChar === 'X' || maskChar === 'x') {
+          // Allow letters and numbers for X/x for better UX
+          accepted = /[a-zA-Z0-9]/.test(char)
+          if (accepted) {
+            char = maskChar === 'X' ? char.toUpperCase() : char.toLowerCase()
+          }
+        }
+
+        if (accepted) {
+          result += char
+          found = true
+          break
+        }
+
+        // If we hit a character that matches the NEXT literal, stop skipping!
+        // This prevents the "walking" bug where it skips useful format chars.
+        if (m + 1 < mask.length && char === mask[m + 1] && !['*', '?', 'X', 'x', '0'].includes(mask[m + 1])) {
+           i-- // Put it back so the next iteration can catch it as a literal
+           break
+        }
+      }
+
+      if (!found) break
     }
   }
-  return result;
-};
+
+  return result
+}

@@ -6,7 +6,12 @@ import { ImageWithFallback } from '@/shared/components'
 import EventSelect from '@/features/events/components/EventSelect'
 import SocialIcon from '@/features/users/components/ui/SocialIcon'
 import { formatRelativeDate } from '@/shared/lib'
-import { SURFACE_GLASS_CARD_COMPACT_CLASS } from '@/shared/styles'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  TYPO_PAGE_TITLE_CLASS,
+  TYPO_METADATA_CLASS
+} from '@/shared/styles'
+import { cn } from '@/shared/lib/utils'
 import { UserDetail, Badge } from '../../types'
 import EditProfileModal from './EditProfileModal'
 
@@ -38,10 +43,10 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   return (
     <section
-      className={`mx-auto flex w-full max-w-7xl flex-col gap-3 p-4 md:flex-row md:items-start md:justify-between ${SURFACE_GLASS_CARD_COMPACT_CLASS}`}
+      className={cn("mx-auto flex w-full max-w-7xl flex-col gap-6 p-5 md:flex-row md:items-start md:justify-between", SURFACE_GLASS_CARD_COMPACT_CLASS)}
     >
-      <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
-        <div className="relative mx-auto flex h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-white shadow-md dark:border-gray-900 sm:mx-0 sm:h-28 sm:w-28 aspect-square">
+      <div className="flex w-full flex-1 flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <div className="relative mx-auto flex h-24 w-24 shrink-0 overflow-hidden rounded-full border border-gray-200/50 shadow-sm dark:border-white/10 sm:mx-0 sm:h-28 sm:w-28 aspect-square">
           <ImageWithFallback
             src={avatarSrc}
             alt={userDetail.username}
@@ -51,9 +56,9 @@ export default function ProfileHeader({
           />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2 text-center sm:text-left">
-          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <h1 className="max-w-full truncate text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-3xl"
+        <div className="flex min-w-0 flex-1 flex-col gap-3 text-center sm:text-left">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <h1 className={cn(TYPO_PAGE_TITLE_CLASS, "max-w-full truncate")}
               title={userDetail.username}
             >
               {userDetail.username}
@@ -68,17 +73,17 @@ export default function ProfileHeader({
             />
           </div>
 
-          <p className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400">
+          <p className="max-w-2xl text-sm leading-6 text-gray-600 dark:text-gray-400 font-medium">
             {userDetail.bio?.trim() || 'CTF player on NXCTF'}
           </p>
 
-          <div className="mt-1 flex w-full flex-col items-center justify-between gap-3 sm:flex-row sm:items-start">
-            <div className="flex flex-wrap justify-center items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 sm:flex-nowrap sm:justify-start sm:text-xs">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-2.5 py-1 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
+          <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row sm:items-start">
+            <div className="flex flex-wrap justify-center items-center gap-2 sm:justify-start">
+              <span className={cn("inline-flex items-center gap-1.5 rounded-full border border-gray-200/50 bg-white/40 px-3 py-1 backdrop-blur-sm dark:border-white/5 dark:bg-white/5", TYPO_METADATA_CLASS)}>
                 <CalendarDays className="h-3.5 w-3.5 text-blue-500" />
                 Joined {userDetail.created_at ? formatRelativeDate(userDetail.created_at) : '-'}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white/50 px-2.5 py-1 backdrop-blur dark:border-white/10 dark:bg-gray-900/40">
+              <span className={cn("inline-flex items-center gap-1.5 rounded-full border border-gray-200/50 bg-white/40 px-3 py-1 backdrop-blur-sm dark:border-white/5 dark:bg-white/5", TYPO_METADATA_CLASS)}>
                 <Clock3 className="h-3.5 w-3.5 text-blue-500" />
                 Last login {userDetail.last_login_at ? formatRelativeDate(userDetail.last_login_at) : 'Never'}
               </span>

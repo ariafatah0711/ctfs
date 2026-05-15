@@ -5,6 +5,12 @@ import { BarChart3 } from 'lucide-react'
 import APP from '@/config'
 import { ChallengeWithSolve } from '@/shared/types'
 import { UserEmptyState, UserSection } from '../ui'
+import { cn } from '@/shared/lib/utils'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  TYPO_CARD_TITLE_CLASS,
+  TYPO_METADATA_CLASS
+} from '@/shared/styles'
 
 type ProgressSectionProps = {
   categoryTotals: { category: string; total_challenges: number }[]
@@ -82,7 +88,7 @@ export default function ProgressSection({
       icon={BarChart3}
       title="Progress"
       description="Solved challenge coverage by category and difficulty."
-      contentClassName="space-y-4"
+      contentClassName="space-y-6"
     >
       {visibleCategories.length === 0 ? (
         <UserEmptyState
@@ -91,24 +97,24 @@ export default function ProgressSection({
           description="Solve a challenge to start filling this progress board."
         />
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {visibleCategories.map(({ category, total_challenges, solvedCount, progress }) => (
             <div
               key={category}
-              className="rounded-xl border border-gray-200 bg-white/40 p-3 backdrop-blur-sm dark:border-white/10 dark:bg-white/5"
+              className={cn("p-4", SURFACE_GLASS_CARD_COMPACT_CLASS)}
             >
               <div className="mb-3 flex items-center justify-between gap-3">
-                <span className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                <span className={TYPO_CARD_TITLE_CLASS}>
                   {category}
                 </span>
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                <span className={TYPO_METADATA_CLASS}>
                   {solvedCount}/{total_challenges}
                 </span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+              <div className="h-2 overflow-hidden rounded-full bg-gray-200/50 dark:bg-gray-800/50">
                 <div
                   style={{ width: `${progress}%` }}
-                  className="h-full rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.12)]"
+                  className="h-full rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.2)]"
                 />
               </div>
             </div>
@@ -117,16 +123,16 @@ export default function ProgressSection({
       )}
 
       {activeDifficulties.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white/40 p-3 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">
+        <div className={cn("p-4", SURFACE_GLASS_CARD_COMPACT_CLASS)}>
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            <span className={TYPO_CARD_TITLE_CLASS}>
               Difficulty Progress
             </span>
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            <span className={TYPO_METADATA_CLASS}>
               {totalSolved}/{totalChallenges}
             </span>
           </div>
-          <div className="flex h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800 gap-0.5">
+          <div className="flex h-3 overflow-hidden rounded-full bg-gray-200/50 dark:bg-gray-800/50 gap-0.5">
             {activeDifficulties.map(({ difficulty, total_challenges, solvedCount, bgColor }, index) => {
               const segmentWidth = (total_challenges / totalChallenges) * 100
               const segmentProgress = (solvedCount / total_challenges) * 100
@@ -151,9 +157,9 @@ export default function ProgressSection({
             {activeDifficulties.map(({ difficulty, total_challenges, solvedCount, bgColor, textColor, borderColor }) => (
               <span
                 key={difficulty}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${borderColor} ${textColor}`}
+                className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium transition-colors", borderColor, textColor, TYPO_METADATA_CLASS)}
               >
-                <span className={`h-2 w-2 rounded-full ${bgColor}`} />
+                <span className={cn("h-1.5 w-1.5 rounded-full", bgColor)} />
                 <span className="capitalize">{difficulty}</span>
                 <span className="opacity-70">
                   ({solvedCount}/{total_challenges})

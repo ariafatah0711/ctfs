@@ -2,7 +2,12 @@
 
 import type { ReactNode } from 'react'
 import { cn } from '@/shared/lib/utils'
-import { SURFACE_GLASS_CARD_COMPACT_CLASS, SURFACE_INTERACTIVE_HOVER_CLASS } from '@/shared/styles'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  SURFACE_INTERACTIVE_HOVER_CLASS,
+  TYPO_CARD_TITLE_CLASS,
+  TYPO_METADATA_CLASS
+} from '@/shared/styles'
 
 type ProfileChallengeListItemProps = {
   title: string
@@ -22,21 +27,21 @@ export default function ProfileChallengeListItem({
   return (
     <div
       className={cn(
-        'flex min-h-[72px] flex-col justify-between gap-2.5 p-3 sm:flex-row sm:items-center',
+        'flex min-h-[64px] flex-col justify-between gap-2 p-3.5 sm:flex-row sm:items-center',
         SURFACE_GLASS_CARD_COMPACT_CLASS,
         SURFACE_INTERACTIVE_HOVER_CLASS,
         className
       )}
     >
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start gap-2">
-          <h3 className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
+        <div className="flex min-w-0 items-center gap-2">
+          <h3 className={cn("min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap", TYPO_CARD_TITLE_CLASS)}>
             {title}
           </h3>
           {titleBadge ? <div className="shrink-0">{titleBadge}</div> : null}
         </div>
 
-        <div className="mt-1 min-h-4 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+        <div className={cn("mt-0.5 min-h-4 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap", TYPO_METADATA_CLASS)}>
           {subtitle}
         </div>
       </div>

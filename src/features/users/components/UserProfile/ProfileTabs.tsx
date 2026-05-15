@@ -1,8 +1,9 @@
 'use client'
 
 import React from 'react'
-import { ArrowLeft, ChartColumnDecreasing, Flag } from 'lucide-react'
+import { ChartColumnDecreasing, Flag } from 'lucide-react'
 import { UserTabs } from '../ui'
+import BackButton from '@/shared/components/BackButton'
 
 type ProfileTabsProps = {
   activeTab: 'profile' | 'stats'
@@ -14,17 +15,13 @@ type ProfileTabsProps = {
 export default function ProfileTabs({ activeTab, setActiveTab, onBack, editAction }: ProfileTabsProps) {
   return (
     <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-      <div className="flex items-center justify-center gap-2 sm:justify-start">
+      <div className="flex items-center justify-center gap-3 sm:justify-start">
         {onBack && (
-          <button
-            type="button"
+          <BackButton
             onClick={onBack}
-            className="inline-flex h-9 items-center gap-2 rounded-full border border-gray-200 bg-white/50 px-4 text-xs font-semibold text-gray-600 backdrop-blur transition hover:border-blue-500/40 hover:text-blue-600 dark:border-white/10 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:text-blue-400 sm:h-10 sm:px-4 sm:text-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden xs:inline">Go Back</span>
-            <span className="xs:hidden">Back</span>
-          </button>
+            label="Back"
+            className="h-10 rounded-xl border border-gray-200/50 bg-white/50 px-4 hover:bg-white dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:bg-gray-800"
+          />
         )}
         {editAction}
       </div>

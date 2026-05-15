@@ -32,7 +32,7 @@ import type {
   SubChallengeMode,
   SubChallengeQuestion,
 } from '../types'
-import { getCategoryDetails, getDifficultyStyle } from '../lib'
+import { getCategoryDetails, getDifficultyStyle, getChallengeFeatureType } from '../lib'
 
 const ChallengeDescription = React.memo(function ChallengeDescription({ description }: { description: string }) {
   return (
@@ -173,8 +173,19 @@ const ChallengeDetailDialog: React.FC<ChallengeDetailDialogProps> = ({
             <div className={`flex items-center justify-between border-b pb-4 ${categoryBorderColor}`}>
               <div className="flex items-center gap-4">
                 {/* Category Badge */}
-                <div className={`select-none text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
-                  {challenge.category}
+                <div className="flex items-center gap-2">
+                  <div className={`select-none text-[12px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${categoryBadgeColor}`}>
+                    {challenge.category}
+                  </div>
+
+                  {(() => {
+                    const featureType = getChallengeFeatureType(challenge);
+                    return featureType !== 'N' ? (
+                      <span className="select-none text-[11px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded uppercase tracking-tight">
+                        {featureType}
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
 
                 {/* Difficulty */}

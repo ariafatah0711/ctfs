@@ -4,8 +4,15 @@ import React from 'react'
 import { Calendar, Flag, Hash, LogOut, Trophy } from 'lucide-react'
 import EventSelect from '@/features/events/components/EventSelect'
 import { Button } from '@/shared/ui/button'
-import { SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS } from '@/shared/styles'
+import {
+  SURFACE_GLASS_CARD_COMPACT_CLASS,
+  TYPO_PAGE_TITLE_CLASS,
+  TYPO_SECTION_TITLE_CLASS,
+  TYPO_STAT_VALUE_CLASS,
+  TYPO_METADATA_CLASS
+} from '@/shared/styles'
 import { TeamInfo, TeamSummary } from '../types'
+import { cn } from '@/shared/lib/utils'
 
 interface TeamProfileHeaderProps {
   team: TeamInfo
@@ -36,30 +43,28 @@ export default function TeamProfileHeader({
   const teamInitials = team.name.slice(0, 2).toUpperCase()
 
   return (
-    <div className={`relative overflow-hidden p-4 sm:p-5 ${SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS}`}>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
-
-      <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl ring-4 ring-white dark:ring-gray-800">
+    <div className={cn("relative overflow-hidden p-5", SURFACE_GLASS_CARD_COMPACT_CLASS)}>
+      <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-lg border border-gray-200/50 dark:border-white/10">
             <div className="flex h-full w-full items-center justify-center text-2xl font-black text-white">
               {teamInitials}
             </div>
             <div className="absolute inset-0 bg-black/5" />
           </div>
 
-          <div className="min-w-0 flex-1 space-y-2">
-            <h1 className="truncate text-2xl font-black tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <h1 className={cn(TYPO_PAGE_TITLE_CLASS, "truncate")}>
               {team.name}
             </h1>
-            <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-              <Calendar size={14} className="text-blue-500" />
+            <div className={cn("flex items-center gap-1.5", TYPO_METADATA_CLASS)}>
+              <Calendar size={13} className="text-blue-500" />
               <span>Created {new Date(team.created_at).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-2 lg:w-[260px]">
+        <div className="flex w-full flex-col gap-3 lg:w-[240px]">
           <EventSelect
             value={effectiveSelectedEvent}
             onChange={setSelectedEvent}
@@ -69,34 +74,32 @@ export default function TeamProfileHeader({
             getEventLabel={(ev: any) => String(ev?.name ?? ev?.title ?? 'Untitled')}
           />
 
-          <div className="flex flex-col gap-2 sm:flex-row lg:flex-col">
-            {isMember && onLeaveTeam && (
-              <Button
-                variant="ghost"
-                onClick={onLeaveTeam}
-                disabled={busy}
-                className="h-10 w-full flex-1 rounded-xl border border-red-200/70 bg-red-50/70 px-4 text-xs font-black uppercase tracking-widest text-red-600 shadow-sm hover:bg-red-100 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
-              >
-                <LogOut size={12} className="mr-1" /> Leave Team
-              </Button>
-            )}
-          </div>
+          {isMember && onLeaveTeam && (
+            <Button
+              variant="ghost"
+              onClick={onLeaveTeam}
+              disabled={busy}
+              className="h-10 w-full rounded-xl border border-red-200/50 bg-red-50/50 px-4 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-sm hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+            >
+              <LogOut size={12} className="mr-1.5" /> Leave Team
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 border-t border-gray-100 pt-4 dark:border-gray-800 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-3 gap-4 border-t border-gray-200/80 pt-5 dark:border-gray-800">
         <StatItem
-          icon={<Hash className="text-emerald-500" />}
+          icon={<Hash size={14} className="text-emerald-500" />}
           label="Rank"
           value={summary?.rank ? `#${summary.rank}` : '-'}
         />
         <StatItem
-          icon={<Trophy className="text-yellow-500" />}
+          icon={<Trophy size={14} className="text-yellow-500" />}
           label="Points"
           value={summary?.total_score ?? summary?.unique_score ?? 0}
         />
         <StatItem
-          icon={<Flag className="text-blue-500" />}
+          icon={<Flag size={14} className="text-blue-500" />}
           label="Solves"
           value={summary?.unique_challenges ?? 0}
         />
@@ -108,14 +111,14 @@ export default function TeamProfileHeader({
 function StatItem({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | number }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800/50">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100/50 dark:bg-gray-800/40">
         {icon}
       </div>
-      <div>
-        <div className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+      <div className="min-w-0">
+        <div className={cn(TYPO_SECTION_TITLE_CLASS, "!text-[10px] leading-none")}>
           {label}
         </div>
-        <div className="text-base font-bold text-gray-900 dark:text-white">
+        <div className={cn(TYPO_STAT_VALUE_CLASS, "mt-1 !text-lg sm:!text-xl")}>
           {value}
         </div>
       </div>

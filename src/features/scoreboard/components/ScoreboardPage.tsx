@@ -13,11 +13,15 @@ import {
   THEME_PRIMARY_BG_CLASS,
   THEME_PRIMARY_BG_HOVER_CLASS,
   THEME_PRIMARY_SELECTION_CLASS,
+  TYPO_SECTION_TITLE_CLASS,
+  TYPO_PAGE_TITLE_CLASS,
+  TYPO_METADATA_CLASS
 } from '@/shared/styles'
 import EventSelect from '@/features/events/components/EventSelect'
 import { useScoreboardPageData } from '../hooks'
 import ScoreboardChart from './ScoreboardChart'
 import ScoreboardTable from './ScoreboardTable'
+import { cn } from '@/shared/lib/utils'
 
 export default function ScoreboardPage() {
   const {
@@ -43,17 +47,28 @@ export default function ScoreboardPage() {
   return (
     <PageBackground
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
-      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-5`}
+      contentClassName={cn(PAGE_MAIN_CONTAINER_6XL, "space-y-6 py-6")}
     >
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="w-full sm:w-auto">
-          {/* Event selector */}
-          <div className="w-full sm:w-auto">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col">
+            <h1 className={TYPO_PAGE_TITLE_CLASS}>
+              Scoreboard
+            </h1>
+            <div className={cn("flex items-center gap-1.5", TYPO_METADATA_CLASS)}>
+              <div className="h-1 w-1 rounded-full bg-blue-500" />
+              Live event rankings
+            </div>
+          </div>
+
+          <div className="h-6 w-[1px] bg-gray-200 dark:bg-gray-800 hidden sm:block mx-1" />
+
+          <div className="w-full sm:w-[180px]">
             <EventSelect
               value={selectedEvent}
               onChange={setSelectedEvent}
               events={startedEvents}
-              className="w-full max-w-full sm:w-[180px]"
+              className="w-full"
               getEventLabel={(event: any) => String(event?.name ?? event?.title ?? 'Untitled')}
             />
           </div>

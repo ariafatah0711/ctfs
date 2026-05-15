@@ -89,23 +89,23 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({ leaderboard, currentU
       }
       action={
         pathname === '/scoreboard' &&
-          showAllLink &&
-          leaderboard.length >= 100 &&
-          (() => {
-            let href = '/scoreboard/all'
-            if (eventId !== undefined && eventId !== 'all') {
-              if (eventId === null) {
-                href += '?event_id=main'
-              } else {
-                href += `?event_id=${encodeURIComponent(String(eventId))}`
-              }
+        showAllLink &&
+        leaderboard.length >= 100 &&
+        (() => {
+          let href = '/scoreboard/all'
+          if (eventId !== undefined && eventId !== 'all') {
+            if (eventId === null) {
+              href += '?event_id=main'
+            } else {
+              href += `?event_id=${encodeURIComponent(String(eventId))}`
             }
-            return (
-              <Link href={href}>
-                <Button variant="default" size="sm">Show All</Button>
-              </Link>
-            )
-          })()
+          }
+          return (
+            <Link href={href}>
+              <Button variant="default" size="sm">Show All</Button>
+            </Link>
+          )
+        })()
       }
       contentClassName="p-0"
     >

@@ -3,7 +3,7 @@
 // React Imports
 import React from "react"
 import dynamic from "next/dynamic"
-import { ChartColumnDecreasing } from "lucide-react"
+import { LayoutGrid, Zap, TrendingUp, BarChart3 } from "lucide-react"
 
 // Shared Imports
 import { Skeleton } from "@/shared/ui"
@@ -70,7 +70,7 @@ export default function UserStatsPlotly({
   if (!solvedChallenges || solvedChallenges.length === 0) {
     return (
       <UserEmptyState
-        icon={ChartColumnDecreasing}
+        icon={BarChart3}
         title="No stat data available"
         description="Solve some challenges to see stats here."
       />
@@ -95,6 +95,9 @@ export default function UserStatsPlotly({
   const diffColors = diffKeys.map((_, index) => pieColors[index % pieColors.length])
   const firstBloodCount = firstBloodIds.length
 
+  const categoriesCount = Object.keys(byCategory).length
+  const difficultiesCount = Object.keys(byDifficulty).length
+
   const timeSeries = groupSolvesOverTime(solvedChallenges)
 
   const baseLayout = {
@@ -116,55 +119,63 @@ export default function UserStatsPlotly({
       {/* ================= PIE ================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* CATEGORY */}
-        <UserSection title="Solves by Category" icon={ChartColumnDecreasing}>
-            <Plot
-              key={`cat-${isDarkMode}`}
-              data={[
-                {
-                  type: "pie",
-                  labels: Object.keys(byCategory),
-                  values: Object.values(byCategory),
-                  hole: 0.5,
-                  marker: {
-                    colors: pieColors,
-                    line: { color: t.bg, width: 1 },
-                  },
-                  textinfo: "label+percent",
-                  hovertemplate:
-                    "%{label}<br>%{value} solves<extra></extra>",
+        <UserSection
+          title="Solves by Category"
+          description={`${categoriesCount} categories represented in your solves.`}
+          icon={LayoutGrid}
+        >
+          <Plot
+            key={`cat-${isDarkMode}`}
+            data={[
+              {
+                type: "pie",
+                labels: Object.keys(byCategory),
+                values: Object.values(byCategory),
+                hole: 0.5,
+                marker: {
+                  colors: pieColors,
+                  line: { color: t.bg, width: 1 },
                 },
-              ]}
-              layout={{ ...baseLayout, height: 260 }}
-              style={{ width: "100%" }}
-              useResizeHandler
-              config={{ displayModeBar: false }}
-            />
+                textinfo: "label+percent",
+                hovertemplate:
+                  "%{label}<br>%{value} solves<extra></extra>",
+              },
+            ]}
+            layout={{ ...baseLayout, height: 260 }}
+            style={{ width: "100%" }}
+            useResizeHandler
+            config={{ displayModeBar: false }}
+          />
         </UserSection>
 
         {/* DIFFICULTY */}
-        <UserSection title="Solves by Difficulty" icon={ChartColumnDecreasing}>
-            <Plot
-              key={`diff-${isDarkMode}`}
-              data={[
-                {
-                  type: "pie",
-                  labels: Object.keys(byDifficulty),
-                  values: Object.values(byDifficulty),
-                  hole: 0.5,
-                  marker: {
-                    colors: diffColors,
-                    line: { color: t.bg, width: 1 },
-                  },
-                  textinfo: "label+percent",
-                  hovertemplate:
-                    "%{label}<br>%{value} solves<extra></extra>",
+        <UserSection
+          title="Solves by Difficulty"
+          description={`${difficultiesCount} difficulty level${difficultiesCount !== 1 ? 's' : ''} mastered.`}
+          icon={Zap}
+        >
+          <Plot
+            key={`diff-${isDarkMode}`}
+            data={[
+              {
+                type: "pie",
+                labels: Object.keys(byDifficulty),
+                values: Object.values(byDifficulty),
+                hole: 0.5,
+                marker: {
+                  colors: diffColors,
+                  line: { color: t.bg, width: 1 },
                 },
-              ]}
-              layout={{ ...baseLayout, height: 260 }}
-              style={{ width: "100%" }}
-              useResizeHandler
-              config={{ displayModeBar: false }}
-            />
+                textinfo: "label+percent",
+                hovertemplate:
+                  "%{label}<br>%{value} solves<extra></extra>",
+              },
+            ]}
+            layout={{ ...baseLayout, height: 260 }}
+            style={{ width: "100%" }}
+            useResizeHandler
+            config={{ displayModeBar: false }}
+          />
         </UserSection>
       </div>
 
@@ -173,40 +184,40 @@ export default function UserStatsPlotly({
         <UserSection
           title="Solves Over Time"
           description={`${firstBloodCount} first blood${firstBloodCount !== 1 ? 's' : ''} recorded in this event scope.`}
-          icon={ChartColumnDecreasing}
+          icon={TrendingUp}
         >
-            <Plot
-              key={`line-${isDarkMode}`}
-              data={[
-                {
-                  type: "scatter",
-                  mode: "lines+markers",
-                  x: timeSeries.map(d => d.date),
-                  y: timeSeries.map(d => d.count),
-                  line: { width: 3, color: "#60a5fa" },
-                  marker: {
-                    size: 6,
-                    color: "#93c5fd",
-                    line: { color: t.bg, width: 1 },
-                  },
-                  hovertemplate:
-                    "%{x}<br>%{y} solves<extra></extra>",
+          <Plot
+            key={`line-${isDarkMode}`}
+            data={[
+              {
+                type: "scatter",
+                mode: "lines+markers",
+                x: timeSeries.map(d => d.date),
+                y: timeSeries.map(d => d.count),
+                line: { width: 3, color: "#60a5fa" },
+                marker: {
+                  size: 6,
+                  color: "#93c5fd",
+                  line: { color: t.bg, width: 1 },
                 },
-              ]}
-              layout={{
-                ...baseLayout,
-                height: 300,
-                xaxis: { gridcolor: t.grid },
-                yaxis: {
-                  title: { text: "Solves" },
-                  gridcolor: t.grid,
-                },
-                showlegend: false,
-              }}
-              style={{ width: "100%" }}
-              useResizeHandler
-              config={{ scrollZoom: false, displayModeBar: false }}
-            />
+                hovertemplate:
+                  "%{x}<br>%{y} solves<extra></extra>",
+              },
+            ]}
+            layout={{
+              ...baseLayout,
+              height: 300,
+              xaxis: { gridcolor: t.grid },
+              yaxis: {
+                title: { text: "Solves" },
+                gridcolor: t.grid,
+              },
+              showlegend: false,
+            }}
+            style={{ width: "100%" }}
+            useResizeHandler
+            config={{ scrollZoom: false, displayModeBar: false }}
+          />
         </UserSection>
       </div>
     </div>

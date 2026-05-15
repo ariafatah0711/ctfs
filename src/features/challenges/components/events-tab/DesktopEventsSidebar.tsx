@@ -1,7 +1,8 @@
 'use client'
 
 import { Search, ListFilter, Calendar, Clock, History, LayoutGrid } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   SURFACE_FILTER_ITEM_ACTIVE_CLASS,
   SURFACE_FILTER_ITEM_CLASS,
@@ -26,6 +27,11 @@ export default function DesktopEventsSidebar({
   events,
 }: DesktopEventsSidebarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const now = new Date()
   const { availableEvents, upcomingList, endedEvents } = getEventSections(events, now)
 
@@ -102,9 +108,9 @@ export default function DesktopEventsSidebar({
         />
       </div>
 
-      {searchOpen && (
+      {searchOpen && mounted && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center bg-gray-950/20 px-4 pt-28 backdrop-blur-sm"
+          className="fixed inset-0 z-[999] flex items-start justify-center bg-gray-950/40 px-4 pt-28 backdrop-blur-sm"
           onClick={() => setSearchOpen(false)}
         >
           <div
@@ -122,7 +128,8 @@ export default function DesktopEventsSidebar({
               onKeyDown={(e) => e.key === 'Enter' && setSearchOpen(false)}
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </aside>
   )

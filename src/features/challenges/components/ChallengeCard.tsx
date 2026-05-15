@@ -5,7 +5,7 @@ import { Flame, Sparkles, AlertTriangle, Flag, CheckCircle2 } from 'lucide-react
 // Shared Imports
 import APP from '@/config';
 import { ChallengeWithSolve } from '@/shared/types'
-import { getCategoryDetails, getCategoryIcon, getDifficultyStyle } from '../lib'
+import { getCategoryDetails, getCategoryIcon, getDifficultyStyle, getChallengeFeatureType } from '../lib'
 
 interface ChallengeCardProps {
   challenge: ChallengeWithSolve & {
@@ -25,9 +25,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({ challenge, highlightTeamS
   const isMaintenance = !!challenge.is_maintenance;
   const isTeamSolved = !!challenge.is_team_solved && highlightTeamSolves;
 
-  const hasQuestions = !!challenge.has_questions;
-  const hasServices = Array.isArray((challenge as any).services) && (challenge as any).services.length > 0;
-  const featureBadge = hasQuestions && hasServices ? 'TS' : hasQuestions ? 'T' : hasServices ? 'S' : null;
+  const featureType = getChallengeFeatureType(challenge);
+  const featureBadge = featureType === 'N' ? null : featureType;
 
   const isSolved = challenge.is_solved;
   const isAnySolved = isSolved || isTeamSolved;

@@ -63,7 +63,7 @@ export default function TeamPageContent({
   const isMember = members.some(m => m.user_id === currentUserId)
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <TeamTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -89,7 +89,7 @@ export default function TeamPageContent({
 
       <div key={activeTab}>
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-6">
             <TeamMembersSection
               members={members}
               canManage={canManage}

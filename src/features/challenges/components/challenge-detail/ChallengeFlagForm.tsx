@@ -26,6 +26,7 @@ export default function ChallengeFlagForm({
   handleFlagSubmit,
 }: ChallengeFlagFormProps) {
   const overlayRef = React.useRef<HTMLDivElement>(null)
+  const [isDeleting, setIsDeleting] = React.useState(false)
 
   return (
     <div className="flex flex-col relative w-full">
@@ -52,7 +53,7 @@ export default function ChallengeFlagForm({
           {challenge.flag_placeholder && placeholders[challenge.id] && (
             <div
               ref={overlayRef}
-              className="pointer-events-none absolute inset-0 flex select-none items-center overflow-hidden whitespace-pre pl-4 pr-6 py-2.5 font-mono text-sm text-gray-400 opacity-50 dark:text-gray-600"
+              className="pointer-events-none absolute inset-0 flex select-none items-center overflow-hidden whitespace-pre pl-4 pr-6 font-mono text-sm text-gray-400 opacity-50 dark:text-gray-600"
             >
               <span className="invisible">{flagInputs[challenge.id] || ''}</span>
               <span>{placeholders[challenge.id].slice((flagInputs[challenge.id] || '').length)}</span>
@@ -64,19 +65,28 @@ export default function ChallengeFlagForm({
               if (overlayRef.current) overlayRef.current.scrollLeft = event.currentTarget.scrollLeft
             }}
             value={flagInputs[challenge.id] || ''}
+            onKeyDown={(event) => {
+              if (event.key === 'Backspace') {
+                setIsDeleting(true)
+              } else {
+                setIsDeleting(false)
+              }
+            }}
             onChange={(event) => {
               const value = event.target.value
               const mask = placeholders[challenge.id]
-              if (challenge.flag_placeholder && mask) {
+
+              if (challenge.flag_placeholder && mask && !isDeleting) {
                 handleFlagInputChange(challenge.id, formatSmartFlag(value, mask))
               } else {
                 handleFlagInputChange(challenge.id, value)
               }
             }}
-            maxLength={challenge.flag_placeholder && placeholders[challenge.id] ? placeholders[challenge.id].length : undefined}
             placeholder={challenge.flag_placeholder && placeholders[challenge.id] ? '' : 'Enter flag here...'}
-            className="w-full h-[38px] pl-4 pr-6 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-base"
+            className="w-full h-[38px] pl-4 pr-6 bg-transparent text-gray-900 dark:text-white focus:outline-none relative z-10 font-mono text-sm"
             autoFocus
+            spellCheck={false}
+            autoComplete="off"
           />
         </div>
         <button
