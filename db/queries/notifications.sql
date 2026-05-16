@@ -18,7 +18,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT n.id, n.title, n.message, n.level, n.created_by, n.created_at
+  SELECT n.id, n.title::TEXT, n.message, n.level::TEXT, n.created_by, n.created_at
   FROM public.notifications n
   ORDER BY n.created_at DESC
   LIMIT p_limit OFFSET p_offset;

@@ -89,13 +89,13 @@ BEGIN
   RETURN QUERY
   SELECT
     u.id,
-    u.username,
+    u.username::TEXT,
     COALESCE(
       au.raw_user_meta_data->>'picture',
       au.raw_user_meta_data->>'avatar_url',
       u.profile_picture_url
-    ) AS picture,
-    u.profile_picture_url,
+    )::TEXT AS picture,
+    u.profile_picture_url::TEXT,
     COALESCE(
       (
         SELECT array_agg(DISTINCT c.event_id) FILTER (WHERE c.event_id IS NOT NULL)
@@ -255,7 +255,7 @@ BEGIN
   RETURN QUERY
   SELECT
     u.id,
-    u.username,
+    u.username::TEXT,
     COALESCE(
       SUM(
         CASE WHEN (
@@ -325,7 +325,7 @@ BEGIN
   RETURN QUERY
   SELECT
     s.user_id,
-    u.username,
+    u.username::TEXT,
     s.created_at,
     c.points
   FROM public.solves s
@@ -389,8 +389,8 @@ RETURNS TABLE (
 BEGIN
   RETURN QUERY
   SELECT
-    u.username,
-    c.title
+    u.username::TEXT,
+    c.title::TEXT
   FROM public.users u
   JOIN public.challenges c ON c.id = p_challenge_id
   WHERE u.id = p_user_id;

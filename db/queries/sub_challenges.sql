@@ -483,7 +483,7 @@ BEGIN
   PERFORM normalize_sub_challenge_order(p_challenge_id);
 
   RETURN QUERY
-  SELECT sc.id, sc.challenge_id, sc.question, sc.answer, sc.order_number, sc.is_sequential
+  SELECT sc.id, sc.challenge_id, sc.question, sc.answer::TEXT, sc.order_number, sc.is_sequential
   FROM public.sub_challenges sc
   WHERE sc.challenge_id = p_challenge_id
   ORDER BY sc.order_number;

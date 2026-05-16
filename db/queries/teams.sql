@@ -293,7 +293,7 @@ BEGIN
   )
   SELECT
     mc.team_id,
-    mc.team_name,
+    mc.team_name::TEXT,
     COALESCE(us.unique_score, 0) AS unique_score,
     COALESCE(a.total_score, 0) AS total_score,
     COALESCE(a.unique_challenges, 0) AS unique_challenges,
@@ -321,7 +321,7 @@ RETURNS TABLE (
 BEGIN
   RETURN QUERY
   SELECT
-    t.name AS team_name,
+    t.name::TEXT AS team_name,
     s.created_at,
     c.points
   FROM public.teams t
@@ -362,12 +362,12 @@ BEGIN
   RETURN QUERY
   WITH team_solves AS (
     SELECT
-      t.name AS team_name,
+      t.name::TEXT AS team_name,
       s.challenge_id,
       MIN(s.created_at) AS created_at,
       MAX(c.points) AS points,
-      MAX(c.title) AS challenge_title,
-      MAX(c.category) AS challenge_category
+      MAX(c.title)::TEXT AS challenge_title,
+      MAX(c.category)::TEXT AS challenge_category
     FROM public.teams t
     JOIN public.team_members tm ON tm.team_id = t.id
     JOIN public.solves s ON s.user_id = tm.user_id
@@ -407,7 +407,7 @@ RETURNS TABLE (
 BEGIN
   RETURN QUERY
   SELECT
-    t.name AS team_name,
+    t.name::TEXT AS team_name,
     s.created_at,
     c.points
   FROM public.teams t
@@ -437,7 +437,7 @@ BEGIN
   RETURN QUERY
   WITH team_solves AS (
     SELECT
-      t.name AS team_name,
+      t.name::TEXT AS team_name,
       s.challenge_id,
       MIN(s.created_at) AS created_at,
       MAX(c.points) AS points

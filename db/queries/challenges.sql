@@ -11,7 +11,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT c.category, COUNT(*)::int
+  SELECT c.category::TEXT, COUNT(*)::int
   FROM public.challenges c
   LEFT JOIN public.events e ON e.id = c.event_id
   WHERE c.is_active = true
@@ -41,7 +41,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   RETURN QUERY
-  SELECT c.difficulty, COUNT(*)::int
+  SELECT c.difficulty::TEXT, COUNT(*)::int
   FROM public.challenges c
   LEFT JOIN public.events e ON e.id = c.event_id
   WHERE c.is_active = true

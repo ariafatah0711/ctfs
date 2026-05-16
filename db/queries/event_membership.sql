@@ -127,7 +127,7 @@ BEGIN
   SELECT
     ep.event_id,
     ep.user_id,
-    u.username,
+    u.username::TEXT,
     ep.joined_at,
     ep.joined_by
   FROM public.event_participants ep
@@ -166,9 +166,9 @@ BEGIN
     ejr.id,
     ejr.event_id,
     ejr.user_id,
-    u.username,
-    ejr.status,
-    ejr.note,
+    u.username::TEXT,
+    ejr.status::TEXT,
+    ejr.note::TEXT,
     ejr.requested_at,
     ejr.reviewed_at,
     ejr.reviewed_by
