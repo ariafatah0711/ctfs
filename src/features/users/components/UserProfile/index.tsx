@@ -112,7 +112,7 @@ export default function UserProfile({
       className="relative overflow-hidden"
       selectionClassName="selection:bg-blue-500/30"
     >
-      <main className="relative z-10 mx-auto w-full max-w-7xl space-y-5 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
+      <main className="relative z-10 mx-auto w-full max-w-5xl space-y-4 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         {loading || loadingDetail ? (
           <div className="flex justify-center py-4 opacity-70">
             <Loader color="text-blue-500" />
@@ -148,7 +148,6 @@ export default function UserProfile({
                       })
                     }}
                     onSaved={refreshUserDetail}
-                    triggerButtonClass="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white/50 px-4 py-2 text-sm font-semibold text-gray-600 backdrop-blur transition hover:border-blue-500/40 hover:text-blue-600 dark:border-white/10 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:text-blue-400"
                     authInfo={authInfo}
                   />
                 ) : null

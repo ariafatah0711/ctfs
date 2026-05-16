@@ -40,7 +40,6 @@ export default function LogsList({
 }) {
   const [notifications, setNotifications] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [visibleCount, setVisibleCount] = useState(50);
   const { getFeed } = useLogs()
 
   const eventKey = eventId === undefined ? 'any' : (eventId === null ? 'main' : String(eventId))
@@ -52,7 +51,6 @@ export default function LogsList({
       try {
         const merged = await getFeed(tabType, eventId)
         setNotifications(merged);
-        setVisibleCount(50); // Reset count on new data
       } catch (error) {
         console.error("Failed to fetch logs:", error);
       } finally {
@@ -88,31 +86,16 @@ export default function LogsList({
     );
   }
 
-  const visibleNotifications = notifications.slice(0, visibleCount);
-  const hasMore = visibleCount < notifications.length;
-
   return (
-    <div className="space-y-4">
-      <div className="grid gap-2.5">
-        {visibleNotifications.map((notif, index) => (
-          <LogItem key={`${notif.log_challenge_id}-${notif.log_created_at}-${index}`} notif={notif} />
-        ))}
-      </div>
-
-      {hasMore && (
-        <div className="flex justify-center pt-2">
-          <Button
-            onClick={() => setVisibleCount(prev => prev + 50)}
-            variant="outline"
-            className={`px-5 py-2.5 text-xs font-black uppercase tracking-widest text-gray-600 hover:text-blue-500 dark:text-gray-300 ${SURFACE_GLASS_CONTROL_COMPACT_CLASS}`}
-          >
-            Load More Intelligence ({notifications.length - visibleCount} remaining)
-          </Button>
-        </div>
-      )}
+    <div className="grid gap-1.5">
+      {notifications.map((notif, index) => (
+        <LogItem key={`${notif.log_challenge_id}-${notif.log_created_at}-${index}`} notif={notif} />
+      ))}
     </div>
   );
 }
+
+import { persistSelectedChallenge } from '@/features/challenges/lib/challenge-persistence'
 
 function LogItem({ notif }: { notif: LogEntry }) {
   const getLogTypeDetails = (type: LogEntry["log_type"]) => {
@@ -156,11 +139,11 @@ function LogItem({ notif }: { notif: LogEntry }) {
 
   return (
     <div
-      className={`group relative overflow-hidden p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS} ${SURFACE_INTERACTIVE_HOVER_CLASS}`}
+      className={`group relative overflow-hidden p-2.5 ${SURFACE_GLASS_CARD_COMPACT_CLASS} ${SURFACE_INTERACTIVE_HOVER_CLASS}`}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {/* Type Icon */}
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${details.bgColor} ${details.color} ${details.borderColor} border shadow-sm transition-transform group-hover:scale-105`}>
+        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${details.bgColor} ${details.color} ${details.borderColor} border shadow-sm transition-transform group-hover:scale-105`}>
           {details.icon}
         </div>
 
@@ -180,19 +163,19 @@ function LogItem({ notif }: { notif: LogEntry }) {
           <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
             {notif.log_type === 'new_challenge' ? (
               <span>
-                <span className="text-blue-600 dark:text-blue-400">[{notif.log_category}]</span> {notif.log_challenge_title} has been deployed.
+                <span className="text-blue-600 dark:text-blue-400">[{notif.log_category}]</span> challenge <span className="font-bold text-gray-700 dark:text-gray-300">&quot;{notif.log_challenge_title}&quot;</span> has been deployed.
               </span>
             ) : notif.log_type === 'first_blood' ? (
               <span>
                 <Link href={`/user/${encodeURIComponent(notif.log_username || '')}`} className="hover:text-red-500 transition-colors">
                   {notif.log_username}
-                </Link> secured first blood on <span className="text-red-500 font-black">{notif.log_challenge_title}</span>!
+                </Link> secured first blood on <span className="text-red-500 font-black">&quot;{notif.log_challenge_title}&quot;</span>!
               </span>
             ) : (
               <span>
                 <Link href={`/user/${encodeURIComponent(notif.log_username || '')}`} className="hover:text-emerald-500 transition-colors">
                   {notif.log_username}
-                </Link> solved <span className="font-bold text-gray-700 dark:text-gray-300">{notif.log_challenge_title}</span>.
+                </Link> solved <span className="font-bold text-gray-700 dark:text-gray-300">&quot;{notif.log_challenge_title}&quot;</span>.
               </span>
             )}
           </h4>
@@ -201,7 +184,8 @@ function LogItem({ notif }: { notif: LogEntry }) {
         {/* Action / Link */}
         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
           <Link
-            href={`/challenges?id=${notif.log_challenge_id}`}
+            href="/challenges"
+            onClick={() => persistSelectedChallenge(notif.log_challenge_id)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
           >
             <ExternalLink size={14} />

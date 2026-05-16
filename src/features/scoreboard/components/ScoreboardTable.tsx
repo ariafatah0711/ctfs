@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Trophy } from 'lucide-react'
+import { Trophy, TrendingUp } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { LeaderboardEntry } from '@/shared/types'
 import { cn } from '@/shared/lib/utils'
@@ -24,6 +24,8 @@ interface ScoreboardTableProps {
   onShowAll?: () => void
   /** Custom label for missing rank badge */
   missingLabel?: string
+  /** Map of username to recent solves count */
+  recentSolvesMap?: Map<string, number>
 }
 
 const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
@@ -33,7 +35,8 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
   scoreColumnLabel,
   scoreColumnRenderer,
   onShowAll,
-  missingLabel
+  missingLabel,
+  recentSolvesMap
 }) => {
   const currentUserIndex = currentUsername
     ? leaderboard.findIndex((entry) => entry.username === currentUsername)
@@ -56,18 +59,30 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
       header: 'User',
       render: (entry) => {
         const isCurrentUser = entry.username === currentUsername
+        const recentCount = recentSolvesMap?.get(entry.username)
 
         return (
-          <Link
-            href={`/user/${encodeURIComponent(entry.username)}`}
-            className={cn(
-              'block max-w-[120px] truncate whitespace-nowrap font-medium transition-colors hover:text-blue-600 hover:underline dark:hover:text-blue-400 md:max-w-xs',
-              isCurrentUser && 'text-blue-700 dark:text-blue-300'
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/user/${encodeURIComponent(entry.username)}`}
+              className={cn(
+                'block max-w-[120px] truncate whitespace-nowrap font-medium transition-colors hover:text-blue-600 hover:underline dark:hover:text-blue-400 md:max-w-xs',
+                isCurrentUser && 'text-blue-700 dark:text-blue-300'
+              )}
+              title={entry.username}
+            >
+              {entry.username}
+            </Link>
+            {!!recentCount && recentCount > 0 && (
+              <span
+                className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-green-500/10 px-1.5 py-0.5 text-[10px] font-bold text-green-600 dark:bg-green-500/20 dark:text-green-400"
+                title={`Solved ${recentCount} challenges recently`}
+              >
+                <TrendingUp size={10} />
+                {recentCount}
+              </span>
             )}
-            title={entry.username}
-          >
-            {entry.username}
-          </Link>
+          </div>
         )
       },
     },
@@ -84,7 +99,7 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
     <BaseScoreboardCard
       title="Ranking"
       icon={Trophy}
-      headerCenter={
+      action={
         currentUsername ? (
           <BaseScoreboardRankBadge
             label="Your Rank"
@@ -95,15 +110,6 @@ const ScoreboardTable: React.FC<ScoreboardTableProps> = ({
             missingLabel={missingLabel ?? 'Not ranked yet'}
           />
         ) : null
-      }
-      action={
-        onShowAll &&
-        leaderboard.length >= 100 &&
-        (
-          <Button variant="default" size="sm" onClick={onShowAll}>
-            Show All
-          </Button>
-        )
       }
       contentClassName="p-0"
     >

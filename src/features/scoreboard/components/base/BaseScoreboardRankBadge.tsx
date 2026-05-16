@@ -25,20 +25,29 @@ export default function BaseScoreboardRankBadge({
   return (
     <div
       className={cn(
-        'flex min-h-9 max-w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-blue-500/20 bg-blue-500/10 px-3 py-1.5 text-xs shadow-[0_0_10px_rgba(59,130,246,0.06)]',
+        'inline-flex items-center overflow-hidden divide-x divide-blue-500/20 rounded-lg border border-blue-500/20 bg-blue-50/50 shadow-sm backdrop-blur-sm dark:divide-blue-500/20 dark:border-blue-500/20 dark:bg-blue-900/10',
         className
       )}
     >
-      <span className="shrink-0 font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-        {label}
-      </span>
       {hasRank ? (
         <>
-          <span className="font-black text-gray-900 dark:text-white">#{rank}</span>
-          {typeof score !== 'undefined' && (
-            <span className="font-semibold text-gray-500 dark:text-gray-300">
-              {scoreLabel}: {score}
+          <div className="flex h-8 items-center gap-2 px-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600/80 dark:text-blue-400/80">
+              {label}
             </span>
+            <span className="text-sm font-black text-gray-900 dark:text-white">
+              #{rank}
+            </span>
+          </div>
+          {typeof score !== 'undefined' && (
+            <div className="flex h-8 items-center gap-2 px-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {scoreLabel}
+              </span>
+              <span className="text-sm font-bold text-gray-900 dark:text-white">
+                {score}
+              </span>
+            </div>
           )}
           {rowHref && (
             <button
@@ -48,24 +57,28 @@ export default function BaseScoreboardRankBadge({
                 const element = document.getElementById(id)
                 if (element) {
                   element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                  // Optional: highlight effect
                   element.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50')
                   setTimeout(() => {
                     element.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50')
                   }, 2000)
                 }
               }}
-              className="inline-flex h-6 shrink-0 items-center justify-center gap-1 rounded-lg border border-blue-500/20 bg-blue-500/10 px-2 text-[10px] font-black uppercase tracking-widest text-blue-600 transition hover:bg-blue-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:text-blue-400 dark:hover:text-white"
+              className="flex h-8 w-8 items-center justify-center text-blue-600 transition-colors hover:bg-blue-500/10 focus-visible:bg-blue-500/10 focus-visible:outline-none dark:text-blue-400 dark:hover:bg-blue-500/20 dark:focus-visible:bg-blue-500/20"
+              title="Jump to my rank"
             >
-              <LocateFixed size={12} />
-              Jump
+              <LocateFixed size={14} />
             </button>
           )}
         </>
       ) : (
-        <span className="min-w-0 font-semibold text-gray-500 dark:text-gray-400">
-          {missingLabel}
-        </span>
+        <div className="flex h-8 items-center gap-2 px-3">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600/80 dark:text-blue-400/80">
+            {label}
+          </span>
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+            {missingLabel}
+          </span>
+        </div>
       )}
     </div>
   )

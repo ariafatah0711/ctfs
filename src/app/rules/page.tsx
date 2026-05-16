@@ -11,7 +11,8 @@ import {
   THEME_PRIMARY_SELECTION_CLASS,
   TYPO_PAGE_TITLE_CLASS,
   TYPO_CARD_TITLE_CLASS,
-  TYPO_METADATA_CLASS
+  TYPO_METADATA_CLASS,
+  PAGE_MAIN_CONTAINER_5XL
 } from '@/shared/styles'
 import { cn } from '@/shared/lib/utils'
 import BackButton from '@/shared/components/BackButton'
@@ -19,7 +20,16 @@ import BackButton from '@/shared/components/BackButton'
 export default function RulesPage() {
   const { loading } = useAuth()
 
-  if (loading) return <Loader fullscreen />
+  if (loading) {
+    return (
+      <PageBackground
+        className="flex justify-center items-center overflow-hidden"
+        selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
+      >
+        <Loader color="text-blue-500" />
+      </PageBackground>
+    )
+  }
 
   return (
     <PageBackground
@@ -27,61 +37,57 @@ export default function RulesPage() {
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
     >
 
-      <main className="relative z-10 flex w-full flex-1 flex-col items-center px-4 py-6 sm:px-6">
-
-        <div className="w-full max-w-6xl mx-auto">
-          {/* TACTICAL HEADER */}
-          <header className="mb-8 flex items-center justify-between border-b border-gray-200/50 pb-5 dark:border-gray-800/60">
-            <div className="flex flex-col">
-              <h1 className={TYPO_PAGE_TITLE_CLASS}>
-                Platform Rules
-              </h1>
-              <div className={cn("flex items-center gap-1.5", TYPO_METADATA_CLASS)}>
-                <div className="h-1 w-1 rounded-full bg-blue-500" />
-                Play fair, hack hard
-              </div>
+      <main className={cn(PAGE_MAIN_CONTAINER_5XL, "flex-1 flex flex-col space-y-4")}>
+        {/* TACTICAL HEADER */}
+        <header className="flex items-center justify-between border-b border-gray-200/50 pb-4 dark:border-gray-800/60">
+          <div className="flex flex-col">
+            <h1 className={TYPO_PAGE_TITLE_CLASS}>
+              Platform Rules
+            </h1>
+            <div className={cn("flex items-center gap-1.5", TYPO_METADATA_CLASS)}>
+              <div className="h-1 w-1 rounded-full bg-blue-500" />
+              Play fair, hack hard
             </div>
-
-            <BackButton
-              href="/"
-              label="Dashboard"
-              className="h-10 rounded-xl border border-gray-200/50 bg-white/50 px-4 hover:bg-white dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:bg-gray-800"
-            />
-          </header>
-
-          {/* RULES LIST - Lightweight Grid */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {rulesConfig.rules.map((rule, idx) => (
-              <div
-                key={idx}
-                className={cn("group flex flex-col gap-2 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500/40", SURFACE_GLASS_CARD_COMPACT_CLASS)}
-              >
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-mono font-black text-blue-600/10 group-hover:text-blue-500/20 transition-colors">
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  <h3 className={cn(TYPO_CARD_TITLE_CLASS, "uppercase tracking-tight")}>
-                    {rule.title}
-                  </h3>
-                </div>
-
-                <div className="pl-12 text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                  <RulesMarkdownRenderer content={rule.description} />
-                </div>
-              </div>
-            ))}
           </div>
 
-          {/* STEALTH FLAG - Perfectly Invisible */}
-          {rulesConfig.showHiddenFlag && (
-            <div className="mt-8 flex justify-center">
-              <p className="text-[8px] font-mono select-all cursor-help text-[#fafafa] dark:text-[#0b0f19] leading-none opacity-5 hover:opacity-100 transition-opacity">
-                {rulesConfig.hiddenFlagBase64}
-              </p>
+          <BackButton
+            href="/"
+            label="Dashboard"
+          />
+        </header>
+
+        {/* RULES LIST - Lightweight Grid */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {rulesConfig.rules.map((rule, idx) => (
+            <div
+              key={idx}
+              className={cn("group flex flex-col gap-2 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-500/40", SURFACE_GLASS_CARD_COMPACT_CLASS)}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-[11px] font-mono font-black text-blue-600 ring-1 ring-blue-500/20 transition-transform group-hover:scale-105 dark:text-blue-400">
+                  {String(idx + 1).padStart(2, '0')}
+                </div>
+                <div className="mt-1.5 flex-1 space-y-1.5 min-w-0">
+                  <h3 className={cn(TYPO_CARD_TITLE_CLASS, "leading-tight")}>
+                    {rule.title}
+                  </h3>
+                  <div className="text-xs text-gray-500 dark:text-gray-400/90 leading-relaxed font-medium">
+                    <RulesMarkdownRenderer content={rule.description} />
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          ))}
         </div>
 
+        {/* STEALTH FLAG - Perfectly Invisible */}
+        {rulesConfig.showHiddenFlag && (
+          <div className="mt-8 flex justify-center">
+            <p className="text-[8px] font-mono select-all cursor-help text-[#fafafa] dark:text-[#0b0f19] leading-none opacity-5 hover:opacity-100 transition-opacity">
+              {rulesConfig.hiddenFlagBase64}
+            </p>
+          </div>
+        )}
       </main>
 
       <Footer />

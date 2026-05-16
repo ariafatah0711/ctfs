@@ -10,7 +10,7 @@ import ConfirmDialog from '@/shared/components/ConfirmDialog'
 import PageBackground from '@/shared/components/PageBackground'
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui'
 import {
-  PAGE_MAIN_CONTAINER_6XL,
+  PAGE_MAIN_CONTAINER_4XL,
   SURFACE_GLASS_CARD_COMPACT_CLASS,
   SURFACE_GLASS_CARD_INTERACTIVE_BLUE_CLASS,
   SURFACE_GLASS_INPUT_CLASS,
@@ -176,9 +176,12 @@ export default function TeamsPage() {
 
   if (authLoading) {
     return (
-      <div className="flex justify-center py-10">
-        <Loader fullscreen />
-      </div>
+      <PageBackground
+        className="flex justify-center items-center overflow-hidden"
+        selectionClassName="selection:bg-blue-500/30"
+      >
+        <Loader color="text-blue-500" />
+      </PageBackground>
     )
   }
 
@@ -186,10 +189,10 @@ export default function TeamsPage() {
 
   return (
     <PageBackground selectionClassName={THEME_PRIMARY_SELECTION_CLASS}>
-      <div className={cn(PAGE_MAIN_CONTAINER_6XL, "space-y-6 py-6")}>
+      <div className={cn(PAGE_MAIN_CONTAINER_4XL, "space-y-4")}>
         {initialLoading ? (
-          <div className="flex justify-center py-10">
-            <Loader />
+          <div className="flex justify-center py-12">
+            <Loader color="text-blue-500" />
           </div>
         ) : (
           <>
@@ -266,7 +269,7 @@ export default function TeamsPage() {
                       <Button
                         onClick={onCreateTeam}
                         disabled={busy || !teamName.trim()}
-                        className="h-11 w-full rounded-xl font-black uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                        className="h-10 w-full font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20"
                       >
                         Create Team
                       </Button>
@@ -300,7 +303,7 @@ export default function TeamsPage() {
                         onClick={onJoinTeam}
                         disabled={busy || !inviteCode.trim()}
                         variant="secondary"
-                        className="h-11 w-full rounded-xl font-black uppercase tracking-widest"
+                        className="h-10 w-full font-bold uppercase tracking-widest"
                       >
                         Join Team
                       </Button>

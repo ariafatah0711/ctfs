@@ -4,7 +4,10 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Bell, Check, Plus, Loader2, X, Megaphone, Settings2, Trash2, Calendar } from 'lucide-react'
 import { Switch } from '@/shared/ui'
-import { formatRelativeDate } from '@/shared/lib/utils'
+import { Button } from '@/shared/ui/button'
+import { SURFACE_GLASS_INPUT_CLASS, SURFACE_GLASS_TEXTAREA_CLASS } from '@/shared/styles'
+import { cn, formatRelativeDate } from '@/shared/lib/utils'
+import { BaseModal, ModalHeader, ModalBody } from '@/shared/components/BaseModal'
 import NotificationItem from './NotificationItem'
 
 function formatNotificationText(content: string) {
@@ -71,6 +74,30 @@ export default function NotificationPanel({
   )
 
   const [hoveredNotifId, setHoveredNotifId] = useState<string | null>(null)
+  const [selectedNotif, setSelectedNotif] = useState<typeof notifItems[0] | null>(null)
+
+  const groupedNotifs = React.useMemo(() => {
+    const now = new Date()
+    const todayStr = now.toDateString()
+    const yesterdayDate = new Date(now)
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+    const yesterdayStr = yesterdayDate.toDateString()
+
+    const groups: Record<string, typeof notifItems> = {
+      Today: [],
+      Yesterday: [],
+      Earlier: []
+    }
+
+    notifItems.forEach(n => {
+      const d = new Date(n.created_at).toDateString()
+      if (d === todayStr) groups.Today.push(n)
+      else if (d === yesterdayStr) groups.Yesterday.push(n)
+      else groups.Earlier.push(n)
+    })
+
+    return groups
+  }, [notifItems])
 
   return (
     <>
@@ -191,115 +218,135 @@ export default function NotificationPanel({
                   <p className="text-xs font-medium">No notifications yet</p>
                 </div>
               ) : (
-                notifItems.map((n) => (
-                  <NotificationItem
-                    key={n.id}
-                    notification={n}
-                    isRead={isNotifRead(n.id)}
-                    theme={theme}
-                    globalAdminStatus={globalAdminStatus}
-                    getLevelBadgeClass={getLevelBadgeClass}
-                    onDelete={handleDeleteNotif}
-                  />
-                ))
+                <div className="space-y-4">
+                  {(['Today', 'Yesterday', 'Earlier'] as const).map(group => {
+                    if (groupedNotifs[group].length === 0) return null
+                    return (
+                      <div key={group} className="flex flex-col gap-1.5">
+                        <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-500/70">
+                          {group}
+                        </h3>
+                        {groupedNotifs[group].map((n) => (
+                          <NotificationItem
+                            key={n.id}
+                            notification={n}
+                            isRead={isNotifRead(n.id)}
+                            theme={theme}
+                            globalAdminStatus={globalAdminStatus}
+                            getLevelBadgeClass={getLevelBadgeClass}
+                            onClick={() => setSelectedNotif(n)}
+                          />
+                        ))}
+                      </div>
+                    )
+                  })}
+                </div>
               )}
             </div>
           ) : (
             <div key="admin" className="p-5 space-y-6">
-                {/* Broadcast Form */}
-                <div className="space-y-3">
+              {/* Broadcast Form */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Plus size={14} className="text-blue-500" />
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500">New Broadcast</h3>
+                </div>
+                <div className="space-y-2">
+                  <input
+                    value={notifTitle}
+                    onChange={(e) => setNotifTitle(e.target.value)}
+                    placeholder="Title"
+                    className={cn(SURFACE_GLASS_INPUT_CLASS, "h-10")}
+                  />
+                  <textarea
+                    value={notifMessage}
+                    onChange={(e) => setNotifMessage(e.target.value)}
+                    placeholder="Message..."
+                    className={cn(SURFACE_GLASS_TEXTAREA_CLASS, "min-h-[80px] resize-y")}
+                    rows={2}
+                  />
+                  <div className="flex items-center justify-between gap-3 pt-1">
+                    <select
+                      value={notifLevel}
+                      onChange={(e) => setNotifLevel(e.target.value as any)}
+                      className={cn(SURFACE_GLASS_INPUT_CLASS, "h-9 w-auto text-xs py-0 pr-8 bg-white/50 dark:bg-[#111622]/50")}
+                    >
+                      <option value="info">Broadcast</option>
+                      <option value="info_platform">System</option>
+                      <option value="info_challenges">Challenges</option>
+                    </select>
+                    <Button
+                      onClick={handleSendNotif}
+                      size="sm"
+                      className="px-5 font-bold uppercase tracking-wider text-[10px]"
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent History List */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Plus size={14} className="text-blue-500" />
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500">New Broadcast</h3>
+                    <Calendar size={14} className="text-gray-400" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500">History</h3>
                   </div>
-                  <div className="space-y-2.5 bg-blue-500/[0.02] dark:bg-blue-400/[0.02] p-3.5 rounded-xl border border-blue-500/10">
-                    <input
-                      value={notifTitle}
-                      onChange={(e) => setNotifTitle(e.target.value)}
-                      placeholder="Title"
-                      className={`w-full px-3 py-2 rounded-lg border text-sm focus:ring-1 focus:ring-blue-500/30 focus:outline-none transition-all ${theme === 'dark' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}
-                    />
-                    <textarea
-                      value={notifMessage}
-                      onChange={(e) => setNotifMessage(e.target.value)}
-                      placeholder="Message..."
-                      className={`w-full px-3 py-2 rounded-lg border text-sm focus:ring-1 focus:ring-blue-500/30 focus:outline-none transition-all ${theme === 'dark' ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}
-                      rows={2}
-                    />
-                    <div className="flex items-center justify-between gap-3 pt-0.5">
-                      <select
-                        value={notifLevel}
-                        onChange={(e) => setNotifLevel(e.target.value as any)}
-                        className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold focus:outline-none ${theme === 'dark' ? 'bg-gray-900 border-gray-800 text-gray-300' : 'bg-white border-gray-200 text-gray-600'}`}
-                      >
-                        <option value="info">General Info</option>
-                        <option value="info_platform">Platform Update</option>
-                        <option value="info_challenges">Challenge Alert</option>
-                      </select>
-                      <button
-                        onClick={handleSendNotif}
-                        className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition-all active:scale-95 shadow-sm"
-                      >
-                        Send
-                      </button>
-                    </div>
-                  </div>
+                  <span className="text-[9px] font-bold text-blue-500 opacity-60 uppercase">
+                    {notifItems.length} Sent
+                  </span>
                 </div>
 
-                {/* Recent History List */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-gray-400" />
-                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-500">History</h3>
-                    </div>
-                    <span className="text-[9px] font-bold text-blue-500 opacity-60 uppercase">
-                      {notifItems.length} Sent
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    {notifItems.map((n) => (
-                      <div
-                        key={n.id}
-                        onMouseEnter={() => setHoveredNotifId(n.id)}
-                        onMouseLeave={() => setHoveredNotifId(null)}
-                        className={`group relative p-2.5 rounded-lg border transition-all duration-200 cursor-default
-                            ${hoveredNotifId === n.id
-                            ? 'bg-white dark:bg-gray-900 border-blue-500/20 shadow-sm'
-                            : 'bg-transparent border-transparent'}
-                          `}
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-xs font-semibold truncate flex-1">{n.title}</span>
-                          <button
-                            onClick={() => handleDeleteNotif(n.id)}
-                            className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-
-                        {hoveredNotifId === n.id && (
-                          <div className="overflow-hidden">
-                            <div className="mt-2 text-[11px] text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-md border border-gray-100 dark:border-gray-700/50">
-                              <div className="whitespace-pre-line break-words line-clamp-3">
-                                {formatNotificationText(n.message)}
-                              </div>
-                            </div>
-                            <div className="mt-1.5 text-[9px] text-gray-400 font-medium">
-                              {formatRelativeDate(n.created_at)}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex flex-col gap-1.5">
+                  {notifItems.map((n) => (
+                    <NotificationItem
+                      key={n.id}
+                      notification={n}
+                      isRead={isNotifRead(n.id)}
+                      theme={theme}
+                      globalAdminStatus={globalAdminStatus}
+                      getLevelBadgeClass={getLevelBadgeClass}
+                      onDelete={handleDeleteNotif}
+                      onClick={() => setSelectedNotif(n)}
+                    />
+                  ))}
                 </div>
+              </div>
             </div>
           )}
         </div>
       </motion.div>
+
+      <BaseModal
+        open={!!selectedNotif}
+        onOpenChange={(open) => {
+          if (!open) setSelectedNotif(null)
+        }}
+        size="2xl"
+      >
+        {selectedNotif && (
+          <>
+            <ModalHeader
+              title={selectedNotif.title}
+              description={
+                <div className="flex items-center gap-2 mt-1 uppercase tracking-wider text-[10px] font-bold">
+                  <span className={getLevelBadgeClass(selectedNotif.level)}>
+                    {selectedNotif.level.replace('info_', '')}
+                  </span>
+                  <span>•</span>
+                  <span>{formatRelativeDate(selectedNotif.created_at)}</span>
+                </div>
+              }
+            />
+            <ModalBody>
+              <div className="text-[13px] text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words leading-relaxed">
+                {formatNotificationText(selectedNotif.message)}
+              </div>
+            </ModalBody>
+          </>
+        )}
+      </BaseModal>
     </>
   )
 }

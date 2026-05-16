@@ -24,6 +24,8 @@ import TeamScoreboardChart from './TeamScoreboardChart'
 import TeamScoreboardTable from './TeamScoreboardTable'
 import { useTeamScoreboard } from '../hooks/useTeamScoreboard'
 
+import { cn } from '@/shared/lib/utils'
+
 export default function TeamScoreboardPage() {
   const { user, loading: authLoading } = useAuth()
   const { theme } = useTheme()
@@ -31,6 +33,7 @@ export default function TeamScoreboardPage() {
   const { startedEvents, selectedEvent, setSelectedEvent } = useEventContext()
 
   const [showTotalScore, setShowTotalScore] = useState(false)
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login')
@@ -51,9 +54,9 @@ export default function TeamScoreboardPage() {
   return (
     <PageBackground
       selectionClassName={THEME_PRIMARY_SELECTION_CLASS}
-      contentClassName={`${PAGE_MAIN_CONTAINER_6XL} space-y-5`}
+      contentClassName={cn(PAGE_MAIN_CONTAINER_6XL, "space-y-4 py-4 sm:py-6")}
     >
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Event Filter */}
         <div className="w-full sm:w-auto">
           <EventSelect

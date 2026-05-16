@@ -20,7 +20,7 @@ export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEv
       const p_event_mode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
 
       const [{ entries: data, error: scoreboardError }, teamResult] = await Promise.all([
-        getTeamScoreboard(200, 0, p_event_id, p_event_mode),
+        getTeamScoreboard(250, 0, p_event_id, p_event_mode),
         getMyTeam(p_event_id, p_event_mode),
       ])
 
@@ -39,11 +39,11 @@ export function useTeamScoreboard(user: any, showTotalScore: boolean, selectedEv
         nameKey: 'team_name',
         scoreKey,
         filterZero: true,
-        limit: 200
+        limit: 250
       })
 
       // Preserve original structure for UI compatibility
-      const teamEntries: TeamScoreboardEntry[] = result.entries.map((e, idx) => {
+      const teamEntries: TeamScoreboardEntry[] = result.entries.map((e) => {
         const original = (data || []).find(o => o.team_name === e.username)
         return {
           ...original,

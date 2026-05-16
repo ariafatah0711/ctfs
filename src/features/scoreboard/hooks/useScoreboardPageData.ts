@@ -7,6 +7,7 @@ import {
   getLeaderboardSummary,
   getTopProgressByUsernames,
 } from '@/shared/lib'
+import { getRecentSolves } from '@/features/logs/lib/log-service'
 import { useAuth, useTheme } from '@/shared/contexts'
 import { useEventContext } from '@/features/events/contexts/EventContext'
 import type { LeaderboardEntry } from '@/shared/types'
@@ -22,6 +23,7 @@ export function useScoreboardPageData() {
   const { theme } = useTheme()
   const router = useRouter()
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [recentSolvesMapState, setRecentSolvesMapState] = useState<Map<string, number>>(new Map())
   const [loading, setLoading] = useState(true)
   const [firstBloodMode, setFirstBloodMode] = useState(false)
   const [view, setView] = useState<'top' | 'all'>('top')
@@ -68,9 +70,19 @@ export function useScoreboardPageData() {
 
       const eventParam = getScoreboardEventParam(selectedEvent)
 
+      const eventMode = selectedEvent === 'all' ? 'any' : selectedEvent === 'main' ? 'main' : 'event'
+      const p_event_id = (selectedEvent === 'all' || selectedEvent === 'main') ? null : String(selectedEvent)
+      const recentSolves = await getRecentSolves(100, 0, p_event_id, eventMode)
+      const recentSolvesMap = new Map<string, number>()
+      recentSolves.forEach(solve => {
+        const count = recentSolvesMap.get(solve.log_username) || 0
+        recentSolvesMap.set(solve.log_username, count + 1)
+      })
+
       if (firstBloodMode) {
         const firstBloodLeaderboard = await getFirstBloodLeaderboard(targetLimit, 0, eventParam)
         setLeaderboard(firstBloodLeaderboard)
+        setRecentSolvesMapState(recentSolvesMap)
         fetchStateRef.current = { event: selectedEvent, fb: firstBloodMode, limit: targetLimit }
         if (isFirstLoad) setLoading(false)
         return
@@ -88,6 +100,7 @@ export function useScoreboardPageData() {
       })
 
       setLeaderboard(result.entries)
+      setRecentSolvesMapState(recentSolvesMap)
       fetchStateRef.current = { event: selectedEvent, fb: firstBloodMode, limit: targetLimit }
       if (isFirstLoad) setLoading(false)
     }
@@ -118,5 +131,6 @@ export function useScoreboardPageData() {
     isEmpty: isScoreboardEmpty(displayedLeaderboard),
     isDark: theme === 'dark',
     eventParam,
+    recentSolvesMap: recentSolvesMapState,
   }
 }

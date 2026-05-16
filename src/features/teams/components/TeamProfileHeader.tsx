@@ -76,12 +76,12 @@ export default function TeamProfileHeader({
 
           {isMember && onLeaveTeam && (
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={onLeaveTeam}
               disabled={busy}
-              className="h-10 w-full rounded-xl border border-red-200/50 bg-red-50/50 px-4 text-[10px] font-black uppercase tracking-widest text-red-600 shadow-sm hover:bg-red-50 dark:border-red-900/30 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+              className="h-10 w-full border-red-200/50 text-xs font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-900/20"
             >
-              <LogOut size={12} className="mr-1.5" /> Leave Team
+              <LogOut size={14} className="mr-1.5" /> Leave Team
             </Button>
           )}
         </div>

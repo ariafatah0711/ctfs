@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import { formatRelativeDate } from '@/shared/lib/utils'
+import { Megaphone, Server, Flag, Trash2 } from 'lucide-react'
+import { cn, formatRelativeDate } from '@/shared/lib/utils'
 
 function formatNotificationText(content: string) {
   return content
@@ -31,7 +32,20 @@ type NotificationItemProps = {
   theme: string
   globalAdminStatus: boolean
   getLevelBadgeClass: (level: string) => string
-  onDelete: (id: string) => void
+  onDelete?: (id: string) => void
+  onClick?: () => void
+}
+
+function getIconAndLabel(level: string) {
+  switch (level) {
+    case 'info_challenges':
+      return { Icon: Flag, label: 'Challenges', colorClass: 'text-blue-500 bg-blue-500/10 ring-blue-500/20 dark:text-blue-400' }
+    case 'info_platform':
+      return { Icon: Server, label: 'System', colorClass: 'text-indigo-500 bg-indigo-500/10 ring-indigo-500/20 dark:text-indigo-400' }
+    case 'info':
+    default:
+      return { Icon: Megaphone, label: 'Broadcast', colorClass: 'text-orange-500 bg-orange-500/10 ring-orange-500/20 dark:text-orange-400' }
+  }
 }
 
 export default function NotificationItem({
@@ -41,42 +55,60 @@ export default function NotificationItem({
   globalAdminStatus,
   getLevelBadgeClass,
   onDelete,
+  onClick,
 }: NotificationItemProps) {
+  const { Icon, label, colorClass } = getIconAndLabel(notification.level)
+
   return (
     <div
-      className={`group relative px-3 py-2.5 rounded-lg transition-all duration-150 flex flex-col gap-1
-        ${!isRead
-          ? 'bg-blue-500/[0.03] dark:bg-blue-400/[0.03] border-l-2 border-blue-500'
-          : 'border-l-2 border-transparent hover:bg-blue-500/5 dark:hover:bg-blue-400/10'}
-      `}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={cn(
+        "group relative flex items-start gap-3 rounded-xl p-3 transition-all duration-200",
+        onClick ? "cursor-pointer" : "",
+        !isRead
+          ? "bg-blue-500/[0.03] dark:bg-blue-400/[0.04] ring-1 ring-blue-500/20"
+          : "hover:bg-blue-500/5 dark:hover:bg-blue-400/5 ring-1 ring-transparent hover:ring-gray-200/50 dark:hover:ring-gray-800/50"
+      )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h4 className={`text-sm font-semibold truncate ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'} leading-tight`} title={notification.title}>
-              {notification.title}
-            </h4>
-            <div className="flex items-center gap-1.5">
-              <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full ${getLevelBadgeClass(notification.level)}`}>
-                {notification.level.replace('info_', '')}
-              </span>
-              {!isRead && (
-                <span className="text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                  New
-                </span>
-              )}
-            </div>
-          </div>
+      <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 transition-transform group-hover:scale-105", colorClass)}>
+        <Icon size={14} />
+      </div>
 
-          <div className="text-xs text-gray-500 dark:text-gray-400 leading-normal whitespace-pre-line break-words line-clamp-2">
-            {formatNotificationText(notification.message)}
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className={cn("text-[13px] font-bold truncate leading-tight", theme === 'dark' ? 'text-gray-100' : 'text-gray-900')} title={notification.title}>
+            {notification.title}
+          </h4>
+          <div className="flex items-center gap-2 shrink-0">
+            {!isRead && (
+              <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500 ring-2 ring-blue-500/20" />
+            )}
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(notification.id)
+                }}
+                className="p-1.5 -mr-1.5 -mt-1.5 rounded text-gray-400/50 hover:text-red-500 hover:bg-red-500/10 transition-all"
+                title="Delete broadcast"
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
           </div>
         </div>
 
-      </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400/90 leading-relaxed whitespace-pre-line break-words line-clamp-3 font-medium">
+          {formatNotificationText(notification.message)}
+        </div>
 
-      <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
-        {notification.created_at ? formatRelativeDate(notification.created_at) : ''}
+        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          <span>{label}</span>
+          <span>•</span>
+          <span>{notification.created_at ? formatRelativeDate(notification.created_at) : ''}</span>
+        </div>
       </div>
     </div>
   )

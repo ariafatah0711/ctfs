@@ -27,10 +27,10 @@ export default function BackButton({ href, label = "Back", onClick, className = 
   return (
     <Button
       onClick={handleClick}
-      variant="ghost"
-      className={`flex items-center gap-2 text-gray-700 dark:text-gray-200 ${className}`}
+      variant="outline"
+      className={`h-9 gap-2 rounded-full px-4 text-xs font-bold uppercase tracking-wider text-gray-600 sm:h-10 sm:text-sm dark:text-gray-400 ${className}`}
     >
-      <ArrowLeft size={16} aria-hidden="true" />
+      <ArrowLeft size={14} aria-hidden="true" />
       {label}
     </Button>
   )

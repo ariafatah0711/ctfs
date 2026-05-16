@@ -42,6 +42,7 @@ export default function ScoreboardPage() {
     isEmpty,
     isDark,
     eventParam,
+    recentSolvesMap,
   } = useScoreboardPageData()
 
   if (authLoading) return <Loader fullscreen />
@@ -133,6 +134,7 @@ export default function ScoreboardPage() {
                 scoreColumnRenderer={(entry) => entry.score}
                 onShowAll={isAllView ? undefined : () => setView('all')}
                 missingLabel={isAllView ? 'Not ranked yet' : 'Not in top 100'}
+                recentSolvesMap={recentSolvesMap}
               />
             )}
           </div>

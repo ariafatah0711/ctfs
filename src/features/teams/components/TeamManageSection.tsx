@@ -101,9 +101,9 @@ export default function TeamManageSection({
               variant="outline"
               onClick={onRegenerateInvite}
               disabled={busy}
-              className="w-full border-emerald-500/30 bg-emerald-500/10 text-xs font-bold uppercase tracking-widest text-emerald-600 hover:bg-emerald-600 hover:text-white dark:text-emerald-400"
+              className="w-full border-emerald-500/30 bg-emerald-500/10 text-xs font-bold uppercase tracking-wider text-emerald-600 hover:bg-emerald-600 hover:text-white dark:text-emerald-400"
             >
-              <RefreshCw size={14} className="mr-2" /> Regenerate Token
+              <RefreshCw size={14} /> Regenerate Token
             </Button>
           )}
         </div>
@@ -121,9 +121,9 @@ export default function TeamManageSection({
             variant="outline"
             onClick={onLeaveTeam}
             disabled={busy}
-            className="w-full border-red-200 text-xs font-bold uppercase tracking-widest text-red-600 transition-all hover:bg-red-600 hover:text-white dark:border-red-900/30 dark:text-red-400"
+            className="w-full border-red-200 text-xs font-bold uppercase tracking-wider text-red-600 transition-all hover:bg-red-600 hover:text-white dark:border-red-900/30 dark:text-red-400"
           >
-            <LogOut size={14} className="mr-2" /> Leave Team
+            <LogOut size={14} /> Leave Team
           </Button>
         </div>
       </ManageCard>
@@ -141,9 +141,9 @@ export default function TeamManageSection({
               variant="destructive"
               onClick={onDeleteTeam}
               disabled={busy}
-              className="w-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-red-500/20"
+              className="w-full text-xs font-bold uppercase tracking-wider shadow-lg shadow-red-500/20"
             >
-              <Trash2 size={14} className="mr-2" /> Delete Team
+              <Trash2 size={14} /> Delete Team
             </Button>
           </div>
         </ManageCard>

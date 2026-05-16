@@ -403,3 +403,13 @@ input[type='password']::-ms-clear {
 .dark *::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* Hide or style the white resize handle in textareas */
+textarea::-webkit-resizer {
+  background-color: transparent;
+}
+
+/* Hide the white box where scrollbars meet (scrollbar corner) */
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}

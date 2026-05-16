@@ -240,8 +240,11 @@ export default function EditProfileModal({
       size="2xl"
       contentClassName="h-auto max-h-[82vh]"
       trigger={
-        <Button className={triggerButtonClass}>
-          <PencilLine size={16} aria-hidden="true" />
+        <Button
+          variant="outline"
+          className={cn("h-9 gap-2 rounded-full px-4 text-xs font-bold uppercase tracking-wider text-gray-600 sm:h-10 sm:text-sm dark:text-gray-400", triggerButtonClass)}
+        >
+          <PencilLine size={14} aria-hidden="true" />
           Edit Profile
         </Button>
       }

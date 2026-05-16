@@ -19,8 +19,7 @@ export default function ProfileTabs({ activeTab, setActiveTab, onBack, editActio
         {onBack && (
           <BackButton
             onClick={onBack}
-            label="Back"
-            className="h-10 rounded-xl border border-gray-200/50 bg-white/50 px-4 hover:bg-white dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:bg-gray-800"
+            label="Go Back"
           />
         )}
         {editAction}

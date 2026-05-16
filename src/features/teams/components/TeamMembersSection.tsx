@@ -45,11 +45,11 @@ export default function TeamMembersSection({
             containerHeight="py-8"
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
             {members.map((m) => (
-              <div key={m.user_id} className={`group relative overflow-hidden p-4 ${SURFACE_GLASS_CARD_COMPACT_CLASS} ${SURFACE_INTERACTIVE_HOVER_CLASS}`}>
-                <div className="flex items-center gap-4">
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-bold text-lg text-gray-500 dark:text-gray-400">
+              <div key={m.user_id} className={`group relative overflow-hidden p-3 ${SURFACE_GLASS_CARD_COMPACT_CLASS} ${SURFACE_INTERACTIVE_HOVER_CLASS}`}>
+                <div className="flex items-center gap-3">
+                  <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center font-bold text-sm text-gray-500 dark:text-gray-400">
                     {m.username.slice(0, 1).toUpperCase()}
                   </div>
                   

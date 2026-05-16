@@ -73,7 +73,7 @@ export default function TeamScoreboardTable({
     <BaseScoreboardCard
       title="Ranking"
       icon={Trophy}
-      headerCenter={
+      action={
         currentTeamName ? (
           <BaseScoreboardRankBadge
             label="Team Rank"
