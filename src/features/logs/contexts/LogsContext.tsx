@@ -120,26 +120,17 @@ export function LogsProvider({ children }: { children: React.ReactNode }) {
       const eventMode: 'any' | 'main' | 'event' =
         eventId === undefined || eventId === 'all'
           ? 'any'
-          : eventId === null
+          : (eventId === null || eventId === 'main')
             ? 'main'
             : 'event'
       const eventParam = eventMode === 'event' ? String(eventId) : null
 
       // Fetch latest rows only (offset 0). For refresh, keep it small.
       const fetched = tabType === 'challenges'
-        ? await getLogs(limit, 0)
+        ? await getLogs(limit, 0, eventParam, eventMode)
         : await getRecentSolves(limit, 0, eventParam, eventMode)
 
-      // Apply event filter if specified and not 'all'.
-      let allowedSet: Set<string> | null = null
-      if (eventId !== undefined && eventId !== 'all') {
-        allowedSet = await getEventChallengeIds(eventId as any)
-      }
-
       let fetchedFiltered = (fetched || []) as any[]
-      if (allowedSet) {
-        fetchedFiltered = fetchedFiltered.filter((n: any) => allowedSet!.has(String(n?.log_challenge_id)))
-      }
 
       // Merge with cache (dedupe by stable entry id), sort newest-first, cap size.
       const mergedMap = new Map<string, any>()

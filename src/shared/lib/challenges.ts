@@ -20,8 +20,8 @@ const buildChallengesListKey = (userId?: string, showAll: boolean = false, event
 
 const applyEventFilter = (query: any, eventId?: string | null | 'all') => {
   if (eventId === 'all') return query
-  if (eventId) return query.eq('event_id', eventId)
-  return query.is('event_id', null)
+  if (eventId === null || eventId === 'main') return query.is('event_id', null)
+  return query.eq('event_id', eventId)
 }
 
 const addComputedFields = <T extends { id: string; created_at?: string; total_solves?: number; is_maintenance?: boolean }>(
@@ -452,7 +452,7 @@ export async function getLeaderboard(limit = 100, offset = 0, eventId?: string |
   if (eventId === 'all') {
     p_event_mode = 'any'
     p_event_id = null
-  } else if (eventId === null) {
+  } else if (eventId === null || eventId === 'main') {
     // explicit `null` means Main (only challenges without event)
     p_event_mode = 'is_null'
     p_event_id = null
@@ -502,7 +502,7 @@ export async function getTopProgress(topUsers: string[], eventId?: string | null
     if (eventId === 'all') {
       p_event_mode = 'any'
       p_event_id = null
-    } else if (eventId === null) {
+    } else if (eventId === null || eventId === 'main') {
       p_event_mode = 'is_null'
       p_event_id = null
     } else if (eventId === undefined) {

@@ -6,7 +6,9 @@
 -- SELECT
 CREATE OR REPLACE FUNCTION get_logs(
   p_limit INT DEFAULT 50,
-  p_offset INT DEFAULT 0
+  p_offset INT DEFAULT 0,
+  p_event_id UUID DEFAULT NULL,
+  p_event_mode TEXT DEFAULT 'any'
 )
 RETURNS TABLE (
   log_type TEXT,
@@ -22,10 +24,10 @@ BEGIN
   SELECT
     t.type AS log_type,
     t.challenge_id AS log_challenge_id,
-    t.challenge_title AS log_challenge_title,
-    t.category AS log_category,
+    t.challenge_title::TEXT AS log_challenge_title,
+    t.category::TEXT AS log_category,
     t.user_id AS log_user_id,
-    t.username AS log_username,
+    t.username::TEXT AS log_username,
     t.created_at AS log_created_at
   FROM (
     SELECT
@@ -39,6 +41,11 @@ BEGIN
     FROM public.challenges c
     LEFT JOIN public.events e ON e.id = c.event_id
     WHERE c.is_active = true
+      AND (
+        p_event_mode = 'any'
+        OR (p_event_mode = 'main' AND c.event_id IS NULL)
+        OR (p_event_mode = 'event' AND c.event_id = p_event_id)
+      )
       AND (
         c.event_id IS NULL
         OR (
@@ -67,6 +74,11 @@ BEGIN
     JOIN public.users u ON u.id = s.user_id
     WHERE c.is_active = true
       AND (
+        p_event_mode = 'any'
+        OR (p_event_mode = 'main' AND c.event_id IS NULL)
+        OR (p_event_mode = 'event' AND c.event_id = p_event_id)
+      )
+      AND (
         c.event_id IS NULL
         OR (
           (e.start_time IS NULL OR now() >= e.start_time)
@@ -79,7 +91,7 @@ END;
 $$ LANGUAGE plpgsql
 SECURITY DEFINER;
 
-GRANT EXECUTE ON FUNCTION get_logs(INT, INT) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_logs(INT, INT, UUID, TEXT) TO authenticated;
 
 CREATE OR REPLACE FUNCTION get_recent_solves(
   p_limit INT DEFAULT 50,
@@ -101,10 +113,10 @@ BEGIN
   SELECT
     'solve'::text AS log_type,
     c.id AS log_challenge_id,
-    c.title AS log_challenge_title,
-    c.category AS log_category,
+    c.title::TEXT AS log_challenge_title,
+    c.category::TEXT AS log_category,
     u.id AS log_user_id,
-    u.username AS log_username,
+    u.username::TEXT AS log_username,
     s.created_at AS log_created_at
   FROM public.solves s
   JOIN public.users u ON u.id = s.user_id
@@ -201,9 +213,9 @@ BEGIN
   SELECT
     s.id,
     u.id,
-    u.username,
+    u.username::TEXT,
     c.id,
-    c.title,
+    c.title::TEXT,
     s.created_at
   FROM public.solves s
   JOIN public.users u ON u.id = s.user_id
@@ -249,10 +261,10 @@ BEGIN
   SELECT
     s.id AS solve_id,
     u.id AS user_id,
-    u.username,
+    u.username::TEXT,
     c.id AS challenge_id,
-    c.title AS challenge_title,
-    c.category AS challenge_category,
+    c.title::TEXT AS challenge_title,
+    c.category::TEXT AS challenge_category,
     c.points,
     s.created_at AS solved_at
   FROM public.solves s
@@ -300,10 +312,10 @@ BEGIN
   SELECT
     s.id AS solve_id,
     u.id AS user_id,
-    u.username,
+    u.username::TEXT,
     c.id AS challenge_id,
-    c.title AS challenge_title,
-    c.category AS challenge_category,
+    c.title::TEXT AS challenge_title,
+    c.category::TEXT AS challenge_category,
     c.points,
     s.created_at AS solved_at
   FROM public.solves s

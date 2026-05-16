@@ -275,12 +275,12 @@ BEGIN
   RETURN QUERY
   SELECT
     c.id AS challenge_id,
-    c.title,
-    c.category,
+    c.title::TEXT,
+    c.category::TEXT,
     c.points,
     MIN(s.created_at) AS first_solved_at,
     (
-      SELECT u.username
+      SELECT u.username::TEXT
       FROM public.solves s2
       JOIN public.team_members tm2 ON tm2.user_id = s2.user_id
       JOIN public.users u ON u.id = s2.user_id
@@ -341,12 +341,12 @@ BEGIN
   RETURN QUERY
   SELECT
     c.id AS challenge_id,
-    c.title,
-    c.category,
+    c.title::TEXT,
+    c.category::TEXT,
     c.points,
     MIN(s.created_at) AS first_solved_at,
     (
-      SELECT u.username
+      SELECT u.username::TEXT
       FROM public.solves s2
       JOIN public.team_members tm2 ON tm2.user_id = s2.user_id
       JOIN public.users u ON u.id = s2.user_id

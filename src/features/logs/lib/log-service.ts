@@ -3,10 +3,17 @@ import { supabase } from '@/lib/supabase/client'
 /**
  * Get logs (new challenges & first blood)
  */
-export async function getLogs(limit = 100, offset = 0) {
+export async function getLogs(
+  limit = 100,
+  offset = 0,
+  eventId?: string | null,
+  eventMode: 'any' | 'main' | 'event' = 'any'
+) {
   const { data, error } = await supabase.rpc('get_logs', {
     p_limit: limit,
     p_offset: offset,
+    p_event_id: eventId ?? null,
+    p_event_mode: eventMode,
   });
   if (error) {
     console.error('Error fetching logs:', error);

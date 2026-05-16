@@ -7,6 +7,7 @@
     "prebuild": "node src/lib/scripts/gen-version.js",
     "prestart": "node src/lib/scripts/gen-version.js",
     "setup": "node db/build-init-sql.js",
+    "update": "node db/update_schema.js",
     "setting": "npm run dev",
     "clean": "rimraf .next",
     "dev": "rimraf .next-dev && next dev",
