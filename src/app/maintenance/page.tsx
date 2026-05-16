@@ -10,7 +10,7 @@ import { cn } from '@/shared/lib/utils'
 import dynamic from 'next/dynamic'
 
 // Dynamically import DevConfigDialog
-const DevConfigDialog = dynamic(() => import('@/_layouts/components/DevConfigDialog'), { ssr: false })
+const DevConfigDialog = dynamic(() => import('@/widgets/dev-config/components/DevConfigDialog'), { ssr: false })
 
 function getCookie(name: string) {
   if (typeof document === 'undefined') return ''

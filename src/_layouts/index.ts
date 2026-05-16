@@ -6,5 +6,4 @@ export {
   ScrollToggle,
   FloatingToolbar,
   TitlePage,
-  DevConfigDialog
 } from './components/index'

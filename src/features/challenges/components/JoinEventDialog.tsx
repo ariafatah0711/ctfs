@@ -68,7 +68,7 @@ export default function JoinEventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={DIALOG_GLASS_CONTENT_MD_CLASS}>
         <DialogHeader>
-          <DialogTitle className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+          <DialogTitle className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
             Join Event
           </DialogTitle>
         </DialogHeader>
@@ -137,7 +137,7 @@ export default function JoinEventDialog({
           <Button
             onClick={handleJoin}
             disabled={loading || isPending}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02]"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-5 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
           >
             {loading ? "Processing..." : joinMode === 'request' ? 'Submit Request' : joinMode === 'key' ? 'Verify & Join' : 'Join Event'}
           </Button>

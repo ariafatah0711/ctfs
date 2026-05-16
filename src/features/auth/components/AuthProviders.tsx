@@ -116,6 +116,7 @@ export default function AuthProviders({ authInfo }: { authInfo: AuthInfo[] }) {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
+        variant="destructive"
         title="Unbind Google Account"
         description={
           <div>

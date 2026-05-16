@@ -13,7 +13,7 @@ import {
 } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
-import { DIALOG_CONTENT_CLASS } from '@/shared/styles'
+import { DIALOG_GLASS_CONTENT_MD_CLASS } from '@/shared/styles'
 
 interface EditTeamModalProps {
   currentName: string
@@ -77,17 +77,12 @@ export default function EditTeamModal({
         )}
       </DialogTrigger>
 
-      <DialogContent
-        className={
-          DIALOG_CONTENT_CLASS +
-          ' [&_button.absolute.right-4.top-4]:block md:[&_button.absolute.right-4.top-4]:hidden'
-        }
-      >
+      <DialogContent className={DIALOG_GLASS_CONTENT_MD_CLASS}>
         <DialogHeader>
-          <DialogTitle className="text-gray-900 dark:text-white">
+          <DialogTitle className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
             Edit Team
           </DialogTitle>
-          <DialogDescription className="text-gray-500 dark:text-gray-300">
+          <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
             Update your team information below.
           </DialogDescription>
         </DialogHeader>
@@ -116,7 +111,14 @@ export default function EditTeamModal({
           )}
         </div>
 
-        <DialogFooter className="mt-2">
+        <DialogFooter className="gap-2 pt-2">
+          <Button
+            variant="ghost"
+            onClick={() => handleOpenChange(false)}
+            className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white"
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleSave}
             disabled={
@@ -124,7 +126,7 @@ export default function EditTeamModal({
               !name.trim() ||
               name.trim() === currentName
             }
-            className="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-400 text-white font-semibold"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-5 font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20 transition-all"
           >
             {loading ? 'Saving...' : 'Save'}
           </Button>

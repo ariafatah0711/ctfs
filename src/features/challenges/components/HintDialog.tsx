@@ -22,7 +22,7 @@ const HintDialog: React.FC<HintDialogProps> = ({ challenge, hintIdx = 0, open, o
       <DialogContent className={`${DIALOG_GLASS_CONTENT_MD_CLASS} max-h-[85dvh] overflow-y-auto scroll-hidden`}>
         <DialogHeader className="select-none space-y-0">
           <div className="flex items-start justify-between gap-4">
-            <DialogTitle className="flex min-w-0 items-center gap-3 text-xl font-black tracking-tight text-gray-900 dark:text-white">
+            <DialogTitle className="flex min-w-0 items-center gap-3 text-lg font-bold tracking-tight text-gray-900 dark:text-white">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400">
                 <Lightbulb className="h-5 w-5" />
               </span>

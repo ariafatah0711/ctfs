@@ -23,7 +23,10 @@ type SetupConfig = {
   eventMainLabel: string
   eventMainImageUrl: string
   eventFallbackImageUrl: string
-
+  image_icon: string
+  image_logo: string
+  image_preview: string
+  discord: string
 }
 
 type SecretConfig = {
@@ -180,7 +183,10 @@ function readConfig(source: string): SetupConfig {
     eventMainLabel: readString(source, /eventMainLabel:\s*['"]([^'"]*)['"]/),
     eventMainImageUrl: readString(source, /eventMainImageUrl:\s*['"]([^'"]*)['"]/),
     eventFallbackImageUrl: readString(source, /eventFallbackImageUrl:\s*['"]([^'"]*)['"]/),
-
+    image_icon: readString(source, /image_icon:\s*['"]([^'"]*)['"]/),
+    image_logo: readString(source, /image_logo:\s*['"]([^'"]*)['"]/),
+    image_preview: readString(source, /image_preview:\s*['"]([^'"]*)['"]/),
+    discord: readString(source, /discord:\s*['"]([^'"]*)['"]/),
   }
 }
 
@@ -224,6 +230,10 @@ function updateConfig(source: string, config: SetupConfig) {
   updated = replaceFirst(updated, /eventMainLabel:\s*['"][^'"]*['"]/, `eventMainLabel: ${toJsonString(config.eventMainLabel)}`)
   updated = replaceFirst(updated, /eventMainImageUrl:\s*['"][^'"]*['"]/, `eventMainImageUrl: ${toJsonString(config.eventMainImageUrl)}`)
   updated = replaceFirst(updated, /eventFallbackImageUrl:\s*['"][^'"]*['"]/, `eventFallbackImageUrl: ${toJsonString(config.eventFallbackImageUrl)}`)
+  updated = replaceFirst(updated, /image_icon:\s*['"][^'"]*['"]/, `image_icon: ${toJsonString(config.image_icon)}`)
+  updated = replaceFirst(updated, /image_logo:\s*['"][^'"]*['"]/, `image_logo: ${toJsonString(config.image_logo)}`)
+  updated = replaceFirst(updated, /image_preview:\s*['"][^'"]*['"]/, `image_preview: ${toJsonString(config.image_preview)}`)
+  updated = replaceFirst(updated, /discord:\s*['"][^'"]*['"]/, `discord: ${toJsonString(config.discord)}`)
   // Note: maintenance mode and site URL are env-backed and will be written to .env.local instead of editing the literal fallback here.
 
   return updated
@@ -272,7 +282,10 @@ function normalizeConfig(input: Partial<SetupConfig>): SetupConfig {
     eventMainLabel: input.eventMainLabel?.trim() || '',
     eventMainImageUrl: input.eventMainImageUrl?.trim() || '',
     eventFallbackImageUrl: input.eventFallbackImageUrl?.trim() || '',
-
+    image_icon: input.image_icon?.trim() || '',
+    image_logo: input.image_logo?.trim() || '',
+    image_preview: input.image_preview?.trim() || '',
+    discord: input.discord?.trim() || '',
   }
 }
 
@@ -350,6 +363,10 @@ export async function PUT(request: Request) {
       'eventMainLabel',
       'eventMainImageUrl',
       'eventFallbackImageUrl',
+      'image_icon',
+      'image_logo',
+      'image_preview',
+      'discord',
     ])
 
     const hasSecretPayload = Boolean(body.secret) || hasAnyOwnProperty(body, [
@@ -383,6 +400,44 @@ export async function PUT(request: Request) {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to update src/config.ts'
+    return NextResponse.json({ ok: false, error: message }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request) {
+  if (isProduction) {
+    return NextResponse.json({ ok: false, error: 'Config editor is disabled in production.' }, { status: 404 })
+  }
+
+  try {
+    const formData = await request.formData()
+    const file = formData.get('file') as File | null
+    const type = formData.get('type') as string // 'icon', 'logo', 'preview'
+
+    if (!file || !type) {
+      return NextResponse.json({ ok: false, error: 'Missing file or type' }, { status: 400 })
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const filename = file.name
+    const ext = path.extname(filename)
+
+    // Determine standard filename based on type
+    let targetName = filename
+    if (type === 'icon') targetName = 'favicon.ico'
+    else if (type === 'logo') targetName = `logo${ext}`
+    else if (type === 'preview') targetName = `og-image${ext}`
+
+    const publicPath = path.join(process.cwd(), 'public', targetName)
+    await fs.writeFile(publicPath, buffer)
+
+    return NextResponse.json({
+      ok: true,
+      path: targetName,
+      message: `Successfully uploaded ${type} as ${targetName}`
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to upload file'
     return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }

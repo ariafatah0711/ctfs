@@ -27,8 +27,8 @@ export const formatSmartFlag = (input: string, mask: string): string => {
         } else if (maskChar === '0') {
           accepted = /[0-9]/.test(char)
         } else if (maskChar === 'X' || maskChar === 'x') {
-          // Allow letters and numbers for X/x for better UX
-          accepted = /[a-zA-Z0-9]/.test(char)
+          // X and x are for letters only
+          accepted = /[a-zA-Z]/.test(char)
           if (accepted) {
             char = maskChar === 'X' ? char.toUpperCase() : char.toLowerCase()
           }

@@ -351,6 +351,7 @@ export default function TeamsPage() {
           }
           setConfirmOpen(open)
         }}
+        variant="destructive"
         title="Confirm"
         description={
           confirmExpected ? (

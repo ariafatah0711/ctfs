@@ -3,7 +3,7 @@
 // React Imports
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { Compass, BookOpen, Flag, Trophy, Shield, Users, Gavel, User, Settings2, ChevronDown, Menu, X } from 'lucide-react';
+import { Compass, BookOpen, Flag, Trophy, Shield, Users, Gavel, User, ChevronDown, Menu, X } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 
@@ -30,7 +30,7 @@ const NavbarNotifications = dynamic(() => import('@/widgets/notifications/Navbar
   ssr: false,
 })
 
-const DevConfigDialog = dynamic(() => import('./components/DevConfigDialog'), {
+const DevConfig = dynamic(() => import('@/widgets/dev-config'), {
   ssr: false,
 })
 
@@ -52,7 +52,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const avatarSrc = user?.profile_picture_url || user?.picture || null
 
-  const [devConfigOpen, setDevConfigOpen] = useState(false)
+
 
   useEffect(() => {
     if (user) {
@@ -342,16 +342,8 @@ export default function Navbar() {
                 <NavbarLogsButton theme={theme} pathname={pathname} />
               )}
 
-              {/* Dev Config */}
-              {process.env.NODE_ENV === 'development' && (
-                <button
-                  onClick={() => setDevConfigOpen(true)}
-                  className="p-1 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors mr-1"
-                  title="Platform Setup (Dev Only)"
-                >
-                  <Settings2 size={22} className="text-orange-500" />
-                </button>
-              )}
+              {/* Dev Config Widget */}
+              <DevConfig />
 
               {/* Theme Switcher - DISABLED TEMPORARILY */}
               {/* <button
@@ -565,9 +557,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {process.env.NODE_ENV === 'development' && (
-        <DevConfigDialog open={devConfigOpen} onOpenChange={setDevConfigOpen} />
-      )}
+
     </>
   )
 }

@@ -83,7 +83,7 @@ export default function RulesPage() {
         {/* STEALTH FLAG - Perfectly Invisible */}
         {rulesConfig.showHiddenFlag && (
           <div className="mt-8 flex justify-center">
-            <p className="text-[8px] font-mono select-all cursor-help text-[#fafafa] dark:text-[#0b0f19] leading-none opacity-5 hover:opacity-100 transition-opacity">
+            <p className="text-[15px] font-mono select-all cursor-help text-[#fafafa] dark:text-[#0b0f19] leading-none opacity-100 hover:opacity-100 transition-opacity">
               {rulesConfig.hiddenFlagBase64}
             </p>
           </div>

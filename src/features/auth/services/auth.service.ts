@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase/client'
 import { User } from '@/shared/types'
 import { AuthResponse, AuthIdentity } from '../types'
 import { mergeProfilePicture } from '../lib/auth-utils'
+import { SUPABASE_URL } from '@/const'
 
 /**
  * Authentication Service
@@ -9,10 +10,48 @@ import { mergeProfilePicture } from '../lib/auth-utils'
  */
 export const AuthService = {
   /**
+   * Check if an OAuth provider is enabled in Supabase
+   */
+  async checkProviderEnabled(provider: string): Promise<boolean> {
+    try {
+      if (!SUPABASE_URL) return true;
+
+      // Sanitize URL (remove trailing slash if exists)
+      const baseUrl = SUPABASE_URL.replace(/\/$/, '');
+
+      const res = await fetch(`${baseUrl}/auth/v1/authorize?provider=${provider}`, {
+        method: 'GET',
+        redirect: 'manual'
+      });
+
+      if (res.status === 400) {
+        const data = await res.json();
+        // Only return false if Supabase explicitly says the provider is not enabled
+        // If it's 400 for other reasons (like missing redirect_to), we assume it might be enabled
+        if (data.msg?.toLowerCase().includes('provider is not enabled')) {
+          console.warn(`AuthService: Provider ${provider} is disabled in Supabase config.`, data);
+          return false;
+        }
+      }
+      return true;
+    } catch (error) {
+      // In case of CORS or network error, we assume it's enabled
+      // so we don't accidentally block users if the check itself fails
+      return true;
+    }
+  },
+
+  /**
    * Sign in with Google OAuth
    */
   async loginWithGoogle(): Promise<AuthResponse> {
     try {
+      // Check if provider is enabled first
+      const isEnabled = await this.checkProviderEnabled('google');
+      if (!isEnabled) {
+        return { user: null, error: 'Google Sign-In is not enabled on this platform. Please contact the administrator.' };
+      }
+
       const redirectUrl = `${window.location.origin}/challenges`
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -258,7 +297,7 @@ export const AuthService = {
         userData = newData && newData.length > 0 ? newData[0] : null
         if (newError || !userData) return null
       }
-      
+
       const merged = mergeProfilePicture(userData as any, user, userData)
       return merged
     } catch (error) {
@@ -306,18 +345,18 @@ export const AuthService = {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return []
-      
+
       if (user.identities && user.identities.length > 0) {
         return user.identities.map((id: any) => ({
           provider: id.provider,
           email: id.identity_data?.email || id.email || '',
         }))
       }
-      
+
       if (user.app_metadata?.provider) {
         return [{ provider: user.app_metadata.provider, email: user.email || '' }]
       }
-      
+
       return [{ provider: 'email', email: user.email || '' }]
     } catch {
       return []
@@ -329,6 +368,11 @@ export const AuthService = {
    */
   async bindGoogle(): Promise<{ error: string | null }> {
     try {
+      const isEnabled = await this.checkProviderEnabled('google');
+      if (!isEnabled) {
+        return { error: 'Google integration is not enabled on this platform.' };
+      }
+
       const { error } = await supabase.auth.linkIdentity({ provider: 'google' })
       if (error) return { error: error.message }
       return { error: null }
@@ -345,13 +389,13 @@ export const AuthService = {
       const { data: identities, error: identitiesError } = await supabase.auth.getUserIdentities()
       if (identitiesError) return { error: identitiesError.message }
       if (!identities || !identities.identities) return { error: 'No identities found.' }
-      
+
       const googleIdentity = identities.identities.find((identity: any) => identity.provider === 'google')
       if (!googleIdentity) return { error: 'Google identity not linked.' }
-      
+
       const { error } = await supabase.auth.unlinkIdentity(googleIdentity)
       if (error) return { error: error.message }
-      
+
       return { error: null }
     } catch {
       return { error: 'Failed to unlink Google account.' }
